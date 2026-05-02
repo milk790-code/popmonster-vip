@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<title>會員生態系｜泡泡怪獸 POP MONSTER</title>
+<meta name="description" content="泡泡怪獸 POP MONSTER 會員制度：儲值禮、迎賓禮、年度禮、推薦感謝金、AI 工具、會員等級。台灣汽美愛好者的長期會員社群。">
+<link rel="canonical" href="https://popmonster.vip/members.html">
+<link rel="manifest" href="/manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="css/main.css">
+<style>
+.mb-hero{padding:80px 24px 40px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(200,169,107,.08) 0%,transparent 70%)}
+.mb-hero h1{font-size:clamp(2rem,5vw,3rem);color:#fff;margin-bottom:12px;letter-spacing:-1px}
+.mb-hero h1 em{font-style:normal;background:var(--shimmer);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite}
+.mb-hero .lead{font-size:17px;color:var(--gold-lt);max-width:680px;margin:0 auto 8px}
+.mb-hero .sub{font-size:14px;color:var(--txt-m);max-width:680px;margin:0 auto}
+
+.section{max-width:1100px;margin:0 auto;padding:48px 24px}
+.section h2{font-size:clamp(1.4rem,3vw,1.8rem);color:var(--gold-lt);margin-bottom:8px;font-weight:700}
+.section .sub{color:var(--txt-m);font-size:15px;margin-bottom:32px}
+
+/* 五大模組卡 */
+.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:20px}
+.module{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px;transition:transform .35s,border-color .35s;position:relative;overflow:hidden}
+.module::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold-grad);opacity:0;transition:opacity .3s}
+.module:hover{transform:translateY(-4px);border-color:var(--gold)}
+.module:hover::before{opacity:1}
+.module-num{font-family:'Montserrat',sans-serif;font-size:14px;color:var(--gold-dk);letter-spacing:3px;font-weight:700;margin-bottom:8px}
+.module h3{font-size:18px;color:#fff;margin-bottom:12px;font-weight:700}
+.module .feat{margin-top:14px}
+.module .feat-row{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--txt-m);line-height:1.7;margin-bottom:6px}
+.module .feat-row::before{content:'✦';color:var(--gold);flex-shrink:0;font-size:11px}
+
+/* 等級表 */
+.tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:24px}
+.tier{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;text-align:center;transition:border-color .3s,transform .3s}
+.tier:hover{border-color:var(--gold);transform:translateY(-3px)}
+.tier-name{font-size:18px;font-weight:800;color:var(--gold-lt);margin-bottom:6px}
+.tier-emoji{font-size:32px;margin-bottom:8px}
+.tier-cond{font-size:12px;color:var(--gold-dk);margin-bottom:16px;letter-spacing:1px}
+.tier-perks{font-size:12px;color:var(--txt-m);line-height:1.7;text-align:left}
+.tier-perks li{list-style:none;padding-left:14px;position:relative;margin-bottom:4px}
+.tier-perks li::before{content:'✓';color:var(--gold);position:absolute;left:0}
+
+/* 重要原則區 */
+.principles{background:rgba(200,169,107,.04);border:1px solid var(--border);border-radius:var(--r-lg);padding:32px;margin-top:32px}
+.principles h3{color:var(--gold);margin-bottom:16px;font-size:16px}
+.principles ul{list-style:none;padding:0}
+.principles li{padding:8px 0;color:var(--txt-m);font-size:14px;line-height:1.7;display:flex;gap:10px}
+.principles li::before{content:'⚖️';flex-shrink:0}
+
+/* 透明度區 */
+.transparency{background:var(--bg-sub);border-left:3px solid var(--gold);padding:24px;margin-top:32px;border-radius:0 var(--r) var(--r) 0}
+.transparency h3{color:var(--gold-lt);font-size:15px;margin-bottom:10px}
+.transparency p{color:var(--txt-m);font-size:13px;line-height:1.7;margin-bottom:8px}
+.transparency a{color:var(--gold)}
+
+@media(max-width:768px){
+  .tier-grid{grid-template-columns:1fr 1fr}
+  .modules{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="nav-inner">
+  <a href="index.html" class="nav-logo">POP MONSTER<span>泡泡怪獸</span></a>
+  <div class="nav-links">
+    <a href="index.html">全部商品</a>
+    <a href="members.html" style="color:var(--gold)">會員生態</a>
+    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
+  </div>
+  <button class="nav-menu-btn" aria-label="選單" onclick="this.nextElementSibling.classList.toggle('show')">☰</button>
+  <div class="mobile-menu" style="display:none;position:fixed;top:60px;left:0;right:0;background:#0a0a0a;border-bottom:1px solid rgba(200,169,107,.15);padding:20px;z-index:99;flex-direction:column;gap:16px;">
+    <a href="index.html" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">全部商品</a>
+    <a href="members.html" style="color:var(--gold);font-size:16px;display:block;padding:8px 0;">會員生態</a>
+    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">蝦皮賣場</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">LINE 諮詢</a>
+  </div>
+</div></nav>
+
+<section class="mb-hero">
+  <h1>會員生態系<br><em>POP MONSTER MEMBERSHIP</em></h1>
+  <p class="lead">台灣汽美愛好者的長期會員社群</p>
+  <p class="sub">不靠拉人賺錢、不做短期暴衝、不藏小字陷阱<br>用真實產品 + 會員體驗 + AI 賦能，建一個能做 30 年的品牌生態</p>
+</section>
+
+<!-- 五大核心模組 -->
+<section class="section fade-up">
+  <h2>五大核心模組</h2>
+  <p class="sub">從儲值禮到 AI 工具，從推薦感謝金到怪獸成長，每一個機制都圍繞長期關係設計</p>
+  <div class="modules">
+    <div class="module fade-up">
+      <div class="module-num">MODULE 01</div>
+      <h3>會員儲值制度</h3>
+      <p style="color:var(--txt-m);font-size:14px;line-height:1.7">儲值即享會員紅利，所有儲值金納入合作銀行履約保證專戶，符合商品禮券規範。</p>
+      <div class="feat">
+        <div class="feat-row">新會員首儲滿 1,000 元，贈 200 點紅利</div>
+        <div class="feat-row">複儲滿 3,000 贈 600 點、滿 5,000 贈 1,200 點</div>
+        <div class="feat-row">紅利可抵扣訂單金額最高 20%</div>
+        <div class="feat-row">儲值金有效期 24 個月，到期自動通知</div>
+        <div class="feat-row">所有儲值金有銀行履約保證</div>
+      </div>
+    </div>
+
+    <div class="module fade-up">
+      <div class="module-num">MODULE 02</div>
+      <h3>實體工具會員福利</h3>
+      <p style="color:var(--txt-m);font-size:14px;line-height:1.7">以實體工具建立用戶連結，但所有福利明確規範期限與條件，不做永久承諾。</p>
+      <div class="feat">
+        <div class="feat-row">新會員迎賓禮：首儲滿 1,000 贈一款專屬工具</div>
+        <div class="feat-row">年度會員禮：年消費滿 10,000 兌換工具年禮</div>
+        <div class="feat-row">會員價購工具：成本價購買其他工具品項</div>
+        <div class="feat-row">12 個月保固，正常使用瑕疵免費換新</div>
+      </div>
+    </div>
+
+    <div class="module fade-up">
+      <div class="module-num">MODULE 03</div>
+      <h3>AI 工具與專業教學</h3>
+      <p style="color:var(--txt-m);font-size:14px;line-height:1.7">AI 提供漆面評估參考，所有教學內容免費公開，不藏付費牆後。</p>
+      <div class="feat">
+        <div class="feat-row">AI 漆面評估工具（顯著揭露免責聲明）</div>
+        <div class="feat-row">完整教學影片、文章、Q&A 知識庫免費公開</div>
+        <div class="feat-row">AI 進階訂閱 NT$ 299/月（含 7 日鑑賞期）</div>
+        <div class="feat-row">真人技師線上諮詢，月度 1 次會員專屬</div>
+        <div class="feat-row">LINE 即時諮詢 24 小時內回覆</div>
+      </div>
+    </div>
+
+    <div class="module fade-up">
+      <div class="module-num">MODULE 04</div>
+      <h3>朋友推薦感謝金</h3>
+      <p style="color:var(--txt-m);font-size:14px;line-height:1.7">單層轉介、固定金額、月度封頂。讓推薦回到「朋友互相支援」的本質。</p>
+      <div class="feat">
+        <div class="feat-row">每成功推薦 1 位朋友首儲，獲 200 點紅利</div>
+        <div class="feat-row">被推薦人額外獲 100 點新會員禮</div>
+        <div class="feat-row">每月封頂 1,000 點（最多 5 人/月）</div>
+        <div class="feat-row">單層機制，朋友再推薦不回流給原推薦人</div>
+        <div class="feat-row">不構成多層次組織、不形成主要收入來源</div>
+      </div>
+    </div>
+
+    <div class="module fade-up">
+      <div class="module-num">MODULE 05</div>
+      <h3>怪獸社群與遊戲化</h3>
+      <p style="color:var(--txt-m);font-size:14px;line-height:1.7">每位會員的專屬怪獸，根據活躍度與消費累積成長，但不做公開比較。</p>
+      <div class="feat">
+        <div class="feat-row">每日簽到禮：7天50點、30天200點</div>
+        <div class="feat-row">百日勳章：連續簽到 100 天獲得</div>
+        <div class="feat-row">專屬怪獸成長系統（個人視角，不公開）</div>
+        <div class="feat-row">自願匿名榮譽榜（預設不參加）</div>
+        <div class="feat-row">LINE 對接需明示同意，可隨時關閉</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 會員等級 -->
+<section class="section fade-up">
+  <h2>會員等級</h2>
+  <p class="sub">年度續約制，達標自動續任、不達標自動降級。所有權益內容、品項、活動，本平台保留每年度調整權利。</p>
+  <div class="tier-grid">
+    <div class="tier fade-up">
+      <div class="tier-emoji">🥉</div>
+      <div class="tier-name">銅牌</div>
+      <div class="tier-cond">首次儲值即達成</div>
+      <ul class="tier-perks">
+        <li>儲值 20% 紅利</li>
+        <li>新會員工具禮</li>
+        <li>所有教學內容</li>
+        <li>LINE 諮詢</li>
+      </ul>
+    </div>
+    <div class="tier fade-up">
+      <div class="tier-emoji">🥈</div>
+      <div class="tier-name">銀牌</div>
+      <div class="tier-cond">年度消費 10,000+</div>
+      <ul class="tier-perks">
+        <li>銅牌全部權益</li>
+        <li>年度工具禮</li>
+        <li>進階教學影片</li>
+        <li>會員專屬活動</li>
+      </ul>
+    </div>
+    <div class="tier fade-up" style="border-color:var(--gold-dk)">
+      <div class="tier-emoji">🥇</div>
+      <div class="tier-name">金牌</div>
+      <div class="tier-cond">年度消費 30,000+</div>
+      <ul class="tier-perks">
+        <li>銀牌全部權益</li>
+        <li>真人技師月度諮詢</li>
+        <li>新品搶先體驗</li>
+        <li>限量商品優先購</li>
+      </ul>
+    </div>
+    <div class="tier fade-up" style="border-color:var(--gold);background:rgba(200,169,107,.06)">
+      <div class="tier-emoji">👑</div>
+      <div class="tier-name">黑金</div>
+      <div class="tier-cond">年消 60,000 + 連續 12 個月</div>
+      <ul class="tier-perks">
+        <li>金牌全部權益</li>
+        <li>聯名商品優先購</li>
+        <li>線下活動邀請</li>
+        <li>專屬服務窗口</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 我們的承諾 -->
+<section class="section fade-up">
+  <h2>我們的承諾</h2>
+  <p class="sub">五大原則，定義泡泡怪獸做會員制的方式</p>
+  <div class="principles">
+    <ul>
+      <li><span><strong style="color:var(--gold-lt)">產品價值優先</strong>：所有會員機制建立在真實好用的汽美產品基礎上，不靠拉人賺錢、不靠虛擬商品。</span></li>
+      <li><span><strong style="color:var(--gold-lt)">合規透明</strong>：所有機制依台灣公平交易法、消費者保護法、個資法、商品禮券規範設計，正式上線前經律師書面審查。</span></li>
+      <li><span><strong style="color:var(--gold-lt)">財務可預測</strong>：不做永久性分紅、不做無限換新、不做終身承諾，每一項權益都有期限、有條件、有封頂。</span></li>
+      <li><span><strong style="color:var(--gold-lt)">用戶有退路</strong>：儲值有履約保證、訂閱有 7 日鑑賞期、個資可隨時刪除、會員可隨時退出。</span></li>
+      <li><span><strong style="color:var(--gold-lt)">長期經營</strong>：我們設計的是能做 30 年的會員制，不是 30 個月就崩盤的暴衝模式。</span></li>
+    </ul>
+  </div>
+
+  <div class="transparency">
+    <h3>📋 上線狀態說明</h3>
+    <p>本頁面所列會員機制為**合規優化版企劃**，正式上線前需完成以下事項：</p>
+    <p>1. 委請執業律師審查並取得正式法律意見書<br>
+       2. 與合作銀行完成儲值履約保證對接<br>
+       3. 撰寫並公告會員定型化契約、隱私權政策<br>
+       4. 完成系統建置與限定範圍試營運<br>
+       5. 律師複核試營運期間執行狀況後正式上線</p>
+    <p>預計時程：上線前 8-10 週完成上述事項。具體上線日期將公告於本頁面與 <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 官方帳號</a>。</p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section fade-up" style="text-align:center">
+  <h2>準備好加入泡泡怪獸了嗎？</h2>
+  <p class="sub">目前可先到蝦皮賣場購買產品，會員生態系正式上線後優先通知</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px">
+    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" class="btn btn-gold">前往蝦皮賣場</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" class="btn btn-outline">加入 LINE 接收通知</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-brand">泡泡怪獸 POP MONSTER × 米速 MISO</div>
+  <div class="footer-sub">安全永遠第一｜任何人都能輕鬆上手｜使用全程零風險</div>
+  <div class="footer-links">
+    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
+    <a href="https://wa.me/886970527037" target="_blank" rel="noopener">WhatsApp</a>
+    <a href="https://www.facebook.com/share/1AcLN6W6HU/" target="_blank" rel="noopener">Facebook</a>
+    <a href="https://www.instagram.com/ssss4845454" target="_blank" rel="noopener">Instagram</a>
+  </div>
+  <div class="footer-legal" style="margin-bottom:8px">
+    <a href="privacy.html" style="font-size:12px;color:var(--txt-m)">隱私權政策</a>
+    <span style="color:var(--txt-m);margin:0 8px">|</span>
+    <a href="terms.html" style="font-size:12px;color:var(--txt-m)">服務條款</a>
+  </div>
+  <div class="footer-copy">&copy; 2026 泡泡怪獸 POP MONSTER. All rights reserved.</div>
+</footer>
+
+<div class="cookie-bar">
+  <span>本站使用 Cookie 提升瀏覽體驗。繼續瀏覽即表示同意。</span>
+  <span><button class="cookie-accept" id="ck-accept">接受</button> <button class="cookie-decline" id="ck-decline">拒絕</button></span>
+</div>
+
+<script src="js/main.js" defer></script>
+<script>document.querySelector('.nav-menu-btn')&&document.querySelector('.nav-menu-btn').addEventListener('click',function(){var m=this.nextElementSibling;m.style.display=m.style.display==='flex'?'none':'flex'})</script>
+</body>
+</html>
