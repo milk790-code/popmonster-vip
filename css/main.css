@@ -111,6 +111,21 @@ a:hover{color:var(--gold-lt)}
 .page-404 h1{font-size:72px;color:var(--gold);margin-bottom:8px}
 .page-404 p{color:var(--txt-m);margin-bottom:24px}
 
+/* === SCROLL PROGRESS BAR === */
+.progress-bar{position:fixed;top:0;left:0;z-index:200;height:2px;background:var(--gold-grad);width:0%;transition:width .1s linear}
+
+/* === BACK TO TOP === */
+.back-top{position:fixed;bottom:80px;right:20px;z-index:97;width:44px;height:44px;border-radius:50%;background:var(--gold-grad);color:#0a0a0a;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;box-shadow:0 4px 20px rgba(200,169,107,.3)}
+.back-top.show{opacity:1;transform:translateY(0)}
+.back-top:hover{transform:translateY(-2px)}
+
+/* === HERO 升級 === */
+.hero{position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(200,169,107,.06) 0%,transparent 60%),radial-gradient(ellipse at 70% 20%,rgba(200,169,107,.04) 0%,transparent 50%);pointer-events:none}
+
+/* === NAV 捲動後加深 === */
+.nav.scrolled{box-shadow:0 4px 20px rgba(0,0,0,.5)}
+
 /* === CATEGORY FILTER === */
 .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
 .filter-btn{padding:6px 16px;font-size:13px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--txt-m);cursor:pointer;transition:all .2s}
