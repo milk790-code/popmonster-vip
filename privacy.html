@@ -18,6 +18,25 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:image" content="https://popmonster.vip/img/og-default.svg">
+<!-- Google tag (gtag.js) - GA4 with Consent Mode v2 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WTKLHW33D7"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+// Consent Mode v2 - 預設拒絕，符合 PDPA / GDPR
+gtag('consent', 'default', {
+  'ad_storage': 'denied',
+  'ad_user_data': 'denied',
+  'ad_personalization': 'denied',
+  'analytics_storage': 'denied',
+  'wait_for_update': 500
+});
+gtag('js', new Date());
+gtag('config', 'G-WTKLHW33D7', {
+  'anonymize_ip': true,
+  'cookie_flags': 'SameSite=None;Secure'
+});
+</script>
 </head>
 <body>
 <nav class="nav"><div class="nav-inner">
@@ -66,8 +85,16 @@
     <li>回應您的諮詢需求</li>
   </ul>
 
-  <h2>四、Cookie 使用</h2>
-  <p>本網站使用 Cookie 提升瀏覽體驗。您可在瀏覽器設定中管理或拒絕 Cookie，但可能影響部分功能正常運作。未來若導入 Google Analytics 4，將依台灣個人資料保護法規定，於啟用前取得您的明示同意。</p>
+  <h2>四、Cookie 使用與 Google Analytics</h2>
+  <p>本網站使用 Cookie 提升瀏覽體驗。您可在瀏覽器設定中管理或拒絕 Cookie，但可能影響部分功能正常運作。</p>
+  <p>本網站使用 Google Analytics 4（測量 ID：G-WTKLHW33D7）作為流量分析工具，用於了解訪客如何使用本網站。我們已啟用以下隱私保護措施：</p>
+  <ul>
+    <li><strong>IP 匿名化</strong>：訪客 IP 位址會在離開瀏覽器前先去識別化處理</li>
+    <li><strong>Consent Mode v2</strong>：在您點擊「接受」Cookie 前，所有分析、廣告相關 Cookie 預設為拒絕狀態</li>
+    <li><strong>不蒐集個人識別資料</strong>：本網站不會傳送姓名、電子郵件、信用卡等個資給 Google</li>
+    <li><strong>退出機制</strong>：您可安裝 <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">Google Analytics 退出附加元件</a>停用 GA4 追蹤</li>
+  </ul>
+  <p>Google Analytics 蒐集的資料（如瀏覽路徑、停留時間、來源網址、裝置類型）會傳送至 Google 伺服器，受 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google 隱私權政策</a>規範。</p>
 
   <h2>五、資料保留期間</h2>
   <p>網站瀏覽行為統計資料保留期間不超過 26 個月。諮詢紀錄於案件結案後 6 個月內刪除。</p>

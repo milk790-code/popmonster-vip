@@ -43,17 +43,44 @@
   start();
 })();
 
-// === Cookie Consent ===
+// === Cookie Consent + GA4 Consent Mode v2 ===
 (function(){
   var bar=document.querySelector('.cookie-bar');
   if(!bar)return;
-  if(localStorage.getItem('ck_consent'))return;
+  
+  // 檢查既有同意狀態
+  var existing = localStorage.getItem('ck_consent');
+  if(existing === 'granted' && typeof gtag === 'function'){
+    // 用戶之前已同意，立刻升級
+    gtag('consent','update',{
+      'ad_storage':'granted',
+      'ad_user_data':'granted',
+      'ad_personalization':'granted',
+      'analytics_storage':'granted'
+    });
+    return;
+  }
+  if(existing === 'denied') return;
+  
+  // 沒有同意紀錄，顯示 Cookie Bar
   setTimeout(function(){bar.classList.add('show')},1500);
+  
   document.getElementById('ck-accept')&&document.getElementById('ck-accept').addEventListener('click',function(){
-    localStorage.setItem('ck_consent','granted');bar.classList.remove('show');
+    if(typeof gtag === 'function'){
+      gtag('consent','update',{
+        'ad_storage':'granted',
+        'ad_user_data':'granted',
+        'ad_personalization':'granted',
+        'analytics_storage':'granted'
+      });
+    }
+    localStorage.setItem('ck_consent','granted');
+    bar.classList.remove('show');
   });
+  
   document.getElementById('ck-decline')&&document.getElementById('ck-decline').addEventListener('click',function(){
-    localStorage.setItem('ck_consent','denied');bar.classList.remove('show');
+    localStorage.setItem('ck_consent','denied');
+    bar.classList.remove('show');
   });
 })();
 
