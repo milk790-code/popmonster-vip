@@ -1,3 +1,48 @@
+// === Carousel 主打商品輪播 ===
+(function(){
+  var track = document.querySelector('.carousel-track');
+  if(!track) return;
+  var slides = track.querySelectorAll('.carousel-slide');
+  var dots = document.querySelectorAll('.carousel-dot');
+  var prev = document.querySelector('.carousel-btn.prev');
+  var next = document.querySelector('.carousel-btn.next');
+  var current = 0;
+  var total = slides.length;
+  var timer;
+  
+  function go(idx){
+    current = (idx + total) % total;
+    track.style.transform = 'translateX(-' + (current * 100) + '%)';
+    dots.forEach(function(d,i){d.classList.toggle('active', i === current)});
+  }
+  
+  function start(){ timer = setInterval(function(){ go(current + 1) }, 5000); }
+  function stop(){ clearInterval(timer); }
+  
+  prev && prev.addEventListener('click', function(){ go(current - 1); stop(); start(); });
+  next && next.addEventListener('click', function(){ go(current + 1); stop(); start(); });
+  dots.forEach(function(d,i){ d.addEventListener('click', function(){ go(i); stop(); start(); })});
+  
+  // hover 暫停
+  var carousel = document.querySelector('.carousel');
+  if(carousel){
+    carousel.addEventListener('mouseenter', stop);
+    carousel.addEventListener('mouseleave', start);
+  }
+  
+  // 觸控滑動
+  var startX = 0;
+  track.addEventListener('touchstart', function(e){ startX = e.touches[0].clientX; stop(); }, {passive:true});
+  track.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - startX;
+    if(dx > 50) go(current - 1);
+    else if(dx < -50) go(current + 1);
+    start();
+  });
+  
+  start();
+})();
+
 // === Cookie Consent ===
 (function(){
   var bar=document.querySelector('.cookie-bar');
