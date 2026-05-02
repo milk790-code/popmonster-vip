@@ -3,17 +3,28 @@
 
 ---
 
-## 檔案清單（共 39 個檔案）
+## 檔案清單（v2.1 — 補完版）
 
-- `index.html` — 首頁（31 商品卡片 + 分類篩選）
+### 繁體中文
+- `index.html` — 首頁（31 商品卡片 + 分類篩選 + 商品搜尋）
 - `a001.html` ~ `a031.html` — 31 個商品頁（黑金主題 + Schema + FAQ）
+- `about.html` — 品牌故事
+- `contact.html` — 聯絡我們（含 mailto 表單）
+- `privacy.html` — 隱私權政策（noindex）
+- `terms.html` — 服務條款（noindex）
 - `404.html` — 自訂 404 頁面
-- `css/main.css` — 共用黑金主題樣式
-- `js/main.js` — Cookie Consent + 滾動動畫 + FAQ 開合 + 分類篩選
-- `sitemap.xml` — Google 搜尋爬蟲用
+
+### English
+- `en/index.html` — homepage with 31 products + search + filter
+- `en/about.html`、`en/contact.html`、`en/privacy.html`、`en/terms.html`、`en/404.html`
+
+### 共用資源
+- `css/main.css` — 共用黑金主題樣式（含 static / contact / search 樣式）
+- `js/main.js` — Cookie Consent + 滾動動畫 + FAQ 開合 + 分類篩選 + 即時搜尋
+- `og-image.svg` — Open Graph / Twitter card 預設圖（1200×630）
+- `sitemap.xml` — 含 hreflang 的多語 sitemap
 - `robots.txt` — 搜尋引擎爬蟲規則
 - `CNAME` — GitHub Pages 自訂網域（popmonster.vip）
-- `.github/workflows/deploy.yml` — 自動部署設定
 
 ---
 

@@ -28,17 +28,48 @@ document.querySelectorAll('.faq-q').forEach(function(q){
   q.addEventListener('click',function(){this.parentElement.classList.toggle('open')});
 });
 
-// === Category Filter (index only) ===
+// === Category Filter + Search (index only) ===
 (function(){
   var btns=document.querySelectorAll('.filter-btn');
   var cards=document.querySelectorAll('.card[data-cat]');
-  if(!btns.length||!cards.length)return;
+  var searchInput=document.getElementById('product-search');
+  var emptyMsg=document.getElementById('search-empty');
+  if(!cards.length)return;
+
+  var state={cat:'all',q:''};
+
+  function norm(s){return (s||'').toLowerCase().trim()}
+
+  function apply(){
+    var q=state.q,cat=state.cat,visible=0;
+    cards.forEach(function(c){
+      var matchCat=(cat==='all'||c.dataset.cat===cat);
+      var matchQ=true;
+      if(q){
+        var txt=norm(c.textContent);
+        matchQ=txt.indexOf(q)>-1;
+      }
+      var show=matchCat&&matchQ;
+      c.style.display=show?'':'none';
+      if(show)visible++;
+    });
+    if(emptyMsg){emptyMsg.classList.toggle('show',visible===0)}
+  }
+
   btns.forEach(function(b){
     b.addEventListener('click',function(){
       btns.forEach(function(x){x.classList.remove('active')});
       b.classList.add('active');
-      var cat=b.dataset.cat;
-      cards.forEach(function(c){c.style.display=(cat==='all'||c.dataset.cat===cat)?'':'none'});
+      state.cat=b.dataset.cat;
+      apply();
     });
   });
+
+  if(searchInput){
+    var t;
+    searchInput.addEventListener('input',function(){
+      clearTimeout(t);
+      t=setTimeout(function(){state.q=norm(searchInput.value);apply()},120);
+    });
+  }
 })();

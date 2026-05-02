@@ -131,6 +131,49 @@ a:hover{color:var(--gold-lt)}
   .cookie-bar{flex-direction:column;text-align:center}
 }
 
+/* === STATIC PAGES (about/contact/privacy/terms) === */
+.static{max-width:880px;margin:0 auto;padding:40px 24px}
+.static-hero{text-align:center;padding:40px 0 32px;border-bottom:1px solid var(--border);margin-bottom:32px}
+.static-hero h1{font-size:clamp(1.8rem,4vw,2.6rem);color:#fff;font-weight:800;margin-bottom:12px}
+.static-hero p{color:var(--txt-m);font-size:15px}
+.static-body h2{font-size:18px;color:var(--gold);margin:32px 0 12px;font-weight:700;border-left:3px solid var(--gold);padding-left:12px}
+.static-body p{color:var(--txt);margin-bottom:14px;line-height:1.8}
+.static-body code{background:var(--bg-sub);color:var(--gold-lt);padding:2px 8px;border-radius:4px;font-size:13px}
+.static-list{list-style:none;padding:0;margin-bottom:16px}
+.static-list li{padding:8px 0 8px 24px;color:var(--txt);position:relative;line-height:1.7}
+.static-list li::before{content:'◆';color:var(--gold-dk);position:absolute;left:0;top:8px;font-size:12px}
+.static-list li strong{color:var(--gold-lt)}
+.static-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px;justify-content:center}
+.static-note{background:var(--bg-sub);padding:12px 16px;border-left:3px solid var(--gold-dk);font-size:13px;color:var(--txt-m);margin:16px 0 24px;border-radius:0 var(--r) var(--r) 0}
+
+/* === CONTACT === */
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:40px}
+.contact-card{display:block;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;transition:transform .25s,border-color .25s,box-shadow .25s}
+.contact-card:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 6px 24px rgba(200,169,107,.18);color:var(--txt)}
+.contact-ico{width:44px;height:44px;border-radius:var(--r);background:var(--gold-grad);color:#0a0a0a;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-bottom:12px;letter-spacing:1px}
+.contact-name{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px}
+.contact-desc{font-size:12px;color:var(--txt-m);line-height:1.6}
+.contact-form{display:flex;flex-direction:column;gap:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px}
+.contact-form label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--txt-m);font-weight:600}
+.contact-form input,.contact-form select,.contact-form textarea{background:var(--bg-sub);border:1px solid var(--border);color:var(--txt);padding:10px 12px;border-radius:var(--r);font:inherit;font-size:14px;transition:border-color .2s}
+.contact-form input:focus,.contact-form select:focus,.contact-form textarea:focus{outline:none;border-color:var(--gold)}
+.contact-form textarea{resize:vertical;min-height:120px}
+.contact-form button{align-self:flex-start}
+
+/* === SEARCH BOX === */
+.search-bar{position:relative;margin-bottom:20px;max-width:480px}
+.search-bar input{width:100%;background:var(--bg-card);border:1px solid var(--border);color:var(--txt);padding:12px 16px 12px 44px;border-radius:var(--r);font:inherit;font-size:14px;transition:border-color .2s}
+.search-bar input:focus{outline:none;border-color:var(--gold)}
+.search-bar::before{content:'⌕';position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gold-dk);font-size:18px;pointer-events:none}
+.search-empty{text-align:center;padding:40px;color:var(--txt-m);font-size:14px;display:none}
+.search-empty.show{display:block}
+
+/* === LANG SWITCH === */
+.lang-switch{font-size:12px;color:var(--txt-m);margin-left:12px}
+.lang-switch a{color:var(--gold-dk);padding:0 6px;border-left:1px solid var(--border)}
+.lang-switch a:first-child{border-left:none}
+.lang-switch a.active{color:var(--gold-lt)}
+
 /* === ANIMATION === */
 .fade-up{opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s}
 .fade-up.visible{opacity:1;transform:translateY(0)}
