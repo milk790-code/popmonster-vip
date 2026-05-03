@@ -30,6 +30,7 @@ class ComplianceEngine:
         findings.extend(self._text_checks(post))
         findings.extend(self._media_checks(post.media))
         findings.extend(self._platform_checks(post, targets))
+        findings.extend(self._originality_checks(post))
         self._persist(post, findings)
         return findings
 
@@ -117,6 +118,16 @@ class ComplianceEngine:
                     detail={"issues": issues, "notes": rules.notes},
                 )
             )
+        return out
+
+    def _originality_checks(self, post: Post) -> list[Finding]:
+        from .originality import check_link_originality, check_media_originality
+
+        out: list[Finding] = []
+        if (media_finding := check_media_originality(post)):
+            out.append(media_finding)
+        if (link_finding := check_link_originality(post)):
+            out.append(link_finding)
         return out
 
     def _persist(self, post: Post, findings: list[Finding]) -> None:

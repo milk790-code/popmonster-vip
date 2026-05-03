@@ -4,6 +4,17 @@ The browser asks ``/api/uploads/presign`` for a one-shot PUT URL, uploads the
 file directly to S3/R2, then registers the resulting object as a
 :class:`MediaAsset` via ``/api/uploads/complete``. Completing a video upload
 also queues an ffmpeg transcode for the standard aspect ratios.
+
+Deduplication: clients should compute the file's sha256 in the browser
+(SubtleCrypto) and:
+
+1. Call ``GET /api/uploads/check?sha256=...&user_id=...`` first. If we
+   already have a MediaAsset with that hash, the browser skips the upload
+   entirely and reuses ``existing.media_id``.
+2. Otherwise call presign + PUT + complete. On ``complete`` we accept
+   ``sha256`` and re-check (race-safe): if a MediaAsset with that hash
+   already exists, return the existing id and tag the just-uploaded S3
+   object as orphaned (caller can delete or leave it for lifecycle policy).
 """
 from __future__ import annotations
 
@@ -27,6 +38,30 @@ _EXT = {
     "image/png": ".png",
     "image/webp": ".webp",
 }
+
+
+@bp.get("/check")
+def check_dedup():
+    """Look up an existing MediaAsset by sha256 to skip re-upload."""
+    sha = request.args.get("sha256")
+    user_id = request.args.get("user_id", type=int)
+    if not (sha and user_id):
+        return jsonify({"error": "sha256 and user_id required"}), 400
+    existing = (
+        db.session.query(MediaAsset)
+        .filter_by(user_id=user_id, sha256=sha)
+        .order_by(MediaAsset.created_at.desc())
+        .first()
+    )
+    if existing:
+        return jsonify({
+            "found": True,
+            "media_id": existing.id,
+            "kind": existing.kind,
+            "transcode_status": existing.transcode_status,
+            "storage_url": existing.storage_url,
+        })
+    return jsonify({"found": False})
 
 
 @bp.post("/presign")
@@ -57,13 +92,46 @@ def presign():
 
 @bp.post("/complete")
 def complete():
-    """Browser calls this after a successful PUT to register the asset."""
+    """Browser calls this after a successful PUT to register the asset.
+
+    If ``sha256`` is provided and an existing MediaAsset matches, the upload
+    is treated as a duplicate and we return the existing media_id with
+    ``deduped: true``. The newly-uploaded S3 object is reported back so the
+    caller can decide whether to delete it (we don't, because orphan cleanup
+    via S3 lifecycle policies is more reliable than per-request deletes).
+    """
     body = request.get_json(force=True)
+    user_id = int(body["user_id"])
+    sha = body.get("sha256") or None
+
+    if sha:
+        existing = (
+            db.session.query(MediaAsset)
+            .filter_by(user_id=user_id, sha256=sha)
+            .order_by(MediaAsset.created_at.desc())
+            .first()
+        )
+        if existing:
+            audit("media.deduped", "media_asset", existing.id,
+                  actor_user_id=user_id,
+                  detail={"sha256": sha,
+                          "orphan_bucket": body.get("bucket"),
+                          "orphan_key": body.get("key")})
+            db.session.commit()
+            return jsonify({
+                "id": existing.id,
+                "deduped": True,
+                "orphan_bucket": body.get("bucket"),
+                "orphan_key": body.get("key"),
+                "transcode_status": existing.transcode_status,
+            }), 200
+
     media = MediaAsset(
-        user_id=int(body["user_id"]),
+        user_id=user_id,
         kind=body["kind"],
         storage_url=body["public_get_url"],
         mime_type=body.get("content_type", "application/octet-stream"),
+        sha256=sha,
         compliance_report={"s3_bucket": body["bucket"], "s3_key": body["key"]},
         transcode_status="pending" if body["kind"] == "video" else "skipped",
     )
@@ -71,8 +139,9 @@ def complete():
     db.session.commit()
     audit("media.uploaded", "media_asset", media.id,
           actor_user_id=media.user_id,
-          detail={"bucket": body["bucket"], "key": body["key"]})
+          detail={"bucket": body["bucket"], "key": body["key"], "sha256": sha})
 
     if media.kind == "video" and os.environ.get("ENABLE_TRANSCODE", "1") != "0":
         transcode_media.delay(media.id)
-    return jsonify({"id": media.id, "transcode_status": media.transcode_status}), 201
+    return jsonify({"id": media.id, "deduped": False,
+                    "transcode_status": media.transcode_status}), 201
