@@ -66,6 +66,57 @@ After configuration, click **Connect …** in the dashboard. The callback writes
 encrypted tokens (Fernet, AES-128-CBC + HMAC-SHA256) to the database — they
 are never logged.
 
+## Asset & Permission Manager (Phase 5)
+
+Distinguishes three things people often conflate as "social media migration":
+
+1. **Permission grants** within an organization — fully API-automated for
+   Meta Pages/IG (`POST /{asset}/assigned_users`) and TikTok Business Center
+   (`/bc/asset/assign/`). YouTube has no API; the dashboard links to a
+   hand-written runbook instead of pretending.
+2. **Ownership transfer** — Meta Page transfer between Business Managers
+   has a real API (`POST /{from-biz}/owned_pages?asset=...`) but still needs
+   the destination BM admin to accept manually. We track the request and
+   poll status. TikTok / YouTube have no transfer API; we keep a manual
+   transfer state machine (`requested → awaiting_target → completed |
+   rejected | expired`) with email reminders on overdue deadlines.
+3. **Content re-broadcast** — pulls historical posts from a connected
+   account (`/me/posts`, `/{ig}/media`, `/v2/video/list/`,
+   `playlistItems.list`) and promotes selected ones into a new `Post`,
+   then runs the standard distribute flow to a different persona group.
+
+New endpoints:
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET / POST` | `/api/permissions/grants` | List + create grants |
+| `DELETE` | `/api/permissions/grants/<id>` | Revoke a grant |
+| `GET` | `/api/permissions/drift` | Unresolved drift alerts |
+| `POST` | `/api/permissions/health/run` | Synchronous health sweep |
+| `GET` | `/api/permissions/runbooks/<file>.md` | Manual runbooks for non-API platforms |
+| `GET / POST` | `/api/transfers` | Track ownership transfers |
+| `POST` | `/api/transfers/<id>/{complete,reject}` | Move state machine forward |
+| `POST` | `/api/rebroadcast/scan` | Pull historical posts into candidates |
+| `POST` | `/api/rebroadcast/promote` | Convert candidate → Post → distribute |
+
+New Celery beats:
+
+- `permission_health_sweep` — daily at 04:30; reconciles `PermissionGrant`
+  rows with platform truth, files `PermissionDriftAlert` for mismatches,
+  emails owners on first detection.
+- `expire_overdue_transfers` — every 3h; flips manual transfers past their
+  deadline to `expired` and notifies.
+
+What we **don't** claim to do (recorded explicitly so future contributors
+don't reintroduce it):
+
+- ❌ Cross-Business-Manager Page ownership without the destination admin
+  accepting manually
+- ❌ YouTube channel ownership transfer via API (no API exists)
+- ❌ TikTok creator account migration between organisations (no API exists)
+- ❌ Performance numbers for "migration speed" — the system reports actual
+  per-call latency, no marketing multipliers
+
 ## Daily workflow + PWA + observability (Phase 4)
 
 * **每日工作流** tab is the new default landing page. Five vertical steps:

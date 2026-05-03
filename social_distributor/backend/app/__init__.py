@@ -25,8 +25,11 @@ def create_app() -> Flask:
         events_bp,
         groups_bp,
         insights_bp,
+        permissions_bp,
         posts_bp,
+        rebroadcast_bp,
         schedules_bp,
+        transfers_bp,
         uploads_bp,
     )
 
@@ -36,8 +39,11 @@ def create_app() -> Flask:
     app.register_blueprint(events_bp)
     app.register_blueprint(groups_bp)
     app.register_blueprint(insights_bp)
+    app.register_blueprint(permissions_bp)
     app.register_blueprint(posts_bp)
+    app.register_blueprint(rebroadcast_bp)
     app.register_blueprint(schedules_bp)
+    app.register_blueprint(transfers_bp)
     app.register_blueprint(uploads_bp)
 
     @app.get("/healthz")

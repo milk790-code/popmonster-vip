@@ -22,6 +22,9 @@
       <button data-tab="status">Status board</button>
       <button data-tab="accounts">Accounts</button>
       <button data-tab="insights">Insights</button>
+      <button data-tab="permissions">協作權限</button>
+      <button data-tab="transfers">Ownership 轉移</button>
+      <button data-tab="rebroadcast">內容重發</button>
       <button data-tab="audit">Audit log</button>
     </nav>
     <label class="user-select">
@@ -271,6 +274,131 @@
         </thead>
         <tbody></tbody>
       </table>
+    </section>
+
+    <section id="tab-permissions" class="tab">
+      <h2>協作權限</h2>
+      <p class="hint">
+        把你管理的 FB Page / IG Business 帳號 / TikTok Business Center
+        資產的部分權限派給其他人。**YouTube 沒有 API**，要轉移請看
+        <a href="#" id="permRunbookYT">YouTube 手動轉移指引</a>。
+      </p>
+      <form id="grantForm" class="grid">
+        <label>平台
+          <select name="platform">
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+            <option value="tiktok">TikTok (Business Center)</option>
+          </select>
+        </label>
+        <label>Asset 類型
+          <select name="asset_kind">
+            <option value="page">page (FB)</option>
+            <option value="ig_account">ig_account</option>
+            <option value="ad_account">ad_account (TikTok)</option>
+          </select>
+        </label>
+        <label>Asset ID<input name="asset_external_id" required /></label>
+        <label>受權者 ID（FB user id / IG user id / TikTok BC member id）<input name="grantee_external_id" required /></label>
+        <label>受權者顯示名稱<input name="grantee_label" /></label>
+        <label>角色
+          <select name="role">
+            <option value="ADMIN">ADMIN</option>
+            <option value="EDITOR">EDITOR</option>
+            <option value="MODERATOR">MODERATOR</option>
+            <option value="ADVERTISER">ADVERTISER</option>
+            <option value="ANALYST">ANALYST</option>
+            <option value="OPERATOR">OPERATOR (TikTok)</option>
+          </select>
+        </label>
+        <label>TikTok BC ID（僅 TikTok 需要）<input name="bc_id" /></label>
+        <button type="submit">派發權限</button>
+      </form>
+      <pre id="grantOutput"></pre>
+
+      <h3>已派發的權限</h3>
+      <button id="refreshGrants">Refresh</button>
+      <table id="grantsTable">
+        <thead><tr><th>平台</th><th>Asset</th><th>受權者</th><th>角色</th><th>狀態</th><th>派發時間</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <h3>權限漂移告警 <small class="hint">(平台實際狀態與我們紀錄不一致時)</small></h3>
+      <button id="runHealthSweep">立刻執行健康檢查</button>
+      <table id="driftTable">
+        <thead><tr><th>偵測時間</th><th>平台</th><th>類型</th><th>細節</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="tab-transfers" class="tab">
+      <h2>Ownership 轉移</h2>
+      <p class="hint">
+        Meta Pages 的跨 BM 轉移是 API 發起、雙邊管理員手動接收。
+        TikTok 帳號 / YouTube 頻道的所有權轉移**完全沒有 API**——這裡只用來
+        記錄你在平台介面操作的進度，過期未完成會自動 Email 提醒。
+      </p>
+      <form id="transferForm" class="grid">
+        <label>平台
+          <select name="platform">
+            <option value="facebook">Facebook (API 發起)</option>
+            <option value="tiktok">TikTok (manual)</option>
+            <option value="youtube">YouTube (manual)</option>
+          </select>
+        </label>
+        <label>Channel
+          <select name="channel">
+            <option value="api">api（僅 Facebook）</option>
+            <option value="manual" selected>manual</option>
+          </select>
+        </label>
+        <label>Asset 類型<input name="asset_kind" placeholder="page / channel / creator_account" /></label>
+        <label>Asset ID<input name="asset_external_id" required /></label>
+        <label>Asset 名稱<input name="asset_label" /></label>
+        <label>來源（描述用）<input name="source_label" /></label>
+        <label>目標（描述用）<input name="target_label" /></label>
+        <label>From BM ID（API channel）<input name="from_business_id" /></label>
+        <label>To BM ID（API channel）<input name="to_business_id" /></label>
+        <label>截止時間（manual 用）<input name="expires_at" type="datetime-local" /></label>
+        <button type="submit">建立轉移紀錄</button>
+      </form>
+      <pre id="transferOutput"></pre>
+
+      <h3>所有轉移</h3>
+      <button id="refreshTransfers">Refresh</button>
+      <table id="transfersTable">
+        <thead><tr><th>平台</th><th>Asset</th><th>方向</th><th>Channel</th><th>狀態</th><th>截止</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="tab-rebroadcast" class="tab">
+      <h2>內容重發（從舊帳號到新人設）</h2>
+      <p class="hint">
+        從一個已連接帳號的歷史貼文中挑要重新發布的，自動建立 Post 草稿，
+        然後走標準的 Distribute 流程到新人設群組。注意：影片素材是平台
+        CDN 短連結，建議在最後送出前重新上傳一份新版素材以避免來源連結失效。
+      </p>
+      <div class="grid">
+        <label>來源帳號 ID<input id="rbSourceId" type="number" min="1" /></label>
+        <label>抓取數量<input id="rbLimit" type="number" min="1" max="100" value="25" /></label>
+        <button id="rbScanBtn" type="button">掃描歷史貼文</button>
+      </div>
+      <pre id="rbScanOutput"></pre>
+
+      <h3>候選清單</h3>
+      <button id="rbRefresh">Refresh</button>
+      <table id="rbTable">
+        <thead><tr><th></th><th>平台 ID</th><th>內文（前 200 字）</th><th>連結</th><th>已用</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="grid">
+        <label>要分發到的人設群組 ID（逗號分隔）<input id="rbGroupIds" /></label>
+        <label>Jitter（分鐘）<input id="rbJitter" type="number" value="20" /></label>
+        <label><input id="rbVariants" type="checkbox" checked /> 為每帳號產生變體文案</label>
+        <button id="rbPromoteBtn" type="button">將勾選的候選 promote 並 distribute</button>
+      </div>
+      <pre id="rbPromoteOutput"></pre>
     </section>
 
     <section id="tab-audit" class="tab">

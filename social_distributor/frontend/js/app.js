@@ -36,6 +36,9 @@ document.querySelectorAll(".topbar nav button").forEach((btn) => {
     if (btn.dataset.tab === "distribute") loadDistributeGroups();
     if (btn.dataset.tab === "insights") loadInsights();
     if (btn.dataset.tab === "daily") loadDailyDeps();
+    if (btn.dataset.tab === "permissions") { loadGrants(); loadDrift(); }
+    if (btn.dataset.tab === "transfers") loadTransfers();
+    if (btn.dataset.tab === "rebroadcast") loadRbCandidates();
   });
 });
 
@@ -811,3 +814,237 @@ connectEvents();
 
 // Render preview on initial load.
 renderDailyPreview();
+
+// --- Permissions ------------------------------------------------------
+const grantForm = document.getElementById("grantForm");
+grantForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fd = new FormData(grantForm);
+  const body = {
+    user_id: Number(userIdInput.value),
+    platform: fd.get("platform"),
+    asset_kind: fd.get("asset_kind"),
+    asset_external_id: fd.get("asset_external_id"),
+    grantee_external_id: fd.get("grantee_external_id"),
+    grantee_label: fd.get("grantee_label") || "",
+    role: fd.get("role"),
+  };
+  if (fd.get("bc_id")) body.bc_id = fd.get("bc_id");
+  try {
+    const res = await api("/api/permissions/grants", {
+      method: "POST", body: JSON.stringify(body),
+    });
+    document.getElementById("grantOutput").textContent = JSON.stringify(res, null, 2);
+    loadGrants();
+  } catch (err) {
+    document.getElementById("grantOutput").textContent = `失敗：${err.message}`;
+  }
+});
+
+document.getElementById("refreshGrants").addEventListener("click", loadGrants);
+document.getElementById("runHealthSweep").addEventListener("click", async () => {
+  const counts = await api("/api/permissions/health/run", { method: "POST" });
+  alert(`掃描 ${counts.scanned} 個帳號 / token_invalid ${counts.token_invalid} / 漂移 ${counts.grant_disappeared + counts.grant_unexpected}`);
+  loadDrift();
+});
+document.getElementById("permRunbookYT").addEventListener("click", async (e) => {
+  e.preventDefault();
+  const url = `${API_BASE}/api/permissions/runbooks/youtube_transfer.md`;
+  window.open(url, "_blank", "noopener");
+});
+
+async function loadGrants() {
+  const userId = Number(userIdInput.value);
+  const rows = await api(`/api/permissions/grants?user_id=${userId}`);
+  const tbody = document.querySelector("#grantsTable tbody");
+  tbody.innerHTML = "";
+  for (const g of rows) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${g.platform}</td>
+      <td>${escapeHtml(g.asset_label || g.asset_external_id)}</td>
+      <td>${escapeHtml(g.grantee_label || g.grantee_external_id)}</td>
+      <td>${g.role}</td>
+      <td><span class="status-pill ${g.status}">${g.status}</span></td>
+      <td>${g.granted_at ?? ""}</td>
+      <td></td>
+    `;
+    if (g.status === "active") {
+      const btn = document.createElement("button");
+      btn.textContent = "撤回";
+      btn.addEventListener("click", async () => {
+        if (!confirm("確定撤回這個權限？")) return;
+        await api(`/api/permissions/grants/${g.id}`, { method: "DELETE" });
+        loadGrants();
+      });
+      tr.lastElementChild.appendChild(btn);
+    }
+    tbody.appendChild(tr);
+  }
+}
+
+async function loadDrift() {
+  const userId = Number(userIdInput.value);
+  const rows = await api(`/api/permissions/drift?user_id=${userId}&unresolved=1`);
+  const tbody = document.querySelector("#driftTable tbody");
+  tbody.innerHTML = "";
+  for (const a of rows) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${a.detected_at ?? ""}</td>
+      <td>${a.platform}</td>
+      <td>${a.kind}</td>
+      <td><pre style="max-height:120px">${escapeHtml(JSON.stringify(a.detail, null, 2))}</pre></td>
+      <td><button class="resolve-drift" data-id="${a.id}">標記解決</button></td>
+    `;
+    tbody.appendChild(tr);
+  }
+  tbody.querySelectorAll(".resolve-drift").forEach((b) =>
+    b.addEventListener("click", async () => {
+      await api(`/api/permissions/drift/${b.dataset.id}/resolve`, { method: "POST" });
+      loadDrift();
+    })
+  );
+}
+
+// --- Transfers --------------------------------------------------------
+const transferForm = document.getElementById("transferForm");
+transferForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fd = new FormData(transferForm);
+  const body = {
+    user_id: Number(userIdInput.value),
+    platform: fd.get("platform"),
+    channel: fd.get("channel"),
+    asset_kind: fd.get("asset_kind") || "page",
+    asset_external_id: fd.get("asset_external_id"),
+    asset_label: fd.get("asset_label") || "",
+    source_label: fd.get("source_label") || "",
+    target_label: fd.get("target_label") || "",
+  };
+  if (fd.get("from_business_id")) body.from_business_id = fd.get("from_business_id");
+  if (fd.get("to_business_id")) body.to_business_id = fd.get("to_business_id");
+  if (fd.get("expires_at")) body.expires_at = fd.get("expires_at");
+  try {
+    const res = await api("/api/transfers", {
+      method: "POST", body: JSON.stringify(body),
+    });
+    document.getElementById("transferOutput").textContent = JSON.stringify(res, null, 2);
+    loadTransfers();
+  } catch (err) {
+    document.getElementById("transferOutput").textContent = `失敗：${err.message}`;
+  }
+});
+
+document.getElementById("refreshTransfers").addEventListener("click", loadTransfers);
+
+async function loadTransfers() {
+  const userId = Number(userIdInput.value);
+  const rows = await api(`/api/transfers?user_id=${userId}`);
+  const tbody = document.querySelector("#transfersTable tbody");
+  tbody.innerHTML = "";
+  for (const t of rows) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${t.platform}</td>
+      <td>${escapeHtml(t.asset_label || t.asset_external_id)}</td>
+      <td>${escapeHtml(t.source_label || "?")} → ${escapeHtml(t.target_label || "?")}</td>
+      <td>${t.channel}</td>
+      <td><span class="status-pill ${t.status}">${t.status}</span></td>
+      <td>${t.expires_at ?? ""}</td>
+      <td></td>
+    `;
+    if (["requested", "awaiting_target"].includes(t.status)) {
+      const done = document.createElement("button");
+      done.textContent = "標記完成";
+      done.addEventListener("click", async () => {
+        await api(`/api/transfers/${t.id}/complete`, { method: "POST", body: JSON.stringify({}) });
+        loadTransfers();
+      });
+      const reject = document.createElement("button");
+      reject.textContent = "標記拒絕";
+      reject.addEventListener("click", async () => {
+        await api(`/api/transfers/${t.id}/reject`, { method: "POST", body: JSON.stringify({}) });
+        loadTransfers();
+      });
+      tr.lastElementChild.append(done, reject);
+    }
+    tbody.appendChild(tr);
+  }
+}
+
+// --- Rebroadcast ------------------------------------------------------
+document.getElementById("rbScanBtn").addEventListener("click", async () => {
+  const sourceId = Number(document.getElementById("rbSourceId").value);
+  const limit = Number(document.getElementById("rbLimit").value || 25);
+  if (!sourceId) { alert("請填來源帳號 ID"); return; }
+  document.getElementById("rbScanOutput").textContent = "Scanning…";
+  try {
+    const res = await api("/api/rebroadcast/scan", {
+      method: "POST",
+      body: JSON.stringify({ source_account_id: sourceId, limit }),
+    });
+    document.getElementById("rbScanOutput").textContent = JSON.stringify(res, null, 2);
+    loadRbCandidates();
+  } catch (err) {
+    document.getElementById("rbScanOutput").textContent = `失敗：${err.message}`;
+  }
+});
+
+document.getElementById("rbRefresh").addEventListener("click", loadRbCandidates);
+
+async function loadRbCandidates() {
+  const userId = Number(userIdInput.value);
+  const rows = await api(`/api/rebroadcast/candidates?user_id=${userId}`);
+  const tbody = document.querySelector("#rbTable tbody");
+  tbody.innerHTML = "";
+  for (const c of rows) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><input type="checkbox" class="rb-pick" data-id="${c.id}" ${c.used ? "disabled" : ""}/></td>
+      <td>${escapeHtml(c.external_post_id)}</td>
+      <td>${escapeHtml((c.snippet || "").slice(0, 200))}</td>
+      <td>${c.permalink ? `<a href="${c.permalink}" target="_blank">原文</a>` : ""}</td>
+      <td>${c.used ? `→ post #${c.promoted_post_id}` : ""}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+document.getElementById("rbPromoteBtn").addEventListener("click", async () => {
+  const picked = Array.from(document.querySelectorAll(".rb-pick:checked"))
+    .map((cb) => Number(cb.dataset.id));
+  if (!picked.length) { alert("先勾選至少一個候選"); return; }
+  const groupIds = (document.getElementById("rbGroupIds").value || "")
+    .split(",").map((s) => Number(s.trim())).filter(Boolean);
+  if (!groupIds.length) { alert("請填群組 ID"); return; }
+  const jitter = Number(document.getElementById("rbJitter").value || 0);
+  const variants = document.getElementById("rbVariants").checked;
+
+  const out = document.getElementById("rbPromoteOutput");
+  const results = [];
+  for (const candidateId of picked) {
+    try {
+      const promoted = await api("/api/rebroadcast/promote", {
+        method: "POST",
+        body: JSON.stringify({
+          candidate_id: candidateId,
+          group_ids: groupIds,
+          jitter_minutes: jitter,
+          generate_variants: variants,
+        }),
+      });
+      // Now actually distribute via the canonical endpoint.
+      const distRes = await api(`/api/posts/${promoted.post_id}/distribute`, {
+        method: "POST",
+        body: JSON.stringify(promoted.suggested_body),
+      });
+      results.push({ candidate_id: candidateId, post_id: promoted.post_id,
+                     distribute: distRes });
+    } catch (err) {
+      results.push({ candidate_id: candidateId, error: err.message });
+    }
+  }
+  out.textContent = JSON.stringify(results, null, 2);
+  loadRbCandidates();
+});
