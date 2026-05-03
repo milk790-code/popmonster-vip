@@ -18,6 +18,7 @@ from ..models import (
 )
 from ..scheduler import dispatch_target
 from ..utils.audit import record as audit
+from ..utils.best_times import next_best_time_for_group
 from ..utils.jitter import spread
 from ..utils.variants import VariantRequest, generate_variant
 
@@ -237,7 +238,13 @@ def distribute(post_id: int):
         return jsonify({"error": "one or more group_ids not found"}), 400
 
     tz_name = body.get("timezone", "UTC")
+    use_best_time = bool(body.get("use_best_time", False))
+    best_time_used: dict[int, str] = {}
+
+    # Best time is per-group, so we compute per group below. ``base`` is
+    # only used as the fallback when a group has no data yet.
     base = _parse_when(body.get("scheduled_for"), tz_name) or datetime.now(timezone.utc)
+
     jitter = max(0, int(body.get("jitter_minutes", 0)))
     do_variants = bool(body.get("generate_variants", False))
     dry_run = bool(body.get("dry_run", False))
@@ -249,8 +256,18 @@ def distribute(post_id: int):
         active_accounts = [a for a in group.accounts if a.revoked_at is None]
         if not active_accounts:
             continue
-        seed = f"distribute:{post.id}:group:{group.id}:{base.isoformat()}"
-        starts = spread(base, jitter, seed, len(active_accounts))
+
+        group_base = base
+        if use_best_time:
+            suggested = next_best_time_for_group(group.id)
+            if suggested is not None:
+                group_base = suggested
+                best_time_used[group.id] = "learned"
+            else:
+                best_time_used[group.id] = "fallback_no_data"
+
+        seed = f"distribute:{post.id}:group:{group.id}:{group_base.isoformat()}"
+        starts = spread(group_base, jitter, seed, len(active_accounts))
 
         for account, when in zip(active_accounts, starts):
             overrides: dict = {}
@@ -327,6 +344,7 @@ def distribute(post_id: int):
             "dry_run": dry_run,
             "created_target_ids": created_ids,
             "plan": plan,
+            "best_time_used": best_time_used,
         }
     ), (200 if dry_run else 201)
 

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import joinedload
 
@@ -39,6 +39,38 @@ def _bucket_of(dt: datetime) -> int:
 
 def _label_of(bucket: int) -> tuple[str, int]:
     return _DOW_LABELS[bucket // 24], bucket % 24
+
+
+def next_best_time_for_group(
+    group_id: int,
+    *,
+    after: datetime | None = None,
+    min_samples: int = 3,
+) -> datetime | None:
+    """Return the next future occurrence of the group's top engagement slot.
+
+    Uses the bucket's day-of-week + hour-of-day to find the closest future
+    moment in UTC. Returns ``None`` when there isn't enough data to make a
+    confident recommendation — caller should fall back to "now" or prompt
+    the user.
+    """
+    slots = best_times_for_group(group_id, top_n=1, min_samples=min_samples)
+    if not slots:
+        return None
+    return _next_future_occurrence(slots[0], after=after)
+
+
+def _next_future_occurrence(slot: TimeSlot,
+                             after: datetime | None = None) -> datetime:
+    now = (after or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    target_dow = _DOW_LABELS.index(slot.day)
+    days_ahead = (target_dow - now.weekday()) % 7
+    candidate = now.replace(
+        hour=slot.hour, minute=0, second=0, microsecond=0
+    ) + timedelta(days=days_ahead)
+    if candidate <= now:
+        candidate += timedelta(days=7)
+    return candidate
 
 
 def best_times_for_account(account_id: int, *, top_n: int = 5,
