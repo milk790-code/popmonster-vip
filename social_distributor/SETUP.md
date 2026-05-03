@@ -116,6 +116,8 @@ Use that user's access key in `.env`.
    - `pages_manage_posts`
    - `instagram_basic`
    - `instagram_content_publish`
+   - `business_management` (only if you'll use the Permissions / Transfers
+     features in Phase 5; needed to call BM endpoints)
 6. **Crucial**: The Instagram account you publish to **must be a Business
    or Creator account** *and* linked to a Facebook Page. The OAuth flow
    discovers IG accounts via the linked Page.
@@ -134,6 +136,8 @@ Use that user's access key in `.env`.
    - `video.upload`
    - `video.publish` (this needs **production review** — until approved,
      posts publish as `SELF_ONLY` drafts only)
+   - `business.creator.read` (only if you'll use the Permissions Phase 5
+     features against TikTok Business Center assets)
 6. **Heads up**: TikTok rate-limits and reviews are strict. The default
    `RATE_LIMIT_TIKTOK=30:86400` (30/day) reflects what an unaudited app
    typically gets; bump it after audit.

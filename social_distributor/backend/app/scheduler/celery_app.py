@@ -45,6 +45,14 @@ def make_celery(flask_app=None) -> Celery:
                 "task": "app.scheduler.tasks.ingest_insights",
                 "schedule": crontab(minute=15, hour="*"),
             },
+            "permission-health-sweep": {
+                "task": "app.scheduler.tasks.permission_health_sweep",
+                "schedule": crontab(minute=30, hour=4),
+            },
+            "expire-overdue-transfers": {
+                "task": "app.scheduler.tasks.expire_overdue_transfers",
+                "schedule": crontab(minute=0, hour="*/3"),
+            },
         },
     )
 

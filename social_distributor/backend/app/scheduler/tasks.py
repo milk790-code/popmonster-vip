@@ -372,6 +372,20 @@ def _provider_name_for_platform(platform_value: str) -> str | None:
 
 
 @celery_app.task
+def permission_health_sweep() -> dict:
+    """Daily reconciliation of recorded grants vs. platform truth."""
+    from ..permissions.health import run_health_sweep
+    return run_health_sweep()
+
+
+@celery_app.task
+def expire_overdue_transfers() -> int:
+    """Move past-deadline manual transfers to ``expired`` and notify."""
+    from ..transfers.manual_transfer import transition_expired_if_overdue
+    return transition_expired_if_overdue()
+
+
+@celery_app.task
 def ingest_insights() -> None:
     """Pull engagement metrics for recently-published targets.
 
