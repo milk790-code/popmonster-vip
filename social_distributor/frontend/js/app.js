@@ -1,4 +1,11 @@
-const API_BASE = window.SOCIAL_DISTRIBUTOR_API ?? "http://localhost:5000";
+// A6: read API base URL from <meta name="distributor-api"> first (set at
+// container start by nginx envsubst), fall back to window override (dev /
+// test injection), then localhost. The unsubstituted "${API_BASE_URL}"
+// literal is treated as "use the fallback".
+const _META_API = document.querySelector('meta[name="distributor-api"]')?.content?.trim();
+const API_BASE = (_META_API && !_META_API.startsWith("$"))
+  ? _META_API
+  : (window.SOCIAL_DISTRIBUTOR_API ?? "http://localhost:5000");
 
 // Register the service worker for PWA / offline shell support.
 if ("serviceWorker" in navigator) {
@@ -646,9 +653,48 @@ const dailyState = {
 
 async function loadDailyDeps() {
   const userId = Number(userIdInput.value);
-  dailyState.groups = await api(`/api/groups?user_id=${userId}`);
+  // A8: load all three deps so we can show the right empty-state guide.
+  const [groups, accounts] = await Promise.all([
+    api(`/api/groups?user_id=${userId}`),
+    api(`/api/accounts?user_id=${userId}`),
+  ]);
+  dailyState.groups = groups;
+  dailyState.accounts = accounts;
+  renderDailyOnboarding();
   renderDailyChips();
   renderDailyPreview();
+}
+
+function renderDailyOnboarding() {
+  // Three contextual onboarding states. The wizard banner sits above step 1
+  // and switches the user to the right tab with one click.
+  const slot = document.getElementById("dailyOnboarding");
+  if (!slot) return;
+  const accounts = dailyState.accounts || [];
+  const groups = dailyState.groups || [];
+  if (accounts.length === 0) {
+    slot.innerHTML = `
+      <div class="onboarding accent">
+        <strong>👋 第一步：連一個社群帳號</strong>
+        <p>沒連帳號就發不出去。建議先連 Instagram Business + Facebook Page，這條路徑最少坑。</p>
+        <button type="button" data-go="accounts">→ 到 Accounts tab</button>
+      </div>`;
+  } else if (groups.length === 0) {
+    slot.innerHTML = `
+      <div class="onboarding accent">
+        <strong>👌 ${accounts.length} 個帳號連好了。下一步：建第一個人設群組</strong>
+        <p>把幾個帳號綁成一個「人設」，發文時選人設就會一鍵分發到該人設下所有平台。</p>
+        <button type="button" data-go="groups">→ 到 人設群組 tab</button>
+      </div>`;
+  } else {
+    slot.innerHTML = "";  // clear any previous banner
+  }
+  slot.querySelectorAll("button[data-go]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const target = document.querySelector(`.topbar nav button[data-tab="${btn.dataset.go}"]`);
+      target?.click();
+    });
+  });
 }
 
 function renderDailyChips() {

@@ -59,6 +59,13 @@ def dispatch_target(self, target_id: int) -> None:
     after a worker restart. On retryable errors we use our own exponential
     backoff (see ``utils.retry.backoff_seconds``); on permanent errors we
     record a terminal failure.
+
+    The whole body is wrapped in a final ``try/except`` (A2): an unexpected
+    crash (decrypt failure, AttributeError on a malformed model row, etc.)
+    used to leave the row stuck in ``RUNNING`` forever — Celery's own retry
+    semantics never fire for non-Celery exceptions raised before the publish
+    step. We now always flip to FAILED and audit ``dispatch.uncaught`` so the
+    Status board surfaces the row instead of silently hanging.
     """
     target: PostTarget | None = (
         db.session.query(PostTarget)
@@ -85,8 +92,45 @@ def dispatch_target(self, target_id: int) -> None:
         attempt=target.attempt_count,
     )
 
-    findings = ComplianceEngine().evaluate(target.post, [target])
-    if ComplianceEngine().has_blockers(findings):
+    try:
+        _dispatch_body(self, target)
+    except Exception as exc:  # noqa: BLE001 - last-resort guard for A2
+        if isinstance(exc, self.retry.__self__.MaxRetriesExceededError if hasattr(self.retry, "__self__") else type(None)):
+            raise
+        # Celery's self.retry() raises Retry() to schedule the next attempt;
+        # don't swallow that — let it propagate so Celery does its thing.
+        from celery.exceptions import Retry
+        if isinstance(exc, Retry):
+            raise
+        log.exception("dispatch_target uncaught exception target_id=%s", target.id)
+        target.status = JobStatus.FAILED
+        target.last_error = f"uncaught: {type(exc).__name__}: {str(exc)[:300]}"
+        audit(
+            "dispatch.uncaught",
+            "post_target",
+            target.id,
+            actor_user_id=target.post.user_id,
+            detail={"error_type": type(exc).__name__, "error": str(exc)[:500]},
+        )
+        db.session.commit()
+        publish_event(
+            target.post.user_id,
+            "target.status_changed",
+            {
+                "target_id": target.id,
+                "post_id": target.post_id,
+                "status": target.status.value,
+                "platform": target.account.platform.value,
+                "error": target.last_error,
+            },
+        )
+
+
+def _dispatch_body(self, target: PostTarget) -> None:
+    """Body of dispatch_target, factored out so A2's outer try/except is clean."""
+    engine = ComplianceEngine()
+    findings = engine.evaluate(target.post, [target])
+    if engine.has_blockers(findings):
         target.status = JobStatus.REJECTED_COMPLIANCE
         target.last_error = "compliance blocker"
         audit(

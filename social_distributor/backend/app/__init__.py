@@ -1,10 +1,15 @@
 """Flask app factory."""
 from __future__ import annotations
 
+import logging
+import os
+
 from flask import Flask, jsonify
 
 from .config import config
 from .extensions import cors, db, migrate
+
+log = logging.getLogger(__name__)
 
 
 def create_app() -> Flask:
@@ -52,8 +57,63 @@ def create_app() -> Flask:
     def healthz():
         return jsonify({"status": "ok"})
 
+    @app.get("/healthz/ready")
+    def healthz_ready():
+        """A7: per-dependency configuration readiness.
+
+        This is intentionally configuration-only — actual liveness probes
+        for Redis/S3/Meta would slow down every k8s readiness poll.
+        """
+        return jsonify(config.readiness())
+
     @app.errorhandler(404)
     def not_found(_):
         return jsonify({"error": "not found"}), 404
 
+    # A7: warn at boot if MEDIA_BUCKET / OAuth credentials not set, instead
+    # of letting the user discover it during their first upload click.
+    _warn_about_missing_config(app)
+
+    # A9: in dev, auto-seed user_id=1 so the user doesn't have to docker exec
+    # to create a User row before the first dashboard load. Skipped if magic
+    # link login is enabled (C3) or any users already exist.
+    if os.environ.get("AUTO_SEED_USER", "1") == "1":
+        _auto_seed_user(app)
+
     return app
+
+
+def _warn_about_missing_config(app: Flask) -> None:
+    readiness = config.readiness()
+    if not readiness["encryption"]["token_key_set"]:
+        log.warning("TOKEN_ENCRYPTION_KEY not set — OAuth flows WILL fail")
+    if not readiness["media_bucket"]["configured"]:
+        log.warning("MEDIA_BUCKET not set — uploads will fail with 500")
+    elif not readiness["media_bucket"]["aws_credentials"]:
+        log.warning("MEDIA_BUCKET set but AWS credentials missing")
+    for name in ("meta", "tiktok", "google"):
+        if not readiness["oauth"][name]:
+            log.warning("OAuth credentials for %s not configured", name)
+
+
+def _auto_seed_user(app: Flask) -> None:
+    from .models import User
+    with app.app_context():
+        # Idempotent schema creation — for dev SQLite "just works", for
+        # Postgres with existing migrations it's a no-op (CREATE IF NOT
+        # EXISTS via SQLAlchemy DDL).
+        try:
+            db.create_all()
+        except Exception as exc:  # noqa: BLE001
+            log.debug("auto-seed: create_all skipped (%s)", exc)
+            return
+        try:
+            existing = db.session.query(User).count()
+        except Exception as exc:  # noqa: BLE001 - schema still not ready
+            log.debug("auto-seed: query failed (%s)", exc)
+            return
+        if existing == 0:
+            seed = User(email="me@local", display_name="Me", timezone="UTC")
+            db.session.add(seed)
+            db.session.commit()
+            log.info("AUTO_SEED_USER: created user_id=%s (me@local)", seed.id)

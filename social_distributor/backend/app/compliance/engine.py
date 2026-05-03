@@ -25,13 +25,29 @@ class Finding:
 
 
 class ComplianceEngine:
-    def evaluate(self, post: Post, targets: Iterable[PostTarget]) -> list[Finding]:
+    def evaluate(
+        self,
+        post: Post,
+        targets: Iterable[PostTarget],
+        *,
+        persist: bool = True,
+    ) -> list[Finding]:
+        """Run all checks and return findings.
+
+        ``persist`` controls whether ComplianceCheck rows are written. The
+        preview-compliance endpoint and distribute dry-run pass ``False``
+        so they don't pollute the audit table with throwaway evaluations
+        (A3 — previously every dry-run inserted N rows + relied on a
+        ``rollback()`` that only saved the transient targets, not the
+        already-flushed ComplianceCheck inserts).
+        """
         findings: list[Finding] = []
         findings.extend(self._text_checks(post))
         findings.extend(self._media_checks(post.media))
         findings.extend(self._platform_checks(post, targets))
         findings.extend(self._originality_checks(post))
-        self._persist(post, findings)
+        if persist:
+            self._persist(post, findings)
         return findings
 
     def has_blockers(self, findings: Iterable[Finding]) -> bool:

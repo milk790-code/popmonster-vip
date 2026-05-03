@@ -103,5 +103,47 @@ class Config:
             "CELERY_RESULT_BACKEND": self.celery_result_backend,
         }
 
+    def readiness(self) -> dict:
+        """A7: machine-readable readiness for /healthz/ready.
+
+        Reports each external dependency's configuration status (not actual
+        liveness — checking liveness on every request would be wasteful).
+        Use ``/healthz`` for liveness, ``/healthz/ready`` for readiness."""
+        meta_creds = self.platform("meta")
+        tiktok_creds = self.platform("tiktok")
+        google_creds = self.platform("google")
+        return {
+            "database": {"configured": bool(self.database_url)},
+            "redis": {"configured": bool(self.redis_url)},
+            "celery": {
+                "configured": bool(self.celery_broker_url and self.celery_result_backend),
+            },
+            "media_bucket": {
+                "configured": bool(_env("MEDIA_BUCKET")),
+                "endpoint_override": bool(_env("S3_ENDPOINT_URL")),
+                "aws_credentials": bool(
+                    _env("AWS_ACCESS_KEY_ID") and _env("AWS_SECRET_ACCESS_KEY")
+                ),
+            },
+            "oauth": {
+                "meta": meta_creds.configured,
+                "tiktok": tiktok_creds.configured,
+                "google": google_creds.configured,
+            },
+            "ai": {
+                "anthropic_api_key": bool(_env("ANTHROPIC_API_KEY")),
+                "perspective_api_key": bool(self.perspective_api_key),
+            },
+            "notify": {
+                "sendgrid": bool(self.sendgrid_api_key and self.notify_email_from),
+                "twilio": bool(
+                    self.twilio_account_sid
+                    and self.twilio_auth_token
+                    and self.twilio_from_number
+                ),
+            },
+            "encryption": {"token_key_set": bool(self.token_encryption_key)},
+        }
+
 
 config = Config()

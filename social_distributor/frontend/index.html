@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Social Distributor — Dashboard</title>
   <meta name="theme-color" content="#0f1115" />
+  <!--
+    A6: API base URL injection. nginx (in docker-compose) runs envsubst on
+    this file at container startup and replaces ${API_BASE_URL} with whatever
+    the env var is set to. For local development without the nginx wrapper,
+    the literal token below is harmless — JS sees the unsubstituted value
+    and falls back to http://localhost:5000.
+  -->
+  <meta name="distributor-api" content="${API_BASE_URL}" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
   <link rel="apple-touch-icon" href="icons/icon.svg" />
@@ -35,6 +43,7 @@
 
   <main>
     <section id="tab-daily" class="tab active daily">
+      <div id="dailyOnboarding"></div>
       <div class="daily-step">
         <header><span class="step-num">1</span><h2>媒體</h2><span class="step-hint" id="dailyMediaHint">拖一個影片或圖片</span></header>
         <div id="dailyDropzone" class="dropzone">

@@ -16,4 +16,7 @@ RUN pip install --upgrade pip && pip install -r /app/requirements.txt
 COPY backend /app
 
 EXPOSE 5000
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "run:app"]
+# A10: gevent worker class so SSE connections don't pin a sync worker
+# (one /api/events/stream client per worker = dashboard freeze with sync).
+CMD ["gunicorn", "-k", "gevent", "-w", "2", "--worker-connections", "100", \
+     "--timeout", "120", "-b", "0.0.0.0:5000", "run:app"]

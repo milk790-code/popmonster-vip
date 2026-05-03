@@ -186,12 +186,14 @@ def preview_compliance(post_id: int):
         )
         for a in accounts
     ]
-    findings = ComplianceEngine().evaluate(post, targets)
-    db.session.rollback()  # don't persist preview targets
+    # A3 + A4: shared engine instance, no DB writes for preview.
+    engine = ComplianceEngine()
+    findings = engine.evaluate(post, targets, persist=False)
+    db.session.rollback()  # transient targets are still on the session
 
     return jsonify(
         {
-            "blocked": ComplianceEngine().has_blockers(findings),
+            "blocked": engine.has_blockers(findings),
             "findings": [
                 {
                     "checker": f.checker,
