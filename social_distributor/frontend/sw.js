@@ -8,7 +8,14 @@
 // - Navigation requests fall back to the cached index when offline so PWA
 //   launches don't show a browser error page.
 
-const CACHE = "distributor-shell-v3";
+// B10: cache name carries a build/version token so each deploy invalidates
+// the previous shell. nginx (in docker-compose) substitutes ${CACHE_VERSION}
+// at container start; for local dev the literal stays and SubstrFromActivate
+// claims clients on update.
+const CACHE_VERSION = "${CACHE_VERSION}".startsWith("$")
+  ? "dev-" + Date.now()
+  : "${CACHE_VERSION}";
+const CACHE = `distributor-shell-${CACHE_VERSION}`;
 const SHELL = [
   "./index.html",
   "./css/app.css",

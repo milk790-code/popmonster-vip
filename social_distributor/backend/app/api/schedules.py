@@ -32,11 +32,25 @@ def create_schedule():
     if not post:
         return jsonify({"error": "post not found"}), 404
 
+    from ..utils.overrides import validate_overrides
+
     created: list[int] = []
     for item in body.get("items", []):
         account = db.session.get(SocialAccount, item["account_id"])
         if not account or account.revoked_at is not None:
             return jsonify({"error": f"account {item['account_id']} not connected"}), 400
+
+        # B7: per-target overrides validated against the account's platform.
+        item_overrides = item.get("overrides", {})
+        if item_overrides:
+            errors = validate_overrides(account.platform.value, item_overrides)
+            if errors:
+                return jsonify({
+                    "error": "invalid overrides",
+                    "account_id": account.id,
+                    "platform": account.platform.value,
+                    "details": errors,
+                }), 400
 
         tz_name = item.get("timezone", "UTC")
         cron_expr = item.get("cron")
@@ -53,7 +67,7 @@ def create_schedule():
         target = PostTarget(
             post_id=post.id,
             account_id=account.id,
-            overrides=item.get("overrides", {}),
+            overrides=item_overrides,
             cron_expr=cron_expr,
             timezone=tz_name,
             scheduled_for=scheduled_for,

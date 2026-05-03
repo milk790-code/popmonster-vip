@@ -1,11 +1,19 @@
-"""HTTP helpers for platform adapters."""
+"""HTTP helpers for platform adapters.
+
+B6: ``timeout`` defaults to ``PLATFORM_HTTP_TIMEOUT`` env var (or 60s if
+unset). Video upload / IG container poll callsites pass an explicit longer
+timeout when needed (these can take 60–120s legitimately).
+"""
 from __future__ import annotations
 
+import os
 from typing import Any
 
 import requests
 
 from .base import PlatformError
+
+DEFAULT_TIMEOUT = float(os.environ.get("PLATFORM_HTTP_TIMEOUT", "60"))
 
 
 def request_json(
@@ -17,8 +25,10 @@ def request_json(
     json: dict[str, Any] | None = None,
     headers: dict[str, str] | None = None,
     files: dict[str, Any] | None = None,
-    timeout: float = 30.0,
+    timeout: float | None = None,
 ) -> dict[str, Any]:
+    if timeout is None:
+        timeout = DEFAULT_TIMEOUT
     try:
         response = requests.request(
             method,

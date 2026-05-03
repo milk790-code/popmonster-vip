@@ -1,4 +1,9 @@
-"""Centralised audit logging."""
+"""Centralised audit logging.
+
+B5: every ``detail`` payload passes through ``redact()`` so OAuth tokens,
+Authorization headers, and platform secrets that occasionally bubble up in
+error messages don't get persisted in plaintext.
+"""
 from __future__ import annotations
 
 from typing import Any
@@ -7,6 +12,7 @@ from flask import has_request_context, request
 
 from ..extensions import db
 from ..models import AuditLog
+from .redact import redact
 
 
 def record(
@@ -21,7 +27,7 @@ def record(
         action=action,
         resource_type=resource_type,
         resource_id=str(resource_id) if resource_id is not None else None,
-        detail=detail or {},
+        detail=redact(detail or {}),
         request_ip=request.remote_addr if has_request_context() else None,
     )
     db.session.add(entry)

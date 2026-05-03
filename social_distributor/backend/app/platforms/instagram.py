@@ -120,9 +120,16 @@ class InstagramPublisher(Publisher):
             code = status.get("status_code")
             if code == "FINISHED":
                 return
-            if code in ("ERROR", "EXPIRED"):
+            if code == "ERROR":
                 raise PlatformError(
                     f"instagram container failed: {code}", retryable=False
+                )
+            if code == "EXPIRED":
+                # B3: EXPIRED means the platform discarded the container before
+                # we got to publish (transient; happens under IG load). Re-running
+                # the upload reproduces a fresh container, so it's worth retrying.
+                raise PlatformError(
+                    f"instagram container expired (will retry)", retryable=True
                 )
             time.sleep(5)
         raise PlatformError("instagram container timed out", retryable=True)

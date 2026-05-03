@@ -286,13 +286,21 @@ def advance_cron_targets() -> None:
 def sweep_due_targets() -> None:
     """Queue any target whose ``scheduled_for`` has elapsed."""
     now = datetime.now(timezone.utc)
-    rows = (
+    # B1: skip_locked + with_for_update so two beat ticks running on
+    # different workers don't both queue the same row. SQLite ignores the
+    # lock hint silently, which is fine for dev where there's only one
+    # beat process anyway.
+    query = (
         db.session.query(PostTarget)
         .filter(PostTarget.status == JobStatus.PENDING)
         .filter(PostTarget.scheduled_for.isnot(None))
         .filter(PostTarget.scheduled_for <= now)
-        .all()
     )
+    try:
+        rows = query.with_for_update(skip_locked=True).all()
+    except Exception:
+        # Fallback for backends that don't support skip_locked.
+        rows = query.all()
     for target in rows:
         target.status = JobStatus.QUEUED
         db.session.add(target)
@@ -384,7 +392,32 @@ def refresh_oauth_tokens() -> None:
             new_bundle = provider.refresh(refresh_token)
         except NotImplementedError:
             continue
-        except Exception as exc:
+        except PlatformError as exc:
+            # B2: 401 = the user revoked our app or the refresh token is dead;
+            # there is no point retrying. Mark the account revoked so the
+            # publisher stops trying to use it. 5xx / network errors fall
+            # through to the generic warning + retry-on-next-tick.
+            if exc.status_code == 401:
+                account.revoked_at = datetime.now(timezone.utc)
+                audit(
+                    "account.revoked_by_provider", "social_account", account.id,
+                    actor_user_id=account.user_id,
+                    detail={"reason": "refresh returned 401",
+                            "platform": account.platform.value},
+                )
+                db.session.commit()
+                continue
+            log.warning("token refresh transient failure account %s: %s",
+                        account.id, exc)
+            audit(
+                "account.refresh_failed", "social_account", account.id,
+                actor_user_id=account.user_id,
+                detail={"error": str(exc)[:300],
+                        "status_code": exc.status_code},
+            )
+            db.session.commit()
+            continue
+        except Exception as exc:  # noqa: BLE001 - non-PlatformError fallback
             log.warning("token refresh failed for account %s: %s", account.id, exc)
             audit(
                 "account.refresh_failed", "social_account", account.id,

@@ -251,6 +251,25 @@ def distribute(post_id: int):
     do_variants = bool(body.get("generate_variants", False))
     dry_run = bool(body.get("dry_run", False))
 
+    # B7: validate caller-provided overrides against the platform whitelist.
+    # We validate against every member platform in the selected groups, since
+    # the same overrides apply uniformly. (Per-platform overrides can be
+    # added later via a nested dict.)
+    body_overrides = body.get("overrides", {})
+    if body_overrides:
+        from ..utils.overrides import validate_overrides
+        platforms_in_groups = {
+            a.platform.value for g in groups for a in g.accounts
+        }
+        for plat in platforms_in_groups:
+            errors = validate_overrides(plat, body_overrides)
+            if errors:
+                return jsonify({
+                    "error": "invalid overrides",
+                    "platform": plat,
+                    "details": errors,
+                }), 400
+
     plan: list[dict] = []
     created_ids: list[int] = []
 

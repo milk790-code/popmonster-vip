@@ -147,7 +147,13 @@ class ComplianceEngine:
         return out
 
     def _persist(self, post: Post, findings: list[Finding]) -> None:
+        from ..utils.redact import redact
+
         for f in findings:
+            # B5: drop noisy raw platform payload before persisting and run
+            # the rest through the redactor in case any platform error
+            # message contained an echoed token.
+            cleaned = {k: v for k, v in f.detail.items() if k != "raw"}
             db.session.add(
                 ComplianceCheck(
                     post_id=post.id,
@@ -155,7 +161,7 @@ class ComplianceEngine:
                     checker=f.checker,
                     passed=f.passed,
                     severity=f.severity,
-                    findings=f.detail,
+                    findings=redact(cleaned),
                 )
             )
 

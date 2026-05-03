@@ -39,6 +39,35 @@ class MetaOAuth(OAuthProvider):
 
     name = "meta"
 
+    def refresh(self, refresh_token: str) -> TokenBundle:
+        """B4: Meta long-lived Page tokens don't expire, but the user
+        token used to mint them does (60 days). We re-exchange the stored
+        page/user token via ``fb_exchange_token`` which both extends the
+        expiry window and detects revocation (returns 4xx from Graph)."""
+        creds = config.platform("meta")
+        if not creds.configured:
+            raise PlatformError("meta app credentials not configured",
+                                retryable=False)
+        long_lived = request_json(
+            "GET",
+            f"{GRAPH_BASE}/oauth/access_token",
+            params={
+                "grant_type": "fb_exchange_token",
+                "client_id": creds.client_id,
+                "client_secret": creds.client_secret,
+                "fb_exchange_token": refresh_token,
+            },
+        )
+        from datetime import datetime, timedelta, timezone as _tz
+        expires_at = None
+        if (ttl := long_lived.get("expires_in")):
+            expires_at = datetime.now(_tz.utc) + timedelta(seconds=int(ttl))
+        return TokenBundle(
+            access_token=long_lived["access_token"],
+            expires_at=expires_at,
+            scopes=DEFAULT_SCOPES,
+        )
+
     def authorization_url(self, state: str) -> str:
         creds = config.platform("meta")
         if not creds.configured:
@@ -155,6 +184,8 @@ class FacebookPublisher(Publisher):
         )
 
     def _publish_video(self, token, page_id, req: PublishRequest) -> PublishResult:
+        # B6: video uploads can take 60-120s; use long timeout instead of
+        # the 60s default so a slow Meta CDN doesn't fail us spuriously.
         data = request_json(
             "POST",
             f"{GRAPH_VIDEO_BASE}/{page_id}/videos",
@@ -164,5 +195,6 @@ class FacebookPublisher(Publisher):
                 "title": req.title or None,
                 "access_token": token,
             },
+            timeout=180,
         )
         return PublishResult(external_post_id=str(data.get("id")), raw=data)
