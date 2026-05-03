@@ -91,5 +91,16 @@ th { color: var(--muted); font-weight: 500; }
 .status-pill.failed,
 .status-pill.rejected_compliance { background: rgba(229,115,115,0.18); color: var(--danger); }
 .connect-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.dropzone {
+  border: 2px dashed #2a2f38;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  background: #0b0d11;
+  transition: border-color .15s, background .15s;
+}
+.dropzone.dragover { border-color: var(--accent); background: #131720; }
+.dropzone button { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 4px 10px; border-radius: 4px; cursor: pointer; }
+.dropzone p { margin: 4px 0; }
 .hint { color: var(--muted); font-size: 13px; }
 footer { color: var(--muted); padding: 24px; font-size: 12px; max-width: 1100px; margin: 0 auto; }

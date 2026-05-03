@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+import os
+import tempfile
+from datetime import datetime, timedelta, timezone
 
 import pytz
 from croniter import croniter
@@ -10,13 +12,22 @@ from croniter import croniter
 from ..compliance import ComplianceEngine
 from ..compliance.engine import publisher_request_from
 from ..extensions import db
-from ..models import JobStatus, PostTarget, SocialAccount
-from ..platforms import get_publisher
+from ..models import JobStatus, MediaAsset, PostTarget, SocialAccount, User
+from ..platforms import get_oauth_provider, get_publisher
 from ..platforms.base import PlatformError, TokenBundle
 from ..utils.audit import record as audit
 from ..utils.crypto import cipher
+from ..utils.notify import notify_publish_failed
 from ..utils.retry import backoff_seconds
 from .celery_app import celery_app
+
+# Per-platform aspect ratio preference (used to pick a transcoded derivative).
+_PREFERRED_ASPECT = {
+    "facebook": "16:9",
+    "instagram": "9:16",
+    "tiktok": "9:16",
+    "youtube": "16:9",
+}
 
 log = logging.getLogger(__name__)
 
@@ -81,6 +92,7 @@ def dispatch_target(self, target_id: int) -> None:
 
     publisher = get_publisher(target.account.platform)
     request = publisher_request_from(target.post, target)
+    _swap_in_preferred_derivative(request, target.post.media, target.account.platform.value)
     try:
         token = _decrypt_token(target.account)
         result = publisher.publish(token, target.account.external_account_id, request)
@@ -99,6 +111,15 @@ def dispatch_target(self, target_id: int) -> None:
             detail={"error": str(exc)},
         )
         db.session.commit()
+        owner = db.session.get(User, target.post.user_id)
+        notify_publish_failed(
+            user_email=owner.email if owner else None,
+            user_phone=None,
+            platform=target.account.platform.value,
+            handle=target.account.handle,
+            error=str(exc),
+            target_id=target.id,
+        )
         return
 
     target.status = JobStatus.SUCCEEDED
@@ -181,3 +202,117 @@ def sweep_due_targets() -> None:
     db.session.commit()
     for target in rows:
         dispatch_target.delay(target.id)
+
+
+def _swap_in_preferred_derivative(request, media: MediaAsset | None, platform: str) -> None:
+    """If the media has a transcoded variant for this platform, use it."""
+    if not media or media.kind != "video" or not media.derivatives:
+        return
+    aspect = _PREFERRED_ASPECT.get(platform)
+    if aspect and (url := media.derivatives.get(aspect)):
+        request.media_url = url
+
+
+@celery_app.task
+def transcode_media(media_id: int) -> None:
+    """Render 16:9 / 9:16 / 1:1 derivatives of a video and store back to S3."""
+    from ..utils import ffmpeg as ffmpeg_utils
+    from ..utils import storage
+
+    media = db.session.get(MediaAsset, media_id)
+    if not media or media.kind != "video":
+        return
+    bucket = (media.compliance_report or {}).get("s3_bucket")
+    key = (media.compliance_report or {}).get("s3_key")
+    if not (bucket and key):
+        log.warning("media %s has no s3 location; skipping transcode", media_id)
+        media.transcode_status = "skipped"
+        db.session.commit()
+        return
+
+    media.transcode_status = "running"
+    db.session.commit()
+
+    derivatives: dict[str, str] = {}
+    try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src = os.path.join(tmpdir, "src.mp4")
+            storage.download_to_file(bucket, key, src)
+            for aspect in ffmpeg_utils.ASPECT_PRESETS:
+                out_path = os.path.join(tmpdir, f"out_{aspect.replace(':', 'x')}.mp4")
+                ffmpeg_utils.transcode(src, out_path, aspect)
+                derived_key = f"{key.rsplit('.', 1)[0]}__{aspect.replace(':', 'x')}.mp4"
+                storage.upload_file(out_path, bucket, derived_key, "video/mp4")
+                derivatives[aspect] = storage.presign_get(bucket, derived_key)
+    except Exception as exc:
+        log.exception("transcode failed for media %s", media_id)
+        media.transcode_status = "failed"
+        media.derivatives = {"error": str(exc)[:500]}
+        db.session.commit()
+        return
+
+    media.derivatives = derivatives
+    media.transcode_status = "ready"
+    db.session.commit()
+    audit(
+        "media.transcoded",
+        "media_asset",
+        media.id,
+        actor_user_id=media.user_id,
+        detail={"aspects": list(derivatives.keys())},
+    )
+    db.session.commit()
+
+
+@celery_app.task
+def refresh_oauth_tokens() -> None:
+    """Proactively refresh tokens that expire within 24 hours."""
+    horizon = datetime.now(timezone.utc) + timedelta(hours=24)
+    candidates = (
+        db.session.query(SocialAccount)
+        .filter(SocialAccount.revoked_at.is_(None))
+        .filter(SocialAccount.refresh_token_enc.isnot(None))
+        .filter(SocialAccount.token_expires_at.isnot(None))
+        .filter(SocialAccount.token_expires_at <= horizon)
+        .all()
+    )
+    c = cipher()
+    for account in candidates:
+        provider_name = _provider_name_for_platform(account.platform.value)
+        if not provider_name:
+            continue
+        try:
+            provider = get_oauth_provider(provider_name)
+            refresh_token = c.decrypt(account.refresh_token_enc)
+            new_bundle = provider.refresh(refresh_token)
+        except NotImplementedError:
+            continue
+        except Exception as exc:
+            log.warning("token refresh failed for account %s: %s", account.id, exc)
+            audit(
+                "account.refresh_failed", "social_account", account.id,
+                actor_user_id=account.user_id, detail={"error": str(exc)[:300]},
+            )
+            db.session.commit()
+            continue
+
+        account.access_token_enc = c.encrypt(new_bundle.access_token)
+        if new_bundle.refresh_token:
+            account.refresh_token_enc = c.encrypt(new_bundle.refresh_token)
+        account.token_expires_at = new_bundle.expires_at
+        audit(
+            "account.token_refreshed", "social_account", account.id,
+            actor_user_id=account.user_id,
+            detail={"expires_at": account.token_expires_at.isoformat()
+                    if account.token_expires_at else None},
+        )
+    db.session.commit()
+
+
+def _provider_name_for_platform(platform_value: str) -> str | None:
+    return {
+        "facebook": "meta",
+        "instagram": "meta",
+        "tiktok": "tiktok",
+        "youtube": "youtube",
+    }.get(platform_value)

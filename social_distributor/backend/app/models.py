@@ -110,6 +110,8 @@ class MediaAsset(db.Model):
     sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
     compliance_status: Mapped[str] = mapped_column(String(32), default="unchecked")
     compliance_report: Mapped[dict] = mapped_column(JSON, default=dict)
+    derivatives: Mapped[dict] = mapped_column(JSON, default=dict)
+    transcode_status: Mapped[str] = mapped_column(String(16), default="pending")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 

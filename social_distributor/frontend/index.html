@@ -33,16 +33,22 @@
         <label>Link URL<input name="link_url" type="url" /></label>
         <fieldset>
           <legend>Media</legend>
-          <label>Storage URL<input name="media_url" type="url" /></label>
-          <label>Kind
+          <div id="dropzone" class="dropzone">
+            <p>拖放影片 / 圖片到這裡，或<button type="button" id="pickFile">選擇檔案</button></p>
+            <input id="fileInput" type="file" accept="image/*,video/*" hidden />
+            <p id="uploadStatus" class="hint"></p>
+          </div>
+          <input type="hidden" name="media_id" />
+          <label class="hint">Or paste a public URL instead
+            <input name="media_url" type="url" placeholder="https://..." />
+          </label>
+          <label>Kind override
             <select name="media_kind">
-              <option value="">(none)</option>
+              <option value="">(auto)</option>
               <option value="image">image</option>
               <option value="video">video</option>
             </select>
           </label>
-          <label>S3 bucket (optional)<input name="s3_bucket" /></label>
-          <label>S3 key (optional)<input name="s3_key" /></label>
         </fieldset>
         <button type="submit">Save draft</button>
       </form>

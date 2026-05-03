@@ -26,26 +26,92 @@ document.querySelectorAll(".topbar nav button").forEach((btn) => {
   });
 });
 
-// --- Compose ----------------------------------------------------------
+// --- Compose: drag-drop upload ----------------------------------------
+const dropzone = document.getElementById("dropzone");
+const fileInput = document.getElementById("fileInput");
+const uploadStatus = document.getElementById("uploadStatus");
+const mediaIdField = document.querySelector('input[name="media_id"]');
+
+document.getElementById("pickFile").addEventListener("click", () => fileInput.click());
+fileInput.addEventListener("change", () => {
+  if (fileInput.files[0]) handleFile(fileInput.files[0]);
+});
+["dragenter", "dragover"].forEach((ev) =>
+  dropzone.addEventListener(ev, (e) => {
+    e.preventDefault();
+    dropzone.classList.add("dragover");
+  })
+);
+["dragleave", "drop"].forEach((ev) =>
+  dropzone.addEventListener(ev, (e) => {
+    e.preventDefault();
+    dropzone.classList.remove("dragover");
+  })
+);
+dropzone.addEventListener("drop", (e) => {
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+
+async function handleFile(file) {
+  const userId = Number(userIdInput.value);
+  const kind = file.type.startsWith("video/") ? "video" : "image";
+  uploadStatus.textContent = `Requesting upload URL for ${file.name}…`;
+  let presign;
+  try {
+    presign = await api("/api/uploads/presign", {
+      method: "POST",
+      body: JSON.stringify({ user_id: userId, kind, content_type: file.type }),
+    });
+  } catch (err) {
+    uploadStatus.textContent = `Presign failed: ${err.message}`;
+    return;
+  }
+  uploadStatus.textContent = `Uploading ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)…`;
+  const putRes = await fetch(presign.put_url, {
+    method: "PUT",
+    headers: presign.headers,
+    body: file,
+  });
+  if (!putRes.ok) {
+    uploadStatus.textContent = `Upload failed: ${putRes.status}`;
+    return;
+  }
+  const media = await api("/api/uploads/complete", {
+    method: "POST",
+    body: JSON.stringify({
+      user_id: userId,
+      kind,
+      content_type: file.type,
+      bucket: presign.bucket,
+      key: presign.key,
+      public_get_url: presign.public_get_url,
+    }),
+  });
+  mediaIdField.value = media.id;
+  uploadStatus.textContent = `Uploaded ✓ media_id=${media.id} (transcode: ${media.transcode_status})`;
+}
+
+// --- Compose: form submit ---------------------------------------------
 const postForm = document.getElementById("postForm");
 postForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const fd = new FormData(postForm);
   const userId = Number(userIdInput.value);
 
+  let mediaId = fd.get("media_id") ? Number(fd.get("media_id")) : null;
+
+  // Allow URL fallback for users who already have hosted media.
   const mediaUrl = fd.get("media_url");
   const mediaKind = fd.get("media_kind");
-  let mediaId = null;
-  if (mediaUrl && mediaKind) {
+  if (!mediaId && mediaUrl) {
+    const inferredKind = mediaKind || (/\.(mp4|mov|webm)$/i.test(mediaUrl) ? "video" : "image");
     const media = await api("/api/posts/media", {
       method: "POST",
       body: JSON.stringify({
         user_id: userId,
-        kind: mediaKind,
+        kind: inferredKind,
         storage_url: mediaUrl,
-        mime_type: mediaKind === "video" ? "video/mp4" : "image/jpeg",
-        s3_bucket: fd.get("s3_bucket") || null,
-        s3_key: fd.get("s3_key") || null,
+        mime_type: inferredKind === "video" ? "video/mp4" : "image/jpeg",
       }),
     });
     mediaId = media.id;

@@ -66,6 +66,30 @@ After configuration, click **Connect …** in the dashboard. The callback writes
 encrypted tokens (Fernet, AES-128-CBC + HMAC-SHA256) to the database — they
 are never logged.
 
+## Uploads + transcoding (Phase 1)
+
+* Browser asks `POST /api/uploads/presign` for a one-shot S3/R2 PUT URL,
+  uploads the file directly, then registers it via `POST /api/uploads/complete`.
+  No file goes through the API server.
+* Set `MEDIA_BUCKET` (and optionally `S3_ENDPOINT_URL` for R2/MinIO) plus the
+  AWS access key vars. Set `ENABLE_TRANSCODE=0` to skip ffmpeg locally.
+* On video upload completion, Celery `transcode_media` produces three
+  derivatives (`16:9`, `9:16`, `1:1`) using the bundled `ffmpeg` binary
+  (installed in `Dockerfile.backend`). Derivatives land in S3 and the URLs
+  are stored in `media_assets.derivatives`.
+* At publish time, `dispatch_target` swaps the request's `media_url` for the
+  platform-preferred derivative (TikTok/IG → 9:16, YouTube/Facebook → 16:9).
+
+## Token freshness + failure notifications
+
+* Beat task `refresh_oauth_tokens` runs every 6 hours: any non-revoked
+  account whose `token_expires_at` is within 24 h gets refreshed via the
+  provider's `OAuthProvider.refresh()`. Failures are audit-logged but never
+  stop the beat.
+* On a permanent `dispatch_target` failure, `notify_publish_failed` sends
+  email (SendGrid) and SMS (Twilio) when those credentials are configured.
+  Missing credentials silently skip the channel — never raises.
+
 ## Compliance
 
 Every publish goes through `ComplianceEngine.evaluate(...)` which runs:
