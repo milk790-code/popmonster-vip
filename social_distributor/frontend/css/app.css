@@ -102,5 +102,20 @@ th { color: var(--muted); font-weight: 500; }
 .dropzone.dragover { border-color: var(--accent); background: #131720; }
 .dropzone button { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 4px 10px; border-radius: 4px; cursor: pointer; }
 .dropzone p { margin: 4px 0; }
+.group-card {
+  background: var(--panel);
+  border: 1px solid #2a2f38;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.group-card header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.group-card header strong { color: var(--accent); font-size: 16px; flex: 1; }
+.group-card details summary { cursor: pointer; color: var(--muted); margin: 8px 0; }
+.group-card ul { padding-left: 20px; }
+.group-card .add-member-row { display: flex; gap: 8px; margin-top: 8px; }
+.group-card .add-member-row select { flex: 1; }
+.group-card button { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.group-card .del-group { color: var(--danger); border-color: var(--danger); }
 .hint { color: var(--muted); font-size: 13px; }
 footer { color: var(--muted); padding: 24px; font-size: 12px; max-width: 1100px; margin: 0 auto; }

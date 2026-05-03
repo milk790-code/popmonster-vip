@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from sqlalchemy import (
     JSON,
     Boolean,
+    Column,
     DateTime,
     Enum,
     ForeignKey,
@@ -20,7 +21,9 @@ from sqlalchemy import (
     Integer,
     LargeBinary,
     String,
+    Table,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -94,6 +97,51 @@ class SocialAccount(db.Model):
 
     user: Mapped[User] = relationship(back_populates="accounts")
     targets: Mapped[list["PostTarget"]] = relationship(back_populates="account")
+    groups: Mapped[list["AccountGroup"]] = relationship(
+        secondary="account_group_members", back_populates="accounts"
+    )
+
+
+account_group_members = Table(
+    "account_group_members",
+    db.metadata,
+    Column("group_id", ForeignKey("account_groups.id", ondelete="CASCADE"), primary_key=True),
+    Column("account_id", ForeignKey("social_accounts.id", ondelete="CASCADE"), primary_key=True),
+    UniqueConstraint("group_id", "account_id", name="uq_group_account"),
+)
+
+
+class AccountGroup(db.Model):
+    """A persona / brand bundle of platform accounts.
+
+    A user typically has many groups, each representing a distinct creator
+    voice (e.g. "美食日常 A", "技術評測 B"). Each group bundles up to one
+    SocialAccount per platform (but the schema doesn't enforce that — you
+    can put two FB pages in one group if you want them in lockstep).
+
+    ``style_profile`` is the seed for the variant engine: it captures tone,
+    emoji density, hashtag pool, target audience, and brand voice notes that
+    get fed into the caption rewriter on each distribute.
+    """
+
+    __tablename__ = "account_groups"
+    __table_args__ = (UniqueConstraint("user_id", "name", name="uq_user_group_name"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    description: Mapped[str] = mapped_column(Text, default="")
+    style_profile: Mapped[dict] = mapped_column(JSON, default=dict)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    default_timezone: Mapped[str] = mapped_column(String(64), default="UTC")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow
+    )
+
+    accounts: Mapped[list[SocialAccount]] = relationship(
+        secondary=account_group_members, back_populates="groups"
+    )
 
 
 class MediaAsset(db.Model):
@@ -159,6 +207,9 @@ class PostTarget(db.Model):
     post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"), nullable=False)
     account_id: Mapped[int] = mapped_column(
         ForeignKey("social_accounts.id"), nullable=False
+    )
+    group_id: Mapped[int | None] = mapped_column(
+        ForeignKey("account_groups.id"), nullable=True
     )
 
     overrides: Mapped[dict] = mapped_column(JSON, default=dict)

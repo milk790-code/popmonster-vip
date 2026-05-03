@@ -11,6 +11,8 @@
     <h1>Social Distributor</h1>
     <nav>
       <button data-tab="compose" class="active">Compose</button>
+      <button data-tab="distribute">Distribute</button>
+      <button data-tab="groups">人設群組</button>
       <button data-tab="schedule">Schedule</button>
       <button data-tab="status">Status board</button>
       <button data-tab="accounts">Accounts</button>
@@ -61,6 +63,65 @@
         <button type="submit">Preview</button>
       </form>
       <pre id="previewOutput"></pre>
+    </section>
+
+    <section id="tab-distribute" class="tab">
+      <h2>Distribute（一鍵分發到人設群組）</h2>
+      <p class="hint">
+        把一篇帖文分發到一個或多個「人設群組」。系統會自動：替每個帳號挑選
+        對應比例的影片版本、依群組 style 產生不同口吻變體、把多帳號發布時間
+        在 jitter 視窗內錯開。
+      </p>
+      <form id="distributeForm" class="grid">
+        <label>Post ID<input name="post_id" type="number" min="1" required /></label>
+        <label>選擇群組（可複選）
+          <select name="group_ids" id="distributeGroupSelect" multiple size="6"></select>
+        </label>
+        <label>Scheduled for（留空 = 立即）
+          <input name="scheduled_for" type="datetime-local" />
+        </label>
+        <label>Timezone<input name="timezone" value="UTC" /></label>
+        <label>Jitter window（分鐘，多帳號錯開）
+          <input name="jitter_minutes" type="number" min="0" value="20" />
+        </label>
+        <label class="hint">
+          <input type="checkbox" name="generate_variants" checked /> 為每個帳號產生變體文案（依群組 style）
+        </label>
+        <label class="hint">
+          <input type="checkbox" name="dry_run" /> Dry run（只預覽，不真的排程）
+        </label>
+        <button type="submit">Distribute</button>
+      </form>
+      <pre id="distributeOutput"></pre>
+    </section>
+
+    <section id="tab-groups" class="tab">
+      <h2>人設群組（Account Groups）</h2>
+      <p class="hint">
+        把一個 FB / IG / TikTok / YouTube 綁成一組「人設」，每組獨立風格。
+        分發時選群組即可一次發到該人設下所有平台。
+      </p>
+      <form id="groupForm" class="grid">
+        <label>群組名稱<input name="name" required placeholder="美食日常 A / 技術評測 B" /></label>
+        <label>描述<input name="description" placeholder="這個人設的定位、目標受眾" /></label>
+        <label>預設時區<input name="default_timezone" value="UTC" /></label>
+        <label>Style profile（JSON，餵給變體引擎）
+          <textarea name="style_profile" rows="6">{
+  "tone": "casual",
+  "voice": "親切的鄰家姊姊，喜歡用比喻",
+  "emoji_density": "medium",
+  "hashtag_pool": ["#日常", "#推薦", "#療癒"],
+  "audience": "20-30 歲都會女性",
+  "do_not_say": ["保證", "100% 有效"]
+}</textarea>
+        </label>
+        <button type="submit">建立群組</button>
+      </form>
+      <pre id="groupCreateOutput"></pre>
+
+      <h3>現有群組</h3>
+      <button id="refreshGroups">Refresh</button>
+      <div id="groupsList"></div>
     </section>
 
     <section id="tab-schedule" class="tab">

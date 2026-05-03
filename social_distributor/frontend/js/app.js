@@ -23,6 +23,8 @@ document.querySelectorAll(".topbar nav button").forEach((btn) => {
     if (btn.dataset.tab === "status") loadStatus();
     if (btn.dataset.tab === "accounts") loadAccounts();
     if (btn.dataset.tab === "audit") loadAudit();
+    if (btn.dataset.tab === "groups") loadGroups();
+    if (btn.dataset.tab === "distribute") loadDistributeGroups();
   });
 });
 
@@ -277,4 +279,169 @@ async function loadAudit() {
     `;
     tbody.appendChild(tr);
   }
+}
+
+// --- Groups -----------------------------------------------------------
+const groupForm = document.getElementById("groupForm");
+groupForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fd = new FormData(groupForm);
+  let style = {};
+  try {
+    style = JSON.parse(fd.get("style_profile") || "{}");
+  } catch (err) {
+    alert(`style_profile 必須是合法 JSON：${err.message}`);
+    return;
+  }
+  const result = await api("/api/groups", {
+    method: "POST",
+    body: JSON.stringify({
+      user_id: Number(userIdInput.value),
+      name: fd.get("name"),
+      description: fd.get("description") || "",
+      default_timezone: fd.get("default_timezone") || "UTC",
+      style_profile: style,
+    }),
+  });
+  document.getElementById("groupCreateOutput").textContent = JSON.stringify(result, null, 2);
+  loadGroups();
+});
+
+document.getElementById("refreshGroups").addEventListener("click", loadGroups);
+
+async function loadGroups() {
+  const userId = Number(userIdInput.value);
+  const groups = await api(`/api/groups?user_id=${userId}`);
+  const accounts = await api(`/api/accounts?user_id=${userId}`);
+  const list = document.getElementById("groupsList");
+  list.innerHTML = "";
+  for (const group of groups) {
+    const card = document.createElement("div");
+    card.className = "group-card";
+    const memberRows = group.members
+      .map(
+        (m) =>
+          `<li>${m.platform} · ${m.handle} <button data-account="${m.account_id}" data-group="${group.id}" class="rm-member">移除</button></li>`
+      )
+      .join("");
+
+    const availableOptions = accounts
+      .filter((a) => !group.members.find((m) => m.account_id === a.id))
+      .map((a) => `<option value="${a.id}">${a.platform} · ${a.handle}</option>`)
+      .join("");
+
+    card.innerHTML = `
+      <header>
+        <strong>${escapeHtml(group.name)}</strong>
+        <span class="hint">${group.is_active ? "active" : "inactive"} · ${group.members.length} 個帳號</span>
+        <button class="del-group" data-group="${group.id}">刪除</button>
+      </header>
+      <p class="hint">${escapeHtml(group.description || "")}</p>
+      <details>
+        <summary>Style profile</summary>
+        <pre>${escapeHtml(JSON.stringify(group.style_profile, null, 2))}</pre>
+        <button data-group="${group.id}" class="edit-style">修改 style</button>
+      </details>
+      <ul>${memberRows || "<li class='hint'>尚未加入任何帳號</li>"}</ul>
+      <div class="add-member-row">
+        <select data-group="${group.id}">${availableOptions}</select>
+        <button data-group="${group.id}" class="add-member">加入帳號</button>
+      </div>
+    `;
+    list.appendChild(card);
+  }
+
+  list.querySelectorAll(".rm-member").forEach((btn) =>
+    btn.addEventListener("click", async () => {
+      await api(`/api/groups/${btn.dataset.group}/members/${btn.dataset.account}`, {
+        method: "DELETE",
+      });
+      loadGroups();
+    })
+  );
+  list.querySelectorAll(".add-member").forEach((btn) =>
+    btn.addEventListener("click", async () => {
+      const select = btn.previousElementSibling;
+      if (!select.value) return;
+      await api(`/api/groups/${btn.dataset.group}/members`, {
+        method: "POST",
+        body: JSON.stringify({ account_id: Number(select.value) }),
+      });
+      loadGroups();
+    })
+  );
+  list.querySelectorAll(".del-group").forEach((btn) =>
+    btn.addEventListener("click", async () => {
+      if (!confirm("刪除這個群組？這不會解除已連接的帳號。")) return;
+      await api(`/api/groups/${btn.dataset.group}`, { method: "DELETE" });
+      loadGroups();
+    })
+  );
+  list.querySelectorAll(".edit-style").forEach((btn) =>
+    btn.addEventListener("click", async () => {
+      const groupId = btn.dataset.group;
+      const current = await api(`/api/groups/${groupId}`);
+      const next = prompt(
+        "貼入新的 style profile JSON：",
+        JSON.stringify(current.style_profile, null, 2)
+      );
+      if (!next) return;
+      try {
+        const parsed = JSON.parse(next);
+        await api(`/api/groups/${groupId}`, {
+          method: "PUT",
+          body: JSON.stringify({ style_profile: parsed }),
+        });
+        loadGroups();
+      } catch (err) {
+        alert(`JSON 解析失敗：${err.message}`);
+      }
+    })
+  );
+}
+
+// --- Distribute -------------------------------------------------------
+async function loadDistributeGroups() {
+  const userId = Number(userIdInput.value);
+  const groups = await api(`/api/groups?user_id=${userId}`);
+  const select = document.getElementById("distributeGroupSelect");
+  select.innerHTML = groups
+    .map(
+      (g) =>
+        `<option value="${g.id}">${escapeHtml(g.name)} (${g.members.length} accounts)</option>`
+    )
+    .join("");
+}
+
+const distributeForm = document.getElementById("distributeForm");
+distributeForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fd = new FormData(distributeForm);
+  const select = document.getElementById("distributeGroupSelect");
+  const groupIds = Array.from(select.selectedOptions).map((o) => Number(o.value));
+  if (!groupIds.length) {
+    alert("請選擇至少一個群組");
+    return;
+  }
+  const body = {
+    group_ids: groupIds,
+    scheduled_for: fd.get("scheduled_for") || null,
+    timezone: fd.get("timezone") || "UTC",
+    jitter_minutes: Number(fd.get("jitter_minutes") || 0),
+    generate_variants: fd.get("generate_variants") === "on",
+    dry_run: fd.get("dry_run") === "on",
+  };
+  const result = await api(`/api/posts/${fd.get("post_id")}/distribute`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+  document.getElementById("distributeOutput").textContent = JSON.stringify(result, null, 2);
+});
+
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
 }

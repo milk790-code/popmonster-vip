@@ -16,11 +16,19 @@ def create_app() -> Flask:
     cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
 
     from .auth import auth_bp
-    from .api import accounts_bp, audit_bp, posts_bp, schedules_bp, uploads_bp
+    from .api import (
+        accounts_bp,
+        audit_bp,
+        groups_bp,
+        posts_bp,
+        schedules_bp,
+        uploads_bp,
+    )
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(accounts_bp)
     app.register_blueprint(audit_bp)
+    app.register_blueprint(groups_bp)
     app.register_blueprint(posts_bp)
     app.register_blueprint(schedules_bp)
     app.register_blueprint(uploads_bp)

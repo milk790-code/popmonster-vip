@@ -66,6 +66,59 @@ After configuration, click **Connect …** in the dashboard. The callback writes
 encrypted tokens (Fernet, AES-128-CBC + HMAC-SHA256) to the database — they
 are never logged.
 
+## Account groups / personas (Phase 2)
+
+The "matrix" workflow you actually want isn't `1 post → 4 platforms`; it's
+`1 post → N personas, each with FB+IG+TikTok+YouTube, each in its own voice`.
+
+* **Group** = one persona. Owns a name, description, `style_profile` (free
+  JSON), and a list of `SocialAccount` members. Same account may belong to
+  multiple groups.
+* `POST /api/groups` to create, `PUT` to edit (including `style_profile`
+  iteratively), `DELETE` to remove. `POST /api/groups/<id>/members` /
+  `DELETE /api/groups/<id>/members/<account_id>` for membership.
+* `style_profile` example::
+
+      {
+        "tone": "casual",
+        "voice": "親切的鄰家姊姊，喜歡用比喻",
+        "emoji_density": "medium",
+        "hashtag_pool": ["#日常", "#推薦", "#療癒"],
+        "audience": "20-30 歲都會女性",
+        "do_not_say": ["保證", "100% 有效"]
+      }
+
+* `POST /api/posts/<id>/distribute` fans a post out to one or more groups,
+  with three switches:
+  - `jitter_minutes` — spread the start times deterministically across a
+    window so N accounts don't all post at the same second (looks like a bot
+    swarm to platform integrity systems).
+  - `generate_variants` — call the variant engine to rewrite the caption per
+    persona / per platform, so the matrix isn't N copies of identical text.
+  - `dry_run` — return the plan without persisting.
+
+### Variant engine
+
+`utils.variants.generate_variant` rewrites a source caption in the persona's
+voice for a target platform. Two backends:
+
+1. **Claude** when `ANTHROPIC_API_KEY` is set (default model
+   `claude-haiku-4-5-20251001`). The persona's `style_profile` is sent as a
+   cached system block so multi-account fanouts pay the input tokens once
+   and reuse the cache across the rest of the calls.
+2. **Template** fallback when no key — deterministic, swaps emoji density
+   and hashtag pool. Ships a different but coherent caption per account
+   without an external dependency.
+
+### Rate limit guard
+
+`utils.rate_limit.check_and_consume` runs before every dispatch. Defaults
+follow each platform's documented limits (TikTok 30/day, YouTube 6/day, IG
+50/24h, FB 200/h). Override via `RATE_LIMIT_<PLATFORM>=calls:seconds`.
+Backed by Redis when available; falls back to a process-local counter.
+A breach reschedules the dispatch for the documented retry-after window
+instead of consuming a retry attempt.
+
 ## Uploads + transcoding (Phase 1)
 
 * Browser asks `POST /api/uploads/presign` for a one-shot S3/R2 PUT URL,

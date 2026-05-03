@@ -18,6 +18,7 @@ from ..platforms.base import PlatformError, TokenBundle
 from ..utils.audit import record as audit
 from ..utils.crypto import cipher
 from ..utils.notify import notify_publish_failed
+from ..utils.rate_limit import RateLimitExceeded, check_and_consume
 from ..utils.retry import backoff_seconds
 from .celery_app import celery_app
 
@@ -93,6 +94,17 @@ def dispatch_target(self, target_id: int) -> None:
     publisher = get_publisher(target.account.platform)
     request = publisher_request_from(target.post, target)
     _swap_in_preferred_derivative(request, target.post.media, target.account.platform.value)
+
+    try:
+        check_and_consume(
+            target.account.platform.value, target.account.external_account_id
+        )
+    except RateLimitExceeded as exc:
+        target.status = JobStatus.QUEUED
+        target.last_error = str(exc)
+        db.session.commit()
+        raise self.retry(exc=exc, countdown=exc.retry_after_seconds)
+
     try:
         token = _decrypt_token(target.account)
         result = publisher.publish(token, target.account.external_account_id, request)
