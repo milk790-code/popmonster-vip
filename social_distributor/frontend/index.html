@@ -102,6 +102,17 @@
         <label>Caption / description
           <textarea name="caption" rows="6" placeholder="Body text"></textarea>
         </label>
+        <div class="hashtag-suggest-row">
+          <select id="hashtagPlatform">
+            <option value="instagram">Instagram</option>
+            <option value="tiktok">TikTok</option>
+            <option value="facebook">Facebook</option>
+            <option value="youtube">YouTube</option>
+          </select>
+          <input id="hashtagGroupId" type="number" placeholder="Group ID（吃 style）" />
+          <button type="button" id="hashtagSuggestBtn">建議 hashtag</button>
+          <span id="hashtagSuggestOut" class="hint"></span>
+        </div>
         <label>Link URL<input name="link_url" type="url" /></label>
         <fieldset>
           <legend>Media</legend>
@@ -160,6 +171,9 @@
         </label>
         <label class="hint">
           <input type="checkbox" name="generate_variants" checked /> 為每個帳號產生變體文案（依群組 style）
+        </label>
+        <label class="hint">
+          <input type="checkbox" name="use_best_time" /> 用系統學到的最佳時段（覆蓋 scheduled_for）
         </label>
         <label class="hint">
           <input type="checkbox" name="dry_run" /> Dry run（只預覽，不真的排程）

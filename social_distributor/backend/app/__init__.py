@@ -24,6 +24,7 @@ def create_app() -> Flask:
         audit_bp,
         events_bp,
         groups_bp,
+        hashtags_bp,
         insights_bp,
         permissions_bp,
         posts_bp,
@@ -38,6 +39,7 @@ def create_app() -> Flask:
     app.register_blueprint(audit_bp)
     app.register_blueprint(events_bp)
     app.register_blueprint(groups_bp)
+    app.register_blueprint(hashtags_bp)
     app.register_blueprint(insights_bp)
     app.register_blueprint(permissions_bp)
     app.register_blueprint(posts_bp)

@@ -68,9 +68,37 @@ dropzone.addEventListener("drop", (e) => {
   if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
 });
 
+async function sha256Hex(file) {
+  const buf = await file.arrayBuffer();
+  const hash = await crypto.subtle.digest("SHA-256", buf);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 async function handleFile(file) {
   const userId = Number(userIdInput.value);
   const kind = file.type.startsWith("video/") ? "video" : "image";
+
+  uploadStatus.textContent = `Hashing ${file.name}…`;
+  let sha;
+  try {
+    sha = await sha256Hex(file);
+  } catch (err) {
+    uploadStatus.textContent = `Hashing failed: ${err.message}`;
+    return;
+  }
+
+  // Skip the upload entirely if we already have this exact file.
+  try {
+    const dup = await api(`/api/uploads/check?sha256=${sha}&user_id=${userId}`);
+    if (dup.found) {
+      mediaIdField.value = dup.media_id;
+      uploadStatus.textContent = `已存在 ✓ media_id=${dup.media_id}（重複檔案，省 ${(file.size / 1024 / 1024).toFixed(1)} MB 上傳）`;
+      return;
+    }
+  } catch {}
+
   uploadStatus.textContent = `Requesting upload URL for ${file.name}…`;
   let presign;
   try {
@@ -101,10 +129,12 @@ async function handleFile(file) {
       bucket: presign.bucket,
       key: presign.key,
       public_get_url: presign.public_get_url,
+      sha256: sha,
     }),
   });
   mediaIdField.value = media.id;
-  uploadStatus.textContent = `Uploaded ✓ media_id=${media.id} (transcode: ${media.transcode_status})`;
+  const note = media.deduped ? " (race-deduped to existing)" : "";
+  uploadStatus.textContent = `Uploaded ✓ media_id=${media.id}${note} (transcode: ${media.transcode_status})`;
 }
 
 // --- Compose: form submit ---------------------------------------------
@@ -443,6 +473,7 @@ distributeForm.addEventListener("submit", async (e) => {
     timezone: fd.get("timezone") || "UTC",
     jitter_minutes: Number(fd.get("jitter_minutes") || 0),
     generate_variants: fd.get("generate_variants") === "on",
+    use_best_time: fd.get("use_best_time") === "on",
     dry_run: fd.get("dry_run") === "on",
   };
   const result = await api(`/api/posts/${fd.get("post_id")}/distribute`, {
@@ -503,6 +534,34 @@ function renderPreview() {
 }
 postForm.addEventListener("input", renderPreview);
 renderPreview();
+
+document.getElementById("hashtagSuggestBtn").addEventListener("click", async () => {
+  const captionEl = postForm.querySelector('textarea[name="caption"]');
+  const out = document.getElementById("hashtagSuggestOut");
+  const body = {
+    caption: captionEl.value,
+    platform: document.getElementById("hashtagPlatform").value,
+    count: 5,
+  };
+  const gid = document.getElementById("hashtagGroupId").value;
+  if (gid) body.group_id = Number(gid);
+  out.textContent = "Suggesting…";
+  try {
+    const res = await api("/api/hashtags/suggest", {
+      method: "POST", body: JSON.stringify(body),
+    });
+    if (!res.hashtags.length) {
+      out.textContent = "（無建議——可能是群組 hashtag_pool 為空）";
+      return;
+    }
+    const tags = res.hashtags.join(" ");
+    out.textContent = `[${res.used_engine}] ${tags}（已附加到內文）`;
+    captionEl.value = (captionEl.value.trimEnd() + "\n\n" + tags).trim();
+    renderPreview();
+  } catch (err) {
+    out.textContent = `失敗：${err.message}`;
+  }
+});
 
 // --- Insights ---------------------------------------------------------
 async function loadInsights() {
@@ -649,8 +708,16 @@ dailyDz.addEventListener("drop", (e) => e.dataTransfer.files[0] && handleDailyFi
 async function handleDailyFile(file) {
   const userId = Number(userIdInput.value);
   const kind = file.type.startsWith("video/") ? "video" : "image";
-  dailyHint.textContent = `Uploading ${file.name}…`;
+  dailyHint.textContent = `Hashing ${file.name}…`;
   try {
+    const sha = await sha256Hex(file);
+    const dup = await api(`/api/uploads/check?sha256=${sha}&user_id=${userId}`);
+    if (dup.found) {
+      dailyState.mediaId = dup.media_id;
+      dailyHint.textContent = `已存在 ✓ media_id=${dup.media_id}（重複，省 ${(file.size / 1024 / 1024).toFixed(1)} MB 上傳）`;
+      return;
+    }
+    dailyHint.textContent = `Uploading ${file.name}…`;
     const presign = await api("/api/uploads/presign", {
       method: "POST",
       body: JSON.stringify({ user_id: userId, kind, content_type: file.type }),
@@ -662,6 +729,7 @@ async function handleDailyFile(file) {
       body: JSON.stringify({
         user_id: userId, kind, content_type: file.type,
         bucket: presign.bucket, key: presign.key, public_get_url: presign.public_get_url,
+        sha256: sha,
       }),
     });
     dailyState.mediaId = media.id;
@@ -732,18 +800,9 @@ document.getElementById("dailyGoBtn").addEventListener("click", async () => {
 
   const when = document.querySelector('input[name="dailyWhen"]:checked').value;
   let scheduled_for = null;
+  let use_best_time = false;
   if (when === "at") scheduled_for = document.getElementById("dailyAt").value || null;
-  if (when === "best") {
-    const groupId = Array.from(dailyState.selectedGroups)[0];
-    try {
-      const slots = await api(`/api/insights/best-times?group_id=${groupId}`);
-      if (slots.length) {
-        // Find the next future occurrence of slot[0] (top engagement bucket).
-        const top = slots[0];
-        scheduled_for = nextOccurrence(top.day, top.hour);
-      }
-    } catch {}
-  }
+  if (when === "best") use_best_time = true;  // backend handles fallback per-group
 
   const body = {
     group_ids: Array.from(dailyState.selectedGroups),
@@ -751,6 +810,7 @@ document.getElementById("dailyGoBtn").addEventListener("click", async () => {
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
     jitter_minutes: Number(document.getElementById("dailyJitter").value || 0),
     generate_variants: document.getElementById("dailyVariants").checked,
+    use_best_time,
     dry_run: document.getElementById("dailyDryRun").checked,
   };
   out.textContent = "Distribute…";
