@@ -69,6 +69,21 @@ def run_health_sweep() -> dict:
                 counts["token_invalid"] += 1
                 continue
             counts.update(_reconcile_meta_grants(account, token, counts))
+        elif account.platform == Platform.TIKTOK:
+            # C1: TikTok user.info.basic is the lightest auth-required call.
+            if not _tiktok_token_alive(token):
+                _record_alert(account.user_id, account.platform, "token_invalid",
+                              {"account_id": account.id,
+                               "external_account_id": account.external_account_id})
+                counts["token_invalid"] += 1
+        elif account.platform == Platform.YOUTUBE:
+            refresh_token = (c.decrypt(account.refresh_token_enc)
+                              if account.refresh_token_enc else None)
+            if not _youtube_token_alive(token, refresh_token):
+                _record_alert(account.user_id, account.platform, "token_invalid",
+                              {"account_id": account.id,
+                               "external_account_id": account.external_account_id})
+                counts["token_invalid"] += 1
 
     db.session.commit()
     return counts
@@ -78,6 +93,45 @@ def _meta_token_alive(token: str) -> bool:
     try:
         request_json("GET", f"{GRAPH_BASE}/me", params={"access_token": token})
         return True
+    except Exception:
+        return False
+
+
+def _tiktok_token_alive(token: str) -> bool:
+    """C1: hit TikTok's /v2/user/info/ with the bearer token.
+
+    The endpoint is free (counts toward read quota only) and returns 401 when
+    the token is revoked / expired.
+    """
+    try:
+        request_json(
+            "GET",
+            "https://open.tiktokapis.com/v2/user/info/",
+            headers={"Authorization": f"Bearer {token}"},
+            params={"fields": "open_id"},
+        )
+        return True
+    except Exception:
+        return False
+
+
+def _youtube_token_alive(token: str, refresh_token: str | None) -> bool:
+    """C1: cheap auth probe via channels?mine=true (1 quota unit).
+
+    Uses the official client so token refresh is automatic if a refresh
+    token is present and the access token has merely expired (which is the
+    expected case for YouTube — tokens last 1 hour).
+    """
+    try:
+        from googleapiclient.discovery import build
+        from ..platforms.base import TokenBundle
+        from ..platforms.youtube import _credentials_from_token
+
+        bundle = TokenBundle(access_token=token, refresh_token=refresh_token)
+        creds = _credentials_from_token(bundle)
+        yt = build("youtube", "v3", credentials=creds, cache_discovery=False)
+        result = yt.channels().list(part="id", mine=True).execute()
+        return bool(result.get("items"))
     except Exception:
         return False
 
