@@ -66,6 +66,29 @@ After configuration, click **Connect …** in the dashboard. The callback writes
 encrypted tokens (Fernet, AES-128-CBC + HMAC-SHA256) to the database — they
 are never logged.
 
+## Daily workflow + PWA + observability (Phase 4)
+
+* **每日工作流** tab is the new default landing page. Five vertical steps:
+  drop media → write content (live WYSIWYG previews) → tap persona chips →
+  pick "Now / At time / Best learned time" → Distribute. The recently-sent
+  table below auto-refreshes via SSE so you don't context-switch tabs.
+* **PWA**: `manifest.json` + service worker (`sw.js`) cache the dashboard
+  shell so it opens instantly and survives flaky links. API calls bypass
+  the cache (control surfaces shouldn't show stale data). Install to
+  desktop / iOS home screen via the browser's share menu.
+* **Responsive**: top-bar tabs scroll horizontally on phones; the WYSIWYG
+  preview grid collapses to a single column; the Daily Distribute button
+  spans the full width.
+* **Sentry**: set `SENTRY_DSN` to capture errors and ~10% of transactions
+  by default (override via `SENTRY_TRACES_SAMPLE_RATE`). Flask, Celery, and
+  SQLAlchemy integrations attach automatically.
+* **OpenTelemetry**: set `OTEL_EXPORTER_OTLP_ENDPOINT` to ship traces to any
+  OTLP receiver (Tempo / Jaeger / Honeycomb / Datadog). Each
+  `dispatch_target` attempt is a span tagged with `target.id`, `post.id`,
+  `user.id`, `platform`, `attempt`, and (on success) `external_post_id` —
+  so a failure jumps straight to the offending row in your traces UI.
+* From-zero setup walkthrough lives in [`SETUP.md`](./SETUP.md).
+
 ## Insights, best-time learning, SSE, WYSIWYG (Phase 3)
 
 * `ingest_insights` Celery beat task (every hour, minute 15) pulls engagement

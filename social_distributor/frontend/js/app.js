@@ -1,5 +1,14 @@
 const API_BASE = window.SOCIAL_DISTRIBUTOR_API ?? "http://localhost:5000";
 
+// Register the service worker for PWA / offline shell support.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {
+      /* SW registration is a progressive enhancement; ignore failures. */
+    });
+  });
+}
+
 const userIdInput = document.getElementById("userId");
 
 async function api(path, options = {}) {
@@ -26,6 +35,7 @@ document.querySelectorAll(".topbar nav button").forEach((btn) => {
     if (btn.dataset.tab === "groups") loadGroups();
     if (btn.dataset.tab === "distribute") loadDistributeGroups();
     if (btn.dataset.tab === "insights") loadInsights();
+    if (btn.dataset.tab === "daily") loadDailyDeps();
   });
 });
 
@@ -563,3 +573,241 @@ function connectEvents() {
 }
 userIdInput.addEventListener("change", connectEvents);
 connectEvents();
+
+// --- Daily workflow ---------------------------------------------------
+const dailyState = {
+  mediaId: null,
+  selectedGroups: new Set(),
+  groups: [],
+  lastTargets: [],
+};
+
+async function loadDailyDeps() {
+  const userId = Number(userIdInput.value);
+  dailyState.groups = await api(`/api/groups?user_id=${userId}`);
+  renderDailyChips();
+  renderDailyPreview();
+}
+
+function renderDailyChips() {
+  const wrap = document.getElementById("dailyGroupChips");
+  if (!dailyState.groups.length) {
+    wrap.innerHTML = `<p class="hint">尚無群組——先到「人設群組」分頁建立。</p>`;
+    return;
+  }
+  wrap.innerHTML = "";
+  for (const g of dailyState.groups) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.dataset.groupId = g.id;
+    chip.innerHTML = `<strong>${escapeHtml(g.name)}</strong><small>${g.members.length} 帳號</small>`;
+    if (dailyState.selectedGroups.has(g.id)) chip.classList.add("on");
+    chip.addEventListener("click", () => {
+      if (dailyState.selectedGroups.has(g.id)) {
+        dailyState.selectedGroups.delete(g.id);
+        chip.classList.remove("on");
+      } else {
+        dailyState.selectedGroups.add(g.id);
+        chip.classList.add("on");
+      }
+      refreshBestHint();
+    });
+    wrap.appendChild(chip);
+  }
+}
+
+async function refreshBestHint() {
+  const hint = document.getElementById("dailyBestHint");
+  hint.textContent = "";
+  if (dailyState.selectedGroups.size !== 1) return;
+  const groupId = Array.from(dailyState.selectedGroups)[0];
+  try {
+    const slots = await api(`/api/insights/best-times?group_id=${groupId}`);
+    if (!slots.length) {
+      hint.textContent = "（資料不足，先用「立刻發」或自定時間）";
+      return;
+    }
+    const top = slots[0];
+    hint.textContent = `→ 建議：${top.day} ${String(top.hour).padStart(2, "0")}:00（互動率 ${(top.avg_engagement_rate * 100).toFixed(1)}%）`;
+  } catch {}
+}
+
+// Drag-drop upload
+const dailyDz = document.getElementById("dailyDropzone");
+const dailyFi = document.getElementById("dailyFileInput");
+const dailyHint = document.getElementById("dailyMediaHint");
+document.getElementById("dailyPickFile").addEventListener("click", () => dailyFi.click());
+dailyFi.addEventListener("change", () => dailyFi.files[0] && handleDailyFile(dailyFi.files[0]));
+["dragenter", "dragover"].forEach((ev) => dailyDz.addEventListener(ev, (e) => { e.preventDefault(); dailyDz.classList.add("dragover"); }));
+["dragleave", "drop"].forEach((ev) => dailyDz.addEventListener(ev, (e) => { e.preventDefault(); dailyDz.classList.remove("dragover"); }));
+dailyDz.addEventListener("drop", (e) => e.dataTransfer.files[0] && handleDailyFile(e.dataTransfer.files[0]));
+
+async function handleDailyFile(file) {
+  const userId = Number(userIdInput.value);
+  const kind = file.type.startsWith("video/") ? "video" : "image";
+  dailyHint.textContent = `Uploading ${file.name}…`;
+  try {
+    const presign = await api("/api/uploads/presign", {
+      method: "POST",
+      body: JSON.stringify({ user_id: userId, kind, content_type: file.type }),
+    });
+    const put = await fetch(presign.put_url, { method: "PUT", headers: presign.headers, body: file });
+    if (!put.ok) throw new Error(`upload failed ${put.status}`);
+    const media = await api("/api/uploads/complete", {
+      method: "POST",
+      body: JSON.stringify({
+        user_id: userId, kind, content_type: file.type,
+        bucket: presign.bucket, key: presign.key, public_get_url: presign.public_get_url,
+      }),
+    });
+    dailyState.mediaId = media.id;
+    dailyHint.textContent = `✓ media_id=${media.id} (transcode: ${media.transcode_status})`;
+  } catch (err) {
+    dailyHint.textContent = `失敗：${err.message}`;
+  }
+}
+
+// Live preview
+function renderDailyPreview() {
+  const title = document.getElementById("dailyTitle").value;
+  const caption = document.getElementById("dailyCaption").value;
+  const grid = document.getElementById("dailyPreviewGrid");
+  grid.innerHTML = "";
+  for (const [platform, rule] of Object.entries(PLATFORM_PREVIEW_RULES)) {
+    const captionTooLong = caption.length > rule.caption_max;
+    const titleTooLong = rule.title_max !== null && title.length > rule.title_max;
+    const card = document.createElement("article");
+    card.className = `preview-card preview-${platform}`;
+    card.innerHTML = `
+      <header><strong>${rule.label}</strong><span class="hint">${rule.aspect}</span></header>
+      ${rule.title_max !== null
+        ? `<div class="preview-title ${titleTooLong ? "over" : ""}">${escapeHtml(title) || "<em>未填標題</em>"}</div>` : ""}
+      <div class="preview-caption ${captionTooLong ? "over" : ""}">${escapeHtml(caption) || "<em>未填內文</em>"}</div>
+      <div class="preview-meta"><span>${caption.length}/${rule.caption_max}</span>
+        ${rule.title_max !== null ? `<span>標題 ${title.length}/${rule.title_max}</span>` : ""}</div>
+    `;
+    grid.appendChild(card);
+  }
+}
+["dailyTitle", "dailyCaption"].forEach((id) =>
+  document.getElementById(id).addEventListener("input", renderDailyPreview)
+);
+
+// When-to-send radio handling
+document.querySelectorAll('input[name="dailyWhen"]').forEach((r) =>
+  r.addEventListener("change", () => {
+    document.getElementById("dailyAt").disabled = r.value !== "at" || !r.checked;
+    if (r.value === "best" && r.checked) refreshBestHint();
+  })
+);
+
+// Submit
+document.getElementById("dailyGoBtn").addEventListener("click", async () => {
+  const userId = Number(userIdInput.value);
+  const out = document.getElementById("dailyOutput");
+  if (!dailyState.selectedGroups.size) { out.textContent = "請先選擇至少一個群組"; return; }
+
+  const title = document.getElementById("dailyTitle").value;
+  const caption = document.getElementById("dailyCaption").value;
+  if (!caption && !dailyState.mediaId) {
+    out.textContent = "請至少給一段內文或一個媒體檔";
+    return;
+  }
+
+  out.textContent = "建立 post…";
+  const post = await api("/api/posts", {
+    method: "POST",
+    body: JSON.stringify({
+      user_id: userId,
+      title,
+      caption,
+      link_url: document.getElementById("dailyLinkUrl").value || null,
+      media_id: dailyState.mediaId,
+    }),
+  });
+
+  const when = document.querySelector('input[name="dailyWhen"]:checked').value;
+  let scheduled_for = null;
+  if (when === "at") scheduled_for = document.getElementById("dailyAt").value || null;
+  if (when === "best") {
+    const groupId = Array.from(dailyState.selectedGroups)[0];
+    try {
+      const slots = await api(`/api/insights/best-times?group_id=${groupId}`);
+      if (slots.length) {
+        // Find the next future occurrence of slot[0] (top engagement bucket).
+        const top = slots[0];
+        scheduled_for = nextOccurrence(top.day, top.hour);
+      }
+    } catch {}
+  }
+
+  const body = {
+    group_ids: Array.from(dailyState.selectedGroups),
+    scheduled_for,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+    jitter_minutes: Number(document.getElementById("dailyJitter").value || 0),
+    generate_variants: document.getElementById("dailyVariants").checked,
+    dry_run: document.getElementById("dailyDryRun").checked,
+  };
+  out.textContent = "Distribute…";
+  const res = await api(`/api/posts/${post.id}/distribute`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+  out.innerHTML = `<strong>✓ ${res.dry_run ? "Dry-run 預覽" : `建立 ${res.created_target_ids.length} 個目標`}</strong>
+    <pre>${escapeHtml(JSON.stringify(res.plan, null, 2))}</pre>`;
+  dailyState.lastTargets = res.created_target_ids;
+  loadDailyStatus();
+});
+
+function nextOccurrence(dayLabel, hour) {
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const target = days.indexOf(dayLabel);
+  if (target < 0) return null;
+  const now = new Date();
+  const todayIdx = (now.getDay() + 6) % 7; // make Mon=0
+  let delta = (target - todayIdx + 7) % 7;
+  const candidate = new Date(now);
+  candidate.setDate(candidate.getDate() + delta);
+  candidate.setHours(hour, 0, 0, 0);
+  if (candidate <= now) candidate.setDate(candidate.getDate() + 7);
+  // Format as local naive ISO so backend localizes with the explicit tz field.
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${candidate.getFullYear()}-${pad(candidate.getMonth() + 1)}-${pad(candidate.getDate())}T${pad(candidate.getHours())}:${pad(candidate.getMinutes())}`;
+}
+
+document.getElementById("dailyRefreshStatus").addEventListener("click", loadDailyStatus);
+
+async function loadDailyStatus() {
+  if (!dailyState.lastTargets.length) return;
+  const userId = Number(userIdInput.value);
+  const all = await api(`/api/schedules?user_id=${userId}`);
+  const set = new Set(dailyState.lastTargets);
+  const tbody = document.querySelector("#dailyStatusTable tbody");
+  tbody.innerHTML = "";
+  for (const row of all.filter((r) => set.has(r.id))) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${row.platform}</td><td>${escapeHtml(row.handle ?? "")}</td>
+      <td><span class="status-pill ${row.status}">${row.status}</span></td>
+      <td>${row.scheduled_for ?? ""}</td>
+      <td>${escapeHtml(row.external_post_id ?? "")}</td>
+      <td>${escapeHtml(row.last_error ?? "")}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+// Auto-refresh daily status when SSE fires.
+const _origConnect = connectEvents;
+connectEvents = function () {
+  _origConnect();
+  if (_eventSource) {
+    _eventSource.addEventListener("message", () => {
+      if (document.getElementById("tab-daily").classList.contains("active")) loadDailyStatus();
+    });
+  }
+};
+connectEvents();
+
+// Render preview on initial load.
+renderDailyPreview();

@@ -8,6 +8,9 @@ from .extensions import cors, db, migrate
 
 
 def create_app() -> Flask:
+    from .utils.telemetry import init_telemetry
+    init_telemetry(component="api")
+
     app = Flask(__name__)
     app.config.update(config.as_flask())
 

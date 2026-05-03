@@ -133,5 +133,87 @@ th { color: var(--muted); font-weight: 500; }
 
 .insights-controls { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin-bottom: 12px; }
 .insights-controls label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+
+/* --- Daily workflow --- */
+.daily { max-width: 920px; }
+.daily-step {
+  background: var(--panel);
+  border: 1px solid #23272e;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 14px;
+}
+.daily-step header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.daily-step header h2 { margin: 0; font-size: 16px; flex: 1; color: var(--text); }
+.daily-step .step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 999px;
+  background: var(--accent); color: #0f1115; font-weight: 700;
+}
+.daily-step .step-hint { color: var(--muted); font-size: 12px; }
+.daily-step input, .daily-step textarea, .daily-step select { width: 100%; margin-bottom: 8px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  background: #0b0d11;
+  color: var(--text);
+  border: 1px solid #2a2f38;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-width: 110px;
+}
+.chip strong { font-size: 13px; }
+.chip small { color: var(--muted); font-size: 11px; }
+.chip.on { border-color: var(--accent); background: #131720; }
+.when-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 8px; }
+.when-option { display: flex; align-items: center; gap: 8px; color: var(--text); font-size: 14px; }
+.when-option input[type="datetime-local"] { width: auto; margin: 0; }
+.advanced-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; align-items: center; color: var(--muted); font-size: 13px; }
+.advanced-row label { display: flex; gap: 6px; align-items: center; }
+.advanced-row input[type="number"] { width: 70px; }
+.daily-go { text-align: center; }
+.daily-go button {
+  background: var(--accent);
+  color: #0f1115;
+  border: none;
+  padding: 14px 36px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.daily-go button:hover { filter: brightness(1.06); }
+#dailyOutput { margin-top: 12px; text-align: left; color: var(--text); }
+#dailyOutput pre { max-height: 240px; }
+
+/* --- Responsive (mobile) --- */
+@media (max-width: 720px) {
+  .topbar { flex-wrap: wrap; padding: 10px 12px; gap: 8px; }
+  .topbar h1 { font-size: 16px; flex: 1 0 100%; }
+  .topbar nav { overflow-x: auto; flex-wrap: nowrap; gap: 4px; -webkit-overflow-scrolling: touch; }
+  .topbar nav button { white-space: nowrap; padding: 6px 10px; font-size: 13px; }
+  .user-select { font-size: 12px; }
+  main { padding: 12px; }
+  .grid { max-width: 100%; }
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  .preview-grid { grid-template-columns: 1fr; }
+  .when-row { flex-direction: column; gap: 10px; align-items: flex-start; }
+  .group-card .add-member-row { flex-direction: column; }
+  .daily-go button { width: 100%; padding: 18px; font-size: 18px; }
+}
+
+@media (display-mode: standalone) {
+  /* Extra padding when launched as a PWA on iOS to avoid the notch. */
+  .topbar { padding-top: max(env(safe-area-inset-top), 12px); }
+}
 .hint { color: var(--muted); font-size: 13px; }
 footer { color: var(--muted); padding: 24px; font-size: 12px; max-width: 1100px; margin: 0 auto; }

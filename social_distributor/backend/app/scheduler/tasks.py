@@ -16,6 +16,7 @@ from ..models import JobStatus, MediaAsset, PostMetric, PostTarget, SocialAccoun
 from ..platforms import get_oauth_provider, get_publisher
 from ..platforms.base import PlatformError, TokenBundle
 from ..utils.events import publish_event
+from ..utils.telemetry import add_breadcrumb, trace_dispatch
 from ..utils.audit import record as audit
 from ..utils.crypto import cipher
 from ..utils.notify import notify_publish_failed
@@ -78,6 +79,12 @@ def dispatch_target(self, target_id: int) -> None:
     target.attempt_count += 1
     db.session.commit()
 
+    add_breadcrumb(
+        "dispatch", f"running target #{target.id}",
+        target_id=target.id, platform=target.account.platform.value,
+        attempt=target.attempt_count,
+    )
+
     findings = ComplianceEngine().evaluate(target.post, [target])
     if ComplianceEngine().has_blockers(findings):
         target.status = JobStatus.REJECTED_COMPLIANCE
@@ -106,9 +113,19 @@ def dispatch_target(self, target_id: int) -> None:
         db.session.commit()
         raise self.retry(exc=exc, countdown=exc.retry_after_seconds)
 
+    trace_kwargs = dict(
+        target_id=target.id,
+        post_id=target.post_id,
+        user_id=target.post.user_id,
+        platform=target.account.platform.value,
+        attempt=target.attempt_count,
+    )
     try:
-        token = _decrypt_token(target.account)
-        result = publisher.publish(token, target.account.external_account_id, request)
+        with trace_dispatch(**trace_kwargs) as span:
+            token = _decrypt_token(target.account)
+            result = publisher.publish(token, target.account.external_account_id, request)
+            if span is not None and result.external_post_id:
+                span.set_attribute("external_post_id", result.external_post_id)
     except PlatformError as exc:
         target.last_error = str(exc)
         if exc.retryable and target.attempt_count < self.max_retries:

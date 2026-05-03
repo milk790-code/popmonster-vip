@@ -2,15 +2,20 @@
 <html lang="zh-Hant-TW">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Social Distributor — Dashboard</title>
+  <meta name="theme-color" content="#0f1115" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="apple-touch-icon" href="icons/icon.svg" />
   <link rel="stylesheet" href="css/app.css" />
 </head>
 <body>
   <header class="topbar">
     <h1>Social Distributor</h1>
     <nav>
-      <button data-tab="compose" class="active">Compose</button>
+      <button data-tab="daily" class="active">每日工作流</button>
+      <button data-tab="compose">Compose</button>
       <button data-tab="distribute">Distribute</button>
       <button data-tab="groups">人設群組</button>
       <button data-tab="schedule">Schedule</button>
@@ -26,7 +31,68 @@
   </header>
 
   <main>
-    <section id="tab-compose" class="tab active">
+    <section id="tab-daily" class="tab active daily">
+      <div class="daily-step">
+        <header><span class="step-num">1</span><h2>媒體</h2><span class="step-hint" id="dailyMediaHint">拖一個影片或圖片</span></header>
+        <div id="dailyDropzone" class="dropzone">
+          <p>拖放到此處，或<button type="button" id="dailyPickFile">選擇檔案</button></p>
+          <input id="dailyFileInput" type="file" accept="image/*,video/*" hidden />
+        </div>
+      </div>
+
+      <div class="daily-step">
+        <header><span class="step-num">2</span><h2>內容</h2><span class="step-hint">標題給 YouTube，內文給其他平台</span></header>
+        <input id="dailyTitle" placeholder="Title (YouTube 用，&lt;100 字)" />
+        <textarea id="dailyCaption" rows="6" placeholder="主要內文 / Caption"></textarea>
+        <input id="dailyLinkUrl" type="url" placeholder="可選：附帶連結" />
+        <div id="dailyPreviewGrid" class="preview-grid"></div>
+      </div>
+
+      <div class="daily-step">
+        <header><span class="step-num">3</span><h2>選人設</h2><span class="step-hint">勾要發的群組（可複選）</span></header>
+        <div id="dailyGroupChips" class="chip-row"><p class="hint">尚無群組——先到「人設群組」分頁建立。</p></div>
+      </div>
+
+      <div class="daily-step">
+        <header><span class="step-num">4</span><h2>什麼時候發</h2></header>
+        <div class="when-row">
+          <label class="when-option">
+            <input type="radio" name="dailyWhen" value="now" checked />
+            <span>立刻發</span>
+          </label>
+          <label class="when-option">
+            <input type="radio" name="dailyWhen" value="at" />
+            <span>指定時間</span>
+            <input type="datetime-local" id="dailyAt" disabled />
+          </label>
+          <label class="when-option">
+            <input type="radio" name="dailyWhen" value="best" />
+            <span>跟系統建議的最佳時段</span>
+            <small id="dailyBestHint" class="hint"></small>
+          </label>
+        </div>
+        <div class="advanced-row">
+          <label>Jitter（分鐘）<input id="dailyJitter" type="number" min="0" value="20" /></label>
+          <label><input id="dailyVariants" type="checkbox" checked /> 為每帳號自動產生變體文案</label>
+          <label><input id="dailyDryRun" type="checkbox" /> Dry run（只預覽不真發）</label>
+        </div>
+      </div>
+
+      <div class="daily-step daily-go">
+        <button id="dailyGoBtn" type="button">Distribute（一鍵發送）</button>
+        <div id="dailyOutput"></div>
+      </div>
+
+      <div class="daily-step">
+        <header><h2>剛剛發出去的</h2><button id="dailyRefreshStatus" type="button">手動刷新</button></header>
+        <table id="dailyStatusTable">
+          <thead><tr><th>平台</th><th>帳號</th><th>狀態</th><th>排程時間</th><th>外部 ID</th><th>錯誤</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-compose" class="tab">
       <h2>Compose post</h2>
       <form id="postForm" class="grid">
         <label>Title<input name="title" placeholder="Optional title (used as YouTube title)"/></label>
