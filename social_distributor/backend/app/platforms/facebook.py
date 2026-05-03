@@ -12,6 +12,7 @@ from urllib.parse import urlencode
 from ..config import config
 from ._http import request_json
 from .base import (
+    InsightsSnapshot,
     OAuthProvider,
     PlatformError,
     PublishRequest,
@@ -127,6 +128,31 @@ class FacebookPublisher(Publisher):
             },
         )
         return PublishResult(external_post_id=data.get("post_id", data["id"]), raw=data)
+
+    def fetch_insights(self, token, external_account_id, external_post_id):
+        page_token = token.extra.get("page_access_token", token.access_token)
+        try:
+            data = request_json(
+                "GET",
+                f"{GRAPH_BASE}/{external_post_id}/insights",
+                params={
+                    "access_token": page_token,
+                    "metric": "post_impressions,post_impressions_unique,"
+                              "post_reactions_by_type_total,post_clicks",
+                },
+            )
+        except PlatformError:
+            return None
+        metrics = {item["name"]: item["values"][0]["value"]
+                   for item in data.get("data", []) if item.get("values")}
+        reactions = metrics.get("post_reactions_by_type_total") or {}
+        likes = sum(reactions.values()) if isinstance(reactions, dict) else None
+        return InsightsSnapshot(
+            reach=metrics.get("post_impressions_unique"),
+            impressions=metrics.get("post_impressions"),
+            likes=likes,
+            raw=metrics,
+        )
 
     def _publish_video(self, token, page_id, req: PublishRequest) -> PublishResult:
         data = request_json(

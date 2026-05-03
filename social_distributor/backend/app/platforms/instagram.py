@@ -12,7 +12,14 @@ from __future__ import annotations
 import time
 
 from ._http import request_json
-from .base import PlatformError, PublishRequest, PublishResult, Publisher, TokenBundle
+from .base import (
+    InsightsSnapshot,
+    PlatformError,
+    PublishRequest,
+    PublishResult,
+    Publisher,
+    TokenBundle,
+)
 from .facebook import GRAPH_BASE
 
 
@@ -76,6 +83,31 @@ class InstagramPublisher(Publisher):
             data={"creation_id": container_id, "access_token": access_token},
         )
         return PublishResult(external_post_id=published["id"], raw=published)
+
+    def fetch_insights(self, token, external_account_id, external_post_id):
+        try:
+            data = request_json(
+                "GET",
+                f"{GRAPH_BASE}/{external_post_id}/insights",
+                params={
+                    "access_token": token.access_token,
+                    "metric": "reach,impressions,likes,comments,saved,shares,plays",
+                },
+            )
+        except PlatformError:
+            return None
+        metrics = {item["name"]: item["values"][0]["value"]
+                   for item in data.get("data", []) if item.get("values")}
+        return InsightsSnapshot(
+            reach=metrics.get("reach"),
+            impressions=metrics.get("impressions"),
+            likes=metrics.get("likes"),
+            comments=metrics.get("comments"),
+            shares=metrics.get("shares"),
+            saves=metrics.get("saved"),
+            plays=metrics.get("plays"),
+            raw=metrics,
+        )
 
     def _wait_for_container(self, container_id: str, access_token: str) -> None:
         deadline = time.monotonic() + 240  # 4 minutes

@@ -12,9 +12,10 @@ from croniter import croniter
 from ..compliance import ComplianceEngine
 from ..compliance.engine import publisher_request_from
 from ..extensions import db
-from ..models import JobStatus, MediaAsset, PostTarget, SocialAccount, User
+from ..models import JobStatus, MediaAsset, PostMetric, PostTarget, SocialAccount, User
 from ..platforms import get_oauth_provider, get_publisher
 from ..platforms.base import PlatformError, TokenBundle
+from ..utils.events import publish_event
 from ..utils.audit import record as audit
 from ..utils.crypto import cipher
 from ..utils.notify import notify_publish_failed
@@ -123,6 +124,17 @@ def dispatch_target(self, target_id: int) -> None:
             detail={"error": str(exc)},
         )
         db.session.commit()
+        publish_event(
+            target.post.user_id,
+            "target.status_changed",
+            {
+                "target_id": target.id,
+                "post_id": target.post_id,
+                "status": target.status.value,
+                "platform": target.account.platform.value,
+                "error": str(exc),
+            },
+        )
         owner = db.session.get(User, target.post.user_id)
         notify_publish_failed(
             user_email=owner.email if owner else None,
@@ -150,6 +162,18 @@ def dispatch_target(self, target_id: int) -> None:
         },
     )
     db.session.commit()
+    publish_event(
+        target.post.user_id,
+        "target.status_changed",
+        {
+            "target_id": target.id,
+            "post_id": target.post_id,
+            "status": target.status.value,
+            "platform": target.account.platform.value,
+            "external_post_id": target.external_post_id,
+            "permalink": result.permalink,
+        },
+    )
 
 
 @celery_app.task
@@ -328,3 +352,53 @@ def _provider_name_for_platform(platform_value: str) -> str | None:
         "tiktok": "tiktok",
         "youtube": "youtube",
     }.get(platform_value)
+
+
+@celery_app.task
+def ingest_insights() -> None:
+    """Pull engagement metrics for recently-published targets.
+
+    Looks back 30 days. Each platform's adapter returns ``None`` for
+    unsupported / unauthorised metrics; we silently skip those so a single
+    flaky platform doesn't block the rest of the sweep.
+    """
+    cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+    targets = (
+        db.session.query(PostTarget)
+        .filter(PostTarget.status == JobStatus.SUCCEEDED)
+        .filter(PostTarget.external_post_id.isnot(None))
+        .filter(PostTarget.published_at.isnot(None))
+        .filter(PostTarget.published_at >= cutoff)
+        .all()
+    )
+    fetched = 0
+    for target in targets:
+        publisher = get_publisher(target.account.platform)
+        try:
+            token = _decrypt_token(target.account)
+            snapshot = publisher.fetch_insights(
+                token, target.account.external_account_id, target.external_post_id
+            )
+        except Exception as exc:  # noqa: BLE001 - one bad target shouldn't kill the sweep
+            log.warning("insights fetch failed for target %s: %s", target.id, exc)
+            continue
+        if snapshot is None:
+            continue
+        db.session.add(
+            PostMetric(
+                target_id=target.id,
+                reach=snapshot.reach,
+                impressions=snapshot.impressions,
+                likes=snapshot.likes,
+                comments=snapshot.comments,
+                shares=snapshot.shares,
+                saves=snapshot.saves,
+                plays=snapshot.plays,
+                watch_time_seconds=snapshot.watch_time_seconds,
+                avg_view_pct=snapshot.avg_view_pct,
+                raw=snapshot.raw,
+            )
+        )
+        fetched += 1
+    db.session.commit()
+    log.info("insights ingestion: %d snapshots stored", fetched)

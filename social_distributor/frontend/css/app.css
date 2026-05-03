@@ -117,5 +117,21 @@ th { color: var(--muted); font-weight: 500; }
 .group-card .add-member-row select { flex: 1; }
 .group-card button { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
 .group-card .del-group { color: var(--danger); border-color: var(--danger); }
+
+.preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 8px; }
+.preview-card { background: var(--panel); border: 1px solid #2a2f38; border-radius: 8px; padding: 12px; }
+.preview-card header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.preview-card header strong { color: var(--accent); }
+.preview-frame { background: #000; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #555; font-size: 11px; margin-bottom: 8px; }
+.preview-16x9 { aspect-ratio: 16/9; }
+.preview-9x16 { aspect-ratio: 9/16; max-height: 280px; }
+.preview-1x1 { aspect-ratio: 1/1; }
+.preview-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.preview-caption { font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; max-height: 220px; overflow: auto; }
+.preview-meta { display: flex; gap: 12px; font-size: 11px; color: var(--muted); margin-top: 6px; }
+.preview-card .over { color: var(--danger); }
+
+.insights-controls { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin-bottom: 12px; }
+.insights-controls label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
 .hint { color: var(--muted); font-size: 13px; }
 footer { color: var(--muted); padding: 24px; font-size: 12px; max-width: 1100px; margin: 0 auto; }

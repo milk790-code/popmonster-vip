@@ -41,6 +41,10 @@ def make_celery(flask_app=None) -> Celery:
                 "task": "app.scheduler.tasks.refresh_oauth_tokens",
                 "schedule": crontab(minute=0, hour="*/6"),
             },
+            "ingest-insights": {
+                "task": "app.scheduler.tasks.ingest_insights",
+                "schedule": crontab(minute=15, hour="*"),
+            },
         },
     )
 

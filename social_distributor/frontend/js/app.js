@@ -25,6 +25,7 @@ document.querySelectorAll(".topbar nav button").forEach((btn) => {
     if (btn.dataset.tab === "audit") loadAudit();
     if (btn.dataset.tab === "groups") loadGroups();
     if (btn.dataset.tab === "distribute") loadDistributeGroups();
+    if (btn.dataset.tab === "insights") loadInsights();
   });
 });
 
@@ -445,3 +446,120 @@ function escapeHtml(s) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
 }
+
+// --- WYSIWYG preview --------------------------------------------------
+const PLATFORM_PREVIEW_RULES = {
+  facebook:  { label: "Facebook",  caption_max: 63206, title_max: null, aspect: "16:9" },
+  instagram: { label: "Instagram", caption_max: 2200,  title_max: null, aspect: "9:16" },
+  tiktok:    { label: "TikTok",    caption_max: 2200,  title_max: null, aspect: "9:16" },
+  youtube:   { label: "YouTube",   caption_max: 5000,  title_max: 100,  aspect: "16:9" },
+};
+
+function renderPreview() {
+  const fd = new FormData(postForm);
+  const title = fd.get("title") ?? "";
+  const caption = fd.get("caption") ?? "";
+  const grid = document.getElementById("previewGrid");
+  grid.innerHTML = "";
+  for (const [platform, rule] of Object.entries(PLATFORM_PREVIEW_RULES)) {
+    const captionTooLong = caption.length > rule.caption_max;
+    const titleTooLong = rule.title_max !== null && title.length > rule.title_max;
+    const captionShown = captionTooLong ? caption.slice(0, rule.caption_max) + "…" : caption;
+    const titleShown = titleTooLong ? title.slice(0, rule.title_max) + "…" : title;
+    const card = document.createElement("article");
+    card.className = `preview-card preview-${platform}`;
+    card.innerHTML = `
+      <header>
+        <strong>${rule.label}</strong>
+        <span class="hint">${rule.aspect}</span>
+      </header>
+      <div class="preview-frame preview-${rule.aspect.replace(":", "x")}">
+        <div class="preview-media-placeholder">媒體預覽位</div>
+      </div>
+      ${rule.title_max !== null
+        ? `<div class="preview-title ${titleTooLong ? "over" : ""}">${escapeHtml(titleShown) || "<em>未填標題</em>"}</div>`
+        : ""}
+      <div class="preview-caption ${captionTooLong ? "over" : ""}">${escapeHtml(captionShown) || "<em>未填內文</em>"}</div>
+      <div class="preview-meta">
+        <span>內文 ${caption.length} / ${rule.caption_max}</span>
+        ${rule.title_max !== null ? `<span>標題 ${title.length} / ${rule.title_max}</span>` : ""}
+      </div>
+    `;
+    grid.appendChild(card);
+  }
+}
+postForm.addEventListener("input", renderPreview);
+renderPreview();
+
+// --- Insights ---------------------------------------------------------
+async function loadInsights() {
+  const postId = document.getElementById("insightsPostId").value;
+  const groupId = document.getElementById("insightsGroupId").value;
+  const params = new URLSearchParams();
+  if (postId) params.set("post_id", postId);
+  if (groupId) params.set("group_id", groupId);
+  const rows = await api(`/api/insights?${params.toString()}`);
+  const tbody = document.querySelector("#insightsTable tbody");
+  tbody.innerHTML = "";
+  for (const r of rows) {
+    const m = r.metric;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.platform}</td>
+      <td>${escapeHtml(r.handle)}</td>
+      <td>${m.reach ?? ""}</td>
+      <td>${m.impressions ?? ""}</td>
+      <td>${m.likes ?? ""}</td>
+      <td>${m.comments ?? ""}</td>
+      <td>${m.shares ?? ""}</td>
+      <td>${m.plays ?? ""}</td>
+      <td>${m.avg_view_pct != null ? m.avg_view_pct.toFixed(1) + "%" : ""}</td>
+      <td>${escapeHtml(r.external_post_id ?? "")}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+document.getElementById("loadInsights").addEventListener("click", loadInsights);
+
+document.getElementById("loadBestTimes").addEventListener("click", async () => {
+  const accountId = document.getElementById("bestAccountId").value;
+  const groupId = document.getElementById("bestGroupId").value;
+  const params = new URLSearchParams();
+  if (accountId) params.set("account_id", accountId);
+  else if (groupId) params.set("group_id", groupId);
+  else { alert("請填 Account ID 或 Group ID"); return; }
+  const rows = await api(`/api/insights/best-times?${params.toString()}`);
+  const tbody = document.querySelector("#bestTimesTable tbody");
+  tbody.innerHTML = "";
+  for (const r of rows) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${r.day}</td><td>${String(r.hour).padStart(2,"0")}:00</td>
+      <td>${r.sample_count}</td><td>${(r.avg_engagement_rate * 100).toFixed(2)}%</td>`;
+    tbody.appendChild(tr);
+  }
+  if (rows.length === 0) tbody.innerHTML = `<tr><td colspan="4" class="hint">資料不足，繼續累積發文成效後再回來查。</td></tr>`;
+});
+
+// --- SSE real-time status updates -------------------------------------
+let _eventSource = null;
+function connectEvents() {
+  if (_eventSource) _eventSource.close();
+  const userId = Number(userIdInput.value);
+  if (!userId) return;
+  _eventSource = new EventSource(`${API_BASE}/api/events/stream?user_id=${userId}`);
+  _eventSource.onmessage = (ev) => {
+    try {
+      const data = JSON.parse(ev.data);
+      if (data.type === "target.status_changed") {
+        // If user is on the status board, refresh in place.
+        const isOnStatus = document.getElementById("tab-status").classList.contains("active");
+        if (isOnStatus) loadStatus();
+      }
+    } catch {}
+  };
+  _eventSource.onerror = () => {
+    // EventSource auto-reconnects; nothing to do.
+  };
+}
+userIdInput.addEventListener("change", connectEvents);
+connectEvents();

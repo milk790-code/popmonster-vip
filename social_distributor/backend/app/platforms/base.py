@@ -39,6 +39,21 @@ class PublishResult:
     raw: dict[str, Any] = field(default_factory=dict)
 
 
+@dataclass
+class InsightsSnapshot:
+    """Normalised engagement metrics. ``None`` for fields a platform omits."""
+    reach: int | None = None
+    impressions: int | None = None
+    likes: int | None = None
+    comments: int | None = None
+    shares: int | None = None
+    saves: int | None = None
+    plays: int | None = None
+    watch_time_seconds: float | None = None
+    avg_view_pct: float | None = None
+    raw: dict[str, Any] = field(default_factory=dict)
+
+
 class PlatformError(Exception):
     """Raised on platform API failures.
 
@@ -87,3 +102,12 @@ class Publisher(ABC):
     def validate(self, request: PublishRequest) -> list[str]:
         """Pre-publish validation hooks. Returns a list of human-readable issues."""
         return []
+
+    def fetch_insights(
+        self,
+        token: TokenBundle,
+        external_account_id: str,
+        external_post_id: str,
+    ) -> InsightsSnapshot | None:
+        """Pull engagement metrics. Return ``None`` when not supported."""
+        return None

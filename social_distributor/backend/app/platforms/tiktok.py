@@ -17,6 +17,7 @@ from urllib.parse import urlencode
 from ..config import config
 from ._http import request_json
 from .base import (
+    InsightsSnapshot,
     OAuthProvider,
     PlatformError,
     PublishRequest,
@@ -156,3 +157,35 @@ class TikTokPublisher(Publisher):
         if not publish_id:
             raise PlatformError(f"tiktok response missing publish_id: {data}", retryable=True)
         return PublishResult(external_post_id=publish_id, raw=data)
+
+    def fetch_insights(self, token, external_account_id, external_post_id):
+        """TikTok video metrics via /v2/video/query/ (owned-user fields).
+
+        Note: ``view_count``/``like_count`` etc. are exposed for the video
+        owner without research-API approval. ``avg_view_pct`` is not available
+        through this endpoint — full retention requires Research API.
+        """
+        try:
+            data = request_json(
+                "POST",
+                "https://open.tiktokapis.com/v2/video/query/",
+                headers={
+                    "Authorization": f"Bearer {token.access_token}",
+                    "Content-Type": "application/json",
+                },
+                params={"fields": "view_count,like_count,comment_count,share_count"},
+                json={"filters": {"video_ids": [external_post_id]}},
+            )
+        except PlatformError:
+            return None
+        videos = data.get("data", {}).get("videos", [])
+        if not videos:
+            return None
+        v = videos[0]
+        return InsightsSnapshot(
+            plays=v.get("view_count"),
+            likes=v.get("like_count"),
+            comments=v.get("comment_count"),
+            shares=v.get("share_count"),
+            raw=v,
+        )

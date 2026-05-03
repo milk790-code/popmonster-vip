@@ -111,7 +111,8 @@ def test_distribute_with_variants_uses_template_fallback(client, app):
     _, group_id, post_id = _make_group(
         app, accounts=[Platform.INSTAGRAM, Platform.TIKTOK],
         style={"tone": "casual", "emoji_density": "high",
-               "hashtag_pool": ["#美食", "#日常"]},
+               "hashtag_pool": ["#美食", "#日常", "#推薦", "#療癒",
+                                "#週末", "#輕食", "#台北", "#甜點"]},
     )
     future = (datetime.now(timezone.utc) + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%S")
     res = client.post(

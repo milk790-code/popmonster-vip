@@ -66,6 +66,37 @@ After configuration, click **Connect …** in the dashboard. The callback writes
 encrypted tokens (Fernet, AES-128-CBC + HMAC-SHA256) to the database — they
 are never logged.
 
+## Insights, best-time learning, SSE, WYSIWYG (Phase 3)
+
+* `ingest_insights` Celery beat task (every hour, minute 15) pulls engagement
+  metrics for every successful target published in the last 30 days. Per
+  platform:
+  - **Facebook**: `/<post_id>/insights` — impressions, unique reach, reactions
+  - **Instagram**: `/<media_id>/insights` — reach, impressions, likes, comments,
+    shares, saves, plays
+  - **TikTok**: `/v2/video/query/` — view/like/comment/share counts (full
+    retention requires Research API approval)
+  - **YouTube**: `videos.list` for counts + `youtubeAnalytics.reports.query`
+    for `averageViewPercentage` and `estimatedMinutesWatched`
+* Snapshots persist as `PostMetric` rows so trends are queryable. The latest
+  snapshot per target is exposed via `GET /api/insights?post_id=` or
+  `?group_id=`.
+* `GET /api/insights/best-times?account_id=` (or `?group_id=`) buckets
+  successful posts by hour-of-week, computes engagement rate
+  `(likes+comments+shares)/reach`, and returns the top slots once a bucket
+  has at least 3 samples. Used to suggest the next best send time.
+* `GET /api/events/stream?user_id=` is a Server-Sent Events stream; the
+  dispatcher publishes `target.status_changed` events to Redis pub/sub on
+  every success/failure, and the dashboard refreshes the status board
+  in-place (no manual refresh). Without Redis the endpoint emits a single
+  `noop` frame so the client can fall back to polling.
+* The Compose tab now renders a **WYSIWYG per-platform preview card** for FB,
+  IG, TikTok, YouTube — character counts go red when over the platform limit
+  so you see truncation before publish.
+* Production note for SSE: gunicorn's default sync worker pins one request per
+  worker for the lifetime of the stream. Use `--worker-class gevent` or
+  `uvicorn` so the SSE endpoint doesn't starve your pool.
+
 ## Account groups / personas (Phase 2)
 
 The "matrix" workflow you actually want isn't `1 post → 4 platforms`; it's

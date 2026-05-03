@@ -16,6 +16,7 @@
       <button data-tab="schedule">Schedule</button>
       <button data-tab="status">Status board</button>
       <button data-tab="accounts">Accounts</button>
+      <button data-tab="insights">Insights</button>
       <button data-tab="audit">Audit log</button>
     </nav>
     <label class="user-select">
@@ -55,6 +56,10 @@
         <button type="submit">Save draft</button>
       </form>
       <pre id="postOutput"></pre>
+
+      <h3>各平台預覽（WYSIWYG）</h3>
+      <p class="hint">即時依字數/比例渲染，紅色 = 超出平台限制會被截斷或拒絕。</p>
+      <div id="previewGrid" class="preview-grid"></div>
 
       <h3>Compliance preview</h3>
       <form id="previewForm" class="grid">
@@ -168,6 +173,35 @@
       <table id="accountsTable">
         <thead>
           <tr><th>ID</th><th>Platform</th><th>Handle</th><th>Token expires</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="tab-insights" class="tab">
+      <h2>Insights（成效資料）</h2>
+      <div class="insights-controls">
+        <label>Post ID 篩選 <input id="insightsPostId" type="number" min="1" /></label>
+        <label>Group ID 篩選 <input id="insightsGroupId" type="number" min="1" /></label>
+        <button id="loadInsights">載入</button>
+      </div>
+      <table id="insightsTable">
+        <thead>
+          <tr><th>平台</th><th>帳號</th><th>Reach</th><th>Impressions</th><th>Likes</th>
+          <th>Comments</th><th>Shares</th><th>Plays</th><th>Avg view %</th><th>External</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <h3>最佳發布時段建議</h3>
+      <div class="insights-controls">
+        <label>Account ID <input id="bestAccountId" type="number" min="1" /></label>
+        <label>或 Group ID <input id="bestGroupId" type="number" min="1" /></label>
+        <button id="loadBestTimes">查詢</button>
+      </div>
+      <table id="bestTimesTable">
+        <thead>
+          <tr><th>星期</th><th>時段</th><th>樣本</th><th>互動率</th></tr>
         </thead>
         <tbody></tbody>
       </table>

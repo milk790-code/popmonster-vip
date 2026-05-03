@@ -233,6 +233,40 @@ class PostTarget(db.Model):
     account: Mapped[SocialAccount] = relationship(back_populates="targets")
 
 
+class PostMetric(db.Model):
+    """Time-series engagement metrics per published target.
+
+    We snapshot whatever the platform exposes; columns are the union of common
+    metrics so cross-platform queries stay simple. Per-platform extras (e.g.
+    YouTube's ``averageViewPercentage``) live in ``raw``. Each row is one
+    ingestion sample — ``fetched_at`` is when we asked the platform, not when
+    the post was made.
+    """
+
+    __tablename__ = "post_metrics"
+    __table_args__ = (
+        Index("ix_post_metrics_target_fetched", "target_id", "fetched_at"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    target_id: Mapped[int] = mapped_column(
+        ForeignKey("post_targets.id"), nullable=False
+    )
+    fetched_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow
+    )
+    reach: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    impressions: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    likes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    comments: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    shares: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    saves: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    plays: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    watch_time_seconds: Mapped[float | None] = mapped_column(nullable=True)
+    avg_view_pct: Mapped[float | None] = mapped_column(nullable=True)
+    raw: Mapped[dict] = mapped_column(JSON, default=dict)
+
+
 class ComplianceCheck(db.Model):
     __tablename__ = "compliance_checks"
 

@@ -20,6 +20,7 @@ from googleapiclient.http import MediaIoBaseUpload
 
 from ..config import config
 from .base import (
+    InsightsSnapshot,
     OAuthProvider,
     PlatformError,
     PublishRequest,
@@ -197,6 +198,51 @@ class YouTubePublisher(Publisher):
         while response is None:
             _, response = request_obj.next_chunk()
         return response
+
+    def fetch_insights(self, token, external_account_id, external_post_id):
+        try:
+            credentials = _credentials_from_token(token)
+            data_api = build("youtube", "v3", credentials=credentials, cache_discovery=False)
+            videos = data_api.videos().list(
+                part="statistics,contentDetails", id=external_post_id
+            ).execute()
+        except HttpError:
+            return None
+
+        items = videos.get("items", [])
+        if not items:
+            return None
+        stats = items[0].get("statistics", {})
+
+        avg_pct = None
+        watch_time = None
+        try:
+            analytics = build("youtubeAnalytics", "v2", credentials=credentials,
+                              cache_discovery=False)
+            report = analytics.reports().query(
+                ids="channel==MINE",
+                startDate="2005-01-01",
+                endDate=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                metrics="averageViewPercentage,estimatedMinutesWatched",
+                filters=f"video=={external_post_id}",
+            ).execute()
+            rows = report.get("rows", [])
+            if rows:
+                avg_pct = float(rows[0][0])
+                watch_time = float(rows[0][1]) * 60
+        except HttpError:
+            pass
+
+        return InsightsSnapshot(
+            impressions=int(stats.get("viewCount", 0)) or None,
+            plays=int(stats.get("viewCount", 0)) or None,
+            likes=int(stats.get("likeCount", 0)) or None,
+            comments=int(stats.get("commentCount", 0)) or None,
+            avg_view_pct=avg_pct,
+            watch_time_seconds=watch_time,
+            raw={**stats, "analytics": {"avg_view_pct": avg_pct,
+                                        "watch_time_seconds": watch_time}},
+        )
 
     @staticmethod
     def _set_thumbnail(youtube, video_id: str, thumbnail_url: str) -> None:
