@@ -20,7 +20,12 @@ const userIdInput = document.getElementById("userId");
 
 async function api(path, options = {}) {
   const headers = { "Content-Type": "application/json", ...(options.headers ?? {}) };
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  // C3: send the session cookie cross-origin (CORS supports_credentials).
+  const res = await fetch(`${API_BASE}${path}`, {
+    credentials: "include",
+    ...options,
+    headers,
+  });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`${res.status} ${res.statusText}: ${text}`);
@@ -28,6 +33,29 @@ async function api(path, options = {}) {
   if (res.status === 204) return null;
   return res.json();
 }
+
+// C3: at startup, check session. If logged in, hide the manual User ID
+// box and use the authenticated id everywhere. If not logged in, the
+// user can either click "登入" (top right) or keep typing user_id manually
+// for backcompat.
+(async function _bootstrapIdentity() {
+  try {
+    const me = await fetch(`${API_BASE}/auth/me`, {
+      credentials: "include",
+    }).then((r) => (r.ok ? r.json() : null));
+    if (me && me.authenticated) {
+      const userIdEl = document.getElementById("userId");
+      if (userIdEl) {
+        userIdEl.value = String(me.id);
+        userIdEl.disabled = true;
+        const wrap = userIdEl.closest("label");
+        if (wrap) wrap.title = `signed in as ${me.email}`;
+      }
+    }
+  } catch {
+    /* not authenticated, fall back to manual user_id field */
+  }
+})();
 
 // --- Tabs -------------------------------------------------------------
 document.querySelectorAll(".topbar nav button").forEach((btn) => {

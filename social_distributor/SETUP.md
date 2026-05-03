@@ -175,25 +175,35 @@ Verify:
 curl http://localhost:5000/healthz       # → {"status":"ok"}
 ```
 
-## 5. Create your user record
+## 5. Sign in (magic link, no password)
 
-Until proper login is added, create a user via the API:
+Open `https://your-dashboard.example.com/login.html` (or `http://localhost:8080/login.html`
+for local dev). Enter your email → check your inbox → click the magic link
+→ you're in. The dashboard auto-detects the session and hides the manual
+User ID field.
 
-```bash
-docker compose exec api python -c "
-from app import create_app
-from app.extensions import db
-from app.models import User
-app = create_app()
-with app.app_context():
-    u = User(email='you@example.com', display_name='Me', timezone='Asia/Taipei')
-    db.session.add(u); db.session.commit()
-    print('user_id =', u.id)
-"
-```
+> **First-boot shortcut**: if you launched fresh and the `users` table is
+> empty, the API auto-seeds `me@local` (`user_id=1`) so the dashboard works
+> immediately without going through magic-link. Disable with
+> `AUTO_SEED_USER=0`.
 
-Note the printed `user_id`. Open the dashboard, set the **User ID** field
-in the top bar to that number.
+> **Backcompat**: any endpoint still accepts `?user_id=N` for 7 days from
+> deploy (sunset 2026-05-12). Old scripts keep working but emit a
+> `Deprecation` response header.
+
+> **Need SendGrid?** Magic links go out via SendGrid. Without
+> `SENDGRID_API_KEY` set, the `/auth/login/request` call still returns 200
+> but no email goes out. For local dev without SendGrid, you can mint and
+> consume a magic link directly:
+>
+> ```bash
+> docker compose exec api python -c "
+> from app import create_app; from app.utils.auth import issue_magic_token
+> app = create_app()
+> with app.app_context():
+>     print('http://localhost:5000/auth/login/verify?token=' + issue_magic_token('you@example.com'))
+> "
+> ```
 
 ## 6. Connect first account
 

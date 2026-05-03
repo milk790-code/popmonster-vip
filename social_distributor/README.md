@@ -66,6 +66,49 @@ After configuration, click **Connect …** in the dashboard. The callback writes
 encrypted tokens (Fernet, AES-128-CBC + HMAC-SHA256) to the database — they
 are never logged.
 
+## Phase 7 — Pre-flight audit + magic-link login
+
+Three-agent code audit found 40+ concrete issues; this round shipped the
+30 that block first real-world publishing or risk data leakage.
+
+### 7A — Pre-flight critical fixes (10)
+OAuth callback returns HTML success page (was raw JSON), `dispatch_target`
+wraps body in last-resort try/except (RUNNING never sticks), compliance
+preview no longer pollutes `compliance_checks` table, shared engine
+instance per dispatch, TikTok unaudited scope flagged in `extra.unaudited`,
+frontend API base URL configurable via `<meta name="distributor-api">` +
+nginx envsubst, `/healthz/ready` reports per-dependency config, Daily tab
+gets contextual onboarding banners, `AUTO_SEED_USER=1` creates `me@local`
+on first boot, gunicorn switches to `gevent` worker for SSE.
+
+### 7B — Hardening (10)
+`sweep_due_targets` uses row-level lock (no double-dispatch race), token
+refresh distinguishes 401 (revoke account) from 5xx (retry), IG container
+`EXPIRED` is retryable (was incorrectly permanent), Meta long-lived token
+refresh implemented (`fb_exchange_token`), `utils/redact.py` masks
+access/refresh tokens in audit + compliance persists, HTTP timeout
+configurable via `PLATFORM_HTTP_TIMEOUT` (default 60s, video upload uses
+180s), `utils/overrides.py` whitelists per-platform fields rejected with
+400 + details on unknown keys, service worker cache name carries
+`${CACHE_VERSION}` so each deploy invalidates.
+
+### C1 — TikTok / YouTube health probes
+Closes a Phase 5 gap. `_tiktok_token_alive()` hits `/v2/user/info/`,
+`_youtube_token_alive()` uses `googleapiclient` channels.list (auto-handles
+refresh). All 4 platforms now flow through the same `PermissionDriftAlert`
++ email path on token revocation.
+
+### C3 — Multi-user + magic-link login
+Email → SendGrid magic link → 30-min signed token → session cookie. New
+endpoints: `POST /auth/login/request`, `GET /auth/login/verify`,
+`POST /auth/logout`, `GET /auth/me`. Session config:
+`HttpOnly + SameSite=Lax + Secure` (Secure off for localhost dev). Old
+`?user_id=N` query param still works for 7 days but emits a `Deprecation`
+header. Audit log records login attempts with **hashed** email (no plaintext
+PII).
+
+128 tests pass (was 82, +46).
+
 ## Phase 6 — DNA, peak-hour, hashtags, native shell
 
 Four targeted improvements to the daily-use loop:

@@ -19,9 +19,24 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.config.update(config.as_flask())
 
+    # C3: session cookie config — secure flags for prod, but allow plain
+    # http on localhost / dev so first-time setup isn't blocked by HTTPS.
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_SECURE"] = (
+        os.environ.get("SESSION_COOKIE_SECURE", "0") == "1"
+    )
+    app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 60 * 24 * 30  # 30 days
+
     db.init_app(app)
     migrate.init_app(app, db)
-    cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
+    cors.init_app(app, resources={r"/api/*": {"origins": "*",
+                                              "supports_credentials": True}})
+
+    # C3: resolve current user once per request, surface deprecation header
+    # for any caller still using ?user_id= backcompat.
+    from .utils.auth import attach_user_id_middleware
+    attach_user_id_middleware(app)
 
     from .auth import auth_bp
     from .api import (
@@ -38,8 +53,10 @@ def create_app() -> Flask:
         transfers_bp,
         uploads_bp,
     )
+    from .api.login import bp as login_bp
 
     app.register_blueprint(auth_bp)
+    app.register_blueprint(login_bp)
     app.register_blueprint(accounts_bp)
     app.register_blueprint(audit_bp)
     app.register_blueprint(events_bp)
