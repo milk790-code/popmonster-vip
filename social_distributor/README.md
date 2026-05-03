@@ -66,6 +66,49 @@ After configuration, click **Connect …** in the dashboard. The callback writes
 encrypted tokens (Fernet, AES-128-CBC + HMAC-SHA256) to the database — they
 are never logged.
 
+## Phase 6 — DNA, peak-hour, hashtags, native shell
+
+Four targeted improvements to the daily-use loop:
+
+1. **Content DNA / dedup** — Browser computes the file's SHA-256 with
+   `crypto.subtle.digest`. `GET /api/uploads/check?sha256=…` lets the client
+   skip the upload entirely when we already have that exact bytes; otherwise
+   `/api/uploads/complete` re-checks server-side as a race guard. Re-uploaded
+   files now come back as `{"deduped": true, "id": <existing>}` in milliseconds.
+2. **Originality findings in compliance** — `compliance/originality.py` adds
+   two non-blocking warnings to every distribute:
+   - `originality:media_sha256` when the same byte content has been used
+     before
+   - `originality:link_reshare` when the post's `link_url` (normalised:
+     scheme+host+path, query stripped) matches a prior post by the same user
+   Set `ORIGINALITY_BLOCK=1` to escalate to hard-block.
+3. **Peak-hour distribute** — `POST /api/posts/<id>/distribute` accepts
+   `use_best_time: true`. Per group, we look up the top engagement bucket
+   from `PostMetric` history and use the next future occurrence as the
+   schedule base. Falls back to the explicit `scheduled_for` (or "now")
+   per-group when there's not enough data, and reports `best_time_used:
+   {group_id: "learned"|"fallback_no_data"}` in the response.
+4. **AI hashtag suggester** — `POST /api/hashtags/suggest` returns a
+   per-platform tag list. Calls Claude when `ANTHROPIC_API_KEY` is set
+   (style profile cached across calls — same prompt-cache trick as the
+   variant engine), otherwise returns a deduped, banned-tag-filtered subset
+   of the persona's `hashtag_pool`. Compose tab shows a 「建議 hashtag」
+   button that appends suggestions into the caption.
+
+### Native desktop shell (`desktop/`)
+
+Tauri 2 scaffold that loads the existing `frontend/` inside a native
+window with a `Cmd/Ctrl+Shift+P` global shortcut and a tray icon. See
+`desktop/README.md` for build prerequisites; `pnpm tauri dev` opens the
+window once your Rust toolchain is ready. The desktop app does **not**
+duplicate the dashboard — it points at the same `frontend/` directory, so
+edits show up in both surfaces.
+
+This is a scaffold (no auto-update, no code-signing pipeline, no native
+menus beyond the tray). The dashboard PWA already covers most use cases;
+ship the native shell only if you specifically need the global shortcut or
+deeper OS integration.
+
 ## Asset & Permission Manager (Phase 5)
 
 Distinguishes three things people often conflate as "social media migration":
