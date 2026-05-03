@@ -108,6 +108,10 @@ a:hover{color:var(--gold-lt)}
 
 /* === 404 === */
 .page-404{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px}
+
+/* === HOOK TAG 鉤子標語徽章 === */
+.hook-tag{position:absolute;bottom:8px;left:8px;background:rgba(10,10,10,.85);color:var(--gold);font-size:10px;padding:3px 8px;border-radius:3px;letter-spacing:1px;border:1px solid var(--gold-dk);font-weight:600;backdrop-filter:blur(4px)}
+.card-img{position:relative}
 .page-404 h1{font-size:72px;color:var(--gold);margin-bottom:8px}
 .page-404 p{color:var(--txt-m);margin-bottom:24px}
 
