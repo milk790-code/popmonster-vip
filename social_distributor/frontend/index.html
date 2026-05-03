@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Social Distributor — Dashboard</title>
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Social Distributor</h1>
+    <nav>
+      <button data-tab="compose" class="active">Compose</button>
+      <button data-tab="schedule">Schedule</button>
+      <button data-tab="status">Status board</button>
+      <button data-tab="accounts">Accounts</button>
+      <button data-tab="audit">Audit log</button>
+    </nav>
+    <label class="user-select">
+      User ID
+      <input id="userId" type="number" min="1" value="1" />
+    </label>
+  </header>
+
+  <main>
+    <section id="tab-compose" class="tab active">
+      <h2>Compose post</h2>
+      <form id="postForm" class="grid">
+        <label>Title<input name="title" placeholder="Optional title (used as YouTube title)"/></label>
+        <label>Caption / description
+          <textarea name="caption" rows="6" placeholder="Body text"></textarea>
+        </label>
+        <label>Link URL<input name="link_url" type="url" /></label>
+        <fieldset>
+          <legend>Media</legend>
+          <label>Storage URL<input name="media_url" type="url" /></label>
+          <label>Kind
+            <select name="media_kind">
+              <option value="">(none)</option>
+              <option value="image">image</option>
+              <option value="video">video</option>
+            </select>
+          </label>
+          <label>S3 bucket (optional)<input name="s3_bucket" /></label>
+          <label>S3 key (optional)<input name="s3_key" /></label>
+        </fieldset>
+        <button type="submit">Save draft</button>
+      </form>
+      <pre id="postOutput"></pre>
+
+      <h3>Compliance preview</h3>
+      <form id="previewForm" class="grid">
+        <label>Post ID<input name="post_id" type="number" min="1" /></label>
+        <label>Account IDs (comma-separated)<input name="account_ids" /></label>
+        <button type="submit">Preview</button>
+      </form>
+      <pre id="previewOutput"></pre>
+    </section>
+
+    <section id="tab-schedule" class="tab">
+      <h2>Schedule distribution</h2>
+      <p class="hint">
+        Pick a saved post and one connected account at a time, with either a one-shot
+        ISO timestamp or a cron expression for recurring posts.
+      </p>
+      <form id="scheduleForm" class="grid">
+        <label>Post ID<input name="post_id" type="number" min="1" required /></label>
+        <label>Account ID<input name="account_id" type="number" min="1" required /></label>
+        <label>Scheduled for (ISO 8601, local)
+          <input name="scheduled_for" type="datetime-local" />
+        </label>
+        <label>Cron expression (overrides scheduled_for)<input name="cron" /></label>
+        <label>Timezone<input name="timezone" value="UTC" /></label>
+        <label>Per-platform overrides (JSON)
+          <textarea name="overrides" rows="4">{}</textarea>
+        </label>
+        <button type="submit">Queue</button>
+      </form>
+      <pre id="scheduleOutput"></pre>
+    </section>
+
+    <section id="tab-status" class="tab">
+      <h2>Publish status</h2>
+      <button id="refreshStatus">Refresh</button>
+      <table id="statusTable">
+        <thead>
+          <tr><th>ID</th><th>Platform</th><th>Handle</th><th>Status</th>
+          <th>Scheduled</th><th>Cron</th><th>Attempts</th><th>External</th><th>Error</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="tab-accounts" class="tab">
+      <h2>Connected accounts</h2>
+      <div class="connect-row">
+        <button data-provider="meta">Connect Facebook + Instagram</button>
+        <button data-provider="tiktok">Connect TikTok</button>
+        <button data-provider="youtube">Connect YouTube</button>
+      </div>
+      <table id="accountsTable">
+        <thead>
+          <tr><th>ID</th><th>Platform</th><th>Handle</th><th>Token expires</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="tab-audit" class="tab">
+      <h2>Audit log</h2>
+      <button id="refreshAudit">Refresh</button>
+      <table id="auditTable">
+        <thead>
+          <tr><th>Time</th><th>Actor</th><th>Action</th><th>Resource</th><th>Detail</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      All publishing flows use the official platform APIs. Configure each platform's
+      OAuth app credentials in <code>backend/.env</code> before connecting accounts.
+    </p>
+  </footer>
+
+  <script src="js/app.js" type="module"></script>
+</body>
+</html>

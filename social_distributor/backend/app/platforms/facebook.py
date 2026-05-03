@@ -1,0 +1,142 @@
+"""Facebook Page publisher (Graph API v20).
+
+Reference:
+- https://developers.facebook.com/docs/pages-api/posts
+- https://developers.facebook.com/docs/video-api/guides/publishing
+"""
+from __future__ import annotations
+
+from datetime import datetime, timedelta, timezone
+from urllib.parse import urlencode
+
+from ..config import config
+from ._http import request_json
+from .base import (
+    OAuthProvider,
+    PlatformError,
+    PublishRequest,
+    PublishResult,
+    Publisher,
+    TokenBundle,
+)
+
+GRAPH_BASE = "https://graph.facebook.com/v20.0"
+GRAPH_VIDEO_BASE = "https://graph-video.facebook.com/v20.0"
+DIALOG_BASE = "https://www.facebook.com/v20.0/dialog/oauth"
+
+DEFAULT_SCOPES = [
+    "pages_show_list",
+    "pages_read_engagement",
+    "pages_manage_posts",
+    "instagram_basic",
+    "instagram_content_publish",
+]
+
+
+class MetaOAuth(OAuthProvider):
+    """Shared between Facebook and Instagram (Meta consolidated app)."""
+
+    name = "meta"
+
+    def authorization_url(self, state: str) -> str:
+        creds = config.platform("meta")
+        if not creds.configured:
+            raise PlatformError("meta app credentials not configured", retryable=False)
+        params = {
+            "client_id": creds.client_id,
+            "redirect_uri": creds.redirect_uri,
+            "scope": ",".join(DEFAULT_SCOPES),
+            "response_type": "code",
+            "state": state,
+        }
+        return f"{DIALOG_BASE}?{urlencode(params)}"
+
+    def exchange_code(self, code: str) -> TokenBundle:
+        creds = config.platform("meta")
+        payload = request_json(
+            "GET",
+            f"{GRAPH_BASE}/oauth/access_token",
+            params={
+                "client_id": creds.client_id,
+                "client_secret": creds.client_secret,
+                "redirect_uri": creds.redirect_uri,
+                "code": code,
+            },
+        )
+        # Exchange short-lived for long-lived (60 day) token.
+        long_lived = request_json(
+            "GET",
+            f"{GRAPH_BASE}/oauth/access_token",
+            params={
+                "grant_type": "fb_exchange_token",
+                "client_id": creds.client_id,
+                "client_secret": creds.client_secret,
+                "fb_exchange_token": payload["access_token"],
+            },
+        )
+        expires_at = None
+        if (ttl := long_lived.get("expires_in")):
+            expires_at = datetime.now(timezone.utc) + timedelta(seconds=int(ttl))
+        return TokenBundle(
+            access_token=long_lived["access_token"],
+            expires_at=expires_at,
+            scopes=DEFAULT_SCOPES,
+        )
+
+
+class FacebookPublisher(Publisher):
+    name = "facebook"
+
+    def validate(self, request: PublishRequest) -> list[str]:
+        issues: list[str] = []
+        if len(request.caption) > 63206:
+            issues.append("Facebook post text exceeds 63,206 characters.")
+        return issues
+
+    def publish(
+        self,
+        token: TokenBundle,
+        external_account_id: str,
+        request: PublishRequest,
+    ) -> PublishResult:
+        # external_account_id is the Page ID. The token must be a Page Access Token,
+        # which the OAuth callback converts via /me/accounts.
+        page_token = token.extra.get("page_access_token", token.access_token)
+
+        if request.media_url and request.media_kind == "video":
+            return self._publish_video(page_token, external_account_id, request)
+        if request.media_url and request.media_kind == "image":
+            return self._publish_photo(page_token, external_account_id, request)
+        return self._publish_text(page_token, external_account_id, request)
+
+    def _publish_text(self, token, page_id, req: PublishRequest) -> PublishResult:
+        body = {"message": req.caption, "access_token": token}
+        if req.link_url:
+            body["link"] = req.link_url
+        data = request_json("POST", f"{GRAPH_BASE}/{page_id}/feed", data=body)
+        return PublishResult(external_post_id=data["id"], raw=data)
+
+    def _publish_photo(self, token, page_id, req: PublishRequest) -> PublishResult:
+        data = request_json(
+            "POST",
+            f"{GRAPH_BASE}/{page_id}/photos",
+            data={
+                "url": req.media_url,
+                "caption": req.caption,
+                "access_token": token,
+            },
+        )
+        return PublishResult(external_post_id=data.get("post_id", data["id"]), raw=data)
+
+    def _publish_video(self, token, page_id, req: PublishRequest) -> PublishResult:
+        data = request_json(
+            "POST",
+            f"{GRAPH_VIDEO_BASE}/{page_id}/videos",
+            data={
+                "file_url": req.media_url,
+                "description": req.caption,
+                "title": req.title or None,
+                "access_token": token,
+            },
+        )
+        return PublishResult(external_post_id=str(data.get("id")), raw=data)
