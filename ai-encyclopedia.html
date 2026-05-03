@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<title>AI 汽美百科｜泡泡怪獸 POP MONSTER</title>
+<meta name="description" content="結合 Gemini AI 的汽美知識問答系統，可上傳車漆照片做 AI 評估，或直接詢問產品搭配建議。">
+<link rel="canonical" href="https://popmonster.vip/ai-encyclopedia.html">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/favicon.svg">
+<link rel="manifest" href="/manifest.json">
+<meta property="og:title" content="AI 汽美百科｜泡泡怪獸 POP MONSTER">
+<meta property="og:description" content="結合 Gemini AI 的汽美知識問答系統，可上傳車漆照片做 AI 評估，或直接詢問產品搭配建議。">
+<meta property="og:url" content="https://popmonster.vip/ai-encyclopedia.html">
+<meta property="og:image" content="https://popmonster.vip/img/og-default.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<!-- GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WTKLHW33D7"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', {'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'denied','wait_for_update':500});
+gtag('js', new Date());
+gtag('config', 'G-WTKLHW33D7', {'anonymize_ip':true,'cookie_flags':'SameSite=None;Secure'});
+</script>
+<link rel="stylesheet" href="css/main.css">
+<style>
+.preview-hero{padding:80px 24px 30px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(200,169,107,.06) 0%,transparent 70%)}
+.preview-hero .icon-big{font-size:64px;margin-bottom:16px;opacity:.85}
+.preview-hero .status-tag{display:inline-block;background:rgba(200,169,107,.1);color:var(--gold);font-size:12px;padding:6px 14px;border-radius:4px;letter-spacing:2px;margin-bottom:20px;border:1px solid var(--gold-dk)}
+.preview-hero h1{font-size:clamp(2rem,4vw,3rem);color:#fff;margin-bottom:14px;letter-spacing:-1px}
+.preview-hero .tagline{color:var(--gold-lt);font-size:17px;margin-bottom:14px;font-weight:600}
+.preview-hero p{color:var(--txt-m);max-width:680px;margin:0 auto;font-size:15px;line-height:1.7}
+
+.preview-section{max-width:780px;margin:40px auto;padding:0 24px}
+.preview-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:32px}
+.preview-card h2{font-size:18px;color:var(--gold-lt);margin-bottom:16px}
+.preview-card ul{list-style:none;padding:0;margin:0}
+.preview-card li{padding:10px 0;color:var(--txt-m);font-size:14px;line-height:1.7;display:flex;gap:10px;align-items:flex-start}
+.preview-card li::before{content:'✦';color:var(--gold);flex-shrink:0;font-size:12px;margin-top:5px}
+
+.preview-warning{background:rgba(255,193,7,.04);border:1px solid rgba(255,193,7,.2);border-left:3px solid #ffc107;border-radius:0 var(--r) var(--r) 0;padding:20px 24px;margin:32px 0;color:var(--txt-m);font-size:13px;line-height:1.7}
+.preview-warning strong{color:#ffd56b;display:block;margin-bottom:6px}
+
+.preview-cta{margin-top:40px;text-align:center;padding:32px;background:rgba(200,169,107,.04);border:1px solid var(--border);border-radius:var(--r-lg)}
+.preview-cta h3{font-size:16px;color:#fff;margin-bottom:14px}
+.preview-cta p{color:var(--txt-m);font-size:14px;margin-bottom:18px}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="nav-inner">
+  <a href="index.html" class="nav-logo">POP MONSTER<span>泡泡怪獸</span></a>
+  <div class="nav-links">
+    <a href="index.html">全部商品</a>
+    <a href="members.html">會員生態</a>
+    <a href="guide/">教學攻略</a>
+    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
+  </div>
+  <button class="nav-menu-btn" aria-label="選單" onclick="this.nextElementSibling.classList.toggle('show')">☰</button>
+  <div class="mobile-menu" style="display:none;position:fixed;top:60px;left:0;right:0;background:#0a0a0a;border-bottom:1px solid rgba(200,169,107,.15);padding:20px;z-index:99;flex-direction:column;gap:16px;">
+    <a href="index.html" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">全部商品</a>
+    <a href="members.html" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">會員生態</a>
+    <a href="guide/" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">教學攻略</a>
+    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">蝦皮賣場</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">LINE 諮詢</a>
+  </div>
+</div></nav>
+<script>document.querySelector('.nav-menu-btn')&&document.querySelector('.nav-menu-btn').addEventListener('click',function(){var m=this.nextElementSibling;m.style.display=m.style.display==='flex'?'none':'flex'})</script>
+
+<section class="preview-hero">
+  <div class="icon-big">🤖</div>
+  <div class="status-tag">⏳ 需完成律師審查與付款金流對接後才會正式上線</div>
+  <h1>AI 汽美百科</h1>
+  <div class="tagline">智慧問答系統・規劃中</div>
+  <p>結合 Gemini AI 的汽美知識問答系統，可上傳車漆照片做 AI 評估，或直接詢問產品搭配建議。</p>
+</section>
+
+<section class="preview-section">
+  <div class="preview-card">
+    <h2>規劃中的內容</h2>
+    <ul>
+      <li>AI 漆面評估（上傳照片自動分析）</li>
+      <li>產品搭配智慧推薦</li>
+      <li>施工流程一對一問答</li>
+      <li>汽美知識即時查詢</li>
+    </ul>
+  </div>
+  <div class="preview-warning"><strong>⚠ 上線前提</strong>本機制涉及付費訂閱與消費者保護法第 19 條 7 日鑑賞期，正式上線前需完成律師審查。</div>
+
+  <div class="preview-cta">
+    <h3>等不及了嗎？</h3>
+    <p>想諮詢產品？加 LINE 直接問真人</p>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" class="btn btn-gold">立即前往</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-brand">泡泡怪獸 POP MONSTER × 米速 MISO</div>
+  <div class="footer-sub">安全永遠第一｜任何人都能輕鬆上手｜使用全程零風險</div>
+  <div class="footer-links">
+    <a href="index.html">全部商品</a>
+    <a href="members.html">會員生態</a>
+    <a href="guide/">教學攻略</a>
+    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
+  </div>
+  <div class="footer-legal" style="margin-bottom:8px">
+    <a href="privacy.html" style="font-size:12px;color:var(--txt-m)">隱私權政策</a>
+    <span style="color:var(--txt-m);margin:0 8px">|</span>
+    <a href="terms.html" style="font-size:12px;color:var(--txt-m)">服務條款</a>
+  </div>
+  <div class="footer-copy">&copy; 2026 泡泡怪獸 POP MONSTER. All rights reserved.</div>
+</footer>
+
+<div class="cookie-bar"><span>本站使用 Cookie 提升瀏覽體驗。繼續瀏覽即表示同意。</span><span><button class="cookie-accept" id="ck-accept">接受</button> <button class="cookie-decline" id="ck-decline">拒絕</button></span></div>
+<script src="js/main.js" defer></script>
+</body>
+</html>
