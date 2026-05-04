@@ -134,6 +134,11 @@ class AccountGroup(db.Model):
     style_profile: Mapped[dict] = mapped_column(JSON, default=dict)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     default_timezone: Mapped[str] = mapped_column(String(64), default="UTC")
+    # C2: which variant engine the A/B backtest learned wins for this group.
+    # nullable until enough data accumulates; written by ab-variant-backtest beat.
+    preferred_variant_engine: Mapped[str | None] = mapped_column(
+        String(32), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, onupdate=utcnow

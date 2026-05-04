@@ -297,6 +297,19 @@
         </thead>
         <tbody></tbody>
       </table>
+
+      <!-- C2: A/B 變體勝出回測 -->
+      <h3>A/B 變體勝出（過去 7 天）</h3>
+      <p class="hint">
+        每週日 03:00 UTC 自動跑回測；要立即重算按下方按鈕。
+        Winner 寫入 group.preferred_variant_engine。
+      </p>
+      <div class="insights-controls">
+        <label>Group ID <input id="abGroupId" type="number" min="1" /></label>
+        <button id="loadAb">查詢結果</button>
+        <button id="runBacktestNow" class="secondary">立即跑全部回測</button>
+      </div>
+      <div id="abResults" class="insights-block"></div>
     </section>
 
     <section id="tab-permissions" class="tab">

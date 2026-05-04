@@ -463,6 +463,20 @@ def expire_overdue_transfers() -> int:
 
 
 @celery_app.task
+def ab_variant_backtest() -> list[dict]:
+    """C2: weekly A/B winner pick — see utils.experiments."""
+    from ..utils.experiments import backtest_and_persist_winners
+    return backtest_and_persist_winners()
+
+
+@celery_app.task
+def weekly_insights_digest() -> dict:
+    """C5: weekly actionable digest email per user."""
+    from ..utils.digest import send_weekly_digests
+    return send_weekly_digests()
+
+
+@celery_app.task
 def ingest_insights() -> None:
     """Pull engagement metrics for recently-published targets.
 

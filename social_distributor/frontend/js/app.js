@@ -647,6 +647,56 @@ document.getElementById("loadBestTimes").addEventListener("click", async () => {
   if (rows.length === 0) tbody.innerHTML = `<tr><td colspan="4" class="hint">資料不足，繼續累積發文成效後再回來查。</td></tr>`;
 });
 
+// --- C2: A/B 結果 -----------------------------------------------------
+document.getElementById("loadAb")?.addEventListener("click", async () => {
+  const gid = Number(document.getElementById("abGroupId").value);
+  const slot = document.getElementById("abResults");
+  if (!gid) { slot.innerHTML = `<p class="hint">輸入 group id</p>`; return; }
+  slot.innerHTML = "Loading…";
+  try {
+    const data = await api(`/api/experiments/results?group_id=${gid}`);
+    const rows = data.by_engine.map((e) => `
+      <tr>
+        <td>${e.engine}${e.engine === data.winner ? ' 🏆' : ''}</td>
+        <td>${e.samples}</td>
+        <td>${e.total_reach.toLocaleString()}</td>
+        <td>${e.total_engagement.toLocaleString()}</td>
+        <td>${(e.rate * 100).toFixed(2)}%</td>
+      </tr>`).join("");
+    slot.innerHTML = `
+      <p><strong>${data.group_name}</strong> · since ${data.since.slice(0,10)}</p>
+      <p class="hint">${data.note}</p>
+      <table>
+        <thead><tr><th>Engine</th><th>樣本</th><th>觸及</th><th>互動</th><th>互動率</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="5" class="hint">no data</td></tr>`}</tbody>
+      </table>`;
+  } catch (err) {
+    slot.innerHTML = `<p class="error">${err.message}</p>`;
+  }
+});
+
+document.getElementById("runBacktestNow")?.addEventListener("click", async () => {
+  const slot = document.getElementById("abResults");
+  slot.innerHTML = "回測中…";
+  try {
+    const data = await api(`/api/experiments/backtest`, { method: "POST" });
+    const rows = data.results.map((r) => `
+      <tr>
+        <td>${r.group_name}</td>
+        <td>${r.winner ?? '—'}${r.updated ? ' (寫入)' : ''}</td>
+        <td>${r.note}</td>
+      </tr>`).join("");
+    slot.innerHTML = `
+      <p>${data.results.length} 個 group 回測完成</p>
+      <table>
+        <thead><tr><th>Group</th><th>Winner</th><th>Note</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="3" class="hint">no groups</td></tr>`}</tbody>
+      </table>`;
+  } catch (err) {
+    slot.innerHTML = `<p class="error">${err.message}</p>`;
+  }
+});
+
 // --- SSE real-time status updates -------------------------------------
 let _eventSource = null;
 function connectEvents() {

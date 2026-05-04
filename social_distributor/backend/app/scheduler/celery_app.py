@@ -53,6 +53,19 @@ def make_celery(flask_app=None) -> Celery:
                 "task": "app.scheduler.tasks.expire_overdue_transfers",
                 "schedule": crontab(minute=0, hour="*/3"),
             },
+            # C2: weekly A/B engine winner backtest. Runs Sunday 03:00 UTC,
+            # writes AccountGroup.preferred_variant_engine for groups with
+            # statistically meaningful samples.
+            "ab-variant-backtest": {
+                "task": "app.scheduler.tasks.ab_variant_backtest",
+                "schedule": crontab(minute=0, hour=3, day_of_week="sun"),
+            },
+            # C5: weekly actionable insights digest email. Monday 09:00 UTC
+            # so it lands at the start of the work-week without being late.
+            "weekly-insights-digest": {
+                "task": "app.scheduler.tasks.weekly_insights_digest",
+                "schedule": crontab(minute=0, hour=9, day_of_week="mon"),
+            },
         },
     )
 

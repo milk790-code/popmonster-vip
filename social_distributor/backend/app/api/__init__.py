@@ -1,6 +1,7 @@
 from .accounts import bp as accounts_bp
 from .audit import bp as audit_bp
 from .events import bp as events_bp
+from .experiments import bp as experiments_bp
 from .groups import bp as groups_bp
 from .hashtags import bp as hashtags_bp
 from .insights import bp as insights_bp
@@ -15,6 +16,7 @@ __all__ = [
     "accounts_bp",
     "audit_bp",
     "events_bp",
+    "experiments_bp",
     "groups_bp",
     "hashtags_bp",
     "insights_bp",

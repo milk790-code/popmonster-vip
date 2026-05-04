@@ -43,6 +43,7 @@ def create_app() -> Flask:
         accounts_bp,
         audit_bp,
         events_bp,
+        experiments_bp,
         groups_bp,
         hashtags_bp,
         insights_bp,
@@ -60,6 +61,7 @@ def create_app() -> Flask:
     app.register_blueprint(accounts_bp)
     app.register_blueprint(audit_bp)
     app.register_blueprint(events_bp)
+    app.register_blueprint(experiments_bp)
     app.register_blueprint(groups_bp)
     app.register_blueprint(hashtags_bp)
     app.register_blueprint(insights_bp)
