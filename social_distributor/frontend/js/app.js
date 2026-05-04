@@ -648,6 +648,30 @@ document.getElementById("loadBestTimes").addEventListener("click", async () => {
   if (rows.length === 0) tbody.innerHTML = `<tr><td colspan="4" class="hint">資料不足，繼續累積發文成效後再回來查。</td></tr>`;
 });
 
+// --- C5: 週報 ---------------------------------------------------------
+document.getElementById("previewDigest")?.addEventListener("click", async () => {
+  const userId = Number(userIdInput.value);
+  const out = document.getElementById("digestOut");
+  out.textContent = "Loading…";
+  try {
+    const data = await api(`/api/insights/digest/preview?user_id=${userId}`);
+    out.textContent = JSON.stringify(data, null, 2);
+  } catch (err) { out.textContent = err.message; }
+});
+
+document.getElementById("sendDigest")?.addEventListener("click", async () => {
+  const userId = Number(userIdInput.value);
+  const out = document.getElementById("digestOut");
+  if (!confirm("確定寄一份週報到 user.email？")) return;
+  out.textContent = "Sending…";
+  try {
+    const data = await api(`/api/insights/digest/send`, {
+      method: "POST", body: JSON.stringify({ user_id: userId }),
+    });
+    out.textContent = JSON.stringify(data, null, 2);
+  } catch (err) { out.textContent = err.message; }
+});
+
 // --- C2: A/B 結果 -----------------------------------------------------
 document.getElementById("loadAb")?.addEventListener("click", async () => {
   const gid = Number(document.getElementById("abGroupId").value);

@@ -109,6 +109,36 @@ PII).
 
 128 tests pass (was 82, +46).
 
+### C2 — A/B variants + 7-day backtest
+`AccountGroup.preferred_variant_engine` field; `utils/experiments.py` rolls
+up engagement-per-reach by `variant_engine` (claude/template/none) per
+group, requires `MIN_SAMPLES_PER_ENGINE=5` to declare a winner. Endpoints:
+`POST /api/posts/<id>/distribute_ab`, `GET /api/experiments/results`,
+`POST /api/experiments/backtest`. Weekly `ab-variant-backtest` Celery beat
+runs Sunday 03:00 UTC. Frontend Insights tab gets an A/B section.
+
+### C4 — Media library UI
+`GET /api/uploads?user_id=&kind=&transcode_status=&since=&until=&limit=&offset=`
+returns paginated MediaAsset rows with derivatives, sha256, transcode
+state, etc. New "素材庫" tab renders a grid of 1:1 thumbnails (videos use
+`derivatives['1:1']` cover frame); click a tile to fill `media_id` in the
+nearest active form (Compose / Daily) — falls back to clipboard.
+
+### C5 — Weekly actionable insights digest
+`utils/digest.py::build_user_digest` aggregates last-7-day SUCCEEDED
+targets + freshest PostMetric per target, computes total reach /
+engagement / rate / best-vs-worst / emoji-vs-plain delta (when sample
+sizes hit `EMOJI_MIN_SAMPLES=3` each side) / A/B winners. Narrative comes
+from Claude under a strict no-fabrication system prompt; if Anthropic isn't
+configured or fails, falls back to a deterministic template using only the
+computed numbers. Email goes via existing SendGrid plumbing in
+`notify.send_failure_email`. Beat: `weekly-insights-digest` Monday
+09:00 UTC. Endpoints: `GET /api/insights/digest/preview` and
+`POST /api/insights/digest/send`. Frontend Insights tab gets preview +
+send buttons.
+
+161 tests pass (was 128, +33).
+
 ## Phase 6 — DNA, peak-hour, hashtags, native shell
 
 Four targeted improvements to the daily-use loop:

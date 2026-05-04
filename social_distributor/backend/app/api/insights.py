@@ -62,6 +62,68 @@ def list_insights():
     return jsonify(out)
 
 
+@bp.get("/digest/preview")
+def digest_preview():
+    """C5: render the weekly digest for a user as JSON, no email sent.
+
+    Useful for the dashboard "立即預覽" button so the creator can see what
+    the Monday email will look like without polluting their inbox.
+    """
+    from ..utils.digest import build_user_digest, _ts_dict
+
+    user_id = request.args.get("user_id", type=int)
+    if not user_id:
+        return jsonify({"error": "user_id required"}), 400
+    digest = build_user_digest(user_id, days=int(request.args.get("days", 7)))
+    if digest is None:
+        return jsonify({"error": "user not found"}), 404
+    return jsonify({
+        "user_id": digest.user_id,
+        "since": digest.since.isoformat(),
+        "until": digest.until.isoformat(),
+        "total_published": digest.total_published,
+        "total_reach": digest.total_reach,
+        "total_engagement": digest.total_engagement,
+        "avg_rate": round(digest.avg_rate, 4),
+        "best": _ts_dict(digest.best),
+        "worst": _ts_dict(digest.worst),
+        "emoji_vs_plain": digest.emoji_vs_plain,
+        "ab_winners": digest.ab_winners,
+        "narrative": digest.narrative,
+    })
+
+
+@bp.post("/digest/send")
+def digest_send():
+    """Send the digest immediately to one user. Returns whether the email
+    actually went out (depends on SendGrid being configured)."""
+    from ..utils.digest import build_user_digest, _format_email_body
+    from ..utils.notify import send_failure_email
+    from ..config import config
+
+    body_in = request.get_json(silent=True) or {}
+    user_id = body_in.get("user_id") or request.args.get("user_id", type=int)
+    if not user_id:
+        return jsonify({"error": "user_id required"}), 400
+    digest = build_user_digest(int(user_id))
+    if digest is None:
+        return jsonify({"error": "user not found"}), 404
+    if not digest.has_data():
+        return jsonify({"sent": False, "reason": "no published posts in window"})
+    will_actually_send = bool(config.sendgrid_api_key and config.notify_email_from)
+    send_failure_email(
+        to=[digest.user_email],
+        subject=f"📈 Weekly insights — {digest.total_published} posts, "
+                f"{digest.total_engagement:,} engagement",
+        body=_format_email_body(digest),
+    )
+    return jsonify({
+        "sent": will_actually_send,
+        "to": digest.user_email,
+        "narrative_preview": digest.narrative[:200],
+    })
+
+
 @bp.get("/best-times")
 def best_times():
     account_id = request.args.get("account_id", type=int)

@@ -333,6 +333,18 @@
         <tbody></tbody>
       </table>
 
+      <!-- C5: 週報預覽 + 立即寄送 -->
+      <h3>每週成效報告</h3>
+      <p class="hint">
+        週一 09:00 UTC 自動寄。預覽 = 看 JSON 不寄；寄一份給我 = 真的寄
+        到 user.email（需 SendGrid 設定，否則回 sent:false）。
+      </p>
+      <div class="insights-controls">
+        <button id="previewDigest">立即預覽</button>
+        <button id="sendDigest" class="secondary">寄一份給我</button>
+      </div>
+      <pre id="digestOut" class="hint" style="white-space:pre-wrap;background:#181b22;padding:12px;border-radius:8px;max-height:400px;overflow:auto"></pre>
+
       <!-- C2: A/B 變體勝出回測 -->
       <h3>A/B 變體勝出（過去 7 天）</h3>
       <p class="hint">
