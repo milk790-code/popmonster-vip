@@ -29,6 +29,7 @@
       <button data-tab="schedule">Schedule</button>
       <button data-tab="status">Status board</button>
       <button data-tab="accounts">Accounts</button>
+      <button data-tab="media">素材庫</button>
       <button data-tab="insights">Insights</button>
       <button data-tab="permissions">協作權限</button>
       <button data-tab="transfers">Ownership 轉移</button>
@@ -268,6 +269,40 @@
         </thead>
         <tbody></tbody>
       </table>
+    </section>
+
+    <section id="tab-media" class="tab">
+      <h2>素材庫</h2>
+      <p class="hint">
+        看你過去上傳的影片 / 圖片；點縮圖回填到 Compose 或 Daily 的 media_id
+        欄。Video 顯示 1:1 cover frame（轉碼完成後才會有），未轉完顯示
+        spinning。
+      </p>
+      <div class="insights-controls">
+        <label>類型
+          <select id="mediaKind">
+            <option value="">全部</option>
+            <option value="video">video</option>
+            <option value="image">image</option>
+          </select>
+        </label>
+        <label>轉碼狀態
+          <select id="mediaTranscode">
+            <option value="">全部</option>
+            <option value="done">done</option>
+            <option value="pending">pending</option>
+            <option value="failed">failed</option>
+            <option value="skipped">skipped</option>
+          </select>
+        </label>
+        <button id="reloadMedia">重新載入</button>
+      </div>
+      <div id="mediaGrid" class="media-grid"></div>
+      <div class="insights-controls">
+        <button id="mediaPrevPage" class="secondary">上一頁</button>
+        <span id="mediaPageInfo" class="hint"></span>
+        <button id="mediaNextPage" class="secondary">下一頁</button>
+      </div>
     </section>
 
     <section id="tab-insights" class="tab">

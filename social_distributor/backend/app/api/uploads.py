@@ -40,6 +40,65 @@ _EXT = {
 }
 
 
+@bp.get("")
+@bp.get("/")
+def list_uploads():
+    """C4: list this user's media library.
+
+    Query params:
+      - ``user_id`` (required, int)
+      - ``kind`` (optional: ``image`` or ``video``)
+      - ``transcode_status`` (optional: ``done`` / ``pending`` / ``failed`` / ``skipped``)
+      - ``since`` / ``until`` (optional ISO 8601)
+      - ``limit`` (default 50, max 200), ``offset`` (default 0)
+    """
+    from datetime import datetime
+    user_id = request.args.get("user_id", type=int)
+    if not user_id:
+        return jsonify({"error": "user_id required"}), 400
+    q = db.session.query(MediaAsset).filter(MediaAsset.user_id == user_id)
+    if (kind := request.args.get("kind")):
+        if kind not in ("image", "video"):
+            return jsonify({"error": "kind must be image|video"}), 400
+        q = q.filter(MediaAsset.kind == kind)
+    if (ts := request.args.get("transcode_status")):
+        q = q.filter(MediaAsset.transcode_status == ts)
+    for arg, op in (("since", "ge"), ("until", "le")):
+        if (val := request.args.get(arg)):
+            try:
+                dt = datetime.fromisoformat(val.replace("Z", "+00:00"))
+            except ValueError:
+                return jsonify({"error": f"{arg} must be ISO 8601"}), 400
+            q = q.filter(getattr(MediaAsset.created_at, f"__{op}__")(dt))
+    limit = min(max(int(request.args.get("limit", 50)), 1), 200)
+    offset = max(int(request.args.get("offset", 0)), 0)
+    total = q.count()
+    items = q.order_by(MediaAsset.created_at.desc()).limit(limit).offset(offset).all()
+    return jsonify({
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "items": [_serialize_asset(m) for m in items],
+    })
+
+
+def _serialize_asset(m: MediaAsset) -> dict:
+    return {
+        "id": m.id,
+        "kind": m.kind,
+        "storage_url": m.storage_url,
+        "mime_type": m.mime_type,
+        "width": m.width,
+        "height": m.height,
+        "duration_seconds": m.duration_seconds,
+        "sha256": m.sha256,
+        "transcode_status": m.transcode_status,
+        "derivatives": m.derivatives or {},
+        "compliance_status": m.compliance_status,
+        "created_at": m.created_at.isoformat() if m.created_at else None,
+    }
+
+
 @bp.get("/check")
 def check_dedup():
     """Look up an existing MediaAsset by sha256 to skip re-upload."""

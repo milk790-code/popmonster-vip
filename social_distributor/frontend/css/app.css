@@ -134,6 +134,49 @@ th { color: var(--muted); font-weight: 500; }
 .insights-controls { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin-bottom: 12px; }
 .insights-controls label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
 
+/* --- Media library grid (C4) --- */
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.media-tile {
+  background: #181b22;
+  border: 1px solid #23272e;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.media-tile:hover { border-color: var(--accent); }
+.media-tile .thumb {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #0f1115 center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  font-size: 12px;
+}
+.media-tile .meta {
+  padding: 6px 8px;
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+.media-tile .meta .pill {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: #23272e;
+}
+.media-tile .meta .pill.done { background: #1f3a2a; color: #6abf69; }
+.media-tile .meta .pill.pending { background: #3a3520; color: #c8a96b; }
+.media-tile .meta .pill.failed { background: #3a1f1f; color: #e57373; }
+
 /* --- Onboarding banner (A8) --- */
 .onboarding {
   background: var(--panel);

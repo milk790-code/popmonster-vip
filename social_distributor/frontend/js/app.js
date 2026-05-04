@@ -68,6 +68,7 @@ document.querySelectorAll(".topbar nav button").forEach((btn) => {
     if (btn.dataset.tab === "accounts") loadAccounts();
     if (btn.dataset.tab === "audit") loadAudit();
     if (btn.dataset.tab === "groups") loadGroups();
+    if (btn.dataset.tab === "media") loadMedia();
     if (btn.dataset.tab === "distribute") loadDistributeGroups();
     if (btn.dataset.tab === "insights") loadInsights();
     if (btn.dataset.tab === "daily") loadDailyDeps();
@@ -1231,4 +1232,94 @@ document.getElementById("rbPromoteBtn").addEventListener("click", async () => {
   }
   out.textContent = JSON.stringify(results, null, 2);
   loadRbCandidates();
+});
+
+// --- C4: 素材庫 -------------------------------------------------------
+const mediaState = { offset: 0, limit: 24, total: 0 };
+
+async function loadMedia() {
+  const userId = Number(userIdInput.value);
+  if (!userId) return;
+  const kind = document.getElementById("mediaKind").value;
+  const ts = document.getElementById("mediaTranscode").value;
+  const params = new URLSearchParams({
+    user_id: userId, limit: mediaState.limit, offset: mediaState.offset,
+  });
+  if (kind) params.set("kind", kind);
+  if (ts) params.set("transcode_status", ts);
+  const grid = document.getElementById("mediaGrid");
+  grid.textContent = "Loading…";
+  try {
+    const data = await api(`/api/uploads?${params}`);
+    mediaState.total = data.total;
+    grid.innerHTML = "";
+    if (!data.items.length) {
+      grid.innerHTML = `<p class="hint">沒有素材。先去 Daily 或 Compose 上傳一個檔案。</p>`;
+    }
+    for (const m of data.items) {
+      const tile = document.createElement("div");
+      tile.className = "media-tile";
+      tile.dataset.mediaId = m.id;
+      const cover = m.kind === "image"
+        ? m.storage_url
+        : (m.derivatives?.["1:1"] || m.derivatives?.["9:16"] || "");
+      const thumb = cover
+        ? `<div class="thumb" style="background-image:url('${cover}')"></div>`
+        : `<div class="thumb">${m.kind === "video" ? "🎬" : "🖼"} ${m.transcode_status}</div>`;
+      tile.innerHTML = `
+        ${thumb}
+        <div class="meta">
+          <span>#${m.id} · ${m.kind}</span>
+          <span class="pill ${m.transcode_status}">${m.transcode_status}</span>
+        </div>`;
+      tile.addEventListener("click", () => _useMediaInActiveForm(m.id));
+      grid.appendChild(tile);
+    }
+    document.getElementById("mediaPageInfo").textContent =
+      `${data.offset + 1}–${data.offset + data.items.length} / ${data.total}`;
+  } catch (err) {
+    grid.innerHTML = `<p class="error">${err.message}</p>`;
+  }
+}
+
+function _useMediaInActiveForm(mediaId) {
+  // Try to fill the most likely target field. Compose's media id input wins
+  // if present and visible; otherwise fall back to the Daily flow.
+  const candidates = ["composeMediaId", "dailyMediaId"];
+  for (const id of candidates) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value = String(mediaId);
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+      // Flash a short status
+      const banner = document.createElement("div");
+      banner.className = "onboarding accent";
+      banner.style.position = "fixed";
+      banner.style.bottom = "20px";
+      banner.style.right = "20px";
+      banner.style.zIndex = "9999";
+      banner.innerHTML = `<strong>素材 #${mediaId}</strong><p>已填入 ${id}</p>`;
+      document.body.appendChild(banner);
+      setTimeout(() => banner.remove(), 2500);
+      return;
+    }
+  }
+  // No active form found — copy to clipboard as fallback
+  navigator.clipboard?.writeText(String(mediaId));
+  alert(`media_id ${mediaId} copied to clipboard`);
+}
+
+document.getElementById("reloadMedia")?.addEventListener("click", () => {
+  mediaState.offset = 0;
+  loadMedia();
+});
+document.getElementById("mediaPrevPage")?.addEventListener("click", () => {
+  mediaState.offset = Math.max(0, mediaState.offset - mediaState.limit);
+  loadMedia();
+});
+document.getElementById("mediaNextPage")?.addEventListener("click", () => {
+  if (mediaState.offset + mediaState.limit < mediaState.total) {
+    mediaState.offset += mediaState.limit;
+    loadMedia();
+  }
 });
