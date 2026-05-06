@@ -1,0 +1,23 @@
+FROM nginx:1.27-alpine
+
+# Default values overridden by Railway env vars
+ENV API_BASE_URL=http://localhost:5000 \
+    CACHE_VERSION=prod \
+    PORT=80
+
+# Copy site as templates
+COPY frontend /tmp/frontend
+RUN mkdir -p /usr/share/nginx/html \
+    && cp /tmp/frontend/index.html /usr/share/nginx/html/index.html.tpl \
+    && cp /tmp/frontend/sw.js /usr/share/nginx/html/sw.js.tpl \
+    && cp -r /tmp/frontend/css /usr/share/nginx/html/css \
+    && cp -r /tmp/frontend/js /usr/share/nginx/html/js \
+    && cp -r /tmp/frontend/icons /usr/share/nginx/html/icons 2>/dev/null || true \
+    && cp /tmp/frontend/manifest.json /usr/share/nginx/html/ 2>/dev/null || true \
+    && cp /tmp/frontend/login.html /usr/share/nginx/html/ 2>/dev/null || true \
+    && rm -rf /tmp/frontend
+
+COPY social_distributor/scripts/frontend-entrypoint.sh /docker-entrypoint.d/99-render.sh
+RUN chmod +x /docker-entrypoint.d/99-render.sh
+
+EXPOSE 80
