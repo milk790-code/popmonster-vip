@@ -103,6 +103,29 @@
           <tbody></tbody>
         </table>
       </div>
+
+      <div class="daily-step" style="border-top:2px solid #333;padding-top:16px;">
+        <header>
+          <h2>🤖 自動排程「今天」</h2>
+          <span class="step-hint">用素材庫影片 + 過去成功的文案，自動排成今天的全帳號廣告檔期</span>
+        </header>
+        <div class="grid" style="gap:12px;">
+          <label>連結（會附在每篇文末）
+            <input id="autoLink" type="url" placeholder="https://s.shopee.tw/..." />
+          </label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <label>每帳號影片數<input id="autoVideos" type="number" min="0" max="10" value="2" style="width:60px;" /></label>
+            <label>每帳號圖/文數<input id="autoPosts" type="number" min="0" max="10" value="2" style="width:60px;" /></label>
+            <label>開始時段<input id="autoStart" type="number" min="0" max="23" value="10" style="width:60px;" />:00</label>
+            <label>結束時段<input id="autoEnd" type="number" min="1" max="24" value="22" style="width:60px;" />:00</label>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button id="autoPreviewBtn" type="button">預覽（不寫）</button>
+            <button id="autoCommitBtn" type="button" style="background:#c8a96b;">確定排程</button>
+          </div>
+          <div id="autoOutput" style="background:#1a1d24;padding:12px;border-radius:6px;font-family:monospace;font-size:12px;white-space:pre-wrap;max-height:400px;overflow:auto;"></div>
+        </div>
+      </div>
     </section>
 
     <section id="tab-compose" class="tab">

@@ -991,6 +991,69 @@ function nextOccurrence(dayLabel, hour) {
 
 document.getElementById("dailyRefreshStatus").addEventListener("click", loadDailyStatus);
 
+// --- Auto-schedule "today" ---------------------------------------------
+async function runAutoSchedule(dryRun) {
+  const userId = Number(userIdInput.value);
+  const out = document.getElementById("autoOutput");
+  const link = document.getElementById("autoLink").value.trim();
+  const videosPerAccount = Number(document.getElementById("autoVideos").value);
+  const postsPerAccount = Number(document.getElementById("autoPosts").value);
+  const windowStart = Number(document.getElementById("autoStart").value);
+  const windowEnd = Number(document.getElementById("autoEnd").value);
+  out.textContent = dryRun ? "預覽中…" : "排程中…";
+  try {
+    const res = await api(`/api/auto-schedule/today?user_id=${userId}`, {
+      method: "POST",
+      body: JSON.stringify({
+        videos_per_account: videosPerAccount,
+        posts_per_account: postsPerAccount,
+        link: link || null,
+        window_start_hour: windowStart,
+        window_end_hour: windowEnd,
+        platforms: ["facebook"],
+        dry_run: dryRun,
+      }),
+    });
+    const s = res.summary;
+    let text = `${dryRun ? "🔍 預覽" : "✅ 已排程"}\n`;
+    text += `帳號數：${s.accounts}\n`;
+    text += `文案池：${s.captions_available} 個 caption\n`;
+    text += `影片庫存：${s.videos_available} 個（ready）\n`;
+    text += `圖片庫存：${s.images_available} 個\n`;
+    text += `預計建立：${s.posts_created} 篇\n`;
+    if (s.earliest_scheduled_at) {
+      text += `最早：${new Date(s.earliest_scheduled_at).toLocaleString()}\n`;
+      text += `最晚：${new Date(s.latest_scheduled_at).toLocaleString()}\n`;
+    }
+    if (s.warnings && s.warnings.length) {
+      text += `\n⚠️ 警告：\n`;
+      for (const w of s.warnings) text += `  - ${w}\n`;
+    }
+    if (res.by_account.length && res.by_account.length <= 10) {
+      text += `\n各帳號明細：\n`;
+      for (const a of res.by_account) {
+        text += `  ${a.platform} @ ${a.handle}: ${a.scheduled_ats.length} 篇\n`;
+      }
+    } else if (res.by_account.length) {
+      text += `\n各帳號明細：${res.by_account.length} 個帳號（折疊；前 5 個）\n`;
+      for (const a of res.by_account.slice(0, 5)) {
+        text += `  ${a.platform} @ ${a.handle}: ${a.scheduled_ats.length} 篇\n`;
+      }
+    }
+    out.textContent = text;
+  } catch (e) {
+    out.textContent = `❌ 失敗：${e.message}`;
+  }
+}
+document.getElementById("autoPreviewBtn").addEventListener(
+  "click", () => runAutoSchedule(true)
+);
+document.getElementById("autoCommitBtn").addEventListener("click", () => {
+  if (confirm("確定要建立排程嗎？所有帳號的貼文會在指定時段自動發出。")) {
+    runAutoSchedule(false);
+  }
+});
+
 async function loadDailyStatus() {
   if (!dailyState.lastTargets.length) return;
   const userId = Number(userIdInput.value);

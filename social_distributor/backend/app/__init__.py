@@ -53,6 +53,7 @@ def create_app() -> Flask:
     from .api import (
         accounts_bp,
         audit_bp,
+        auto_schedule_bp,
         events_bp,
         experiments_bp,
         groups_bp,
@@ -71,6 +72,7 @@ def create_app() -> Flask:
     app.register_blueprint(login_bp)
     app.register_blueprint(accounts_bp)
     app.register_blueprint(audit_bp)
+    app.register_blueprint(auto_schedule_bp)
     app.register_blueprint(events_bp)
     app.register_blueprint(experiments_bp)
     app.register_blueprint(groups_bp)
