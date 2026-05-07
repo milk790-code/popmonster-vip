@@ -31,6 +31,7 @@ def auto_schedule_today():
             spacing_minutes_min=int(body.get("spacing_minutes_min", 5)),
             spacing_minutes_max=int(body.get("spacing_minutes_max", 15)),
             platforms=tuple(body.get("platforms") or ("facebook",)),
+            timezone=str(body.get("timezone") or "Asia/Taipei"),
             dry_run=bool(body.get("dry_run", False)),
         )
     except (ValueError, TypeError) as e:

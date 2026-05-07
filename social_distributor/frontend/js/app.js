@@ -1000,6 +1000,9 @@ async function runAutoSchedule(dryRun) {
   const postsPerAccount = Number(document.getElementById("autoPosts").value);
   const windowStart = Number(document.getElementById("autoStart").value);
   const windowEnd = Number(document.getElementById("autoEnd").value);
+  // Use the browser's IANA timezone so window hours match what user sees.
+  let tz = "Asia/Taipei";
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || tz; } catch {}
   out.textContent = dryRun ? "預覽中…" : "排程中…";
   try {
     const res = await api(`/api/auto-schedule/today?user_id=${userId}`, {
@@ -1010,6 +1013,7 @@ async function runAutoSchedule(dryRun) {
         link: link || null,
         window_start_hour: windowStart,
         window_end_hour: windowEnd,
+        timezone: tz,
         platforms: ["facebook"],
         dry_run: dryRun,
       }),

@@ -13,8 +13,9 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass
-from datetime import datetime, time, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Sequence
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 
@@ -40,8 +41,9 @@ class AutoScheduleParams:
     spacing_minutes_min: int = 5
     spacing_minutes_max: int = 15
     platforms: tuple[str, ...] = ("facebook",)
+    timezone: str = "Asia/Taipei"
     dry_run: bool = False
-    today: datetime | None = None  # injectable for tests
+    today: datetime | None = None  # injectable for tests; UTC
 
 
 def _platform_enums(names: Sequence[str]) -> list[Platform]:
@@ -95,28 +97,43 @@ def _active_accounts(user_id: int, platforms: list[Platform]) -> list[SocialAcco
 
 def _spread_today(
     n_slots: int,
-    today_local: datetime,
+    now_utc: datetime,
     start_hour: int,
     end_hour: int,
+    tz_name: str,
     rng: random.Random,
 ) -> list[datetime]:
-    """Evenly bin the [start_hour, end_hour) window into n_slots; pick one
-    minute inside each bin (jittered). Returns sorted UTC datetimes.
+    """Evenly bin today's [start_hour, end_hour) window in the given timezone
+    into n_slots; pick one minute inside each bin (jittered). Returns sorted
+    UTC datetimes.
 
-    If the window has already started, only future minutes are eligible.
+    Window hours are interpreted in ``tz_name``: e.g. start=10, end=22,
+    tz="Asia/Taipei" means [10:00 Taipei, 22:00 Taipei) on the local
+    "today" relative to ``now_utc``. If the window has already started,
+    only future minutes are eligible.
+
+    Returns [] when:
+    - n_slots <= 0
+    - start_hour >= end_hour
+    - The window has already ended for "today" in tz_name
     """
     if start_hour >= end_hour or n_slots <= 0:
         return []
-    window_start = today_local.replace(
+    try:
+        tz = ZoneInfo(tz_name)
+    except Exception:
+        tz = ZoneInfo("UTC")
+    now_local = now_utc.astimezone(tz)
+    window_start_local = now_local.replace(
         hour=start_hour, minute=0, second=0, microsecond=0
     )
-    window_end = today_local.replace(
+    window_end_local = now_local.replace(
         hour=end_hour, minute=0, second=0, microsecond=0
     )
-    earliest = max(window_start, today_local + timedelta(minutes=1))
-    if earliest >= window_end:
+    earliest_local = max(window_start_local, now_local + timedelta(minutes=1))
+    if earliest_local >= window_end_local:
         return []
-    span_minutes = int((window_end - earliest).total_seconds() // 60)
+    span_minutes = int((window_end_local - earliest_local).total_seconds() // 60)
     if span_minutes <= 0:
         return []
     bin_size = max(1, span_minutes // n_slots)
@@ -128,7 +145,7 @@ def _spread_today(
             offset_min = bin_start_min
         else:
             offset_min = rng.randint(bin_start_min, bin_end_min - 1)
-        out.append(earliest + timedelta(minutes=offset_min))
+        out.append((earliest_local + timedelta(minutes=offset_min)).astimezone(timezone.utc))
     return out
 
 
@@ -177,6 +194,21 @@ def build_today_schedule(params: AutoScheduleParams) -> dict:
             "no ready videos in library; videos_per_account treated as 0"
         )
 
+    # Heads-up if today's window is already over in the user's TZ.
+    try:
+        tz = ZoneInfo(params.timezone)
+    except Exception:
+        tz = ZoneInfo("UTC")
+    now_local = (today).astimezone(tz)
+    end_local = now_local.replace(
+        hour=params.window_end_hour, minute=0, second=0, microsecond=0
+    )
+    if now_local >= end_local:
+        summary["warnings"].append(
+            f"window {params.window_start_hour:02d}:00–{params.window_end_hour:02d}:00 "
+            f"({params.timezone}) has already passed for today; nothing scheduled"
+        )
+
     all_scheduled: list[datetime] = []
 
     for account in accounts:
@@ -202,9 +234,10 @@ def build_today_schedule(params: AutoScheduleParams) -> dict:
 
         scheduled_ats = _spread_today(
             n_slots=len(media_picks),
-            today_local=today,
+            now_utc=today,
             start_hour=params.window_start_hour,
             end_hour=params.window_end_hour,
+            tz_name=params.timezone,
             rng=rng,
         )
         if len(scheduled_ats) < len(media_picks):

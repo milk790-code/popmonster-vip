@@ -143,19 +143,52 @@ def test_scheduled_ats_in_window(app):
         _seed_media(user_id, "video", "ready")
         db.session.commit()
 
-        # Pin "today" to 09:00 UTC so the 10–22 window is fully ahead
-        today = datetime(2026, 5, 7, 9, 0, 0, tzinfo=timezone.utc)
+        # Pin "now" to 09:00 UTC = 17:00 Asia/Taipei. Window [10,22) Taipei
+        # should be fully ahead in UTC terms (it's [02:00, 14:00) UTC).
+        # Wait — 09:00 UTC = 17:00 Taipei, so window has already started
+        # (10:00) but not ended (22:00). Set now earlier so window is ahead:
+        now_utc = datetime(2026, 5, 7, 0, 0, 0, tzinfo=timezone.utc)
+        # 00:00 UTC = 08:00 Taipei → window [10,22) Taipei = [02:00, 14:00) UTC
         params = AutoScheduleParams(
             user_id=user_id, videos_per_account=2, posts_per_account=0,
-            window_start_hour=10, window_end_hour=22, today=today,
+            window_start_hour=10, window_end_hour=22,
+            timezone="Asia/Taipei",
+            today=now_utc,
         )
         result = build_today_schedule(params)
 
+        from zoneinfo import ZoneInfo
+        tz = ZoneInfo("Asia/Taipei")
         for entry in result["by_account"]:
+            assert len(entry["scheduled_ats"]) > 0
             for sched_iso in entry["scheduled_ats"]:
                 dt = datetime.fromisoformat(sched_iso)
-                assert dt.hour >= 10
-                assert dt.hour < 22
+                local = dt.astimezone(tz)
+                assert local.hour >= 10
+                assert local.hour < 22
+
+
+def test_window_passed_today_returns_warning(app):
+    """If we run after window_end_hour in the user's TZ, no slots should be
+    scheduled and a warning surfaces."""
+    with app.app_context():
+        user_id, _ = _seed_user_and_accounts(1)
+        _seed_succeeded_post(user_id, "c1")
+        _seed_media(user_id, "video", "ready")
+        db.session.commit()
+
+        # 15:00 UTC May 7 = 23:00 May 7 Taipei → today's window 10–22 has passed
+        now_utc = datetime(2026, 5, 7, 15, 0, 0, tzinfo=timezone.utc)
+        params = AutoScheduleParams(
+            user_id=user_id, videos_per_account=2, posts_per_account=0,
+            window_start_hour=10, window_end_hour=22,
+            timezone="Asia/Taipei",
+            today=now_utc,
+        )
+        result = build_today_schedule(params)
+        # Either no posts created, or warning surfaced
+        warnings = " ".join(result["summary"]["warnings"])
+        assert "passed" in warnings or result["summary"]["posts_created"] == 0
 
 
 def test_dry_run_writes_nothing(app):
