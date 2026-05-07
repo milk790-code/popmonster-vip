@@ -78,6 +78,13 @@ class MetaOAuth(OAuthProvider):
             "redirect_uri": creds.redirect_uri,
             "response_type": "code",
             "state": state,
+            # auth_type=reauthorize forces FB to show the consent dialog even
+            # for already-connected users. Without it, FB Login for Business
+            # short-circuits to a dead-end "already connected" info page that
+            # never redirects back to our callback, so we can't re-pull the
+            # Page list (e.g. when the user has added new Pages since the
+            # original OAuth, or when paging cursor was missed in older code).
+            "auth_type": "reauthorize",
         }
         # Facebook Login for Business: scopes are baked into the login config
         # so we send config_id instead of scope. Falls back to classic
