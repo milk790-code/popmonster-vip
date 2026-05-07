@@ -26,6 +26,7 @@ from ..extensions import db
 from ..models import MediaAsset
 from ..scheduler.tasks import transcode_media
 from ..utils.audit import record as audit
+from ..utils.auth import current_user_id
 from ..utils.storage import presign_upload
 
 bp = Blueprint("uploads", __name__, url_prefix="/api/uploads")
@@ -53,7 +54,7 @@ def list_uploads():
       - ``limit`` (default 50, max 200), ``offset`` (default 0)
     """
     from datetime import datetime
-    user_id = request.args.get("user_id", type=int)
+    user_id = current_user_id()
     if not user_id:
         return jsonify({"error": "user_id required"}), 400
     q = db.session.query(MediaAsset).filter(MediaAsset.user_id == user_id)
@@ -103,7 +104,7 @@ def _serialize_asset(m: MediaAsset) -> dict:
 def check_dedup():
     """Look up an existing MediaAsset by sha256 to skip re-upload."""
     sha = request.args.get("sha256")
-    user_id = request.args.get("user_id", type=int)
+    user_id = current_user_id()
     if not (sha and user_id):
         return jsonify({"error": "sha256 and user_id required"}), 400
     existing = (
@@ -125,9 +126,11 @@ def check_dedup():
 
 @bp.post("/presign")
 def presign():
-    body = request.get_json(force=True)
-    user_id = int(body["user_id"])
-    kind = body["kind"]
+    body = request.get_json(silent=True) or {}
+    user_id = current_user_id()
+    if not user_id:
+        return jsonify({"error": "user_id required"}), 400
+    kind = body.get("kind")
     content_type = body.get("content_type", "application/octet-stream")
     if kind not in ("video", "image"):
         return jsonify({"error": "kind must be video or image"}), 400
@@ -159,8 +162,12 @@ def complete():
     caller can decide whether to delete it (we don't, because orphan cleanup
     via S3 lifecycle policies is more reliable than per-request deletes).
     """
-    body = request.get_json(force=True)
-    user_id = int(body["user_id"])
+    body = request.get_json(silent=True) or {}
+    user_id = current_user_id()
+    if not user_id:
+        return jsonify({"error": "user_id required"}), 400
+    if not body.get("kind") or not body.get("bucket") or not body.get("key") or not body.get("public_get_url"):
+        return jsonify({"error": "kind, bucket, key, public_get_url required"}), 400
     sha = body.get("sha256") or None
 
     if sha:
