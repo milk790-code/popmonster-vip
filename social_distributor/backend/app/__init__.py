@@ -30,8 +30,19 @@ def create_app() -> Flask:
 
     db.init_app(app)
     migrate.init_app(app, db)
-    cors.init_app(app, resources={r"/api/*": {"origins": "*",
-                                              "supports_credentials": True}})
+    raw_origins = os.environ.get("CORS_ALLOWED_ORIGINS", "*").strip()
+    cors_origins = (
+        "*" if raw_origins in ("", "*")
+        else [o.strip() for o in raw_origins.split(",") if o.strip()]
+    )
+    cors.init_app(
+        app,
+        resources={
+            r"/api/*": {"origins": cors_origins, "supports_credentials": True},
+            r"/auth/*": {"origins": cors_origins, "supports_credentials": True},
+            r"/healthz*": {"origins": cors_origins},
+        },
+    )
 
     # C3: resolve current user once per request, surface deprecation header
     # for any caller still using ?user_id= backcompat.
