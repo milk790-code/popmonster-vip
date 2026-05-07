@@ -272,3 +272,67 @@ def test_meta_callback_skips_personal_ig(client, app, monkeypatch):
         fb_count = db.session.query(SocialAccount).filter_by(
             platform=Platform.FACEBOOK).count()
         assert fb_count == 1
+
+
+# -- 10.6: /me/accounts pagination cursor followed -----------------------
+
+def test_meta_callback_follows_paging_cursor(client, app):
+    """User with >25 Pages: callback must follow paging.next, not stop at
+    page 1 of Graph API results."""
+    from app.auth import routes as auth_routes
+
+    with app.app_context():
+        user = User(email="paging@example.com", display_name="paging")
+        db.session.add(user); db.session.commit()
+        user_id = user.id
+
+    state = auth_routes._serializer().dumps(
+        {"user_id": user_id, "provider": "meta"}
+    )
+    bundle = TokenBundle(
+        access_token="user-tok", refresh_token=None,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=60),
+        scopes=["pages_show_list"],
+        extra={},
+    )
+    fake_provider = MagicMock()
+    fake_provider.exchange_code.return_value = bundle
+
+    page1 = {
+        "data": [
+            {"id": f"page-{i}", "name": f"Page {i}", "access_token": f"tok-{i}"}
+            for i in range(25)
+        ],
+        "paging": {"next": "https://graph.facebook.com/v20.0/me/accounts?after=cursor1"},
+    }
+    page2 = {
+        "data": [
+            {"id": f"page-{i}", "name": f"Page {i}", "access_token": f"tok-{i}"}
+            for i in range(25, 51)
+        ],
+        # No paging.next on the last page
+    }
+    calls = {"n": 0}
+
+    def fake_request_json(method, url, **kw):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            assert "/me/accounts" in url and url.startswith("https://graph.facebook.com")
+            return page1
+        if calls["n"] == 2:
+            assert url == "https://graph.facebook.com/v20.0/me/accounts?after=cursor1"
+            assert kw.get("params") is None
+            return page2
+        raise AssertionError(f"unexpected call #{calls['n']}: {url}")
+
+    with patch("app.auth.routes.get_oauth_provider", return_value=fake_provider), \
+         patch("app.auth.routes.request_json", side_effect=fake_request_json):
+        res = client.get(f"/auth/meta/callback?code=x&state={state}")
+
+    assert res.status_code == 200
+    assert calls["n"] == 2  # both pages fetched
+
+    with app.app_context():
+        fb_count = db.session.query(SocialAccount).filter_by(
+            platform=Platform.FACEBOOK).count()
+        assert fb_count == 51  # 25 + 26 across both pages

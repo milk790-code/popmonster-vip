@@ -209,13 +209,21 @@ def _persist_accounts(provider: str, user_id: int, bundle):
                 "handle": handle, "unaudited": unaudited}
 
     if provider == "meta":
-        pages = request_json(
-            "GET",
-            f"{GRAPH_BASE}/me/accounts",
-            params={"access_token": bundle.access_token,
-                    "fields": "id,name,access_token,instagram_business_account"},
-        )
-        for page in pages.get("data", []):
+        all_pages = []
+        url = f"{GRAPH_BASE}/me/accounts"
+        params = {
+            "access_token": bundle.access_token,
+            "fields": "id,name,access_token,instagram_business_account",
+            "limit": 100,
+        }
+        while url:
+            payload = request_json("GET", url, params=params)
+            all_pages.extend(payload.get("data", []))
+            url = (payload.get("paging") or {}).get("next")
+            params = None
+            if len(all_pages) > 1000:
+                break
+        for page in all_pages:
             page_token = page["access_token"]
             created.append(
                 upsert(
