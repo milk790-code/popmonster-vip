@@ -26,6 +26,7 @@ Honest scope notes wired into the callback:
 """
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 
 from flask import Blueprint, Response, jsonify, request
@@ -39,6 +40,8 @@ from ..platforms._http import request_json
 from ..platforms.facebook import GRAPH_BASE
 from ..utils.audit import record as audit
 from ..utils.crypto import cipher
+
+logger = logging.getLogger(__name__)
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -90,13 +93,21 @@ def callback(provider: str):
     try:
         bundle = get_oauth_provider(provider).exchange_code(code)
     except Exception as exc:  # noqa: BLE001 - surface platform error in UI
-        return _callback_html(False, f"token exchange failed: {exc}", [], [])
+        logger.exception("oauth.exchange_failed provider=%s", provider)
+        return _callback_html(
+            False, f"token exchange failed [{type(exc).__name__}]: {exc}", [], []
+        )
 
     user_id = payload["user_id"]
     try:
         connected, skipped = _persist_accounts(provider, user_id, bundle)
     except Exception as exc:  # noqa: BLE001 - any per-account write failure
-        return _callback_html(False, f"persist failed: {exc}", [], [])
+        logger.exception(
+            "oauth.persist_failed provider=%s user_id=%s", provider, user_id
+        )
+        return _callback_html(
+            False, f"persist failed [{type(exc).__name__}]: {exc}", [], []
+        )
 
     return _callback_html(True, "success", connected, skipped)
 
