@@ -74,7 +74,7 @@ document.querySelectorAll(".topbar nav button").forEach((btn) => {
     if (btn.dataset.tab === "daily") loadDailyDeps();
     if (btn.dataset.tab === "permissions") { loadGrants(); loadDrift(); }
     if (btn.dataset.tab === "transfers") loadTransfers();
-    if (btn.dataset.tab === "rebroadcast") loadRbCandidates();
+    if (btn.dataset.tab === "rebroadcast") { loadRbDeps().then(loadRbCandidates); }
   });
 });
 
@@ -1250,10 +1250,39 @@ async function loadTransfers() {
 }
 
 // --- Rebroadcast ------------------------------------------------------
+const rbState = { accounts: [], groups: [] };
+
+async function loadRbDeps() {
+  const userId = Number(userIdInput.value);
+  if (!userId) return;
+  rbState.accounts = await api(`/api/accounts?user_id=${userId}`);
+  rbState.groups = await api(`/api/groups?user_id=${userId}`);
+  // Source picker (single, FB-only since rebroadcast scan currently supports FB)
+  const src = document.getElementById("rbSourceSelect");
+  const filt = document.getElementById("rbFilterSource");
+  src.innerHTML = '<option value="">— 選一個來源帳號 —</option>';
+  filt.innerHTML = '<option value="">全部</option>';
+  for (const a of rbState.accounts.filter((x) => !x.revoked_at)) {
+    const label = `${a.platform} · ${a.handle || a.external_account_id} (#${a.id})`;
+    src.insertAdjacentHTML("beforeend", `<option value="${a.id}">${escapeHtml(label)}</option>`);
+    filt.insertAdjacentHTML("beforeend", `<option value="${a.id}">${escapeHtml(label)}</option>`);
+  }
+  // Group multi-select
+  const grp = document.getElementById("rbGroupSelect");
+  grp.innerHTML = "";
+  for (const g of rbState.groups) {
+    const memberCount = (g.members || []).length;
+    grp.insertAdjacentHTML(
+      "beforeend",
+      `<option value="${g.id}">${escapeHtml(g.name)} (${memberCount} 帳號)</option>`,
+    );
+  }
+}
+
 document.getElementById("rbScanBtn").addEventListener("click", async () => {
-  const sourceId = Number(document.getElementById("rbSourceId").value);
+  const sourceId = Number(document.getElementById("rbSourceSelect").value);
   const limit = Number(document.getElementById("rbLimit").value || 25);
-  if (!sourceId) { alert("請填來源帳號 ID"); return; }
+  if (!sourceId) { alert("請選來源帳號"); return; }
   document.getElementById("rbScanOutput").textContent = "Scanning…";
   try {
     const res = await api("/api/rebroadcast/scan", {
@@ -1267,17 +1296,66 @@ document.getElementById("rbScanBtn").addEventListener("click", async () => {
   }
 });
 
+document.getElementById("rbScanAllBtn").addEventListener("click", async () => {
+  const limit = Number(document.getElementById("rbLimit").value || 25);
+  const fbAccounts = rbState.accounts.filter(
+    (a) => a.platform === "facebook" && !a.revoked_at
+  );
+  if (!fbAccounts.length) { alert("沒有任何 FB 帳號"); return; }
+  if (!confirm(`即將掃描 ${fbAccounts.length} 個 FB 粉專，每個取 ${limit} 篇歷史貼文。確定？`)) return;
+  const out = document.getElementById("rbScanOutput");
+  out.textContent = `Scanning ${fbAccounts.length} accounts...\n`;
+  let ok = 0, fail = 0, totalCandidates = 0;
+  for (const acc of fbAccounts) {
+    try {
+      const res = await api("/api/rebroadcast/scan", {
+        method: "POST",
+        body: JSON.stringify({ source_account_id: acc.id, limit }),
+      });
+      const n = res.inserted ?? 0;
+      const examined = res.examined ?? 0;
+      totalCandidates += n;
+      ok++;
+      out.textContent += `✓ ${acc.handle}: +${n} new (examined ${examined})\n`;
+    } catch (err) {
+      fail++;
+      out.textContent += `✗ ${acc.handle}: ${err.message}\n`;
+    }
+  }
+  out.textContent += `\nDone. ok=${ok} fail=${fail} total_candidates=${totalCandidates}`;
+  loadRbCandidates();
+});
+
 document.getElementById("rbRefresh").addEventListener("click", loadRbCandidates);
+document.getElementById("rbHideUsed").addEventListener("change", loadRbCandidates);
+document.getElementById("rbFilterSource").addEventListener("change", loadRbCandidates);
+document.getElementById("rbSelectAll").addEventListener("click", () => {
+  document.querySelectorAll(".rb-pick:not(:disabled)").forEach((cb) => { cb.checked = true; });
+});
+document.getElementById("rbDeselectAll").addEventListener("click", () => {
+  document.querySelectorAll(".rb-pick").forEach((cb) => { cb.checked = false; });
+});
 
 async function loadRbCandidates() {
   const userId = Number(userIdInput.value);
+  if (!userId) return;
   const rows = await api(`/api/rebroadcast/candidates?user_id=${userId}`);
+  const filterSource = Number(document.getElementById("rbFilterSource").value || 0);
+  const hideUsed = document.getElementById("rbHideUsed").checked;
+  const accountById = new Map(rbState.accounts.map((a) => [a.id, a]));
   const tbody = document.querySelector("#rbTable tbody");
   tbody.innerHTML = "";
+  let shown = 0;
   for (const c of rows) {
+    if (filterSource && c.source_account_id !== filterSource) continue;
+    if (hideUsed && c.used) continue;
+    shown++;
+    const acc = accountById.get(c.source_account_id);
+    const sourceLabel = acc ? `${acc.platform} · ${acc.handle}` : `#${c.source_account_id}`;
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><input type="checkbox" class="rb-pick" data-id="${c.id}" ${c.used ? "disabled" : ""}/></td>
+      <td>${escapeHtml(sourceLabel)}</td>
       <td>${escapeHtml(c.external_post_id)}</td>
       <td>${escapeHtml((c.snippet || "").slice(0, 200))}</td>
       <td>${c.permalink ? `<a href="${c.permalink}" target="_blank">原文</a>` : ""}</td>
@@ -1285,15 +1363,18 @@ async function loadRbCandidates() {
     `;
     tbody.appendChild(tr);
   }
+  if (!shown) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#888;">沒有候選（先掃描或調整過濾條件）</td></tr>';
+  }
 }
 
 document.getElementById("rbPromoteBtn").addEventListener("click", async () => {
   const picked = Array.from(document.querySelectorAll(".rb-pick:checked"))
     .map((cb) => Number(cb.dataset.id));
   if (!picked.length) { alert("先勾選至少一個候選"); return; }
-  const groupIds = (document.getElementById("rbGroupIds").value || "")
-    .split(",").map((s) => Number(s.trim())).filter(Boolean);
-  if (!groupIds.length) { alert("請填群組 ID"); return; }
+  const groupIds = Array.from(document.getElementById("rbGroupSelect").selectedOptions)
+    .map((o) => Number(o.value)).filter(Boolean);
+  if (!groupIds.length) { alert("請選至少一個人設群組"); return; }
   const jitter = Number(document.getElementById("rbJitter").value || 0);
   const variants = document.getElementById("rbVariants").checked;
 
