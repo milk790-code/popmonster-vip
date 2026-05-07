@@ -213,10 +213,13 @@ def test_auto_seed_user_exists(app):
         assert first.id == 1
 
 
-# -- B9: IG non-business account is skipped -------------------------
+# -- 10.8: IG accounts on Pages always persist (no account_type query) ---
 
-def test_meta_callback_skips_personal_ig(client, app, monkeypatch):
-    """Meta callback returning a personal IG account → skipped, not stored."""
+def test_meta_callback_persists_ig_business_account(client, app):
+    """Meta callback queries the IG node for username only (NOT account_type,
+    which doesn't exist on the IG Graph node). Personal IG never appears in
+    instagram_business_account, so we don't filter — every IG linked to an
+    authorized Page becomes a SocialAccount row."""
     from app.auth import routes as auth_routes
 
     with app.app_context():
@@ -244,12 +247,14 @@ def test_meta_callback_skips_personal_ig(client, app, monkeypatch):
             "instagram_business_account": {"id": "ig-1"},
         }]
     }
-    ig_meta = {"username": "personal_ig", "account_type": "PERSONAL"}
+    ig_meta = {"username": "biz_ig"}
 
     def fake_request_json(method, url, **kw):
         if "/me/accounts" in url:
             return pages_response
         if url.endswith("/ig-1"):
+            assert kw.get("params", {}).get("fields") == "username", \
+                "must NOT request account_type — that field doesn't exist on IG node"
             return ig_meta
         raise AssertionError(f"unexpected call: {url}")
 
@@ -259,16 +264,13 @@ def test_meta_callback_skips_personal_ig(client, app, monkeypatch):
 
     assert res.status_code == 200
     body = res.get_data(as_text=True)
-    # FB Page connected, IG personal skipped.
     assert "My Page" in body
-    assert "personal_ig" in body
-    assert "PERSONAL" in body or "BUSINESS" in body  # type surfaced
+    assert "biz_ig" in body
 
     with app.app_context():
-        # Only the FB Page row exists; the IG account was NOT persisted.
         ig_count = db.session.query(SocialAccount).filter_by(
             platform=Platform.INSTAGRAM).count()
-        assert ig_count == 0
+        assert ig_count == 1  # IG persisted, no PERSONAL filter
         fb_count = db.session.query(SocialAccount).filter_by(
             platform=Platform.FACEBOOK).count()
         assert fb_count == 1

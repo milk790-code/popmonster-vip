@@ -51,9 +51,6 @@ PROVIDERS = {
     "youtube": {"platforms": [Platform.YOUTUBE]},
 }
 
-# IG account types that the Graph API actually allows publishing to.
-_IG_PUBLISHABLE_TYPES = {"BUSINESS", "MEDIA_CREATOR"}
-
 
 def _serializer() -> URLSafeTimedSerializer:
     return URLSafeTimedSerializer(config.secret_key, salt="oauth-state")
@@ -253,32 +250,25 @@ def _persist_accounts(provider: str, user_id: int, bundle):
                     "GET",
                     f"{GRAPH_BASE}/{ig_id}",
                     params={"access_token": page_token,
-                            "fields": "username,account_type"},
+                            "fields": "username"},
                 )
                 ig_username = ig_meta.get("username", ig_id)
-                ig_type = ig_meta.get("account_type")  # B9
-                if ig_type and ig_type not in _IG_PUBLISHABLE_TYPES:
-                    skipped.append({
-                        "platform": "instagram",
-                        "handle": ig_username,
-                        "reason": (
-                            f"account_type={ig_type}; needs BUSINESS or "
-                            f"MEDIA_CREATOR for content publishing"
-                        ),
-                    })
-                else:
-                    created.append(
-                        upsert(
-                            Platform.INSTAGRAM,
-                            ig_id,
-                            ig_username,
-                            page_token,
-                            None,
-                            bundle.expires_at,
-                            {"linked_page_id": page["id"],
-                             "account_type": ig_type or "UNKNOWN"},
-                        )
+                # Note: instagram_business_account on a Page only ever exposes
+                # Business or Creator accounts — Personal IG never appears
+                # here, so we don't need to filter by account_type. (The IG
+                # Graph node also doesn't expose an account_type field; trying
+                # to query it returns OAuthException #100.)
+                created.append(
+                    upsert(
+                        Platform.INSTAGRAM,
+                        ig_id,
+                        ig_username,
+                        page_token,
+                        None,
+                        bundle.expires_at,
+                        {"linked_page_id": page["id"]},
                     )
+                )
     elif provider == "tiktok":
         # A5: scope set without video.publish → mark as unaudited (drafts only).
         granted_scopes = set(bundle.scopes or [])
