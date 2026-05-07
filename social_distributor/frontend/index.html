@@ -486,20 +486,34 @@
         CDN 短連結，建議在最後送出前重新上傳一份新版素材以避免來源連結失效。
       </p>
       <div class="grid">
-        <label>來源帳號 ID<input id="rbSourceId" type="number" min="1" /></label>
+        <label>來源帳號
+          <select id="rbSourceSelect"><option value="">— 載入中 —</option></select>
+        </label>
         <label>抓取數量<input id="rbLimit" type="number" min="1" max="100" value="25" /></label>
         <button id="rbScanBtn" type="button">掃描歷史貼文</button>
+        <button id="rbScanAllBtn" type="button" style="background:#c8a96b;">掃描全部 FB 帳號</button>
       </div>
       <pre id="rbScanOutput"></pre>
 
       <h3>候選清單</h3>
-      <button id="rbRefresh">Refresh</button>
+      <div class="grid" style="gap:8px;align-items:center;">
+        <label>過濾來源
+          <select id="rbFilterSource"><option value="">全部</option></select>
+        </label>
+        <label><input type="checkbox" id="rbHideUsed" checked /> 隱藏已 promote</label>
+        <button id="rbRefresh" type="button">Refresh</button>
+        <button id="rbSelectAll" type="button">全選未用</button>
+        <button id="rbDeselectAll" type="button">取消全選</button>
+      </div>
       <table id="rbTable">
-        <thead><tr><th></th><th>平台 ID</th><th>內文（前 200 字）</th><th>連結</th><th>已用</th></tr></thead>
+        <thead><tr><th></th><th>來源</th><th>平台 ID</th><th>內文（前 200 字）</th><th>連結</th><th>已用</th></tr></thead>
         <tbody></tbody>
       </table>
       <div class="grid">
-        <label>要分發到的人設群組 ID（逗號分隔）<input id="rbGroupIds" /></label>
+        <label>要分發到的人設群組
+          <select id="rbGroupSelect" multiple size="4"><option value="">— 載入中 —</option></select>
+          <small class="hint">按住 Cmd/Ctrl 多選</small>
+        </label>
         <label>Jitter（分鐘）<input id="rbJitter" type="number" value="20" /></label>
         <label><input id="rbVariants" type="checkbox" checked /> 為每帳號產生變體文案</label>
         <button id="rbPromoteBtn" type="button">將勾選的候選 promote 並 distribute</button>
