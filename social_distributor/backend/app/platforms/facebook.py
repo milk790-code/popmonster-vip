@@ -6,6 +6,7 @@ Reference:
 """
 from __future__ import annotations
 
+import os
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
 
@@ -75,10 +76,18 @@ class MetaOAuth(OAuthProvider):
         params = {
             "client_id": creds.client_id,
             "redirect_uri": creds.redirect_uri,
-            "scope": ",".join(DEFAULT_SCOPES),
             "response_type": "code",
             "state": state,
         }
+        # Facebook Login for Business: scopes are baked into the login config
+        # so we send config_id instead of scope. Falls back to classic
+        # Facebook Login flow with explicit scopes when META_LOGIN_CONFIG_ID
+        # isn't set.
+        config_id = os.environ.get("META_LOGIN_CONFIG_ID", "").strip()
+        if config_id:
+            params["config_id"] = config_id
+        else:
+            params["scope"] = ",".join(DEFAULT_SCOPES)
         return f"{DIALOG_BASE}?{urlencode(params)}"
 
     def exchange_code(self, code: str) -> TokenBundle:
