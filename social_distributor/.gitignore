@@ -1,0 +1,10 @@
+backend/.env
+backend/.venv/
+backend/instance/
+backend/distributor.db
+backend/celerybeat-schedule*
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+.DS_Store

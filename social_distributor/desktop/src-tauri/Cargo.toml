@@ -1,0 +1,29 @@
+[package]
+name = "social-distributor-desktop"
+version = "0.1.0"
+description = "Native desktop wrapper for Social Distributor"
+authors = ["you"]
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "social_distributor_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
+
+[dependencies]
+tauri = { version = "2.0", features = ["tray-icon"] }
+tauri-plugin-global-shortcut = "2.0"
+tauri-plugin-shell = "2.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+log = "0.4"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true
