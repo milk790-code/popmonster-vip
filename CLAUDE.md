@@ -261,14 +261,23 @@ Rate limits (override defaults):
 - Media: S3 or R2
 - See `SETUP.md` and `RAILWAY.md` for full production hardening checklist
 
----
+## Pitfalls
 
-## Key Insights for Future Contributors
+- **Main site has no build step** — don't introduce Node tooling, bundlers, or frameworks. Pure HTML/CSS/JS is intentional.
+- **Don't bypass `ComplianceEngine`** in `social_distributor` — every dispatch must run through it before hitting a platform API.
+- **OAuth tokens are Fernet-encrypted** — never log them, never store plaintext. Use `app.utils.crypto` helpers.
+- **No detection-evasion code** — official APIs only. This is a hard product rule.
+- **Don't add platforms outside `app/platforms/`** — extend `PlatformAdapter`, add OAuth flow, compliance rules, and tests in that order.
+- **Product page numbering has gaps** (deleted SKUs); don't assume `aXXX.html` is sequential — see `README.md` for the canonical list.
 
-1. **Main site is intentionally static** — no build step, no Node.js, no runtime. Speeds up deploys and reduces attack surface.
-2. **Social distributor is modular by platform** — add a new platform by extending `PlatformAdapter`, adding OAuth flow, compliance rules, and tests.
-3. **Compliance is non-blocking for warnings** — set `ORIGINALITY_BLOCK=1` to escalate. Same for other checks.
-4. **Claude integration is opt-in** — variants and digest email fall back gracefully if `ANTHROPIC_API_KEY` is missing.
-5. **All tokens are encrypted at rest** — Fernet in the DB, never plaintext. Audit logs redact them.
-6. **Rate limits are soft** — a breach reschedules the dispatch instead of consuming a retry. Platform-documented limits are used as defaults.
-7. **Tests run fast** — no waiting for external APIs; in-memory DB + mocked platform responses.
+## Related Repos
+
+Part of the PopMonster ecosystem under `milk790-code`:
+
+| Repo | Role |
+|---|---|
+| **`popmonster-vip`** (this repo) | Static site source + `social_distributor` Flask backend |
+| `popmonster-website-deployment` | Deployment artifact (zip → GitHub Pages → popmonster.vip) |
+| `customer-project-portal` | Full-stack SaaS portal with AI search; also serves PopMonster site at `/` |
+| `popmonster-linebot` | LINE customer-service bot (Flask + OpenAI) |
+| `Repository-name-popmonster-website-` | Placeholder / stub repo |
