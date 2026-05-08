@@ -13,12 +13,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Main Site Structure (Static)
 
-- **27 product pages** (`a001.html`–`a041.html` with gaps in numbering; see README for deleted SKU list)
-- **Navigation pages**: `index.html` (home with grid + carousel), `about.html` (brand story), `members.html`, `free-guide.html`, `ai-encyclopedia.html`, `error-report.html`, `privacy.html`, `terms.html`
-- **Styling**: Single `css/main.css` with CSS variables for black-gold theme (`#0a0a0a`, `#c8a96b`). Responsive breakpoint at 768px. Mobile-first design with 44px touch targets.
+- **27 product pages** (`a001.html`–`a041.html` with gaps in numbering; see README for deleted SKU list — a011, a014–a016, a018, a019, a021–a023, a025–a029 are removed placeholders)
+- **Navigation pages**: `index.html` (home with grid + carousel), `404.html`, `about.html` (brand story + 27-hook headline system), `members.html`, `free-guide.html`, `ai-encyclopedia.html`, `error-report.html`, `privacy.html`, `terms.html`
+- **`guide/` — SEO long-form content** (5 buyer's guides + index): `angel-coating-guide.html`, `ro-polish-beginner.html`, `polishing-pad-selection.html`, `miso-grit-system.html`, `wash-flow-complete.html`. These are top-of-funnel SEO pages, also linked from `free-guide.html`.
+- **`tools/` — internal toolkit** (12 pages): `ai-marketing-plan`, `boss-messages`, `business-card`, `copy-paste`, `line-ai-system-guide`, `line-landing`, `marketing-plan`, `prompt-toolkit`, `qrcode`, `share-hooks`, `social-playbook`, `index`. Hidden from public navigation since v11.0 — keep them out of `sitemap.xml`.
+- **Styling**: Single `css/main.css` with CSS variables for black-gold theme (`#0a0a0a` black, `#c8a96b` champagne gold, `#d8c08a` light gold; contrast 8.06:1, exceeds WCAG AAA). Fonts: Montserrat (latin) + Noto Sans TC (zh). Responsive breakpoint at 768px. Mobile-first with 44px touch targets (WCAG 2.2 AA).
 - **JavaScript**: `js/main.js` handles carousel, FAQ collapsing, category filtering, Cookie Consent (GA4 v2 Consent Mode), scroll animations
-- **Image structure**: `img/aXXX/` directories per product (multiple angles), keyed to product HTML by SKU
-- **SEO**: Per-page canonical, hreflang, OG tags; `sitemap.xml` (27 products + 8 content pages); `robots.txt`; Schema.org (Product, BreadcrumbList, FAQPage as JSON-LD)
+- **Image structure**: `img/aXXX/` directories per product (multiple angles) plus `img/aXXX-main.jpg` thumbnails; keyed to product HTML by SKU
+- **SEO**: Per-page canonical, hreflang (`zh-Hant-TW` + `x-default`), OG tags; `sitemap.xml` (27 products + 8 content pages + 5 guides); `robots.txt`; Schema.org (Product, BreadcrumbList, FAQPage as JSON-LD)
 - **PWA**: `manifest.json`, `favicon.svg`; no service worker
 - **Analytics**: GA4 (`G-WTKLHW33D7`) with IP anonymization and Consent Mode v2
 
@@ -27,6 +29,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Affiliate links: `rel="nofollow sponsored noopener"` to Shopee
 - LINE contact: `rel="noopener"`
 - All links use inline `style` attributes for mobile menu (avoid stylesheet complexity in limited CSS)
+- Site versioning is tracked in README's `## 版本演進摘要` table — current version is v12.0 (when adding new sections, update the README table)
 
 ### Social Distributor Architecture
 
@@ -269,6 +272,8 @@ Rate limits (override defaults):
 - **No detection-evasion code** — official APIs only. This is a hard product rule.
 - **Don't add platforms outside `app/platforms/`** — extend `PlatformAdapter`, add OAuth flow, compliance rules, and tests in that order.
 - **Product page numbering has gaps** (deleted SKUs); don't assume `aXXX.html` is sequential — see `README.md` for the canonical list.
+- **`tools/` is hidden** from public navigation (since v11.0). Don't add it to `sitemap.xml`, the main nav, or the home page grid.
+- **`guide/` long-form pages are SEO assets** — keep them in `sitemap.xml`. Removing one means updating the sitemap and any cross-links from product pages.
 
 ## Related Repos
 
