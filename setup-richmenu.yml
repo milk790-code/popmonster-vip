@@ -1,0 +1,25 @@
+name: Setup LINE Rich Menu
+
+# 觸發方式:GitHub repo → Actions 分頁 → 左側選此 workflow → 右上 Run workflow
+on:
+  workflow_dispatch:
+
+jobs:
+  setup-richmenu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install python-dotenv
+
+      - name: Run setup_richmenu.py
+        env:
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+        run: python setup_richmenu.py

@@ -1,0 +1,26 @@
+# 環境變數絕對不上傳
+.env
+
+# Python 暫存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# 虛擬環境
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# 系統檔
+.DS_Store
+Thumbs.db
+
+# Log
+*.log

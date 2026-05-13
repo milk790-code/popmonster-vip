@@ -1,0 +1,17 @@
+# Render 自動部署設定檔
+# Render 連到 GitHub repo 時會自動讀此檔,免手動設定服務
+
+services:
+  - type: web
+    name: 3qgongwan-bot
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: LINE_CHANNEL_SECRET
+        sync: false
+      - key: LINE_CHANNEL_ACCESS_TOKEN
+        sync: false
+    healthCheckPath: /
