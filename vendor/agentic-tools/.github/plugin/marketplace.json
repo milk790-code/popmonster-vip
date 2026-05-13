@@ -1,0 +1,18 @@
+{
+  "name": "meta-quest",
+  "owner": {
+    "name": "Meta Platforms, Inc."
+  },
+  "metadata": {
+    "description": "Agent skills for Meta Quest and Horizon OS development. Helps Claude assist with Quest app debugging, performance analysis, project setup, Unity and WebXR workflows, Spatial SDK and Platform SDK integration, store submission checks, and hzdb device workflows.",
+    "version": "1.1.0"
+  },
+  "plugins": [
+    {
+      "name": "meta-vr",
+      "description": "Agent skills for Meta Quest and Horizon OS development. Helps Claude assist with Quest app debugging, performance analysis, project setup, Unity and WebXR workflows, Spatial SDK and Platform SDK integration, store submission checks, and hzdb device workflows.",
+      "version": "1.1.0",
+      "source": ".github/plugin"
+    }
+  ]
+}
