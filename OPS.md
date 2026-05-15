@@ -15,6 +15,8 @@ claude
 
 進入 Claude Code 後，下面三組 slash commands 都可用（已併到 `main`）。
 
+> 找不到 skill 名？看 [SKILLS.md](./SKILLS.md)（內建 10 個 + 你自訂 38 個的速查表）
+
 ---
 
 ## /popmonster-deploy — 官網維護
