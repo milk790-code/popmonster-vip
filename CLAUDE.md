@@ -186,6 +186,19 @@ python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().
 
 The repository has a `SessionStart` hook in `.claude/settings.json` that runs `session-start.sh` in remote Claude Code sessions. This installs Python dependencies for the social_distributor backend so tests and linters work immediately. Local development is unaffected.
 
+## Browser-driven onboarding preference (PERSISTENT — set by user 2026-05-17)
+
+When a task requires the user to go to a browser or external system to **authorize, sign up, click Accept, paste a secret, or otherwise do something that cannot be automated from this session**, you MUST pre-stage every step that *can* be automated into a deep-link checklist BEFORE asking the user to act. Format rules:
+
+1. Give the **direct URL** to the exact page (not the homepage). Use deep links like `https://dash.cloudflare.com/?to=/:account/r2/api-tokens`, `https://developers.facebook.com/apps/<APP_ID>/app-review/`, `https://railway.com/project/<uuid>`, etc.
+2. For every form field that has a deterministic value, give the **exact string to paste** (in a fenced block, ready to copy).
+3. Mark each step with 🟢 (pure copy-paste, no decision) or 🔴 (user must enter password / approve / make a judgment call).
+4. Stop the browser-side automation precisely at the 🔴 step. Wait for the user to paste back the resulting value(s) before continuing.
+5. When such a flow is non-trivial (multi-page setup like Railway + Cloudflare + Meta + TikTok onboarding), persist the full checklist as a Markdown file in the repo (e.g. `social_distributor/BROWSER_STEPS.md`) so it survives session compaction.
+6. Never invent URLs you are not sure exist. If you don't know the deep link, say so and offer the menu-path fallback.
+
+Reference implementation of this format: `social_distributor/BROWSER_STEPS.md`. Update or extend it (rather than creating new files) when new external-auth flows arise — keep all browser deep-link runbooks in one place per subproject.
+
 ## File Patterns & Naming
 
 - **Product pages**: `aXXX.html` where XXX is the product SKU (01–41, with gaps). Numbering starts at 01, not 00.
