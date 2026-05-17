@@ -36,15 +36,18 @@ PostTarget seed 進 `social_distributor`，讓 Celery beat 的 `sweep_due_target
 
 ### Phase 1：部署 backend
 
+詳細 12 步部署清單（含 R2 + frontend + custom domain）見
+**[`RUNBOOK_PHASE1_RAILWAY.md`](RUNBOOK_PHASE1_RAILWAY.md)**。
+
 選一條最快的：
 
 | 方案 | 時間 | 適用 |
 |---|---|---|
-| Railway（推薦） | 30 min | DB + Redis + worker 一次給齊 |
+| Railway（推薦） | 30–60 min | DB + Redis + worker 一次給齊；走 RUNBOOK_PHASE1_RAILWAY.md |
 | Docker compose（本機常開） | 1 hr | 本機長開；OAuth 需 ngrok 暴露 |
 | Docker compose + VPS | 2 hr | 已有 Hetzner / Linode |
 
-**Railway 路線**（看 [`RAILWAY.md`](RAILWAY.md)）：
+**Railway 路線**（看 [`RAILWAY.md`](RAILWAY.md) + [`RUNBOOK_PHASE1_RAILWAY.md`](RUNBOOK_PHASE1_RAILWAY.md)）：
 1. Railway 新建專案，連 GitHub repo，root path = `social_distributor`
 2. 三個 service：
    - `api`：Dockerfile = `Dockerfile.backend`，start cmd = `gunicorn -k gevent -w 2 -b 0.0.0.0:$PORT run:app`
