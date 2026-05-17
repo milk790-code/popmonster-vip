@@ -9,6 +9,177 @@
 
 ---
 
+## Phase 1 — Render 免費層部署（**現行路徑**）
+
+> Railway 需要先充值 $5，本路徑改用 Render 完全免費起步。
+> 限制：(a) Render Worker 要付費 → Phase 1–4 不開 worker，等 OAuth 過完
+> 真正要 seed 時再升級。(b) Web Service idle 15 min 會 sleep → 對 OAuth
+> 影響不大（reviewer 等 50s 沒差）。
+
+### R1.1 🔴 開 Render 帳號
+- URL：https://dashboard.render.com/register
+- **用 GitHub 登入**（同 `milk790-code` 那個 GitHub 帳號）
+- 完成後回來貼一句「Render 登入好了」
+
+### R1.2 🟢 建 Postgres（Free 90 天）
+- URL：https://dashboard.render.com/new/database
+- Name = `popmonster-distributor-db`
+- Database = 留空（用 default）
+- User = 留空
+- Region = **Singapore**（離台灣最近）
+- PostgreSQL Version = 16
+- Plan = **Free**
+- 按 **Create Database**
+- 等 ~1 min 變 Available
+- **不用** 抄 URL；下面 Web Service 會自動 link 拿
+
+### R1.3 🟢 建 Key Value（Redis-compat，25MB Free）
+- URL：https://dashboard.render.com/new/keyvalue
+- Name = `popmonster-distributor-redis`
+- Region = **Singapore**（一定要和 Postgres 同區）
+- Maxmemory Policy = `allkeys-lru`
+- Plan = **Free**
+- 按 **Create Key Value**
+
+### R1.4 🟢 建 Web Service `api`
+- URL：https://dashboard.render.com/select-repo?type=web
+- 第一次會跳 GitHub 授權 → 允許 Render 讀 `milk790-code/popmonster-vip`
+- 找到 `popmonster-vip` → **Connect**
+- 然後在表單填：
+  - Name = `popmonster-api`
+  - Region = **Singapore**
+  - Branch = `claude/remote-control-skill-CiYUW`
+  - Root Directory = `social_distributor`
+  - Runtime = **Docker**（會自動偵測 Dockerfile.backend）
+  - Dockerfile Path = `./Dockerfile.backend`（相對於 Root Directory）
+  - Docker Build Context Directory = `.`
+  - Instance Type = **Free**
+  - Health Check Path = `/healthz`
+- **Start Command** 留空（Dockerfile 已寫好，但 Render 會傳 `$PORT`，
+  Dockerfile.backend 的 CMD 已支援）
+- **先別 Create**，往下走 R1.5 把 env 設完再 Deploy
+
+### R1.5 🔴 設 `api` Environment Variables
+在同一個表單下半部 → **Advanced** → **Add Environment Variable**，整批貼：
+
+```
+SECRET_KEY=e0686761307e8b3e9f51c92c1264e833e86e4eb3db40d11d33933e0a8a85d792
+TOKEN_ENCRYPTION_KEY=EdrVxNsgkbiiqVJKtFu6BM2MwAzBEQ7vFNXUW6Ty9DA=
+AUTO_SEED_USER=0
+PUBLISH_DEFAULT_TIMEZONE=Asia/Taipei
+MEDIA_BUCKET=popmonster-media
+META_REDIRECT_URI=https://api.popmonster.vip/auth/meta/callback
+TIKTOK_REDIRECT_URI=https://api.popmonster.vip/auth/tiktok/callback
+```
+
+然後**另外 4 個用 Render 內部 link**（不是貼字串、是用 "Add from Database"）：
+
+- `DATABASE_URL` → 點 **Add from Database** → 選 `popmonster-distributor-db` →
+  Property = `Internal Database URL`
+- `REDIS_URL` → 點 **Add from Key Value** → 選 `popmonster-distributor-redis` →
+  Property = `Internal Connection String`
+- `CELERY_BROKER_URL` → 同上（同一個 Redis）
+- `CELERY_RESULT_BACKEND` → 同上
+
+按 **Create Web Service** → Render 開始 build（~5–8 min）
+
+### R1.6 🟢 等 build 完，驗證 health
+- Render 給你一個臨時 URL `https://popmonster-api-<hash>.onrender.com`
+- 開 `https://popmonster-api-<hash>.onrender.com/healthz` → 期望 `{"status":"ok"}`
+- 開 `https://popmonster-api-<hash>.onrender.com/healthz/ready` →
+  **把整段 JSON 貼回給我**
+
+期望 `database / redis / celery / encryption` 都是 `configured: true`。
+
+### R1.7 🔴 Bootstrap initial User
+- Render → `popmonster-api` service → **Shell** tab（free 也有 shell）
+- 貼：
+  ```
+  python -m scripts.bootstrap_user --email <你的 email> --display-name "陳學誼" --timezone Asia/Taipei
+  ```
+- **把印出的 `user_id=N` 貼回給我**
+
+### R1.8 🟢 Custom domain `api.popmonster.vip`
+- Render → `popmonster-api` → **Settings** → 滑到 **Custom Domains** →
+  **Add Custom Domain** → 填 `api.popmonster.vip`
+- Render 給你一個 CNAME target（形如 `popmonster-api-<hash>.onrender.com`）
+- **記住這個 target**，往下 R1.9 用
+
+### R1.9 🔴 Cloudflare DNS：加 `api` CNAME
+- URL：https://dash.cloudflare.com/?to=/:account/popmonster.vip/dns/records
+- **Add record**：
+  - Type = `CNAME`
+  - Name = `api`
+  - Target = （R1.8 拿到的那個 `<hash>.onrender.com`）
+  - Proxy = **DNS only**（灰雲）
+  - TTL = Auto
+- **Save**
+- 回 Render 等 2–5 min 看綠勾（Let's Encrypt 簽完）
+- 開 `https://api.popmonster.vip/healthz` → `{"status":"ok"}` = 成功
+
+### R1.10 ⏭ worker 暫不開
+Phase 1–4 不需要。Phase 7 要 seed 時再決定升級。
+
+---
+
+## Phase 1.5 — Cloudflare R2（不變，同下方原 S2 段）
+
+### R2.1 🔴 開 Cloudflare R2
+- URL：https://dash.cloudflare.com/?to=/:account/r2/overview
+- 第一次用 R2 要按 **Purchase R2 Plan**（前 10 GB 免費，超過按用量）
+- 綁信用卡（🔴 你本人輸入）
+- 完成後**貼一句「R2 開通好了」**
+
+### R2.2 🟢 建 R2 bucket
+- URL：https://dash.cloudflare.com/?to=/:account/r2/new
+- Bucket Name = `popmonster-media`
+- Location = **Automatic**
+- Default Storage Class = **Standard**
+- 按 **Create bucket**
+
+### R2.3 🔴 建 R2 API Token
+- URL：https://dash.cloudflare.com/?to=/:account/r2/api-tokens
+- 按 **Create API Token**
+- Token name = `popmonster-distributor-prod`
+- Permissions = **Object Read & Write**
+- Specify bucket = `popmonster-media`
+- 按 **Create API Token**
+- 🔴 **這頁只會出現一次**：拷貝 `Access Key ID` / `Secret Access Key` /
+  `S3 API Endpoint URL` 三個值貼回對話
+
+### R2.4 🟢 回 Render 補 R2 env
+- Render → `popmonster-api` → Environment → Add 4 個：
+  ```
+  AWS_ACCESS_KEY_ID=<R2.3 拿到>
+  AWS_SECRET_ACCESS_KEY=<R2.3 拿到>
+  AWS_REGION=auto
+  S3_ENDPOINT_URL=https://<account>.r2.cloudflarestorage.com
+  ```
+- 自動 redeploy
+- 回 `/healthz/ready` 確認 `media_bucket.configured=true`
+
+### R2.5 🟢 R2 CORS
+- URL：https://dash.cloudflare.com/?to=/:account/r2/popmonster-media/settings
+- **CORS Policy** → **Edit** → 貼：
+  ```json
+  [{
+    "AllowedOrigins":["https://api.popmonster.vip"],
+    "AllowedMethods":["GET","PUT"],
+    "AllowedHeaders":["*"],
+    "ExposeHeaders":["ETag"],
+    "MaxAgeSeconds":3600
+  }]
+  ```
+- **Save**
+
+---
+
+## Phase 4 — OAuth onboarding（這段最久，越早開始越好）— 見下方原 S3 / S4 段
+
+---
+
+# 以下為原 Railway 路徑（不再使用，保留作參考）
+
 ## Phase 1 — Railway 部署（先做這段）
 
 ### S1.1 🔴 開 Railway 帳號（如果還沒有）
