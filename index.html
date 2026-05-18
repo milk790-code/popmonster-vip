@@ -41,6 +41,17 @@ gtag('config', 'G-WTKLHW33D7', {
 });
 </script>
 <link rel="stylesheet" href="css/main.css">
+<style>
+@media (max-width: 768px) {
+  .hero-product-pin { padding: 20px !important; margin: 24px auto !important; }
+  .hero-product-pin h2 { font-size: 22px !important; }
+  .hero-hook h1 { font-size: 28px !important; }
+  .hero-hook p { font-size: 15px !important; }
+  section { padding-left: 16px !important; padding-right: 16px !important; }
+  h1 { word-break: keep-all; line-height: 1.3 !important; }
+  h2 { word-break: keep-all; line-height: 1.4 !important; }
+}
+</style>
 </head>
 <body>
 <nav class="nav"><div class="nav-inner">
@@ -52,6 +63,7 @@ gtag('config', 'G-WTKLHW33D7', {
     <a href="about.html">關於我們</a>
     <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
+    <a href="#direct-contact" style="color:#C9A961;font-weight:700;">📱 直接聯繫</a>
   </div>
   <button class="nav-menu-btn" aria-label="選單" onclick="this.nextElementSibling.classList.toggle('show')">☰</button>
   <div class="mobile-menu" style="display:none;position:fixed;top:60px;left:0;right:0;background:#0a0a0a;border-bottom:1px solid rgba(200,169,107,.15);padding:20px;z-index:99;flex-direction:column;gap:16px;">
@@ -261,7 +273,7 @@ IG 13.6 萬粉 · 蝦皮 5.0 評分 1657 粉絲 · TikTok 累積 527 萬瀏覽 �
 </section>
 
 <!-- Contact 強化 section -->
-<section style="padding:60px 20px;background:#0a0a0a;border-top:1px solid rgba(200,169,107,.15);">
+<section id="direct-contact" style="padding:60px 20px;background:#0a0a0a;border-top:1px solid rgba(200,169,107,.15);scroll-margin-top:80px;">
 <div style="max-width:900px;margin:0 auto;">
 
 <div style="text-align:center;margin-bottom:40px;">
@@ -461,7 +473,16 @@ IG 13.6 萬粉 · 蝦皮 5.0 評分 1657 粉絲 · TikTok 累積 527 萬瀏覽 �
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "url": "https://popmonster.vip/", "name": "泡泡怪獸 POP MONSTER", "alternateName": ["米速", "丹若", "POP MONSTER"]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "泡泡怪獸 POP MONSTER", "url": "https://popmonster.vip/", "sameAs": ["https://shopee.tw/milk790", "https://www.facebook.com/share/1AcLN6W6HU/", "https://www.instagram.com/ssss4845454"]}</script>
 <script src="js/main.js" defer></script>
-<!-- 浮動 CTA(右下角 全站固定) -->
+<!-- 浮動 CTA(右下角 全站固定) + mobile 適配 -->
+<style>
+@media (max-width: 768px) {
+  .floating-cta { bottom: 12px !important; right: 12px !important; gap: 6px !important; }
+  .floating-cta a { padding: 10px 14px !important; font-size: 12px !important; }
+}
+@media (max-width: 480px) {
+  .floating-cta { flex-direction: row !important; }
+}
+</style>
 <div class="floating-cta" style="position:fixed;bottom:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:8px;">
 <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" style="background:#C9A961;color:#0a0a0a;padding:12px 18px;border-radius:30px;text-decoration:none;font-weight:700;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.5);display:flex;align-items:center;gap:6px;">🛒 蝦皮直購</a>
 <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" style="background:#06C755;color:white;padding:12px 18px;border-radius:30px;text-decoration:none;font-weight:700;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.5);display:flex;align-items:center;gap:6px;">💬 LINE 諮詢</a>
