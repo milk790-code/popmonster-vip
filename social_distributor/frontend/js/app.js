@@ -533,6 +533,7 @@ const PLATFORM_PREVIEW_RULES = {
   instagram: { label: "Instagram", caption_max: 2200,  title_max: null, aspect: "9:16" },
   tiktok:    { label: "TikTok",    caption_max: 2200,  title_max: null, aspect: "9:16" },
   youtube:   { label: "YouTube",   caption_max: 5000,  title_max: 100,  aspect: "16:9" },
+  shopee:    { label: "蝦皮短影音", caption_max: 500,   title_max: 100,  aspect: "9:16" },
 };
 
 function renderPreview() {

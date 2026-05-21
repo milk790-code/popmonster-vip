@@ -40,6 +40,7 @@ class Platform(str, enum.Enum):
     TIKTOK = "tiktok"
     YOUTUBE = "youtube"
     META_THREADS = "threads"
+    SHOPEE = "shopee"
 
 
 class JobStatus(str, enum.Enum):

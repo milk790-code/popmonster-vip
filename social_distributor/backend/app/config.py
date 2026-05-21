@@ -86,6 +86,11 @@ class Config:
                 "GOOGLE_CLIENT_SECRET",
                 "GOOGLE_REDIRECT_URI",
             ),
+            "shopee": (
+                "SHOPEE_PARTNER_ID",
+                "SHOPEE_PARTNER_KEY",
+                "SHOPEE_REDIRECT_URI",
+            ),
         }
         cid_key, sec_key, redir_key = mapping[name]
         return PlatformCredentials(
@@ -129,6 +134,7 @@ class Config:
                 "meta": meta_creds.configured,
                 "tiktok": tiktok_creds.configured,
                 "google": google_creds.configured,
+                "shopee": self.platform("shopee").configured,
             },
             "ai": {
                 "anthropic_api_key": bool(_env("ANTHROPIC_API_KEY")),

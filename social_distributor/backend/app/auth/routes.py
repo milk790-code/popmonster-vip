@@ -49,6 +49,7 @@ PROVIDERS = {
     "meta": {"platforms": [Platform.FACEBOOK, Platform.INSTAGRAM]},
     "tiktok": {"platforms": [Platform.TIKTOK]},
     "youtube": {"platforms": [Platform.YOUTUBE]},
+    "shopee": {"platforms": [Platform.SHOPEE]},
 }
 
 
@@ -86,6 +87,14 @@ def callback(provider: str):
         return _callback_html(False, "invalid or expired state", [], [])
     if payload["provider"] != provider:
         return _callback_html(False, "state/provider mismatch", [], [])
+
+    # Shopee passes shop_id as a separate query param; encode it into code
+    # so exchange_code() can unpack both values without extra arguments.
+    if provider == "shopee":
+        shop_id = request.args.get("shop_id", "")
+        if not shop_id:
+            return _callback_html(False, "missing shop_id from Shopee", [], [])
+        code = f"{shop_id}:{code}"
 
     try:
         bundle = get_oauth_provider(provider).exchange_code(code)
@@ -306,6 +315,22 @@ def _persist_accounts(provider: str, user_id: int, bundle):
                     {},
                 )
             )
+    elif provider == "shopee":
+        # shop_id is passed back by Shopee in the redirect alongside the code.
+        # The callback receives ?code=<auth_code>&shop_id=<id>&state=<state>.
+        # exchange_code() already unpacks shop_id from "shop_id:code".
+        shop_id = bundle.extra.get("shop_id", "unknown")
+        created.append(
+            upsert(
+                Platform.SHOPEE,
+                shop_id,
+                f"Shopee店鋪 #{shop_id}",
+                bundle.access_token,
+                bundle.refresh_token,
+                bundle.expires_at,
+                bundle.extra,
+            )
+        )
     db.session.commit()
     return created, skipped
 

@@ -56,4 +56,16 @@ PLATFORM_RULES: dict[Platform, PlatformRules] = {
         allowed_media=("video",),
         notes="Avoid misleading metadata; misleading thumbnails violate policy.",
     ),
+    Platform.SHOPEE: PlatformRules(
+        caption_max=500,
+        title_max=100,
+        requires_media=True,
+        allowed_media=("video",),
+        notes=(
+            "Shopee short videos must comply with Shopee Seller Policy. "
+            "Prohibited: misleading product claims, price manipulation, "
+            "counterfeit goods promotion. Videos must be original content "
+            "owned by the shop."
+        ),
+    ),
 }
