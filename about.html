@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#0a0a0a">
 <title>關於泡泡怪獸｜品牌故事與聯絡資訊｜POP MONSTER</title>
-<meta name="description" content="泡泡怪獸 POP MONSTER × 米速 MISO × 丹若 SANWU - 台灣汽車美容職人品牌，蝦皮 5.0 評分 1,657+ 粉絲認證。LINE / WhatsApp / FB / IG 全管道服務。">
+<meta name="description" content="泡泡怪獸 POP MONSTER × 米速 MISO × 丹若 — 台灣汽車美容職人品牌，蝦皮 5.0 評分 1,657+ 粉絲認證。叁無 × 重新定義汽美。">
 <link rel="canonical" href="https://popmonster.vip/about.html">
 <meta property="og:title" content="台灣汽美職人首選母料店｜泡泡怪獸品牌故事">
 <meta property="og:description" content="蝦皮 5.0 評分 1,657+ 粉絲認證的台灣汽美母料品牌">
@@ -16,62 +16,259 @@
 <link rel="manifest" href="/manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Montserrat:wght@400;600;700;800&family=Noto+Serif+TC:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WTKLHW33D7"></script>
 <script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
 gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'denied','wait_for_update':500});
-gtag('js', new Date());
-gtag('config', 'G-WTKLHW33D7', {'anonymize_ip':true,'cookie_flags':'SameSite=None;Secure'});
+gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_flags':'SameSite=None;Secure'});
 </script>
 <link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/patch-p1p2.css">
 <style>
-.about-hero{padding:80px 24px 30px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(200,169,107,.06) 0%,transparent 70%)}
-.about-hero h1{font-size:clamp(2rem,4vw,2.8rem);color:#fff;margin-bottom:14px;letter-spacing:-1px}
-.about-hero h1 em{font-style:normal;background:var(--shimmer);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite}
-.about-hero .lead{color:var(--gold-lt);font-size:17px;max-width:680px;margin:0 auto 8px}
-.about-hero .sub{color:var(--txt-m);max-width:680px;margin:0 auto;font-size:14px;line-height:1.7}
+/* ── About page local tokens ── */
+:root{
+  --serif-about:"Playfair Display","Noto Serif TC",ui-serif,serif;
+  --tcserif-about:"Noto Serif TC","Playfair Display",serif;
+}
 
-.about-stats{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;padding:32px 24px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);max-width:1100px;margin:32px auto}
-.about-stats .stat{text-align:center}
-.about-stats .num{font-size:36px;font-weight:800;color:var(--gold-lt);font-family:'Montserrat',sans-serif}
-.about-stats .label{font-size:12px;color:var(--txt-m);margin-top:4px;letter-spacing:1px}
+/* ── NAV MOBILE MENU FIX (#06) ── */
+.mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:#0a0a0a;
+  border-bottom:1px solid var(--border);padding:20px;z-index:99;flex-direction:column;gap:16px;}
+.mobile-menu.show{display:flex;}
+.mobile-menu a{color:#e8e2d6;font-size:16px;display:block;padding:8px 0;}
+.mobile-menu a.active{color:var(--gold);}
 
-.section{max-width:900px;margin:0 auto;padding:48px 24px}
-.section h2{font-size:clamp(1.4rem,3vw,1.8rem);color:var(--gold-lt);margin-bottom:24px;font-weight:700;text-align:center}
-.section p{font-size:15px;line-height:1.9;color:var(--txt-m);margin-bottom:14px}
+/* ── COVER ── */
+.ab-cover{
+  padding:120px 24px 80px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  background:radial-gradient(ellipse at 50% 0%,rgba(200,169,107,.07) 0%,transparent 65%);
+}
+.ab-cover .kicker{
+  font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.42em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:28px;
+  display:inline-flex;align-items:center;gap:16px;
+}
+.ab-cover .kicker::before,.ab-cover .kicker::after{content:"";width:40px;height:1px;background:var(--gold);opacity:.5;}
+.ab-cover h1{
+  font-family:var(--serif-about);font-weight:900;line-height:.92;
+  font-size:clamp(64px,11vw,160px);letter-spacing:-.02em;color:var(--txt);
+  margin-bottom:24px;
+}
+.ab-cover h1 .it{font-style:italic;font-weight:500;color:var(--gold-lt);}
+.ab-cover .lede{
+  font-family:var(--tcserif-about);font-size:clamp(18px,1.8vw,24px);
+  line-height:1.55;color:var(--txt-m);max-width:640px;margin:0 auto 40px;
+}
+.ab-cover .lede em{color:var(--gold);font-style:normal;}
 
-.brand-pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:24px}
-.pillar{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px;text-align:center;transition:border-color .3s,transform .3s}
-.pillar:hover{border-color:var(--gold);transform:translateY(-3px)}
-.pillar .icon{font-size:36px;margin-bottom:12px}
-.pillar h3{font-size:17px;color:var(--gold-lt);margin-bottom:8px;font-weight:700}
-.pillar p{font-size:13px;color:var(--txt-m);line-height:1.7}
+/* ── STATS STRIP ── */
+.ab-stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  max-width:1000px;margin:0 auto;
+}
+.ab-stat{padding:28px 20px;border-right:1px solid var(--border);text-align:center;}
+.ab-stat:last-child{border-right:none;}
+.ab-stat .n{font-family:var(--serif-about);font-weight:900;font-size:clamp(36px,5vw,64px);
+  line-height:1;color:var(--gold);letter-spacing:-.02em;}
+.ab-stat .l{font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.28em;
+  text-transform:uppercase;color:var(--txt-m);margin-top:10px;}
+@media(max-width:640px){
+  .ab-stats{grid-template-columns:repeat(2,1fr);}
+  .ab-stat:nth-child(2){border-right:none;}
+  .ab-stat:nth-child(1),.ab-stat:nth-child(2){border-bottom:1px solid var(--border);}
+}
 
-.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:24px}
-.contact-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;text-decoration:none;display:flex;flex-direction:column;align-items:center;text-align:center;transition:border-color .3s,transform .3s}
-.contact-card:hover{border-color:var(--gold);transform:translateY(-3px)}
-.contact-card .icon{font-size:36px;margin-bottom:10px}
-.contact-card h3{font-size:15px;color:#fff;margin-bottom:6px;font-weight:700}
-.contact-card .channel{font-size:12px;color:var(--gold-dk);letter-spacing:1px;margin-bottom:6px}
-.contact-card .info{font-size:13px;color:var(--gold-lt);font-family:'Montserrat',sans-serif}
-.contact-card .desc{font-size:12px;color:var(--txt-m);margin-top:6px;line-height:1.6}
+/* ── CHAPTER HEADING ── */
+.chapter{padding:80px 24px;max-width:1000px;margin:0 auto;}
+.chapter + .chapter{border-top:1px solid var(--border);}
+.chp-kicker{
+  font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.36em;
+  text-transform:uppercase;color:var(--gold);
+  display:inline-flex;align-items:center;gap:14px;margin-bottom:20px;
+}
+.chp-kicker::before{content:"";width:36px;height:1px;background:var(--gold);}
+.chp-h{
+  font-family:var(--serif-about);font-weight:900;
+  font-size:clamp(36px,5vw,72px);line-height:.94;letter-spacing:-.01em;
+  color:var(--txt);margin-bottom:16px;
+}
+.chp-h .it{font-style:italic;color:var(--gold-lt);font-weight:500;}
+.chp-deck{
+  font-family:var(--tcserif-about);font-size:18px;line-height:1.65;
+  color:var(--txt-m);max-width:720px;
+}
+.chp-deck em{color:var(--gold);font-style:normal;}
 
-.brands{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:20px}
-.brand-block{background:rgba(200,169,107,.04);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center}
-.brand-block h4{font-size:18px;color:var(--gold);margin-bottom:6px;letter-spacing:1px}
-.brand-block .en{font-size:11px;color:var(--gold-dk);letter-spacing:3px;margin-bottom:10px}
-.brand-block p{font-size:12px;color:var(--txt-m);line-height:1.6}
+/* ── BRAND BELIEF ── */
+.belief-list{list-style:none;padding:0;margin:40px 0 0;display:flex;flex-direction:column;gap:0;}
+.belief-list li{
+  display:grid;grid-template-columns:120px 1fr;gap:40px;align-items:start;
+  padding:36px 0;border-bottom:1px solid var(--border);
+}
+.belief-list li:last-child{border-bottom:none;}
+.belief-num{
+  font-family:var(--serif-about);font-weight:900;font-size:96px;line-height:.85;
+  color:var(--gold);opacity:.25;letter-spacing:-.02em;font-feature-settings:"lnum";
+}
+.belief-tag{
+  font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.36em;
+  text-transform:uppercase;color:var(--txt-dim);margin-bottom:10px;
+}
+.belief-h{
+  font-family:var(--tcserif-about);font-weight:700;font-size:clamp(22px,2.5vw,32px);
+  color:var(--txt);line-height:1.2;
+}
+.belief-h em{font-style:normal;color:var(--gold);}
+@media(max-width:640px){
+  .belief-list li{grid-template-columns:1fr;gap:8px;}
+  .belief-num{font-size:56px;}
+}
 
-.policy-list{list-style:none;padding:0;margin-top:14px}
-.policy-list li{padding:14px 0;border-bottom:1px solid var(--border);color:var(--txt-m);font-size:14px;line-height:1.7;display:flex;gap:12px}
-.policy-list li:last-child{border-bottom:none}
-.policy-list .label{flex-shrink:0;width:130px;color:var(--gold-lt);font-weight:600}
-.policy-list .value{flex:1}
+/* ── MANIFESTO PULL QUOTE ── */
+.manifesto{
+  margin:40px 0;padding:36px 40px;
+  border-left:3px solid var(--gold);
+  background:linear-gradient(135deg,rgba(200,169,107,.06),transparent);
+  border-radius:0 var(--r-lg) var(--r-lg) 0;
+}
+.manifesto p{
+  font-family:var(--serif-about);font-style:italic;font-weight:500;
+  font-size:clamp(20px,2.2vw,28px);line-height:1.5;color:var(--txt);
+}
+.manifesto .attr{
+  font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--gold);margin-top:14px;display:block;
+}
+
+/* ── THREE PRINCIPLES ── */
+.principles{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:0;
+  border:1px solid var(--border);margin-top:40px;
+}
+@media(max-width:768px){.principles{grid-template-columns:1fr;}}
+.prin{padding:28px 24px;border-right:1px solid var(--border);}
+.prin:last-child{border-right:none;}
+@media(max-width:768px){.prin{border-right:none;border-bottom:1px solid var(--border);}.prin:last-child{border-bottom:none;}}
+.prin .pn{
+  font-family:var(--serif-about);font-weight:900;font-size:56px;
+  line-height:.85;color:var(--gold);opacity:.2;margin-bottom:14px;
+  letter-spacing:-.02em;
+}
+.prin h3{font-family:var(--tcserif-about);font-weight:700;font-size:20px;color:var(--txt);margin-bottom:10px;}
+.prin p{font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--txt-m);line-height:1.7;}
+
+/* ── SUB-BRAND GRID ── */
+.sb-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:0;
+  border:1px solid var(--border);margin-top:40px;
+}
+@media(max-width:768px){.sb-grid{grid-template-columns:1fr;}}
+.sb-blk{padding:28px 24px;border-right:1px solid var(--border);position:relative;overflow:hidden;}
+.sb-blk:last-child{border-right:none;}
+@media(max-width:768px){.sb-blk{border-right:none;border-bottom:1px solid var(--border);}.sb-blk:last-child{border-bottom:none;}}
+.sb-blk .accent{height:3px;margin:-28px -24px 20px;background:var(--brand-c,var(--gold));}
+.sb-blk .sb-kk{
+  font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:.32em;
+  text-transform:uppercase;color:var(--brand-c,var(--gold));margin-bottom:8px;
+}
+.sb-blk h3{
+  font-family:var(--tcserif-about);font-weight:900;font-size:28px;
+  color:var(--txt);margin-bottom:4px;
+}
+.sb-blk .en{
+  font-family:var(--serif-about);font-style:italic;font-weight:500;font-size:16px;
+  color:var(--txt-m);margin-bottom:14px;
+}
+.sb-blk p{font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--txt-m);line-height:1.7;margin-bottom:16px;}
+.sb-blk a.sb-link{
+  font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--brand-c,var(--gold));font-weight:700;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.sb-miso{--brand-c:#c2474e;}
+.sb-pop{--brand-c:var(--gold);}
+.sb-dan{--brand-c:#d4a5b8;}
+
+/* ── CONTACT GRID ── */
+.ct-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:0;
+  border:1px solid var(--border);margin-top:40px;
+}
+@media(max-width:980px){.ct-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){.ct-grid{grid-template-columns:1fr;}}
+.ct-card{
+  padding:24px 18px;border-right:1px solid var(--border);
+  text-decoration:none;display:flex;flex-direction:column;gap:8px;
+  transition:background .15s ease;
+}
+.ct-card:last-child{border-right:none;}
+@media(max-width:980px){
+  .ct-card:nth-child(2){border-right:none;}
+  .ct-card:nth-child(1),.ct-card:nth-child(2){border-bottom:1px solid var(--border);}
+  .ct-card:nth-child(3){border-bottom:1px solid var(--border);}
+  .ct-card:nth-child(4){border-right:none;border-bottom:1px solid var(--border);}
+}
+.ct-card:hover{background:var(--bg-sub);}
+.ct-card .ct-kk{
+  font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:.28em;
+  text-transform:uppercase;color:var(--gold-dk);
+}
+.ct-card h3{
+  font-family:var(--tcserif-about);font-weight:700;font-size:17px;color:var(--txt);
+}
+.ct-card .ct-info{
+  font-family:'Montserrat',sans-serif;font-size:12px;color:var(--gold);
+  font-weight:600;letter-spacing:.05em;
+}
+.ct-card .ct-desc{font-family:'Noto Sans TC',sans-serif;font-size:12px;color:var(--txt-m);line-height:1.55;}
+
+/* ── POLICY TABLE ── */
+.policy{margin-top:40px;border:1px solid var(--border);}
+.policy-row{
+  display:grid;grid-template-columns:160px 1fr;gap:0;
+  border-bottom:1px solid var(--border);
+}
+.policy-row:last-child{border-bottom:none;}
+@media(max-width:640px){.policy-row{grid-template-columns:1fr;}}
+.policy-key{
+  padding:18px 20px;border-right:1px solid var(--border);
+  font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);
+  display:flex;align-items:flex-start;gap:8px;
+}
+@media(max-width:640px){.policy-key{border-right:none;border-bottom:1px solid var(--border);padding-bottom:8px;}}
+.policy-val{
+  padding:18px 20px;font-family:'Noto Sans TC',sans-serif;
+  font-size:14px;color:var(--txt-m);line-height:1.7;
+}
+
+/* ── CLOSING CTA ── */
+.ab-cta{
+  padding:80px 24px;text-align:center;
+  background:var(--bg-card);
+  border-top:1px solid var(--border);
+}
+.ab-cta h2{
+  font-family:var(--serif-about);font-weight:900;
+  font-size:clamp(36px,5vw,72px);line-height:.94;letter-spacing:-.01em;
+  color:var(--txt);margin-bottom:8px;
+}
+.ab-cta h2 .it{font-style:italic;color:var(--gold-lt);font-weight:500;}
+.ab-cta .deck{
+  font-family:var(--tcserif-about);font-size:18px;color:var(--txt-m);
+  margin-bottom:36px;max-width:560px;margin-left:auto;margin-right:auto;
+}
+.ab-cta .btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
 </style>
 </head>
 <body>
+
+<!-- NAV -->
 <nav class="nav"><div class="nav-inner">
   <a href="index.html" class="nav-logo">POP MONSTER<span>泡泡怪獸</span></a>
   <div class="nav-links">
@@ -80,159 +277,238 @@ gtag('config', 'G-WTKLHW33D7', {'anonymize_ip':true,'cookie_flags':'SameSite=Non
     <a href="guide/">教學攻略</a>
     <a href="about.html" style="color:var(--gold)">關於我們</a>
     <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
   </div>
-  <button class="nav-menu-btn" aria-label="選單" onclick="this.nextElementSibling.classList.toggle('show')">☰</button>
-  <div class="mobile-menu" style="display:none;position:fixed;top:60px;left:0;right:0;background:#0a0a0a;border-bottom:1px solid rgba(200,169,107,.15);padding:20px;z-index:99;flex-direction:column;gap:16px;">
-    <a href="index.html" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">全部商品</a>
-    <a href="members.html" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">會員生態</a>
-    <a href="guide/" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">教學攻略</a>
-    <a href="about.html" style="color:var(--gold);font-size:16px;display:block;padding:8px 0;">關於我們</a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">蝦皮賣場</a>
+  <button class="nav-menu-btn" aria-label="選單" onclick="this.nextElementSibling.classList.toggle('show');this.nextElementSibling.setAttribute('aria-hidden',!this.nextElementSibling.classList.contains('show'))">☰</button>
+  <div class="mobile-menu" aria-hidden="true">
+    <a href="index.html">全部商品</a>
+    <a href="members.html">會員生態</a>
+    <a href="guide/">教學攻略</a>
+    <a href="about.html" class="active">關於我們</a>
+    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
   </div>
 </div></nav>
-<script>document.querySelector('.nav-menu-btn')&&document.querySelector('.nav-menu-btn').addEventListener('click',function(){var m=this.nextElementSibling;m.style.display=m.style.display==='flex'?'none':'flex'})</script>
 
-<section class="about-hero">
-  <h1>關於<em>泡泡怪獸</em></h1>
-  <p class="lead">台灣汽美職人首選母料品牌</p>
-  <p class="sub">蝦皮 5.0 評分・1,657+ 粉絲・27 款職人級用品<br>從台中出發，把專業級汽美藥水做到任何人都能輕鬆上手</p>
-</section>
-
-<div class="about-stats">
-  <div class="stat"><div class="num">5.0</div><div class="label">蝦皮賣場評分</div></div>
-  <div class="stat"><div class="num">1,657+</div><div class="label">粉絲追蹤</div></div>
-  <div class="stat"><div class="num">76</div><div class="label">蝦皮上架款</div></div>
-  <div class="stat"><div class="num">3</div><div class="label">自有品牌</div></div>
+<div class="brand-tagline" role="doc-tip">
+  <em>叁無</em><span class="x">×</span><em>重新定義汽美</em>
 </div>
 
-<!-- 品牌信念三段論 (對齊品牌手冊 v2 / CHAPTER 01 BRAND BELIEF) -->
-<section class="section belief-section" aria-label="品牌信念">
-  <div style="text-align:center;margin-bottom:32px">
-    <p style="font-size:12px;letter-spacing:5px;color:var(--gold);margin-bottom:6px">C H A P T E R · 0 1</p>
-    <h2 style="margin:0">品牌信念</h2>
-    <p style="color:var(--txt-m);font-size:14px;margin-top:8px">BRAND BELIEF</p>
-  </div>
-  <ol class="belief-list">
-    <li class="fade-up"><span class="belief-num">01</span><div><p class="belief-tag">過 去</p><h3>安全是我們立身的根本</h3></div></li>
-    <li class="fade-up"><span class="belief-num">02</span><div><p class="belief-tag">現 在</p><h3>安全是我們做產品的底線</h3></div></li>
-    <li class="fade-up"><span class="belief-num">03</span><div><p class="belief-tag">未 來</p><h3>安全是我們永不變的堅守</h3></div></li>
+<!-- COVER -->
+<section class="ab-cover" data-screen-label="01 Cover">
+  <div class="kicker">About · 關於我們</div>
+  <h1>One house.<br/><span class="it">Three voices.</span></h1>
+  <p class="lede">
+    台灣汽美職人首選母料品牌 — <em>更快、更安全、更容易解決</em>。<br/>
+    從台中出發，三個 sub-brand，31 款，把專業級效果做到任何人都能 1 秒上手。
+  </p>
+</section>
+
+<!-- STATS -->
+<div class="ab-stats" data-screen-label="02 Stats">
+  <div class="ab-stat"><div class="n">5.0</div><div class="l">蝦皮評分</div></div>
+  <div class="ab-stat"><div class="n">1,657+</div><div class="l">粉絲追蹤</div></div>
+  <div class="ab-stat"><div class="n">500+</div><div class="l">亞太門市實裝</div></div>
+  <div class="ab-stat"><div class="n">3</div><div class="l">自有品牌</div></div>
+</div>
+
+<!-- CH01 BRAND BELIEF -->
+<section class="chapter" data-screen-label="03 Brand Belief">
+  <span class="chp-kicker">Chapter 01 · Brand Belief</span>
+  <h2 class="chp-h">品牌<br/><span class="it">信念.</span></h2>
+  <p class="chp-deck">
+    安全不是我們的賣點 — 是底線。<em>過去如此、現在如此、未來也永不改變。</em>
+  </p>
+
+  <ol class="belief-list" aria-label="品牌信念三段論">
+    <li>
+      <span class="belief-num" aria-hidden="true">01</span>
+      <div>
+        <p class="belief-tag">過 去</p>
+        <h3 class="belief-h">安全是我們<em>立身</em>的根本</h3>
+      </div>
+    </li>
+    <li>
+      <span class="belief-num" aria-hidden="true">02</span>
+      <div>
+        <p class="belief-tag">現 在</p>
+        <h3 class="belief-h">安全是我們做產品的<em>底線</em></h3>
+      </div>
+    </li>
+    <li>
+      <span class="belief-num" aria-hidden="true">03</span>
+      <div>
+        <p class="belief-tag">未 來</p>
+        <h3 class="belief-h">安全是我們<em>永不變</em>的堅守</h3>
+      </div>
+    </li>
   </ol>
 </section>
 
-<section class="section">
-  <h2>核心精神</h2>
-  <p style="text-align:center;color:var(--gold-lt);font-size:17px;margin-bottom:24px">「<strong>更快解決、更安全解決、更容易解決</strong>」</p>
-  <p style="text-align:center">這不是一句口號，是我們對每一款產品的設計準則。</p>
+<!-- CH02 MANIFESTO -->
+<section class="chapter" style="border-top:1px solid var(--border);" data-screen-label="04 Manifesto">
+  <span class="chp-kicker">Chapter 02 · Brand Manifesto</span>
+  <h2 class="chp-h">核心<br/><span class="it">精神.</span></h2>
+  <p class="chp-deck">
+    不比價、不比猛 — 只追求三件事。<em>這是我們對每一款產品的設計準則。</em>
+  </p>
 
-  <div class="brand-pillars">
-    <div class="pillar">
-      <div class="icon">🛡️</div>
-      <h3>安全永遠第一</h3>
-      <p>非硅安全配方、無半衰期、可徹底去除。多次施工不堆疊、零不可逆傷害——這是底線，不是賣點。</p>
+  <div class="manifesto">
+    <p>「把汽美專業級效果，做到任何人都能輕鬆上手；<br/>把安全當底線，不是賣點。」</p>
+    <span class="attr">POP MONSTER · 叁無</span>
+  </div>
+
+  <div class="principles">
+    <div class="prin">
+      <div class="pn">01</div>
+      <h3>更快解決</h3>
+      <p>千倍濃縮、1 秒施工、濕上濕下。把複雜的工序簡化到新手也能立即完成，不犧牲任何效果。</p>
     </div>
-    <div class="pillar">
-      <div class="icon">⚡</div>
-      <h3>任何人都能輕鬆上手</h3>
-      <p>千倍稀釋、濕上濕下、免噴免擦。把專業級效果做到新手也能 1 秒完成施工，不是只給職人的高門檻產品。</p>
+    <div class="prin">
+      <div class="pn">02</div>
+      <h3>更安全解決</h3>
+      <p>非硅安全配方、無半衰期、可徹底去除。多次施工不堆疊、零不可逆傷害 — 這是底線，不是賣點。</p>
     </div>
-    <div class="pillar">
-      <div class="icon">🔬</div>
-      <h3>不靠話術靠實力</h3>
-      <p>看水珠集中度、看收水俐落度、看乾淨感——三個重點當下驗證，產品好不好現場就看得出來。</p>
+    <div class="prin">
+      <div class="pn">03</div>
+      <h3>更容易解決</h3>
+      <p>不靠話術靠實力。看水珠集中度、看收水俐落度、看乾淨感 — 三個重點，當下驗證。</p>
     </div>
   </div>
 </section>
 
-<section class="section">
-  <h2>品牌矩陣</h2>
-  <div class="brands">
-    <div class="brand-block">
-      <h4>泡泡怪獸</h4>
-      <div class="en">POP MONSTER</div>
-      <p>主品牌｜清潔護理全系列｜車主導向</p>
-    </div>
-    <div class="brand-block">
-      <h4>米速</h4>
+<!-- CH03 SUB-BRANDS -->
+<section class="chapter" style="border-top:1px solid var(--border);" data-screen-label="05 Sub-brands">
+  <span class="chp-kicker">Chapter 03 · Brand Matrix</span>
+  <h2 class="chp-h">三個品牌<br/><span class="it">一個理念.</span></h2>
+  <p class="chp-deck">
+    POP MONSTER 是母品牌，不是品牌名稱。三個 sub-brand 各自負責一個產品故事。
+  </p>
+
+  <div class="sb-grid">
+    <div class="sb-blk sb-miso">
+      <div class="accent"></div>
+      <div class="sb-kk">Sub-brand I · 研磨系列</div>
+      <h3>米速</h3>
       <div class="en">MISO</div>
-      <p>研磨拋光職人線｜RO 商用拋光劑與訂製拋光盤</p>
+      <p>研磨系列 7 款。三號 80番重切、伍號 600番一劑拋、拾號 1000番鏡面 — 從重切到鏡面全覆蓋。職人路線、最強切削力。</p>
+      <a href="a002.html" class="sb-link">看研磨系列 →</a>
     </div>
-    <div class="brand-block">
-      <h4>丹若</h4>
-      <div class="en">SANWU・三無</div>
-      <p>合作品牌｜免刷預洗系列｜陽極電鍍可用</p>
+    <div class="sb-blk sb-pop">
+      <div class="accent"></div>
+      <div class="sb-kk">Sub-brand II · 主品牌</div>
+      <h3>泡泡怪獸</h3>
+      <div class="en">POP MONSTER</div>
+      <p>鍍膜、清潔、護理、耗材共 22 款。天使塗層千倍濃縮、玻璃鍍膜、皮革護理 — 日常維護的完整解決方案。</p>
+      <a href="a001.html" class="sb-link">看鍍膜系列 →</a>
+    </div>
+    <div class="sb-blk sb-dan">
+      <div class="accent"></div>
+      <div class="sb-kk">Sub-brand III · 預洗系列</div>
+      <h3>丹若</h3>
+      <div class="en">DANRUO</div>
+      <p>預洗系列。改裝車、陽極、電鍍件 0 風險的免刷預洗液 — 溫和安全配方，每次洗車最安心的第一步。</p>
+      <a href="a032.html" class="sb-link">看預洗系列 →</a>
     </div>
   </div>
 </section>
 
-<section class="section">
-  <h2>聯絡管道</h2>
-  <p style="text-align:center">五大管道任您選擇 — 推薦優先使用 LINE 諮詢，回覆最快</p>
+<!-- CH04 CONTACT -->
+<section class="chapter" style="border-top:1px solid var(--border);" data-screen-label="06 Contact">
+  <span class="chp-kicker">Chapter 04 · Contact</span>
+  <h2 class="chp-h">找到<br/><span class="it">我們.</span></h2>
+  <p class="chp-deck">
+    五大管道任選 — 推薦優先使用 <em>LINE 諮詢</em>，回覆最快。
+  </p>
 
-  <div class="contact-grid">
-    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" class="contact-card">
-      <div class="icon">💚</div>
-      <div class="channel">LINE OFFICIAL</div>
+  <div class="ct-grid">
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" class="ct-card">
+      <div class="ct-kk">LINE · 推薦</div>
       <h3>LINE 官方帳號</h3>
-      <div class="info">@150tiznd</div>
-      <div class="desc">最快速回覆 / 諮詢首選</div>
+      <div class="ct-info">@150tiznd</div>
+      <div class="ct-desc">最快速回覆，諮詢首選</div>
     </a>
-    <a href="https://wa.me/886970527037" target="_blank" rel="noopener" class="contact-card">
-      <div class="icon">📱</div>
-      <div class="channel">WHATSAPP</div>
+    <a href="https://wa.me/886970527037" target="_blank" rel="noopener" class="ct-card">
+      <div class="ct-kk">WhatsApp</div>
       <h3>WhatsApp</h3>
-      <div class="info">+886-970-527-037</div>
-      <div class="desc">海外客戶諮詢適用</div>
+      <div class="ct-info">+886 970 527 037</div>
+      <div class="ct-desc">海外客戶諮詢</div>
     </a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" class="contact-card">
-      <div class="icon">🛒</div>
-      <div class="channel">SHOPEE</div>
+    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" class="ct-card">
+      <div class="ct-kk">Shopee · 5.0</div>
       <h3>蝦皮賣場</h3>
-      <div class="info">milk790</div>
-      <div class="desc">5.0 評分 / 1,657+ 粉絲</div>
+      <div class="ct-info">milk790</div>
+      <div class="ct-desc">1,657+ 粉絲認證</div>
     </a>
-    <a href="https://www.facebook.com/share/1AcLN6W6HU/" target="_blank" rel="noopener" class="contact-card">
-      <div class="icon">📘</div>
-      <div class="channel">FACEBOOK</div>
+    <a href="https://www.facebook.com/share/1AcLN6W6HU/" target="_blank" rel="noopener" class="ct-card">
+      <div class="ct-kk">Facebook</div>
       <h3>Facebook</h3>
-      <div class="info">追蹤新品上架</div>
-      <div class="desc">活動優惠最先知道</div>
+      <div class="ct-info">追蹤新品</div>
+      <div class="ct-desc">活動優惠最先知道</div>
     </a>
-    <a href="https://www.instagram.com/ssss4845454" target="_blank" rel="noopener" class="contact-card">
-      <div class="icon">📷</div>
-      <div class="channel">INSTAGRAM</div>
-      <h3>Instagram</h3>
-      <div class="info">@ssss4845454</div>
-      <div class="desc">施工實拍 / 開箱日常</div>
+    <a href="https://www.instagram.com/ssss4845454" target="_blank" rel="noopener" class="ct-card">
+      <div class="ct-kk">Instagram</div>
+      <h3>@ssss4845454</h3>
+      <div class="ct-info">IG · 13.6 萬粉</div>
+      <div class="ct-desc">施工實拍 · 開箱日常</div>
     </a>
   </div>
 </section>
 
-<section class="section">
-  <h2>服務承諾</h2>
-  <ul class="policy-list">
-    <li><span class="label">📦 出貨時程</span><span class="value">蝦皮賣場下單後依平台時程出貨，特殊大宗商品或缺貨情況我們會主動透過 LINE 通知。</span></li>
-    <li><span class="label">💬 客服回覆</span><span class="value">LINE 官方帳號於營業時間內 4 小時回覆，非營業時間 24 小時內回覆。</span></li>
-    <li><span class="label">🔄 退換貨</span><span class="value">退換貨依蝦皮平台規範執行，因產品瑕疵問題請保留照片證明，主動聯繫 LINE 客服協助。</span></li>
-    <li><span class="label">🚚 海外配送</span><span class="value">支援外貿訂單，海外配送請透過 WhatsApp 直接洽詢配送方案。</span></li>
-    <li><span class="label">🛡️ 產品保固</span><span class="value">所有產品依說明書正常使用情況下，若效果不如預期，請保留證明聯繫客服協助。</span></li>
-    <li><span class="label">⚠️ 安全提醒</span><span class="value">本品牌所有藥劑為汽車美容專用，使用前請詳閱說明書，避免誤食、誤觸眼睛。建議施工時配戴手套。</span></li>
-  </ul>
+<!-- CH05 POLICY -->
+<section class="chapter" style="border-top:1px solid var(--border);" data-screen-label="07 Policy">
+  <span class="chp-kicker">Chapter 05 · Service Policy</span>
+  <h2 class="chp-h">服務<br/><span class="it">承諾.</span></h2>
+  <p class="chp-deck">買之前先知道 — 每一條都是實話。</p>
+
+  <div class="policy">
+    <div class="policy-row">
+      <div class="policy-key">出貨時程</div>
+      <div class="policy-val">蝦皮賣場下單後依平台時程出貨。特殊大宗或缺貨情況主動透過 LINE 通知。</div>
+    </div>
+    <div class="policy-row">
+      <div class="policy-key">客服回覆</div>
+      <div class="policy-val">LINE 官方帳號營業時間內 4 小時回覆，非營業時間 24 小時內回覆。目前因外貿業務繁忙，回覆稍長，但絕不漏訊。</div>
+    </div>
+    <div class="policy-row">
+      <div class="policy-key">退換貨</div>
+      <div class="policy-val">依蝦皮平台規範執行。因產品瑕疵問題請保留照片證明，主動聯繫 LINE 客服協助。</div>
+    </div>
+    <div class="policy-row">
+      <div class="policy-key">海外配送</div>
+      <div class="policy-val">支援外貿訂單。海外配送請透過 WhatsApp 直接洽詢配送方案。</div>
+    </div>
+    <div class="policy-row">
+      <div class="policy-key">批發 / 簽約</div>
+      <div class="policy-val">亞太 500+ 汽美門市實裝合作。批發樣品簽約合作請透過 LINE 諮詢，說明店型與需求。</div>
+    </div>
+    <div class="policy-row">
+      <div class="policy-key">安全提醒</div>
+      <div class="policy-val">所有藥劑為汽車美容專用。使用前請詳閱說明書，避免誤食、誤觸眼睛。建議施工時配戴手套。</div>
+    </div>
+  </div>
 </section>
 
-<section class="section" style="text-align:center">
-  <h2>準備好開始了嗎？</h2>
-  <p>從蝦皮賣場直接購買，或加 LINE 先諮詢您的車漆狀況再選對應產品</p>
-  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px">
+<!-- CLOSING CTA -->
+<section class="ab-cta" data-screen-label="08 CTA">
+  <h2>準備好了<span class="it">嗎？</span></h2>
+  <p class="deck">從蝦皮直購，或加 LINE 先諮詢您的車漆狀況再選對應產品。</p>
+  <div class="btn-row">
     <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" class="btn btn-gold">前往蝦皮賣場</a>
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" class="btn btn-outline">LINE 先諮詢</a>
     <a href="guide/" class="btn btn-outline">看教學攻略</a>
   </div>
 </section>
 
+<!-- FOOTER -->
 <footer class="footer">
-  <div class="footer-brand">泡泡怪獸 POP MONSTER × 米速 MISO × 丹若 SANWU</div>
+  <div class="footer-brand">泡泡怪獸 POP MONSTER × 米速 MISO</div>
   <div class="footer-sub">把關每一道工序｜任何人都能輕鬆上手｜按說明操作 放心使用</div>
-  <div class="brand-belief"><span><b>過去</b>安全是立身根本</span><span><b>現在</b>安全是產品底線</span><span><b>未來</b>安全是永不變的堅守</span></div>
+  <div class="brand-belief">
+    <span><b>過去</b>安全是立身根本</span>
+    <span><b>現在</b>安全是產品底線</span>
+    <span><b>未來</b>安全是永不變的堅守</span>
+  </div>
   <div class="footer-links">
     <a href="index.html">全部商品</a>
     <a href="members.html">會員生態</a>
@@ -240,6 +516,9 @@ gtag('config', 'G-WTKLHW33D7', {'anonymize_ip':true,'cookie_flags':'SameSite=Non
     <a href="about.html">關於我們</a>
     <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
+    <a href="https://wa.me/886970527037" target="_blank" rel="noopener">WhatsApp</a>
+    <a href="https://www.facebook.com/share/1AcLN6W6HU/" target="_blank" rel="noopener">Facebook</a>
+    <a href="https://www.instagram.com/ssss4845454" target="_blank" rel="noopener">Instagram</a>
   </div>
   <div class="footer-legal" style="margin-bottom:8px">
     <a href="privacy.html" style="font-size:12px;color:var(--txt-m)">隱私權政策</a>
@@ -249,7 +528,12 @@ gtag('config', 'G-WTKLHW33D7', {'anonymize_ip':true,'cookie_flags':'SameSite=Non
   <div class="footer-copy">&copy; 2026 泡泡怪獸 POP MONSTER. All rights reserved.</div>
 </footer>
 
-<div class="cookie-bar"><span>本站使用 Cookie 提升瀏覽體驗。繼續瀏覽即表示同意。</span><span><button class="cookie-accept" id="ck-accept">接受</button> <button class="cookie-decline" id="ck-decline">拒絕</button></span></div>
+<div class="cookie-bar">
+  <span>本站使用 Cookie 提升瀏覽體驗。繼續瀏覽即表示同意。</span>
+  <span><button class="cookie-accept" id="ck-accept">接受</button> <button class="cookie-decline" id="ck-decline">拒絕</button></span>
+</div>
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"泡泡怪獸 POP MONSTER","url":"https://popmonster.vip/","sameAs":["https://shopee.tw/milk790","https://www.facebook.com/share/1AcLN6W6HU/","https://www.instagram.com/ssss4845454"]}</script>
 <script src="js/main.js" defer></script>
 </body>
 </html>
