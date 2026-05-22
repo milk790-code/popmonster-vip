@@ -1,0 +1,90 @@
+/* ============================================================
+   POP MONSTER — Patch v2 · P1/P2 fixes
+   貼到 css/main.css 最尾端即可生效
+   Fixes: #04 #09 #14 #15 #16 #17 #03(partial)
+   ============================================================ */
+
+/* #04 #15 — Remove conflicting max-height from carousel-slide-img
+   (aspect-ratio:1/1 is already set; max-height overrides it on mobile)
+   ------------------------------------------------------------ */
+@media (max-width:768px){
+  .carousel-slide-img{max-height:none}
+}
+@media (max-width:480px){
+  .carousel-slide-img{max-height:none}
+}
+
+/* #09 — FAQ self-sizing with grid-template-rows
+   Replaces the fixed max-height approach.
+   Requires wrapping .faq-a content in a single child <div>
+   ------------------------------------------------------------ */
+.faq-a{
+  display:grid;
+  grid-template-rows:0fr;
+  max-height:none;
+  overflow:hidden;
+  transition:grid-template-rows .35s ease, padding .35s;
+  padding:0 18px;
+}
+.faq-a > *{overflow:hidden;min-height:0}
+.faq-item.open .faq-a{
+  grid-template-rows:1fr;
+  padding:14px 18px;
+}
+
+/* #14 — Spacing tokens for .section
+   Replaces inline padding:40px 24px
+   ------------------------------------------------------------ */
+.section{
+  padding:var(--s-12) var(--s-6);
+}
+@media (max-width:768px){
+  .section{padding:var(--s-8) var(--s-4)}
+}
+@media (max-width:480px){
+  .section{padding:var(--s-6) var(--s-4)}
+}
+
+/* #16 — Filter bar: single-row horizontal scroll on mobile
+   ------------------------------------------------------------ */
+@media (max-width:480px){
+  .filter-bar{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding-bottom:6px;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    gap:6px;
+  }
+  .filter-bar::-webkit-scrollbar{display:none}
+  .filter-btn{
+    flex-shrink:0;
+    padding:5px 12px;
+    font-size:12px;
+  }
+}
+
+/* #17 — Footer links: horizontal scroll on landscape tablet
+   ------------------------------------------------------------ */
+@media (max-width:1024px) and (orientation:landscape){
+  .footer-links{
+    flex-wrap:nowrap;
+    gap:14px;
+    overflow-x:auto;
+    justify-content:flex-start;
+    padding-bottom:8px;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .footer-links::-webkit-scrollbar{display:none}
+}
+
+/* #03 (CSS part) — Hero pin image: aspect-ratio lock
+   Also set in HTML: add width="200" height="200" loading="lazy"
+   ------------------------------------------------------------ */
+.hero-pin,
+.hero img[width="200"]{
+  aspect-ratio:1/1;
+  width:200px;
+  height:auto;
+}

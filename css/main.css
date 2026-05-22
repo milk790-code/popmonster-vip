@@ -9,10 +9,22 @@
   --shadow:0 4px 24px rgba(0,0,0,.6);
   --gold-grad:linear-gradient(135deg,#c8a96b,#d8c08a);
   --shimmer:linear-gradient(120deg,#c8a96b 0%,#fff8dc 50%,#c8a96b 100%);
+  /* === Sub-brand 子品牌色 (品牌手冊 v2) === */
+  --brand-miso:#dc262f;       /* 米速 MISO 紅 */
+  --brand-popmonster:#c8a96b; /* 泡泡怪獸 金 (即 --gold) */
+  --brand-danruo:#d78296;     /* 丹若 DANRUO 粉 */
+  /* === Product Accent 產品識別色 (品牌手冊 v2) === */
+  --accent-a003:#dc262f; /* 米速三號 RED */
+  --accent-a004:#e48232; /* 米速伍號 ORANGE */
+  --accent-a005:#3caf6e; /* 米速拾號 GREEN */
+  --accent-a032:#d78296; /* 丹若預洗 PINK */
+  --accent-a041:#826ec8; /* 米速X 鍍鉻 PURPLE */
+  --accent-solo:#d8a04a; /* Solo 重切削 AMBER */
   /* === Typography Scale === */
   --fs-xs:12px;--fs-sm:13px;--fs-base:14px;--fs-md:16px;
   --fs-lg:18px;--fs-xl:20px;--fs-2xl:24px;--fs-3xl:32px;
   --fs-4xl:40px;--fs-hero:clamp(2rem,5vw,3.5rem);
+  --fs-display:clamp(2.4rem,6.5vw,4.5rem);
   --lh-tight:1.2;--lh-normal:1.5;--lh-relaxed:1.7;
   --fw-r:400;--fw-m:500;--fw-b:700;--fw-x:800;
   /* === Spacing Scale (4px base) === */
@@ -50,7 +62,7 @@ a:hover{color:var(--gold-lt)}
 .section-sub{font-size:14px;color:var(--txt-m);margin-bottom:32px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
 .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .35s;display:flex;flex-direction:column}
-.card:hover{transform:translateY(-6px);border-color:var(--gold)}
+.card:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 12px 32px rgba(200,169,107,.15)}
 .card-img{aspect-ratio:4/3;background:var(--bg-sub);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
 .card-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
 .card:hover .card-img img{transform:scale(1.05)}
@@ -75,7 +87,7 @@ a:hover{color:var(--gold-lt)}
 .pd-meta span{font-size:12px;color:var(--txt-m);background:var(--bg-sub);padding:4px 10px;border-radius:4px}
 .pd-desc{font-size:16px;color:var(--txt);line-height:1.8;margin-bottom:28px}
 .pd-cta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:var(--tap);padding:12px 28px;font-size:15px;font-weight:700;border-radius:var(--r);border:none;cursor:pointer;transition:transform .2s,box-shadow .2s;text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:14px 32px;font-size:15px;font-weight:700;border-radius:var(--r);border:none;cursor:pointer;transition:transform .2s,box-shadow .2s;text-decoration:none;letter-spacing:.5px}
 .btn:focus-visible{outline:2px solid var(--gold-lt);outline-offset:3px}
 .btn-gold{background:var(--gold-grad);color:#0a0a0a}
 .btn-gold:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(200,169,107,.4);color:#0a0a0a}
@@ -97,7 +109,7 @@ a:hover{color:var(--gold-lt)}
 .faq-q::after{content:'+';font-size:18px;color:var(--gold-dk);transition:transform .3s}
 .faq-item.open .faq-q::after{transform:rotate(45deg)}
 .faq-a{padding:0 18px;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s;font-size:14px;color:var(--txt-m);line-height:1.7}
-.faq-item.open .faq-a{max-height:300px;padding:14px 18px}
+.faq-item.open .faq-a{max-height:800px;padding:14px 18px}
 
 /* === FOOTER === */
 .footer{background:var(--bg-card);border-top:1px solid var(--border);margin-top:60px;padding:40px 24px;text-align:center}
@@ -153,8 +165,13 @@ a:hover{color:var(--gold-lt)}
 .carousel-dot.active{background:var(--gold);width:24px;border-radius:4px}
 @media(max-width:768px){
   .carousel-slide{grid-template-columns:1fr;padding:24px;gap:16px}
-  .carousel-slide-img{aspect-ratio:16/12;max-height:240px}
-  .carousel-btn{width:36px;height:36px;font-size:14px}
+  .carousel-slide-img{aspect-ratio:1/1;max-height:320px}
+  .carousel-btn{width:40px;height:40px;font-size:14px}
+}
+@media(max-width:480px){
+  .carousel-section{padding:20px 12px}
+  .carousel-slide{padding:18px}
+  .carousel-slide-img{max-height:260px}
 }
 
 /* === RELATED PRODUCTS 相關商品推薦 === */
@@ -162,7 +179,7 @@ a:hover{color:var(--gold-lt)}
 .related h2{font-size:20px;color:var(--gold);margin-bottom:24px;text-align:center}
 .related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .related-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;text-decoration:none;display:flex;flex-direction:column;transition:transform .3s,border-color .3s}
-.related-card:hover{transform:translateY(-3px);border-color:var(--gold)}
+.related-card:hover{transform:translateY(-4px);border-color:var(--gold)}
 .related-img{aspect-ratio:4/3;background:var(--bg-sub);overflow:hidden}
 .related-img img{width:100%;height:100%;object-fit:cover}
 .related-body{padding:14px}
@@ -244,7 +261,7 @@ a:hover{color:var(--gold-lt)}
 .brand{padding:60px 24px;max-width:1200px;margin:0 auto}
 .brand-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
 .brand-card{background:rgba(200,169,107,.04);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px;transition:border-color .3s,transform .3s}
-.brand-card:hover{border-color:var(--gold-dk);transform:translateY(-3px)}
+.brand-card:hover{border-color:var(--gold-dk);transform:translateY(-4px)}
 .brand-icon{font-size:28px;margin-bottom:12px}
 .brand-card h3{font-size:17px;color:var(--gold-lt);margin-bottom:8px;font-weight:700}
 .brand-card p{font-size:14px;color:var(--txt-m);line-height:1.7}
@@ -287,9 +304,9 @@ a:hover{color:var(--gold-lt)}
 .spec-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-sub);border-radius:var(--r);font-size:13px;color:var(--txt)}
 .spec-item .icon{color:var(--gold);font-size:16px;flex-shrink:0}
 
-/* === STICKY CTA (行動端) === */
-.sticky-cta{display:none;position:fixed;bottom:0;left:0;right:0;z-index:98;background:rgba(10,10,10,.95);backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:12px 20px;gap:10px}
-.sticky-cta .btn{flex:1;text-align:center;font-size:14px;padding:12px 16px}
+/* === STICKY CTA (行動端 / 平板) === */
+.sticky-cta{display:none;position:fixed;bottom:0;left:0;right:0;z-index:98;background:rgba(10,10,10,.95);backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:12px 20px;gap:10px;box-shadow:0 -4px 24px rgba(0,0,0,.4)}
+.sticky-cta .btn{flex:1;text-align:center;font-size:14px;padding:14px 16px;min-height:48px}
 
 /* === SOCIAL PROOF === */
 .social{padding:40px 24px;max-width:1200px;margin:0 auto;text-align:center}
@@ -301,8 +318,83 @@ a:hover{color:var(--gold-lt)}
 /* === GLASSMORPHISM CARD === */
 .glass{background:rgba(255,255,255,.03);backdrop-filter:blur(12px);border:1px solid rgba(200,169,107,.1);border-radius:var(--r-lg)}
 
+/* === TRUST ELEMENTS (信任元素：評分/保證/限量) === */
+.trust-row{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 24px}
+.trust-item{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(200,169,107,.08);border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--gold-lt);letter-spacing:.5px}
+.trust-item .icon{color:var(--gold);font-size:14px}
+.rating-badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--gold-lt);font-weight:600}
+.rating-badge .stars{color:var(--gold);letter-spacing:2px}
+.rating-badge .count{color:var(--txt-m);font-size:12px;font-weight:400}
+.scarcity{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:linear-gradient(90deg,rgba(216,192,138,.12),rgba(200,169,107,.04));border-left:3px solid var(--gold);font-size:12px;color:var(--gold-lt);border-radius:0 var(--r) var(--r) 0;margin-bottom:12px}
+.scarcity::before{content:'●';color:var(--gold);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* 行動端商品頁避免被浮動 CTA 遮擋 */
+@media(max-width:920px){
+  .pd{padding-bottom:96px}
+}
+
 /* === DIVIDER === */
 .divider{height:1px;background:linear-gradient(90deg,transparent,var(--gold-dk),transparent);margin:40px auto;max-width:200px}
+
+/* === BRAND MANIFESTO 品牌標語 (對齊品牌手冊「叁無 × 重新定義汽美」) === */
+.brand-tagline{display:flex;justify-content:center;align-items:center;gap:14px;padding:14px 24px;font-size:13px;letter-spacing:6px;color:var(--gold);text-align:center;font-weight:600;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:linear-gradient(90deg,transparent,rgba(200,169,107,.04),transparent)}
+.brand-tagline em{font-style:normal;color:var(--gold-lt);font-weight:800;font-size:15px;letter-spacing:8px}
+.brand-tagline .x{color:var(--gold-dk);font-size:12px;letter-spacing:0}
+
+/* === BRAND BELIEF 品牌信念三段論 === */
+.brand-belief{display:flex;justify-content:center;flex-wrap:wrap;gap:24px;padding:16px 0;margin:0 auto 16px;max-width:680px;font-size:12px;color:var(--txt-m);letter-spacing:1px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.brand-belief span{display:inline-flex;align-items:center;gap:8px}
+.brand-belief b{color:var(--gold);font-weight:700;font-size:11px;letter-spacing:3px}
+@media(max-width:480px){.brand-belief{gap:10px;font-size:11px;padding:12px 16px}.brand-belief b{font-size:10px;letter-spacing:2px}}
+
+/* === SUB-BRAND GRID 子品牌介紹 (首頁) === */
+.subbrands{padding:60px 24px;max-width:1200px;margin:0 auto}
+.subbrands-header{text-align:center;margin-bottom:40px}
+.subbrands-header .eyebrow{font-size:12px;letter-spacing:4px;color:var(--gold);margin-bottom:8px}
+.subbrands-header h2{font-size:clamp(1.6rem,3.5vw,2.4rem);color:#fff;font-weight:800}
+.subbrands-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.sb-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:32px 24px;text-align:center;position:relative;overflow:hidden;transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .35s}
+.sb-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--brand-color,var(--gold))}
+.sb-card:hover{transform:translateY(-4px);border-color:var(--brand-color,var(--gold))}
+.sb-dot{width:14px;height:14px;border-radius:50%;background:var(--brand-color);margin:0 auto 12px;box-shadow:0 0 18px 2px rgba(255,255,255,.05)}
+.sb-card h3{font-size:20px;color:#fff;font-weight:800;margin-bottom:4px;letter-spacing:1px}
+.sb-card .en{font-size:11px;color:var(--txt-m);letter-spacing:3px;margin-bottom:14px}
+.sb-card p{font-size:13px;color:var(--txt-m);line-height:1.7;margin-bottom:16px}
+.sb-card .sb-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--brand-color,var(--gold));font-weight:600;letter-spacing:1px}
+.sb-miso{--brand-color:var(--brand-miso)}
+.sb-pop{--brand-color:var(--brand-popmonster)}
+.sb-danruo{--brand-color:var(--brand-danruo)}
+@media(max-width:768px){.subbrands-grid{grid-template-columns:1fr;gap:14px}.sb-card{padding:24px 20px}}
+
+/* === PRODUCT SKU TAG 商品頁左上角識別標籤 === */
+.pd-sku-tag{display:inline-flex;align-items:center;gap:10px;font-size:11px;letter-spacing:3px;color:var(--accent-color,var(--gold));font-weight:700;margin-bottom:12px;padding:6px 0;text-transform:uppercase}
+.pd-sku-tag .dot{width:8px;height:8px;border-radius:50%;background:var(--accent-color,var(--gold))}
+.pd-accent-line{height:1px;background:linear-gradient(90deg,var(--accent-color,var(--gold)),transparent);margin:0 0 24px;max-width:140px}
+
+/* === PRODUCT HERO MINIMALIST 產品頁極簡 hero 模式 === */
+.pd-img.pd-img-minimal{background:transparent;border:none;padding:48px 0;position:relative}
+.pd-img.pd-img-minimal::before,.pd-img.pd-img-minimal::after{content:'';position:absolute;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--accent-color,var(--gold)),transparent);opacity:.5}
+.pd-img.pd-img-minimal::before{top:0}
+.pd-img.pd-img-minimal::after{bottom:0}
+.pd-img.pd-img-minimal img{max-width:78%;max-height:520px;filter:drop-shadow(0 24px 60px rgba(0,0,0,.7))}
+
+/* === DISPLAY HEADING 品牌手冊 Display 階層 (web 對應) === */
+.h-display{font-size:var(--fs-display);font-weight:800;line-height:1.1;letter-spacing:-1px;color:#fff}
+
+/* === BELIEF SECTION (about.html 品牌信念三段論) === */
+.belief-section{max-width:780px;margin:0 auto}
+.belief-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:20px}
+.belief-list li{display:flex;align-items:flex-start;gap:28px;padding:24px 28px;background:linear-gradient(135deg,rgba(200,169,107,.04),transparent);border-left:3px solid var(--gold-dk);border-radius:0 var(--r-lg) var(--r-lg) 0;transition:border-color .35s,transform .35s}
+.belief-list li:hover{border-left-color:var(--gold);transform:translateX(4px)}
+.belief-num{font-size:48px;font-weight:800;line-height:1;color:var(--gold);font-family:var(--font);flex-shrink:0;background:var(--gold-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.belief-list .belief-tag{font-size:11px;letter-spacing:5px;color:var(--txt-m);margin-bottom:6px;font-weight:600}
+.belief-list h3{font-size:22px;color:#fff;font-weight:700;line-height:1.4}
+@media(max-width:480px){
+  .belief-list li{gap:16px;padding:20px}
+  .belief-num{font-size:36px}
+  .belief-list h3{font-size:18px}
+}
 
 /* === ANIMATION === */
 .fade-up{opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s}
@@ -312,9 +404,21 @@ a:hover{color:var(--gold-lt)}
 @media(max-width:768px){
   .featured-inner{grid-template-columns:1fr;padding:24px}
   .featured-stats{justify-content:center}
-  .sticky-cta{display:flex}
   .brand-grid{grid-template-columns:1fr}
   .steps{grid-template-columns:1fr 1fr}
+}
+@media(max-width:920px){
+  .sticky-cta{display:flex}
+}
+@media(max-width:480px){
+  .pd-meta span{font-size:13px;padding:6px 12px}
+  .filter-btn{padding:6px 12px;font-size:12px}
+  .filter-bar{gap:6px;margin-bottom:20px}
+  .card-img{aspect-ratio:1/1}
+  .nav{padding:0 16px}
+  .hero{padding:40px 16px}
+  .section{padding:32px 16px}
+  .section-title{font-size:20px}
 }
 
 @media(prefers-reduced-motion:reduce){

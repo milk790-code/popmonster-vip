@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>POP MONSTER · 每日四點福袋倒數 Widget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&family=Montserrat:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:#111;font-family:"Noto Sans TC",sans-serif;-webkit-font-smoothing:antialiased;}
+
+/* ── STAGE ── */
+.stage{padding:48px 24px 64px;display:flex;flex-direction:column;align-items:center;gap:40px;}
+.stage-label{font-family:"Montserrat",sans-serif;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#3a3328;}
+
+/* variant switcher */
+.variants{display:flex;gap:0;border:1px solid rgba(200,169,107,.2);}
+.var-btn{font-family:"Montserrat",sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;padding:8px 14px;background:transparent;color:#a89e8e;border:none;border-right:1px solid rgba(200,169,107,.2);cursor:pointer;transition:all .14s;}
+.var-btn:last-child{border-right:none;}
+.var-btn.on{background:#c8a96b;color:#0a0a0a;}
+
+/* ══════════════════════════════════════
+   WIDGET STYLES (self-contained)
+   ══════════════════════════════════════ */
+
+/* ── VARIANT A: Full Banner 640×120 ── */
+.widget-a{
+  width:640px;
+  background:#0a0a0a;
+  border:1px solid rgba(200,169,107,.2);
+  position:relative;overflow:hidden;
+  padding:0;
+}
+.wa-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 20% 50%,rgba(200,169,107,.06) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 50%,rgba(200,169,107,.04) 0%,transparent 50%);
+  pointer-events:none;
+}
+.wa-inner{
+  position:relative;z-index:2;
+  display:grid;grid-template-columns:auto 1fr auto;gap:0;
+  align-items:stretch;
+}
+.wa-left{
+  padding:16px 20px;
+  border-right:1px solid rgba(200,169,107,.15);
+  display:flex;flex-direction:column;justify-content:center;gap:4px;
+  min-width:130px;
+}
+.wa-left .wl-kk{font-family:"Montserrat",sans-serif;font-size:8px;letter-spacing:.32em;text-transform:uppercase;color:#5a5347;}
+.wa-left .wl-title{font-family:"Noto Serif TC","Playfair Display",serif;font-weight:900;font-size:18px;line-height:1;color:#e8e2d6;}
+.wa-left .wl-sub{font-family:"Noto Serif TC",serif;font-style:italic;font-size:11px;color:#c8a96b;margin-top:2px;}
+
+.wa-center{
+  padding:12px 20px;
+  display:flex;align-items:center;gap:16px;
+}
+.wa-slot{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:8px 12px;border:1px solid rgba(200,169,107,.1);
+  background:rgba(200,169,107,.03);
+  transition:all .2s;flex:1;
+}
+.wa-slot.active{border-color:rgba(200,169,107,.5);background:rgba(200,169,107,.08);}
+.wa-slot.past{opacity:.3;}
+.wa-slot.live{border-color:rgba(200,169,107,.6);background:rgba(200,169,107,.12);animation:slotPulse 2s ease-in-out infinite;}
+@keyframes slotPulse{0%,100%{background:rgba(200,169,107,.12);}50%{background:rgba(200,169,107,.18);}}
+.wa-slot .ws-time{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:16px;color:#c8a96b;line-height:1;}
+.wa-slot .ws-label{font-family:"Montserrat",sans-serif;font-size:7px;letter-spacing:.2em;text-transform:uppercase;color:#5a5347;}
+.wa-slot.live .ws-label{color:#c8a96b;}
+.wa-slot .ws-status{font-family:"Montserrat",sans-serif;font-size:7px;letter-spacing:.14em;text-transform:uppercase;margin-top:2px;}
+.wa-slot.live .ws-status{color:#7ec88c;}
+.wa-slot.past .ws-status{color:#3a3328;}
+
+.wa-right{
+  padding:16px 16px;
+  border-left:1px solid rgba(200,169,107,.15);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;
+  min-width:130px;
+}
+.wa-right .next-label{font-family:"Montserrat",sans-serif;font-size:7px;letter-spacing:.22em;text-transform:uppercase;color:#5a5347;}
+.wa-right .countdown{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:22px;color:#e8e2d6;letter-spacing:-.02em;font-feature-settings:"tnum";}
+.wa-right .countdown.live{color:#c8a96b;animation:countPulse 1s ease-in-out infinite alternate;}
+@keyframes countPulse{from{opacity:.8;}to{opacity:1;}}
+.wa-right .cta-mini{
+  font-family:"Montserrat",sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;padding:6px 12px;
+  background:#c8a96b;color:#0a0a0a;text-decoration:none;
+  display:inline-block;transition:background .14s;
+}
+.wa-right .cta-mini:hover{background:#d8c08a;}
+
+/* ── VARIANT B: Compact Card 320×140 ── */
+.widget-b{
+  width:320px;
+  background:#0a0a0a;border:1px solid rgba(200,169,107,.2);
+  padding:20px;position:relative;overflow:hidden;
+}
+.wb-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 40%,rgba(200,169,107,.07) 0%,transparent 55%);pointer-events:none;}
+.wb-inner{position:relative;z-index:2;}
+.wb-kk{font-family:"Montserrat",sans-serif;font-size:8px;letter-spacing:.36em;text-transform:uppercase;color:#5a5347;margin-bottom:8px;}
+.wb-next{font-family:"Noto Serif TC",serif;font-weight:700;font-size:16px;color:#e8e2d6;margin-bottom:4px;}
+.wb-slots{display:flex;gap:6px;margin-bottom:12px;}
+.wb-dot{
+  font-family:"JetBrains Mono",monospace;font-size:10px;color:#5a5347;
+  padding:3px 8px;border:1px solid rgba(200,169,107,.1);
+}
+.wb-dot.active{color:#c8a96b;border-color:rgba(200,169,107,.4);}
+.wb-dot.live{color:#7ec88c;border-color:rgba(126,200,140,.4);background:rgba(126,200,140,.06);}
+.wb-countdown{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:28px;color:#c8a96b;letter-spacing:-.02em;font-feature-settings:"tnum";margin-bottom:10px;}
+.wb-cta{
+  font-family:"Montserrat",sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  padding:7px 14px;background:#c8a96b;color:#0a0a0a;text-decoration:none;display:inline-block;
+}
+.wb-cta:hover{background:#d8c08a;}
+
+/* ── VARIANT C: Minimal Ticker 100% width ── */
+.widget-c{
+  width:640px;height:40px;
+  background:#0a0a0a;border-top:1px solid rgba(200,169,107,.15);border-bottom:1px solid rgba(200,169,107,.15);
+  display:flex;align-items:center;gap:0;
+  overflow:hidden;
+}
+.wc-brand{
+  height:100%;display:flex;align-items:center;
+  padding:0 16px;border-right:1px solid rgba(200,169,107,.15);
+  font-family:"Montserrat",sans-serif;font-size:10px;font-weight:800;letter-spacing:.18em;color:#c8a96b;
+  white-space:nowrap;background:rgba(200,169,107,.04);flex-shrink:0;
+}
+.wc-ticker{flex:1;display:flex;align-items:center;gap:24px;padding:0 16px;overflow:hidden;}
+.wc-slots-row{display:flex;gap:16px;align-items:center;}
+.wc-slot{font-family:"JetBrains Mono",monospace;font-size:11px;color:#5a5347;white-space:nowrap;}
+.wc-slot.active{color:#c8a96b;}
+.wc-slot.live{color:#7ec88c;}
+.wc-sep{color:#3a3328;font-family:"JetBrains Mono",monospace;}
+.wc-countdown{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:700;color:#e8e2d6;white-space:nowrap;font-feature-settings:"tnum";}
+.wc-cta{
+  height:100%;display:flex;align-items:center;
+  padding:0 14px;background:#c8a96b;color:#0a0a0a;
+  font-family:"Montserrat",sans-serif;font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  text-decoration:none;flex-shrink:0;border-left:1px solid rgba(200,169,107,.2);white-space:nowrap;
+}
+.wc-cta:hover{background:#d8c08a;}
+
+/* Embed code block */
+.embed-block{
+  max-width:680px;width:100%;
+  background:#0a0a0a;border:1px solid rgba(200,169,107,.15);padding:16px;position:relative;
+}
+.eb-label{font-family:"Montserrat",sans-serif;font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:#c8a96b;margin-bottom:10px;}
+.eb-code{font-family:"JetBrains Mono",monospace;font-size:11px;color:#d8c08a;line-height:1.7;overflow-x:auto;}
+.eb-copy{position:absolute;top:10px;right:10px;font-family:"Montserrat",sans-serif;font-size:9px;letter-spacing:.18em;text-transform:uppercase;padding:5px 10px;border:1px solid rgba(200,169,107,.25);color:#a89e8e;background:transparent;cursor:pointer;transition:all .13s;}
+.eb-copy:hover,.eb-copy.ok{background:#c8a96b;color:#0a0a0a;border-color:#c8a96b;}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="stage-label">每日四點福袋倒數 Widget · 3 種尺寸 · 可嵌入官網</div>
+
+  <div class="variants">
+    <button class="var-btn on" data-v="va">版本 A · 完整橫幅 640px</button>
+    <button class="var-btn" data-v="vb">版本 B · 卡片 320px</button>
+    <button class="var-btn" data-v="vc">版本 C · 極簡 Ticker</button>
+  </div>
+
+  <!-- WIDGET A -->
+  <div id="wa-wrap">
+    <div class="widget-a">
+      <div class="wa-bg"></div>
+      <div class="wa-inner">
+        <div class="wa-left">
+          <div class="wl-kk">DAILY · FOUR · DROPS</div>
+          <div class="wl-title">每日四點<br/>福袋</div>
+          <div class="wl-sub">每點限量 1 名</div>
+        </div>
+        <div class="wa-center" id="wa-slots">
+          <div class="wa-slot" id="was-0" data-time="07:30"><div class="ws-time">07:30</div><div class="ws-label">MORNING</div><div class="ws-status" id="wss-0">-</div></div>
+          <div class="wa-slot" id="was-1" data-time="12:30"><div class="ws-time">12:30</div><div class="ws-label">NOON</div><div class="ws-status" id="wss-1">-</div></div>
+          <div class="wa-slot" id="was-2" data-time="18:30"><div class="ws-time">18:30</div><div class="ws-label">EVENING</div><div class="ws-status" id="wss-2">-</div></div>
+          <div class="wa-slot" id="was-3" data-time="22:00"><div class="ws-time">22:00</div><div class="ws-label">MIDNIGHT</div><div class="ws-status" id="wss-3">-</div></div>
+        </div>
+        <div class="wa-right">
+          <div class="next-label" id="wa-next-label">下一場倒數</div>
+          <div class="countdown" id="wa-countdown">--:--:--</div>
+          <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" class="cta-mini">立即搶購</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIDGET B -->
+  <div id="wb-wrap" style="display:none">
+    <div class="widget-b">
+      <div class="wb-bg"></div>
+      <div class="wb-inner">
+        <div class="wb-kk">DAILY FOUR DROPS · 每日四點福袋</div>
+        <div class="wb-next" id="wb-next">下一場：—</div>
+        <div class="wb-slots">
+          <div class="wb-dot" id="wbd-0">07:30</div>
+          <div class="wb-dot" id="wbd-1">12:30</div>
+          <div class="wb-dot" id="wbd-2">18:30</div>
+          <div class="wb-dot" id="wbd-3">22:00</div>
+        </div>
+        <div class="wb-countdown" id="wb-countdown">--:--:--</div>
+        <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" class="wb-cta">搶 · 蝦皮賣場</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIDGET C -->
+  <div id="wc-wrap" style="display:none">
+    <div class="widget-c">
+      <div class="wc-brand">福袋</div>
+      <div class="wc-ticker">
+        <div class="wc-slots-row">
+          <span class="wc-slot" id="wcs-0">07:30</span>
+          <span class="wc-sep">·</span>
+          <span class="wc-slot" id="wcs-1">12:30</span>
+          <span class="wc-sep">·</span>
+          <span class="wc-slot" id="wcs-2">18:30</span>
+          <span class="wc-sep">·</span>
+          <span class="wc-slot" id="wcs-3">22:00</span>
+        </div>
+        <div class="wc-sep">|</div>
+        <div class="wc-countdown" id="wc-countdown">--:--:--</div>
+      </div>
+      <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" class="wc-cta">搶購</a>
+    </div>
+  </div>
+
+  <!-- EMBED CODE -->
+  <div class="embed-block">
+    <div class="eb-label">嵌入代碼（貼入官網 HTML）</div>
+    <pre class="eb-code" id="embed-code">&lt;iframe
+  src="https://popmonster.vip/widget/countdown-a.html"
+  width="640"
+  height="92"
+  frameborder="0"
+  scrolling="no"
+  style="border:none;display:block;"
+&gt;&lt;/iframe&gt;</pre>
+    <button class="eb-copy" id="copy-embed">複製</button>
+  </div>
+</div>
+
+<script>
+// ─── COUNTDOWN LOGIC ─────────────────────────────────────────────────
+var SLOTS = [
+  {h:7,  m:30, label:'晨光 07:30', kicker:'MORNING · 07:30'},
+  {h:12, m:30, label:'午陽 12:30', kicker:'NOON · 12:30'},
+  {h:18, m:30, label:'暮色 18:30', kicker:'EVENING · 18:30'},
+  {h:22, m:0,  label:'月光 22:00', kicker:'MIDNIGHT · 22:00'},
+];
+
+function pad(n){ return n<10?'0'+n:String(n); }
+function fmt(s){
+  var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;
+  return pad(h)+':'+pad(m)+':'+pad(ss);
+}
+
+function tick(){
+  var now = new Date();
+  var nowSec = now.getHours()*3600 + now.getMinutes()*60 + now.getSeconds();
+  var nextDrop = null, nextDelta = Infinity, nextLabel = '';
+
+  SLOTS.forEach(function(s,i){
+    var dropSec = s.h*3600 + s.m*60;
+    var endSec  = dropSec + 30*60;
+
+    // Widget A slots
+    var wasEl = document.getElementById('was-'+i);
+    var wssEl = document.getElementById('wss-'+i);
+    var wbdEl = document.getElementById('wbd-'+i);
+    var wcsEl = document.getElementById('wcs-'+i);
+
+    wasEl.classList.remove('live','active','past');
+    wbdEl.classList.remove('live','active');
+    wcsEl.classList.remove('live','active');
+
+    if(nowSec >= dropSec && nowSec < endSec){
+      wasEl.classList.add('live');
+      wbdEl.classList.add('live');
+      wcsEl.classList.add('live');
+      if(wssEl) wssEl.textContent = '搶購中';
+      if(wssEl) wssEl.style.color = '#7ec88c';
+    } else if(nowSec >= endSec){
+      wasEl.classList.add('past');
+      if(wssEl) wssEl.textContent = '已結束';
+      if(wssEl) wssEl.style.color = '';
+    } else {
+      var delta = dropSec - nowSec;
+      if(wssEl) wssEl.textContent = '倒數 '+fmt(delta);
+      if(wssEl) wssEl.style.color = '';
+      if(delta < nextDelta){
+        nextDelta = delta;
+        nextDrop = s;
+        nextLabel = s.label;
+      }
+    }
+    if(nowSec < dropSec) wasEl.classList.add('active');
+  });
+
+  var countdownStr = nextDrop ? fmt(nextDelta) : '今日已結束';
+  var isLive = !nextDrop;
+
+  // Widget A
+  var waC = document.getElementById('wa-countdown');
+  var waNL = document.getElementById('wa-next-label');
+  if(waC){ waC.textContent = countdownStr; waC.className = 'countdown'+(isLive?' live':''); }
+  if(waNL){ waNL.textContent = nextDrop ? (nextDrop.kicker) : '今日完畢'; }
+
+  // Widget B
+  var wbN = document.getElementById('wb-next');
+  var wbC = document.getElementById('wb-countdown');
+  if(wbN){ wbN.textContent = nextDrop ? ('下一場：'+nextLabel) : '今日四場全部結束'; }
+  if(wbC){ wbC.textContent = countdownStr; }
+
+  // Widget C
+  var wcC = document.getElementById('wc-countdown');
+  if(wcC){ wcC.textContent = countdownStr; }
+}
+
+setInterval(tick, 1000);
+tick();
+
+// ─── VARIANT SWITCHER ─────────────────────────────────────────────────
+var embedCodes = {
+  va: '&lt;iframe\n  src="https://popmonster.vip/widget/countdown-a.html"\n  width="640"\n  height="92"\n  frameborder="0"\n  scrolling="no"\n  style="border:none;display:block;"\n&gt;&lt;/iframe&gt;',
+  vb: '&lt;iframe\n  src="https://popmonster.vip/widget/countdown-b.html"\n  width="320"\n  height="140"\n  frameborder="0"\n  scrolling="no"\n  style="border:none;display:block;"\n&gt;&lt;/iframe&gt;',
+  vc: '&lt;iframe\n  src="https://popmonster.vip/widget/countdown-c.html"\n  width="100%"\n  height="40"\n  frameborder="0"\n  scrolling="no"\n  style="border:none;display:block;width:100%;"\n&gt;&lt;/iframe&gt;',
+};
+
+document.querySelectorAll('.var-btn[data-v]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.var-btn').forEach(function(b){b.classList.remove('on');});
+    btn.classList.add('on');
+    var v = btn.getAttribute('data-v');
+    document.getElementById('wa-wrap').style.display = v==='va'?'':'none';
+    document.getElementById('wb-wrap').style.display = v==='vb'?'':'none';
+    document.getElementById('wc-wrap').style.display = v==='vc'?'':'none';
+    document.getElementById('embed-code').innerHTML = embedCodes[v];
+  });
+});
+
+// copy embed
+document.getElementById('copy-embed').addEventListener('click', function(){
+  var code = document.getElementById('embed-code').textContent;
+  navigator.clipboard.writeText(code).then(function(){
+    document.getElementById('copy-embed').textContent='已複製 ✓';
+    document.getElementById('copy-embed').classList.add('ok');
+    setTimeout(function(){document.getElementById('copy-embed').textContent='複製';document.getElementById('copy-embed').classList.remove('ok');},2500);
+  });
+});
+</script>
+</body>
+</html>

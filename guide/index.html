@@ -1,41 +1,163 @@
-<!DOCTYPE html><html lang="zh-Hant-TW"><head>
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#0a0a0a">
 <title>教學攻略 ｜ 泡泡怪獸 POP MONSTER</title>
-<meta name="description" content="泡泡怪獸 POP MONSTER 教學攻略：天使塗層施工、RO 拋光入門、研磨劑番數對照、完整洗車流程。台灣汽美愛好者的深度知識庫。">
+<meta name="description" content="泡泡怪獸 POP MONSTER 教學攻略：天使塗層施工、RO 拋光入門、研磨劑番數對照、完整洗車流程。台灣汽美職人知識庫。">
 <link rel="canonical" href="https://popmonster.vip/guide/">
-<link rel="alternate" hreflang="zh-Hant-TW" href="https://popmonster.vip/guide/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/favicon.svg">
+<link rel="manifest" href="/manifest.json">
 <meta property="og:type" content="website">
 <meta property="og:title" content="汽美職人完整教學攻略｜泡泡怪獸知識庫">
 <meta property="og:description" content="台灣汽美愛好者的深度知識庫">
 <meta property="og:url" content="https://popmonster.vip/guide/">
 <meta property="og:image" content="https://popmonster.vip/img/og-default.svg">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="apple-touch-icon" href="/favicon.svg">
-<link rel="manifest" href="/manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../css/main.css">
-<!-- Google tag (gtag.js) - GA4 with Consent Mode v2 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Montserrat:wght@400;600;700;800&family=Noto+Serif+TC:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WTKLHW33D7"></script>
 <script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-// Consent Mode v2 - 預設拒絕，符合 PDPA / GDPR
-gtag('consent', 'default', {
-  'ad_storage': 'denied',
-  'ad_user_data': 'denied',
-  'ad_personalization': 'denied',
-  'analytics_storage': 'denied',
-  'wait_for_update': 500
-});
-gtag('js', new Date());
-gtag('config', 'G-WTKLHW33D7', {
-  'anonymize_ip': true,
-  'cookie_flags': 'SameSite=None;Secure'
-});
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'denied','wait_for_update':500});
+gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_flags':'SameSite=None;Secure'});
 </script>
+<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="../css/patch-p1p2.css">
+<style>
+:root{
+  --serif-g:"Playfair Display","Noto Serif TC",ui-serif,serif;
+  --tcserif-g:"Noto Serif TC","Playfair Display",serif;
+}
+/* mobile menu fix */
+.mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:#0a0a0a;border-bottom:1px solid var(--border);padding:20px;z-index:99;flex-direction:column;gap:16px;}
+.mobile-menu.show{display:flex;}
+.mobile-menu a{color:#e8e2d6;font-size:16px;display:block;padding:8px 0;}
+.mobile-menu a.active{color:var(--gold);}
+
+/* COVER */
+.g-cover{
+  padding:110px 24px 64px;
+  background:radial-gradient(ellipse at 50% 0%,rgba(200,169,107,.07) 0%,transparent 65%);
+  text-align:center;
+}
+.g-cover .kicker{
+  font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.42em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:24px;
+  display:inline-flex;align-items:center;gap:16px;
+}
+.g-cover .kicker::before,.g-cover .kicker::after{content:"";width:40px;height:1px;background:var(--gold);opacity:.5;}
+.g-cover h1{
+  font-family:var(--serif-g);font-weight:900;line-height:.92;
+  font-size:clamp(56px,10vw,140px);letter-spacing:-.02em;color:var(--txt);margin-bottom:20px;
+}
+.g-cover h1 .it{font-style:italic;font-weight:500;color:var(--gold-lt);}
+.g-cover .lede{
+  font-family:var(--tcserif-g);font-size:clamp(17px,1.8vw,22px);
+  line-height:1.55;color:var(--txt-m);max-width:600px;margin:0 auto 40px;
+}
+.g-cover .lede em{color:var(--gold);font-style:normal;}
+
+/* STAT STRIP */
+.g-stats{
+  display:flex;justify-content:center;gap:0;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  max-width:800px;margin:0 auto;
+}
+.g-stat{
+  flex:1;padding:20px 16px;text-align:center;border-right:1px solid var(--border);
+}
+.g-stat:last-child{border-right:none;}
+.g-stat .n{font-family:var(--serif-g);font-weight:900;font-size:32px;color:var(--gold);line-height:1;}
+.g-stat .l{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--txt-m);margin-top:8px;}
+
+/* ARTICLE GRID */
+.g-wrap{max-width:1200px;margin:0 auto;padding:64px 24px;}
+.g-section-kk{font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);display:inline-flex;align-items:center;gap:14px;margin-bottom:32px;}
+.g-section-kk::before{content:"";width:36px;height:1px;background:var(--gold);}
+
+.article-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--border);}
+@media(max-width:980px){.article-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.article-grid{grid-template-columns:1fr;}}
+
+.art-card{
+  border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+  text-decoration:none;display:flex;flex-direction:column;
+  transition:background .15s ease;position:relative;overflow:hidden;
+}
+.art-card:hover{background:var(--bg-sub);}
+.art-card:nth-child(3n){border-right:none;}
+@media(max-width:980px){
+  .art-card:nth-child(2n){border-right:none;}
+  .art-card:nth-child(3n){border-right:1px solid var(--border);}
+}
+@media(max-width:560px){.art-card{border-right:none;}}
+
+/* card visual header */
+.ac-vis{
+  height:200px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);
+  display:flex;align-items:flex-end;justify-content:flex-start;
+  padding:20px;
+}
+.ac-vis .ac-cat{
+  font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:.28em;
+  text-transform:uppercase;padding:5px 10px;border:1px solid var(--gold);
+  background:rgba(200,169,107,.1);color:var(--gold);
+}
+.ac-vis .ac-num{
+  position:absolute;right:16px;top:16px;
+  font-family:var(--serif-g);font-weight:900;font-size:64px;line-height:1;
+  color:rgba(200,169,107,.12);letter-spacing:-.02em;font-feature-settings:"lnum";
+}
+/* different gradient per card */
+.ac-vis.v1{background:linear-gradient(135deg,#0e1414 0%,#1a2424 100%);}
+.ac-vis.v2{background:linear-gradient(135deg,#140e0e 0%,#241a1a 100%);}
+.ac-vis.v3{background:linear-gradient(135deg,#0e100a 0%,#1a1e14 100%);}
+.ac-vis.v4{background:linear-gradient(135deg,#14100e 0%,#241e1a 100%);}
+.ac-vis.v5{background:linear-gradient(135deg,#0e0e14 0%,#1a1a24 100%);}
+
+.ac-body{padding:22px 22px 20px;flex:1;display:flex;flex-direction:column;gap:10px;}
+.ac-date{font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.2em;color:var(--txt-dim);}
+.ac-h{
+  font-family:var(--tcserif-g);font-weight:700;font-size:18px;
+  color:var(--txt);line-height:1.3;
+}
+.ac-exc{
+  font-family:'Noto Sans TC',sans-serif;font-size:13px;
+  color:var(--txt-m);line-height:1.65;flex:1;
+}
+.ac-foot{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:12px;border-top:1px solid var(--border-w);
+  margin-top:auto;
+}
+.ac-read{
+  font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);
+}
+.ac-time{font-family:'Montserrat',sans-serif;font-size:10px;color:var(--txt-dim);letter-spacing:.1em;}
+.art-card:hover .ac-read{color:var(--gold-lt);}
+
+/* FEATURED (first card) */
+.art-card.featured{grid-column:span 2;}
+@media(max-width:980px){.art-card.featured{grid-column:span 1;}}
+.art-card.featured .ac-vis{height:280px;}
+.art-card.featured .ac-h{font-size:24px;}
+
+/* CATEGORY TAGS */
+.cat-row{
+  display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px;
+}
+.cat-btn{
+  font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.2em;
+  text-transform:uppercase;padding:6px 14px;border:1px solid var(--border);
+  background:transparent;color:var(--txt-m);cursor:pointer;transition:all .15s ease;
+}
+.cat-btn:hover{color:var(--txt);border-color:var(--border-s);}
+.cat-btn.on{background:var(--gold);color:var(--bg);border-color:var(--gold);}
+</style>
 </head>
 <body>
 <nav class="nav"><div class="nav-inner">
@@ -44,83 +166,153 @@ gtag('config', 'G-WTKLHW33D7', {
     <a href="../index.html">全部商品</a>
     <a href="../members.html">會員生態</a>
     <a href="index.html" style="color:var(--gold)">教學攻略</a>
+    <a href="../about.html">關於我們</a>
     <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
   </div>
-  <button class="nav-menu-btn" aria-label="選單" onclick="this.nextElementSibling.classList.toggle('show')">☰</button>
-  <div class="mobile-menu" style="display:none;position:fixed;top:60px;left:0;right:0;background:#0a0a0a;border-bottom:1px solid rgba(200,169,107,.15);padding:20px;z-index:99;flex-direction:column;gap:16px;">
-    <a href="../index.html" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">全部商品</a>
-    <a href="../members.html" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">會員生態</a>
-    <a href="index.html" style="color:var(--gold);font-size:16px;display:block;padding:8px 0;">教學攻略</a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">蝦皮賣場</a>
-    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">LINE 諮詢</a>
+  <button class="nav-menu-btn" aria-label="選單" onclick="this.nextElementSibling.classList.toggle('show');this.nextElementSibling.setAttribute('aria-hidden',!this.nextElementSibling.classList.contains('show'))">☰</button>
+  <div class="mobile-menu" aria-hidden="true">
+    <a href="../index.html">全部商品</a>
+    <a href="../members.html">會員生態</a>
+    <a href="index.html" class="active">教學攻略</a>
+    <a href="../about.html">關於我們</a>
+    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
   </div>
 </div></nav>
-<script>document.querySelector('.nav-menu-btn')&&document.querySelector('.nav-menu-btn').addEventListener('click',function(){var m=this.nextElementSibling;m.style.display=m.style.display==='flex'?'none':'flex'})</script>
-<section class="blog-hero">
-<h1>教學<em>攻略</em></h1>
-<p>從天使塗層到 RO 拋光、從研磨劑番數到完整洗車流程，米速職人經驗整理</p>
+
+<div class="brand-tagline" role="doc-tip"><em>叁無</em><span class="x">×</span><em>重新定義汽美</em></div>
+
+<section class="g-cover" data-screen-label="01 Cover">
+  <div class="kicker">Knowledge · 教學攻略</div>
+  <h1>職人<br/><span class="it">知識庫.</span></h1>
+  <p class="lede">從天使塗層到 RO 拋光、從番數對照到完整洗車流程 — <em>5 篇深度教學</em>，任何人都能讀懂。</p>
 </section>
-<section class="blog-grid">
-<a href="angel-coating-guide.html" class="blog-card fade-up">
-<div class="blog-card-img" style="background:linear-gradient(135deg,#1a1a1a,#262626);display:flex;align-items:center;justify-content:center">
-<div style="font-size:48px;color:rgba(200,169,107,.3)">📖</div>
-<span class="blog-card-cat">鍍膜養護</span>
+
+<div class="g-stats">
+  <div class="g-stat"><div class="n">5</div><div class="l">篇深度教學</div></div>
+  <div class="g-stat"><div class="n">3</div><div class="l">主題分類</div></div>
+  <div class="g-stat"><div class="n">30+</div><div class="l">分鐘閱讀量</div></div>
+  <div class="g-stat"><div class="n">免費</div><div class="l">全部公開</div></div>
 </div>
-<div class="blog-card-body">
-<div class="blog-card-date">2026-05-02</div>
-<h3 class="blog-card-title">天使塗層完整施工指南：千倍稀釋的科學與步驟</h3>
-<p class="blog-card-excerpt">本篇深度解析泡泡怪獸天使塗層 Guard 的施工原理、稀釋比例、操作步驟與常見誤區。從新手到職人都能找到自己的應用情境。</p>
-<span class="blog-card-read">閱讀全文 →</span>
-</div></a><a href="ro-polish-beginner.html" class="blog-card fade-up">
-<div class="blog-card-img" style="background:linear-gradient(135deg,#1a1a1a,#262626);display:flex;align-items:center;justify-content:center">
-<div style="font-size:48px;color:rgba(200,169,107,.3)">📖</div>
-<span class="blog-card-cat">拋光研磨</span>
+
+<div class="g-wrap" data-screen-label="02 Articles">
+  <div class="g-section-kk">全部文章</div>
+  <div class="cat-row">
+    <button class="cat-btn on" data-cat="all">全部</button>
+    <button class="cat-btn" data-cat="鍍膜養護">鍍膜養護</button>
+    <button class="cat-btn" data-cat="拋光研磨">拋光研磨</button>
+    <button class="cat-btn" data-cat="洗車保養">洗車保養</button>
+  </div>
+
+  <div class="article-grid" id="article-grid">
+
+    <a href="angel-coating-guide.html" class="art-card featured fade-up" data-cat="鍍膜養護">
+      <div class="ac-vis v1">
+        <span class="ac-cat">鍍膜養護</span>
+        <span class="ac-num">01</span>
+      </div>
+      <div class="ac-body">
+        <div class="ac-date">2026 · 05 · 02</div>
+        <h3 class="ac-h">天使塗層完整施工指南：千倍稀釋的科學與步驟</h3>
+        <p class="ac-exc">深度解析天使塗層 Guard 的施工原理、稀釋比例、操作步驟與常見誤區。從新手到職人都能找到自己的應用情境。</p>
+        <div class="ac-foot">
+          <span class="ac-read">閱讀全文 →</span>
+          <span class="ac-time">約 8 分鐘</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="ro-polish-beginner.html" class="art-card fade-up" data-cat="拋光研磨">
+      <div class="ac-vis v2">
+        <span class="ac-cat">拋光研磨</span>
+        <span class="ac-num">02</span>
+      </div>
+      <div class="ac-body">
+        <div class="ac-date">2026 · 05 · 02</div>
+        <h3 class="ac-h">RO 拋光新手入門：從機型選擇到番數順序</h3>
+        <p class="ac-exc">RO 是汽美新手最容易上手的工具，但要拋出鏡面效果還是需要正確觀念。從機型差異講到研磨劑搭配。</p>
+        <div class="ac-foot">
+          <span class="ac-read">閱讀全文 →</span>
+          <span class="ac-time">約 7 分鐘</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="polishing-pad-selection.html" class="art-card fade-up" data-cat="拋光研磨">
+      <div class="ac-vis v3">
+        <span class="ac-cat">拋光研磨</span>
+        <span class="ac-num">03</span>
+      </div>
+      <div class="ac-body">
+        <div class="ac-date">2026 · 05 · 02</div>
+        <h3 class="ac-h">拋光盤選擇全攻略：羊毛、粗棉、細棉、鏡面盤怎麼挑</h3>
+        <p class="ac-exc">選錯盤等於白忙一場。從材質、密度、硬度三個維度，講解該如何選對你的拋光盤。</p>
+        <div class="ac-foot">
+          <span class="ac-read">閱讀全文 →</span>
+          <span class="ac-time">約 6 分鐘</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="miso-grit-system.html" class="art-card fade-up" data-cat="拋光研磨">
+      <div class="ac-vis v4">
+        <span class="ac-cat">拋光研磨</span>
+        <span class="ac-num">04</span>
+      </div>
+      <div class="ac-body">
+        <div class="ac-date">2026 · 05 · 02</div>
+        <h3 class="ac-h">米速研磨劑番數對照：什麼狀況該用幾號</h3>
+        <p class="ac-exc">米速從 80 番到 1500 番有完整覆蓋，這篇告訴你不同車漆狀況該選哪一支。</p>
+        <div class="ac-foot">
+          <span class="ac-read">閱讀全文 →</span>
+          <span class="ac-time">約 7 分鐘</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="wash-flow-complete.html" class="art-card fade-up" data-cat="洗車保養">
+      <div class="ac-vis v5">
+        <span class="ac-cat">洗車保養</span>
+        <span class="ac-num">05</span>
+      </div>
+      <div class="ac-body">
+        <div class="ac-date">2026 · 05 · 02</div>
+        <h3 class="ac-h">完整洗車流程：從預洗到鍍膜的 8 個步驟</h3>
+        <p class="ac-exc">認真洗一台車不只是「沖水抹泡沫」。從預洗到鍍膜共 8 步驟，讓你的車從裡到外都乾淨。</p>
+        <div class="ac-foot">
+          <span class="ac-read">閱讀全文 →</span>
+          <span class="ac-time">約 9 分鐘</span>
+        </div>
+      </div>
+    </a>
+
+  </div>
 </div>
-<div class="blog-card-body">
-<div class="blog-card-date">2026-05-02</div>
-<h3 class="blog-card-title">RO 拋光新手入門：從機型選擇到番數順序的完整指南</h3>
-<p class="blog-card-excerpt">RO（Random Orbital，隨機軌道）拋光機是汽美新手最容易上手的工具，但要拋出鏡面效果還是需要正確的觀念。本文從機型差異講到研磨劑搭配。</p>
-<span class="blog-card-read">閱讀全文 →</span>
-</div></a><a href="polishing-pad-selection.html" class="blog-card fade-up">
-<div class="blog-card-img" style="background:linear-gradient(135deg,#1a1a1a,#262626);display:flex;align-items:center;justify-content:center">
-<div style="font-size:48px;color:rgba(200,169,107,.3)">📖</div>
-<span class="blog-card-cat">拋光研磨</span>
-</div>
-<div class="blog-card-body">
-<div class="blog-card-date">2026-05-02</div>
-<h3 class="blog-card-title">拋光盤選擇全攻略：羊毛、粗棉、細棉、鏡面盤怎麼挑</h3>
-<p class="blog-card-excerpt">拋光盤是研磨劑的搭檔，選錯盤等於白忙一場。本文從材質、密度、硬度三個維度，講解該如何選對你的拋光盤。</p>
-<span class="blog-card-read">閱讀全文 →</span>
-</div></a><a href="miso-grit-system.html" class="blog-card fade-up">
-<div class="blog-card-img" style="background:linear-gradient(135deg,#1a1a1a,#262626);display:flex;align-items:center;justify-content:center">
-<div style="font-size:48px;color:rgba(200,169,107,.3)">📖</div>
-<span class="blog-card-cat">拋光研磨</span>
-</div>
-<div class="blog-card-body">
-<div class="blog-card-date">2026-05-02</div>
-<h3 class="blog-card-title">米速研磨劑番數對照：什麼狀況該用幾號</h3>
-<p class="blog-card-excerpt">米速 MISO 研磨劑系列從 80 番到 1500 番有完整覆蓋，這篇文章告訴你不同的車漆狀況該選哪一支，以及如何判斷自己車漆的狀況等級。</p>
-<span class="blog-card-read">閱讀全文 →</span>
-</div></a><a href="wash-flow-complete.html" class="blog-card fade-up">
-<div class="blog-card-img" style="background:linear-gradient(135deg,#1a1a1a,#262626);display:flex;align-items:center;justify-content:center">
-<div style="font-size:48px;color:rgba(200,169,107,.3)">📖</div>
-<span class="blog-card-cat">洗車保養</span>
-</div>
-<div class="blog-card-body">
-<div class="blog-card-date">2026-05-02</div>
-<h3 class="blog-card-title">完整洗車流程：從預洗到鍍膜的 8 個步驟</h3>
-<p class="blog-card-excerpt">認真洗一台車不只是「沖水抹泡沫」這麼簡單。本文整理職人級的完整洗車流程，從預洗到鍍膜共 8 個步驟，讓你的車從裡到外都乾淨。</p>
-<span class="blog-card-read">閱讀全文 →</span>
-</div></a>
+
+<section style="padding:64px 24px;text-align:center;background:var(--bg-card);border-top:1px solid var(--border);" data-screen-label="03 CTA">
+  <div style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.36em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;">看完想入手？</div>
+  <h2 style="font-family:var(--serif-g);font-weight:900;font-size:clamp(32px,4.5vw,56px);line-height:.94;color:var(--txt);margin-bottom:12px;">知識到手<br/><span style="font-style:italic;color:var(--gold-lt);font-weight:500;">現在行動.</span></h2>
+  <p style="font-family:var(--tcserif-g);font-size:17px;color:var(--txt-m);margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto;">有任何施工問題直接加 LINE 問，我們親自說明。</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" class="btn btn-gold">前往蝦皮賣場</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" class="btn btn-outline">LINE 諮詢</a>
+  </div>
 </section>
+
 <footer class="footer">
   <div class="footer-brand">泡泡怪獸 POP MONSTER × 米速 MISO</div>
-  <div class="footer-sub">安全永遠第一｜任何人都能輕鬆上手｜使用全程零風險</div>
+  <div class="footer-sub">把關每一道工序｜任何人都能輕鬆上手｜按說明操作 放心使用</div>
+  <div class="brand-belief">
+    <span><b>過去</b>安全是立身根本</span>
+    <span><b>現在</b>安全是產品底線</span>
+    <span><b>未來</b>安全是永不變的堅守</span>
+  </div>
   <div class="footer-links">
     <a href="../index.html">全部商品</a>
     <a href="../members.html">會員生態</a>
     <a href="index.html">教學攻略</a>
+    <a href="../about.html">關於我們</a>
     <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
   </div>
@@ -131,5 +323,28 @@ gtag('config', 'G-WTKLHW33D7', {
   </div>
   <div class="footer-copy">&copy; 2026 泡泡怪獸 POP MONSTER. All rights reserved.</div>
 </footer>
+<div class="cookie-bar">
+  <span>本站使用 Cookie 提升瀏覽體驗。繼續瀏覽即表示同意。</span>
+  <span><button class="cookie-accept" id="ck-accept">接受</button> <button class="cookie-decline" id="ck-decline">拒絕</button></span>
+</div>
 <script src="../js/main.js" defer></script>
-</body></html>
+<script>
+(function(){
+  // category filter
+  var btns = document.querySelectorAll('.cat-btn[data-cat]');
+  var cards = document.querySelectorAll('.art-card[data-cat]');
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      var cat = b.getAttribute('data-cat');
+      btns.forEach(function(x){ x.classList.toggle('on', x === b); });
+      cards.forEach(function(c){
+        var match = cat === 'all' || c.getAttribute('data-cat') === cat;
+        c.style.display = match ? '' : 'none';
+        if(match) c.classList.add('fade-up');
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
