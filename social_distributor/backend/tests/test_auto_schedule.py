@@ -122,9 +122,12 @@ def test_each_account_gets_n_posts(app):
         _seed_media(user_id, "image")
         db.session.commit()
 
+        # Pin to 00:00 UTC (08:00 Taipei) so the [10,22) Taipei window is ahead.
+        now_utc = datetime(2026, 5, 7, 0, 0, 0, tzinfo=timezone.utc)
         params = AutoScheduleParams(
             user_id=user_id, videos_per_account=2, posts_per_account=2,
             link="https://example.com",
+            today=now_utc,
         )
         result = build_today_schedule(params)
 
@@ -225,8 +228,11 @@ def test_caption_repeats_allowed(app):
         _seed_media(user_id, "video", "ready")
         db.session.commit()
 
+        # Pin to 00:00 UTC (08:00 Taipei) so the [10,22) Taipei window is ahead.
+        now_utc = datetime(2026, 5, 7, 0, 0, 0, tzinfo=timezone.utc)
         params = AutoScheduleParams(
             user_id=user_id, videos_per_account=1, posts_per_account=0,
+            today=now_utc,
         )
         result = build_today_schedule(params)
         assert result["summary"]["accounts"] == 20
