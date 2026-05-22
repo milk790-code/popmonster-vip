@@ -150,10 +150,42 @@ class FacebookPublisher(Publisher):
         page_token = token.extra.get("page_access_token", token.access_token)
 
         if request.media_url and request.media_kind == "video":
-            return self._publish_video(page_token, external_account_id, request)
-        if request.media_url and request.media_kind == "image":
-            return self._publish_photo(page_token, external_account_id, request)
-        return self._publish_text(page_token, external_account_id, request)
+            result = self._publish_video(page_token, external_account_id, request)
+        elif request.media_url and request.media_kind == "image":
+            result = self._publish_photo(page_token, external_account_id, request)
+        else:
+            result = self._publish_text(page_token, external_account_id, request)
+
+        # Phase D: auto first comment. Seeds engagement on new accounts
+        # (no comment -> 0 reach) and carries the brand site for traffic.
+        self._post_first_comment(page_token, result.external_post_id, request)
+        return result
+
+    def _post_first_comment(self, token, post_id, req: PublishRequest) -> None:
+        """Post a first comment on the page's own post right after publishing.
+
+        Content resolution order:
+          1. request.first_comment  (per-post, if the API/UI supplies it)
+          2. FB_FIRST_COMMENT env var  (deployment-wide default)
+        The text supports an optional ``{link}`` placeholder, filled with
+        request.link_url. This never raises -- a failed comment must not
+        fail an already-succeeded post.
+        """
+        template = (getattr(req, "first_comment", None)
+                    or os.environ.get("FB_FIRST_COMMENT", "")).strip()
+        if not template or not post_id:
+            return
+        try:
+            message = template.replace("{link}", req.link_url or "")
+            request_json(
+                "POST",
+                f"{GRAPH_BASE}/{post_id}/comments",
+                data={"message": message, "access_token": token},
+                timeout=30,
+            )
+        except Exception:
+            # Intentionally swallowed: the main post already succeeded.
+            pass
 
     def _publish_text(self, token, page_id, req: PublishRequest) -> PublishResult:
         body = {"message": req.caption, "access_token": token}
