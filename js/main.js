@@ -63,7 +63,7 @@
   if(existing === 'denied') return;
   
   // 沒有同意紀錄，顯示 Cookie Bar
-  setTimeout(function(){bar.classList.add('show')},1500);
+  setTimeout(function(){bar.classList.add('show')},800);
   
   document.getElementById('ck-accept')&&document.getElementById('ck-accept').addEventListener('click',function(){
     if(typeof gtag === 'function'){
