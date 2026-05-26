@@ -399,3 +399,218 @@ def create_media():
     db.session.add(media)
     db.session.commit()
     return jsonify({"id": media.id}), 201
+
+
+@bp.post("/admin/retroactive-pin-comment")
+def retroactive_pin_comment():
+    """One-shot admin: retroactively pin + add first comment to already-published
+    Facebook posts that were sent before auto-pin/first-comment was deployed.
+
+    Body: { "post_ids": [1384, 1385], "admin_token": "<SECRET_KEY>" }
+    Returns a report of successes and failures per target.
+    """
+    import os
+    import logging
+    import requests as _req
+
+    logger = logging.getLogger(__name__)
+
+    body = request.get_json(force=True)
+    provided = body.get("admin_token", "")
+    expected = os.environ.get("SECRET_KEY", "")
+    if not expected or provided != expected:
+        return jsonify({"error": "forbidden"}), 403
+
+    post_ids = body.get("post_ids", [])
+    if not post_ids:
+        return jsonify({"error": "post_ids required"}), 400
+
+    from ..utils.crypto import cipher as _cipher
+    from ..platforms.facebook import GRAPH_BASE, FacebookPublisher
+
+    _pub = FacebookPublisher()
+    _c = _cipher()
+
+    FIRST_COMMENT = _pub.DEFAULT_FIRST_COMMENT
+
+    results = []
+    for post_id in post_ids:
+        targets = (
+            db.session.query(PostTarget)
+            .filter_by(post_id=post_id, status=JobStatus.SUCCEEDED)
+            .all()
+        )
+        for t in targets:
+            if t.platform.value != "facebook":
+                results.append({"post_id": post_id, "target_id": t.id,
+                                 "platform": t.platform.value, "skipped": True,
+                                 "reason": "not facebook"})
+                continue
+            acct = db.session.get(SocialAccount, t.account_id)
+            if not acct:
+                results.append({"post_id": post_id, "target_id": t.id,
+                                 "skipped": True, "reason": "account not found"})
+                continue
+            try:
+                raw_token = _c.decrypt(acct.access_token_enc)
+            except Exception as exc:
+                results.append({"post_id": post_id, "target_id": t.id,
+                                 "account_id": t.account_id,
+                                 "skipped": True, "reason": f"decrypt error: {exc}"})
+                continue
+
+            page_id = acct.external_account_id
+            post_ext_id = t.external_post_id
+
+            # extra may hold page_access_token — prefer it
+            extra = acct.extra or {}
+            page_token = extra.get("page_access_token", raw_token)
+
+            pin_ok = False
+            pin_err = None
+            try:
+                resp = _req.post(
+                    f"{GRAPH_BASE}/{page_id}",
+                    data={"pinned_post_id": post_ext_id, "access_token": page_token},
+                    timeout=15,
+                )
+                if resp.ok:
+                    pin_ok = True
+                else:
+                    pin_err = resp.text[:200]
+            except Exception as exc:
+                pin_err = str(exc)[:200]
+
+            comment_ok = False
+            comment_err = None
+            try:
+                resp = _req.post(
+                    f"{GRAPH_BASE}/{post_ext_id}/comments",
+                    data={"message": FIRST_COMMENT, "access_token": page_token},
+                    timeout=15,
+                )
+                if resp.ok:
+                    comment_ok = True
+                else:
+                    comment_err = resp.text[:200]
+            except Exception as exc:
+                comment_err = str(exc)[:200]
+
+            results.append({
+                "post_id": post_id,
+                "target_id": t.id,
+                "account_id": t.account_id,
+                "page_id": page_id,
+                "external_post_id": post_ext_id,
+                "pin_ok": pin_ok,
+                "pin_err": pin_err,
+                "comment_ok": comment_ok,
+                "comment_err": comment_err,
+            })
+            logger.info(
+                "retroactive post_id=%s target_id=%s pin=%s comment=%s",
+                post_id, t.id, pin_ok, comment_ok,
+            )
+
+    return jsonify({"results": results, "total": len(results)})
+
+
+@bp.post("/admin/retroactive-pin-comment")
+def retroactive_pin_comment():
+    """One-shot admin: retroactively pin + add first comment to already-published
+    Facebook posts that were sent before auto-pin/first-comment was deployed.
+
+    Body: { "post_ids": [1384, 1385], "admin_token": "<SECRET_KEY>" }
+    Returns a report of successes and failures per target.
+    """
+    import os
+    import logging
+    import httpx
+
+    logger = logging.getLogger(__name__)
+
+    body = request.get_json(force=True)
+    provided = body.get("admin_token", "")
+    expected = os.environ.get("SECRET_KEY", "")
+    if not expected or provided != expected:
+        return jsonify({"error": "forbidden"}), 403
+
+    post_ids = body.get("post_ids", [])
+    if not post_ids:
+        return jsonify({"error": "post_ids required"}), 400
+
+    from ..utils.crypto import cipher as _cipher
+    from ..platforms.facebook import GRAPH_BASE, FacebookPublisher
+
+    _pub = FacebookPublisher()
+    _c = _cipher()
+    FIRST_COMMENT = _pub.DEFAULT_FIRST_COMMENT
+
+    results = []
+    for post_id in post_ids:
+        targets = (
+            db.session.query(PostTarget)
+            .filter_by(post_id=post_id, status=JobStatus.SUCCEEDED)
+            .all()
+        )
+        for t in targets:
+            if t.platform.value != "facebook":
+                results.append({"post_id": post_id, "target_id": t.id,
+                                 "platform": t.platform.value, "skipped": True,
+                                 "reason": "not facebook"})
+                continue
+            acct = db.session.get(SocialAccount, t.account_id)
+            if not acct:
+                results.append({"post_id": post_id, "target_id": t.id,
+                                 "skipped": True, "reason": "account not found"})
+                continue
+            try:
+                raw_token = _c.decrypt(acct.access_token_enc)
+            except Exception as exc:
+                results.append({"post_id": post_id, "target_id": t.id,
+                                 "account_id": t.account_id,
+                                 "skipped": True, "reason": f"decrypt: {exc}"})
+                continue
+
+            page_id = acct.external_account_id
+            post_ext_id = t.external_post_id
+            extra = acct.extra or {}
+            page_token = extra.get("page_access_token", raw_token)
+
+            pin_ok = False
+            pin_err = None
+            try:
+                r = httpx.post(f"{GRAPH_BASE}/{page_id}",
+                               data={"pinned_post_id": post_ext_id,
+                                     "access_token": page_token}, timeout=15)
+                if r.is_success:
+                    pin_ok = True
+                else:
+                    pin_err = r.text[:200]
+            except Exception as exc:
+                pin_err = str(exc)[:200]
+
+            comment_ok = False
+            comment_err = None
+            try:
+                r = httpx.post(f"{GRAPH_BASE}/{post_ext_id}/comments",
+                               data={"message": FIRST_COMMENT,
+                                     "access_token": page_token}, timeout=15)
+                if r.is_success:
+                    comment_ok = True
+                else:
+                    comment_err = r.text[:200]
+            except Exception as exc:
+                comment_err = str(exc)[:200]
+
+            results.append({
+                "post_id": post_id, "target_id": t.id,
+                "account_id": t.account_id, "page_id": page_id,
+                "external_post_id": post_ext_id,
+                "pin_ok": pin_ok, "pin_err": pin_err,
+                "comment_ok": comment_ok, "comment_err": comment_err,
+            })
+            logger.info("retroactive post_id=%s target_id=%s pin=%s comment=%s",
+                        post_id, t.id, pin_ok, comment_ok)
+
+    return jsonify({"results": results, "total": len(results)})
