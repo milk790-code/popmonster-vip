@@ -311,8 +311,35 @@ document.querySelectorAll(".connect-row button").forEach((btn) => {
     const result = await api(
       `/auth/${btn.dataset.provider}/start?user_id=${userId}`
     );
-    window.open(result.authorization_url, "_blank", "noopener");
+    // Fix: remove "noopener" so the callback popup can reach window.opener
+    // and send postMessage back. "noopener" sets opener=null in the popup,
+    // which silently breaks the entire OAuth completion flow.
+    window.open(
+      result.authorization_url,
+      "oauth_popup",
+      "width=620,height=720,scrollbars=yes,resizable=yes"
+    );
   });
+});
+
+// Fix: listen for OAuth completion message from the callback popup.
+// The backend callback HTML does window.opener.postMessage({type:"distributor.oauth.complete"})
+// but the original code never listened for this message, so accounts never auto-refreshed.
+window.addEventListener("message", (event) => {
+  if (!event.data || event.data.type !== "distributor.oauth.complete") return;
+  const result = event.data.result;
+  if (result && result.ok) {
+    // Refresh accounts table so newly connected pages appear immediately
+    loadAccounts();
+    // Brief visual feedback
+    const banner = document.createElement("div");
+    banner.textContent = `✓ 連接成功：${(result.connected || []).map(a => a.handle).join("、")}`;
+    banner.style.cssText = "position:fixed;top:16px;right:16px;background:#1a3a1a;color:#6abf69;padding:12px 20px;border-radius:8px;z-index:9999;font-size:14px;border:1px solid #2d5a2d;";
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 4000);
+  } else if (result && !result.ok) {
+    console.error("[OAuth]", result.message);
+  }
 });
 
 async function loadAccounts() {
