@@ -297,23 +297,23 @@ Rate limits (override defaults):
 
 ### A 類：PopMonster 品牌（主力開發）
 
-| Repo | Role |
-|---|---|
-| **`popmonster-vip`** (this repo) | Static site source + `social_distributor` Flask backend |
-| `popmonster-website-deployment` | Deployment artifact only (zip → GitHub Pages → popmonster.vip); not actively developed |
-| `customer-project-portal` | Full-stack SaaS portal with AI search; also serves PopMonster site at `/` |
-| `popmonster-linebot` | LINE customer-service bot (Flask + OpenAI) |
-| `pop-monster-line-oa` | LINE OA visual assets repo (auto-rendered PNGs for rich menus, cover images; CI-managed) |
+| Repo | Role | 狀態 |
+|---|---|---|
+| **`popmonster-vip`** (this repo) | Static site source + `social_distributor` Flask backend | ✅ 主開發中 |
+| `customer-project-portal` | Full-stack SaaS portal with AI search; also serves PopMonster site at `/` | ✅ 活躍 |
+| `popmonster-linebot` | LINE customer-service bot (Flask + OpenAI) | ✅ 活躍 |
+| `pop-monster-line-oa` | LINE OA visual assets repo (auto-rendered PNGs for rich menus, cover images; CI-managed) | ✅ CI 自動維護（最後 2026-05-16） |
+| `popmonster-website-deployment` | Deployment artifact only (zip → GitHub Pages → popmonster.vip) | 📦 被動部署，不主動開發 |
 
 ### B 類：副業 / 獨立項目
 
-| Repo | Role |
-|---|---|
-| `3q-hatchery-line-oa` | 3Q孵化場 LINE OA |
-| `3qgongwan-bot` | 3Q公館機器人 |
+| Repo | Role | 狀態 |
+|---|---|---|
+| `3q-hatchery-line-oa` | 3Q孵化場 LINE OA | ❓ 待確認活躍度 |
+| `3qgongwan-bot` | 3Q公館機器人 | ❓ 待確認活躍度 |
 
 ### C 類：封存（Archive）
 
-| Repo | Reason |
-|---|---|
-| `Repository-name-popmonster-website-` | Placeholder / stub，無實際程式碼 — **已封存 2026-05-26** |
+| Repo | Reason | 狀態 |
+|---|---|---|
+| `Repository-name-popmonster-website-` | Placeholder / stub，無實際程式碼 | 🔒 已封存 2026-05-26 |
