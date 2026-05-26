@@ -303,6 +303,7 @@ Rate limits (override defaults):
 | `popmonster-website-deployment` | Deployment artifact only (zip → GitHub Pages → popmonster.vip); not actively developed |
 | `customer-project-portal` | Full-stack SaaS portal with AI search; also serves PopMonster site at `/` |
 | `popmonster-linebot` | LINE customer-service bot (Flask + OpenAI) |
+| `pop-monster-line-oa` | LINE OA visual assets repo (auto-rendered PNGs for rich menus, cover images; CI-managed) |
 
 ### B 類：副業 / 獨立項目
 
@@ -316,4 +317,3 @@ Rate limits (override defaults):
 | Repo | Reason |
 |---|---|
 | `Repository-name-popmonster-website-` | Placeholder / stub，無實際程式碼 — **已封存 2026-05-26** |
-| `pop-monster-line-oa` | 可能是 `popmonster-linebot` 前身，確認無用後封存 |
