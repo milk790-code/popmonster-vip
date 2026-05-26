@@ -295,12 +295,25 @@ Rate limits (override defaults):
 
 ## Related Repos
 
-Part of the PopMonster ecosystem under `milk790-code`:
+### A 類：PopMonster 品牌（主力開發）
 
 | Repo | Role |
 |---|---|
 | **`popmonster-vip`** (this repo) | Static site source + `social_distributor` Flask backend |
-| `popmonster-website-deployment` | Deployment artifact (zip → GitHub Pages → popmonster.vip) |
+| `popmonster-website-deployment` | Deployment artifact only (zip → GitHub Pages → popmonster.vip); not actively developed |
 | `customer-project-portal` | Full-stack SaaS portal with AI search; also serves PopMonster site at `/` |
 | `popmonster-linebot` | LINE customer-service bot (Flask + OpenAI) |
-| `Repository-name-popmonster-website-` | Placeholder / stub repo |
+
+### B 類：副業 / 獨立項目
+
+| Repo | Role |
+|---|---|
+| `3q-hatchery-line-oa` | 3Q孵化場 LINE OA |
+| `3qgongwan-bot` | 3Q公館機器人 |
+
+### C 類：封存（Archive）
+
+| Repo | Reason |
+|---|---|
+| `Repository-name-popmonster-website-` | Placeholder / stub，無實際程式碼 |
+| `pop-monster-line-oa` | 可能是 `popmonster-linebot` 前身，確認無用後封存 |
