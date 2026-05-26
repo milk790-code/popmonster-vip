@@ -133,6 +133,16 @@ class MetaOAuth(OAuthProvider):
 class FacebookPublisher(Publisher):
     name = "facebook"
 
+    # Default first comment appended to every FB post.
+    # Override per-distribution with overrides["first_comment"] = "custom text"
+    # or set to empty string to disable.
+    DEFAULT_FIRST_COMMENT = (
+        "🛒 蝦皮搜尋【泡泡怪獸】\n"
+        "💬 LINE ID @150tiznd\n"
+        "🌐 popmonster.vip/index.html\n\n"
+        "#泡泡怪獸 #天使塗層 #米速 #汽車美容 #叁無重新定義汽美"
+    )
+
     def validate(self, request: PublishRequest) -> list[str]:
         issues: list[str] = []
         if len(request.caption) > 63206:
@@ -150,10 +160,25 @@ class FacebookPublisher(Publisher):
         page_token = token.extra.get("page_access_token", token.access_token)
 
         if request.media_url and request.media_kind == "video":
-            return self._publish_video(page_token, external_account_id, request)
-        if request.media_url and request.media_kind == "image":
-            return self._publish_photo(page_token, external_account_id, request)
-        return self._publish_text(page_token, external_account_id, request)
+            result = self._publish_video(page_token, external_account_id, request)
+        elif request.media_url and request.media_kind == "image":
+            result = self._publish_photo(page_token, external_account_id, request)
+        else:
+            result = self._publish_text(page_token, external_account_id, request)
+
+        post_id = result.external_post_id
+        overrides = getattr(request, "overrides", {}) or {}
+
+        # Auto-pin: default True unless caller explicitly passes pin_post=False
+        if overrides.get("pin_post", True) and post_id:
+            self._pin_post(page_token, external_account_id, post_id)
+
+        # Auto first comment: use override text, fall back to default, "" disables
+        first_comment_text = overrides.get("first_comment", self.DEFAULT_FIRST_COMMENT)
+        if first_comment_text and post_id:
+            self._add_first_comment(page_token, post_id, first_comment_text)
+
+        return result
 
     def _publish_text(self, token, page_id, req: PublishRequest) -> PublishResult:
         body = {"message": req.caption, "access_token": token}
@@ -161,6 +186,29 @@ class FacebookPublisher(Publisher):
             body["link"] = req.link_url
         data = request_json("POST", f"{GRAPH_BASE}/{page_id}/feed", data=body)
         return PublishResult(external_post_id=data["id"], raw=data)
+
+    def _pin_post(self, token: str, page_id: str, post_id: str) -> None:
+        """Pin a post to the top of the Facebook Page. Silently ignores errors
+        so a pin failure never blocks the publish result."""
+        try:
+            request_json(
+                "POST",
+                f"{GRAPH_BASE}/{page_id}",
+                data={"pinned_post_id": post_id, "access_token": token},
+            )
+        except Exception:  # noqa: BLE001
+            pass  # pin is best-effort; don't fail the whole publish
+
+    def _add_first_comment(self, token: str, post_id: str, message: str) -> None:
+        """Add a first comment to a published post. Silently ignores errors."""
+        try:
+            request_json(
+                "POST",
+                f"{GRAPH_BASE}/{post_id}/comments",
+                data={"message": message, "access_token": token},
+            )
+        except Exception:  # noqa: BLE001
+            pass  # comment is best-effort; don't fail the whole publish
 
     def _publish_photo(self, token, page_id, req: PublishRequest) -> PublishResult:
         data = request_json(

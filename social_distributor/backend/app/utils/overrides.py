@@ -16,7 +16,11 @@ from typing import Any
 _COMMON_FIELDS = {"caption": str, "title": str}
 
 _PLATFORM_FIELDS: dict[str, dict[str, type | tuple]] = {
-    "facebook": {**_COMMON_FIELDS},
+    "facebook": {
+        **_COMMON_FIELDS,
+        "pin_post": bool,       # default True — pin to top of page after publish
+        "first_comment": str,   # default DEFAULT_FIRST_COMMENT; set "" to disable
+    },
     "instagram": {
         **_COMMON_FIELDS,
         "as_reel": bool,
