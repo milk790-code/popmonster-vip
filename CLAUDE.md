@@ -309,8 +309,8 @@ Rate limits (override defaults):
 
 | Repo | Role | 狀態 |
 |---|---|---|
-| `3q-hatchery-line-oa` | 3Q孵化場 LINE OA | ❓ 待確認活躍度 |
-| `3qgongwan-bot` | 3Q公館機器人 | ❓ 待確認活躍度 |
+| `3q-hatchery-line-oa` | 3Q孵化場 LINE OA | ✅ 活躍（最後 2026-05-23） |
+| `3qgongwan-bot` | 3Q公館機器人 | ✅ 活躍（最後 2026-05-23） |
 
 ### C 類：封存（Archive）
 
