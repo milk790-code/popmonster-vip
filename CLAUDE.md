@@ -315,5 +315,5 @@ Rate limits (override defaults):
 
 | Repo | Reason |
 |---|---|
-| `Repository-name-popmonster-website-` | Placeholder / stub，無實際程式碼 |
+| `Repository-name-popmonster-website-` | Placeholder / stub，無實際程式碼 — **已封存 2026-05-26** |
 | `pop-monster-line-oa` | 可能是 `popmonster-linebot` 前身，確認無用後封存 |
