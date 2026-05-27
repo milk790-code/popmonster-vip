@@ -546,6 +546,3 @@ def force_dispatch():
         dispatched.append(t.id)
 
     return jsonify({"dispatched": dispatched, "count": len(dispatched)})
-
-
-@bp.post("/admin/force-dispatch")
