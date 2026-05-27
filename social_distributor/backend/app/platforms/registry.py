@@ -6,12 +6,14 @@ from .base import OAuthProvider, Publisher
 from .facebook import FacebookPublisher, MetaOAuth
 from .instagram import InstagramPublisher
 from .shopee import ShopeeOAuth, ShopeePublisher
+from .threads import ThreadsOAuth, ThreadsPublisher
 from .tiktok import TikTokOAuth, TikTokPublisher
 from .youtube import YouTubeOAuth, YouTubePublisher
 
 _PUBLISHERS: dict[Platform, Publisher] = {
     Platform.FACEBOOK: FacebookPublisher(),
     Platform.INSTAGRAM: InstagramPublisher(),
+    Platform.META_THREADS: ThreadsPublisher(),
     Platform.TIKTOK: TikTokPublisher(),
     Platform.YOUTUBE: YouTubePublisher(),
     Platform.SHOPEE: ShopeePublisher(),
@@ -19,6 +21,7 @@ _PUBLISHERS: dict[Platform, Publisher] = {
 
 _OAUTH: dict[str, OAuthProvider] = {
     "meta": MetaOAuth(),
+    "threads": ThreadsOAuth(),
     "tiktok": TikTokOAuth(),
     "youtube": YouTubeOAuth(),
     "shopee": ShopeeOAuth(),

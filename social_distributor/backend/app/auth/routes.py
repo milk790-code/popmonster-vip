@@ -47,6 +47,7 @@ bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 PROVIDERS = {
     "meta": {"platforms": [Platform.FACEBOOK, Platform.INSTAGRAM]},
+    "threads": {"platforms": [Platform.META_THREADS]},
     "tiktok": {"platforms": [Platform.TIKTOK]},
     "youtube": {"platforms": [Platform.YOUTUBE]},
     "shopee": {"platforms": [Platform.SHOPEE]},
@@ -315,6 +316,30 @@ def _persist_accounts(provider: str, user_id: int, bundle):
                     {},
                 )
             )
+    elif provider == "threads":
+        # Resolve the Threads user profile (id + username) using /me.
+        from ..platforms.threads import THREADS_BASE
+        me = request_json(
+            "GET",
+            f"{THREADS_BASE}/me",
+            params={
+                "fields": "id,username",
+                "access_token": bundle.access_token,
+            },
+        )
+        threads_user_id = me["id"]
+        username = me.get("username", threads_user_id)
+        created.append(
+            upsert(
+                Platform.META_THREADS,
+                threads_user_id,
+                username,
+                bundle.access_token,
+                bundle.refresh_token,
+                bundle.expires_at,
+                bundle.extra,
+            )
+        )
     elif provider == "shopee":
         # shop_id is passed back by Shopee in the redirect alongside the code.
         # The callback receives ?code=<auth_code>&shop_id=<id>&state=<state>.

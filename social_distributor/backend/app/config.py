@@ -76,6 +76,11 @@ class Config:
     def platform(self, name: str) -> PlatformCredentials:
         mapping = {
             "meta": ("META_APP_ID", "META_APP_SECRET", "META_REDIRECT_URI"),
+            "threads": (
+                "THREADS_APP_ID",
+                "THREADS_APP_SECRET",
+                "THREADS_REDIRECT_URI",
+            ),
             "tiktok": (
                 "TIKTOK_CLIENT_KEY",
                 "TIKTOK_CLIENT_SECRET",
