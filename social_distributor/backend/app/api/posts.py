@@ -442,15 +442,15 @@ def retroactive_pin_comment():
             .all()
         )
         for t in targets:
-            if t.platform.value != "facebook":
-                results.append({"post_id": post_id, "target_id": t.id,
-                                 "platform": t.platform.value, "skipped": True,
-                                 "reason": "not facebook"})
-                continue
             acct = db.session.get(SocialAccount, t.account_id)
             if not acct:
                 results.append({"post_id": post_id, "target_id": t.id,
                                  "skipped": True, "reason": "account not found"})
+                continue
+            if acct.platform.value != "facebook":
+                results.append({"post_id": post_id, "target_id": t.id,
+                                 "platform": acct.platform.value, "skipped": True,
+                                 "reason": "not facebook"})
                 continue
             try:
                 raw_token = _c.decrypt(acct.access_token_enc)
