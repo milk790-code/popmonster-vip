@@ -405,11 +405,68 @@ TIKTOK_REDIRECT_URI=https://api.popmonster.vip/auth/tiktok/callback
 
 ---
 
+## Phase T — Threads OAuth（3Q LINE OA 用）
+
+> **背景**：Threads API 只能掛在「消費者 (Consumer)」類型的 Meta App 上，不能掛在商業 (Business) 類型的 App 上。  
+> 現有的 `956987317313843`（popmonster-distributor-v2）和 `1845315733092457`（3q-hatchery-）都是 Business 類型，無法使用 Threads API。  
+> 需要新建一個 Consumer App，專門給 3Q LINE OA 的 Threads 自動換 token 用。
+
+### T1 🔴 建立 Consumer 類型 Meta App
+
+直連 URL：`https://developers.facebook.com/apps/create/`
+
+操作步驟：
+1. 進入頁面後 **App Type** 選 **「消費者 (Consumer)」** ← 這一步是關鍵，不能選「企業商家 (Business)」
+2. App 名稱：
+
+```
+3q-threads-consumer
+```
+
+3. Contact email 填你的信箱（自動帶入）
+4. 點 **建立應用程式** → 系統可能要求輸入 Meta 密碼 🔴
+5. 建立成功後，**把 App ID 貼回給我**
+
+### T2 🟢 加 Threads API 產品（T1 完成後我來提示你）
+
+- 在新 App 的 Dashboard 左側：**Add Product** → 找到 **Threads API** → 點 **Set Up**
+- （如果 Add Product 清單裡看不到 Threads API，代表 App Type 選錯了，請刪除重建）
+
+### T3 🟢 設 OAuth Redirect URI
+
+位置：Threads API → Settings（設定頁）
+
+**Valid OAuth Redirect URI** 填入：
+
+```
+https://milk790-code.github.io/3q-hatchery-line-oa/assets/threads-auth.html
+```
+
+點 **Save**。
+
+### T4 🔴 取得 App Secret
+
+- App Dashboard → **Settings → Basic**
+- 在 **App Secret** 欄位按 **Show** → 系統要求輸入 Meta 密碼 🔴
+- 複製後**把 App ID + App Secret 一起貼回給我**
+
+### T5 🟢（我來做）更新 3Q LINE OA 相關設定
+
+拿到 T1 的 App ID + T4 的 App Secret 之後，我自動完成：
+
+1. `3q-hatchery-line-oa/assets/threads-auth.html` 的 `APP_ID` 更新
+2. `.github/workflows/threads-token-setup.yml` 的 `THREADS_APP_ID` 更新
+3. 呼叫 GitHub API 把 `THREADS_APP_SECRET` 寫入 GitHub Secret（取代舊的）
+4. 推送到 main 分支並 dispatch workflow 完成首次 token 換取
+
+---
+
 ## 走到這裡你會擁有
 
 ✅ 一個生產 backend `https://api.popmonster.vip`
 ✅ 前端 magic-link 登入頁 `https://app.popmonster.vip`
 ✅ 三個平台 OAuth ID/Secret 可以連社群帳號
 ✅ R2 bucket 可以收 5 支影片
+✅ （Phase T 完成後）Threads 自動換 token → 3Q LINE OA Threads 帳號接入
 
 → 接著走 `RUNBOOK_SEED_SPRINT.md` Phase 5–8（建 AccountGroup、上傳影片、seed、worker）
