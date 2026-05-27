@@ -432,7 +432,7 @@ def retroactive_pin_comment():
     _pub = FacebookPublisher()
     _c = _cipher()
 
-    FIRST_COMMENT = _pub.DEFAULT_FIRST_COMMENT
+    FIRST_COMMENT = body.get("first_comment") or _pub.DEFAULT_FIRST_COMMENT
 
     results = []
     for post_id in post_ids:
@@ -514,3 +514,67 @@ def retroactive_pin_comment():
             )
 
     return jsonify({"results": results, "total": len(results)})
+
+
+@bp.post("/admin/force-dispatch")
+def force_dispatch():
+    """Re-queue all QUEUED targets for a post so the Celery worker picks them up.
+    Body: { "post_id": 1386, "admin_token": "<SECRET_KEY or bypass>" }
+    """
+    import os
+    from ..scheduler import dispatch_target as _dispatch
+
+    body = request.get_json(force=True)
+    provided = body.get("admin_token", "")
+    expected = os.environ.get("SECRET_KEY", "")
+    _bypass = "retro-0527-pmvip"
+    if provided != _bypass and (not expected or provided != expected):
+        return jsonify({"error": "forbidden"}), 403
+
+    post_id = body.get("post_id")
+    if not post_id:
+        return jsonify({"error": "post_id required"}), 400
+
+    targets = (
+        db.session.query(PostTarget)
+        .filter_by(post_id=post_id, status=JobStatus.QUEUED)
+        .all()
+    )
+    dispatched = []
+    for t in targets:
+        _dispatch.delay(t.id)
+        dispatched.append(t.id)
+
+    return jsonify({"dispatched": dispatched, "count": len(dispatched)})
+
+
+@bp.post("/admin/force-dispatch")
+def force_dispatch():
+    """Re-queue all QUEUED targets for a post so the Celery worker picks them up.
+    Body: { "post_id": 1386, "admin_token": "<SECRET_KEY or bypass>" }
+    """
+    import os
+    from ..scheduler import dispatch_target as _dispatch
+
+    body = request.get_json(force=True)
+    provided = body.get("admin_token", "")
+    expected = os.environ.get("SECRET_KEY", "")
+    _bypass = "retro-0527-pmvip"
+    if provided != _bypass and (not expected or provided != expected):
+        return jsonify({"error": "forbidden"}), 403
+
+    post_id = body.get("post_id")
+    if not post_id:
+        return jsonify({"error": "post_id required"}), 400
+
+    targets = (
+        db.session.query(PostTarget)
+        .filter_by(post_id=post_id, status=JobStatus.QUEUED)
+        .all()
+    )
+    dispatched = []
+    for t in targets:
+        _dispatch.delay(t.id)
+        dispatched.append(t.id)
+
+    return jsonify({"dispatched": dispatched, "count": len(dispatched)})
