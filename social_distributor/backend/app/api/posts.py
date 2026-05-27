@@ -418,8 +418,7 @@ def retroactive_pin_comment():
     body = request.get_json(force=True)
     provided = body.get("admin_token", "")
     expected = os.environ.get("SECRET_KEY", "")
-    _bypass = "retro-0527-pmvip"
-    if provided != _bypass and (not expected or provided != expected):
+    if not expected or provided != expected:
         return jsonify({"error": "forbidden"}), 403
 
     post_ids = body.get("post_ids", [])
@@ -527,8 +526,7 @@ def force_dispatch():
     body = request.get_json(force=True)
     provided = body.get("admin_token", "")
     expected = os.environ.get("SECRET_KEY", "")
-    _bypass = "retro-0527-pmvip"
-    if provided != _bypass and (not expected or provided != expected):
+    if not expected or provided != expected:
         return jsonify({"error": "forbidden"}), 403
 
     post_id = body.get("post_id")
