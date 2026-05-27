@@ -19,4 +19,4 @@ while ($http.IsListening) {
         $context.Response.StatusCode = 404
         $context.Response.OutputStream.Close()
     }
-}
+}(Get-FileHash -Algorithm SHA256 "c:\Users\USER\Documents\GitHub\popmonster-vip\3q-hatchery-line-oa\webhook\deploy.ps1").Hash
