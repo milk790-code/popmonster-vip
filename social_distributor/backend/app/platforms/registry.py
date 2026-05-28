@@ -16,6 +16,7 @@ _PUBLISHERS: dict[Platform, Publisher] = {
     Platform.META_THREADS: ThreadsPublisher(),
     Platform.TIKTOK: TikTokPublisher(),
     Platform.YOUTUBE: YouTubePublisher(),
+    Platform.META_THREADS: ThreadsPublisher(),
     Platform.SHOPEE: ShopeePublisher(),
 }
 

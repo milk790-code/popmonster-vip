@@ -1,26 +1,22 @@
-"""Threads publisher and OAuth provider (Meta Threads API v1.0).
+"""Threads platform adapter.
 
-Reference:
-- https://developers.facebook.com/docs/threads
-- https://developers.facebook.com/docs/threads/posts
-- https://developers.facebook.com/docs/threads/videos
+OAuth uses graph.threads.net (not graph.facebook.com).
+Publishing is a two-step process:
+  1. Create a media container
+  2. Publish the container
 
-Publishing flow (2-step container model):
-1. POST /{user_id}/threads  → creation_id  (media container)
-2. Poll /{creation_id}?fields=status,error_message until FINISHED
-3. POST /{user_id}/threads_publish → id  (live post)
+Docs: https://developers.facebook.com/docs/threads/getting-started
 """
 from __future__ import annotations
 
+import os
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any
-from urllib.parse import urlencode
 
-from ..config import config
-from ._http import request_json
+import requests
+
 from .base import (
-    InsightsSnapshot,
     OAuthProvider,
     PlatformError,
     PublishRequest,
@@ -29,234 +25,180 @@ from .base import (
     TokenBundle,
 )
 
-THREADS_BASE = "https://graph.threads.net/v1.0"
-THREADS_AUTH_BASE = "https://www.threads.net/oauth/authorize"
-THREADS_TOKEN_URL = "https://graph.threads.net/oauth/access_token"
-THREADS_LONG_LIVED_URL = "https://graph.threads.net/access_token"
+_THREADS_API = "https://graph.threads.net/v1.0"
+_AUTH_BASE   = "https://www.threads.net/oauth"
 
-DEFAULT_SCOPES = [
-    "threads_basic",
-    "threads_content_publish",
-    "threads_read_replies",
-    "threads_manage_replies",
-    "threads_manage_insights",
-]
+APP_ID     = os.getenv("THREADS_APP_ID", "")
+APP_SECRET = os.getenv("THREADS_APP_SECRET", "")
+REDIRECT   = os.getenv("THREADS_REDIRECT_URI", "")
 
-# How long to poll the container status before giving up (seconds)
-CONTAINER_POLL_TIMEOUT = 120
-CONTAINER_POLL_INTERVAL = 5
+
+def _raise(resp: requests.Response, context: str) -> None:
+    try:
+        err = resp.json().get("error", {})
+        msg = err.get("message", resp.text)
+        code = str(err.get("code", resp.status_code))
+    except Exception:
+        msg = resp.text or "unknown error"
+        code = str(resp.status_code)
+    retryable = resp.status_code >= 500
+    raise PlatformError(
+        f"Threads {context}: {msg}",
+        retryable=retryable,
+        status_code=resp.status_code,
+        platform_code=code,
+    )
 
 
 class ThreadsOAuth(OAuthProvider):
     name = "threads"
 
     def authorization_url(self, state: str) -> str:
-        creds = config.platform("threads")
-        if not creds.configured:
-            raise PlatformError("threads app credentials not configured", retryable=False)
-        params = {
-            "client_id": creds.client_id,
-            "redirect_uri": creds.redirect_uri,
-            "scope": ",".join(DEFAULT_SCOPES),
-            "response_type": "code",
-            "state": state,
-        }
-        return f"{THREADS_AUTH_BASE}?{urlencode(params)}"
+        scope = "threads_basic,threads_content_publish"
+        return (
+            f"{_AUTH_BASE}/authorize"
+            f"?client_id={APP_ID}"
+            f"&redirect_uri={REDIRECT}"
+            f"&scope={scope}"
+            f"&response_type=code"
+            f"&state={state}"
+        )
 
     def exchange_code(self, code: str) -> TokenBundle:
-        creds = config.platform("threads")
-        if not creds.configured:
-            raise PlatformError("threads app credentials not configured", retryable=False)
-
         # Step 1: short-lived token
-        data = request_json(
-            "POST",
-            THREADS_TOKEN_URL,
+        r = requests.post(
+            f"{_AUTH_BASE}/access_token",
             data={
-                "client_id": creds.client_id,
-                "client_secret": creds.client_secret,
+                "client_id": APP_ID,
+                "client_secret": APP_SECRET,
                 "grant_type": "authorization_code",
-                "redirect_uri": creds.redirect_uri,
+                "redirect_uri": REDIRECT,
                 "code": code,
             },
+            timeout=30,
         )
-        short_token = data["access_token"]
-        user_id = str(data.get("user_id", ""))
+        if not r.ok:
+            _raise(r, "code exchange")
+        short = r.json()["access_token"]
 
-        # Step 2: long-lived token (60 days)
-        long_data = request_json(
-            "GET",
-            THREADS_LONG_LIVED_URL,
+        # Step 2: long-lived token (valid 60 days)
+        r2 = requests.get(
+            "https://graph.threads.net/access_token",
             params={
                 "grant_type": "th_exchange_token",
-                "client_secret": creds.client_secret,
-                "access_token": short_token,
+                "client_id": APP_ID,
+                "client_secret": APP_SECRET,
+                "access_token": short,
             },
+            timeout=30,
         )
-        long_token = long_data["access_token"]
-        expires_in = long_data.get("expires_in", 5183944)  # ~60 days default
-        expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+        if not r2.ok:
+            # Fall back to short-lived if exchange fails
+            expires = datetime.now(timezone.utc) + timedelta(hours=1)
+            return TokenBundle(access_token=short, expires_at=expires)
 
-        return TokenBundle(
-            access_token=long_token,
-            refresh_token=long_token,  # Threads uses the same token for refresh
-            expires_at=expires_at,
-            scopes=DEFAULT_SCOPES,
-            extra={"threads_user_id": user_id},
-        )
+        data = r2.json()
+        token = data.get("access_token", short)
+        expires_in = data.get("expires_in", 5_184_000)  # 60 days
+        expires = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+        return TokenBundle(access_token=token, expires_at=expires)
 
     def refresh(self, refresh_token: str) -> TokenBundle:
-        """Refresh a long-lived Threads token (extends another 60 days)."""
-        data = request_json(
-            "GET",
-            THREADS_LONG_LIVED_URL,
+        """Threads uses token refresh via th_refresh_token."""
+        r = requests.get(
+            "https://graph.threads.net/refresh_access_token",
             params={
                 "grant_type": "th_refresh_token",
                 "access_token": refresh_token,
             },
+            timeout=30,
         )
-        expires_in = data.get("expires_in", 5183944)
-        expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
-        return TokenBundle(
-            access_token=data["access_token"],
-            refresh_token=data["access_token"],
-            expires_at=expires_at,
-            scopes=DEFAULT_SCOPES,
-        )
+        if not r.ok:
+            _raise(r, "token refresh")
+        data = r.json()
+        token = data["access_token"]
+        expires_in = data.get("expires_in", 5_184_000)
+        expires = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+        return TokenBundle(access_token=token, expires_at=expires)
 
 
 class ThreadsPublisher(Publisher):
-    """Publish text + video posts to Threads."""
+    name = "threads"
+    _POLL_MAX = 30
+    _POLL_INTERVAL = 2
 
-    def _get_threads_user_id(self, token: str) -> str:
-        """Resolve the Threads user ID from /me."""
-        me = request_json(
-            "GET",
-            f"{THREADS_BASE}/me",
-            params={"fields": "id,username", "access_token": token},
-        )
-        return me["id"]
-
-    def _create_container(
+    def publish(
         self,
-        threads_user_id: str,
-        token: str,
-        req: PublishRequest,
-    ) -> str:
-        """Step 1: Create media container, return creation_id."""
-        params: dict[str, Any] = {
-            "access_token": token,
-            "text": req.caption,
+        token: TokenBundle,
+        external_account_id: str,
+        request: PublishRequest,
+    ) -> PublishResult:
+        at = token.access_token
+
+        # Step 1: create container
+        payload: dict[str, Any] = {
+            "access_token": at,
+            "text": request.caption,
         }
-
-        if req.media_url and req.media_kind == "video":
-            params["media_type"] = "VIDEO"
-            params["video_url"] = req.media_url
-        elif req.media_url and req.media_kind == "image":
-            params["media_type"] = "IMAGE"
-            params["image_url"] = req.media_url
+        if request.media_url and request.media_kind == "video":
+            payload.update({"media_type": "VIDEO", "video_url": request.media_url})
+        elif request.media_url and request.media_kind == "image":
+            payload.update({"media_type": "IMAGE", "image_url": request.media_url})
         else:
-            params["media_type"] = "TEXT"
+            payload["media_type"] = "TEXT"
 
-        data = request_json(
-            "POST",
-            f"{THREADS_BASE}/{threads_user_id}/threads",
-            params=params,
+        r = requests.post(
+            f"{_THREADS_API}/{external_account_id}/threads",
+            data=payload,
+            timeout=60,
         )
-        creation_id = data.get("id")
-        if not creation_id:
-            raise PlatformError(
-                f"threads container creation returned no id: {data}",
-                retryable=False,
-            )
-        return creation_id
+        if not r.ok:
+            _raise(r, "create container")
+        container_id = r.json()["id"]
 
-    def _poll_container(self, creation_id: str, token: str) -> None:
-        """Step 2: Poll until container status = FINISHED (or timeout)."""
-        deadline = time.monotonic() + CONTAINER_POLL_TIMEOUT
-        while time.monotonic() < deadline:
-            data = request_json(
-                "GET",
-                f"{THREADS_BASE}/{creation_id}",
-                params={
-                    "fields": "status,error_message",
-                    "access_token": token,
-                },
+        # Step 2: poll until container is ready
+        for _ in range(self._POLL_MAX):
+            time.sleep(self._POLL_INTERVAL)
+            status_r = requests.get(
+                f"{_THREADS_API}/{container_id}",
+                params={"fields": "status,error_message", "access_token": at},
+                timeout=15,
             )
-            status = data.get("status", "")
-            if status == "FINISHED":
-                return
-            if status == "ERROR":
-                error_msg = data.get("error_message", "unknown")
-                raise PlatformError(
-                    f"threads container error: {error_msg}",
-                    retryable=False,
-                )
-            time.sleep(CONTAINER_POLL_INTERVAL)
+            if status_r.ok:
+                st = status_r.json().get("status", "")
+                if st == "FINISHED":
+                    break
+                if st == "ERROR":
+                    err_msg = status_r.json().get("error_message", "unknown")
+                    raise PlatformError(f"Threads container error: {err_msg}", retryable=False)
 
-        raise PlatformError(
-            f"threads container {creation_id} timed out after {CONTAINER_POLL_TIMEOUT}s",
-            retryable=True,
+        # Step 3: publish
+        pub_r = requests.post(
+            f"{_THREADS_API}/{external_account_id}/threads_publish",
+            data={"creation_id": container_id, "access_token": at},
+            timeout=30,
         )
+        if not pub_r.ok:
+            _raise(pub_r, "publish")
+        post_id = pub_r.json()["id"]
 
-    def _publish_container(
-        self, threads_user_id: str, creation_id: str, token: str
-    ) -> str:
-        """Step 3: Publish the container, return the live post ID."""
-        data = request_json(
-            "POST",
-            f"{THREADS_BASE}/{threads_user_id}/threads_publish",
-            params={
-                "creation_id": creation_id,
-                "access_token": token,
-            },
+        permalink = None
+        info_r = requests.get(
+            f"{_THREADS_API}/{post_id}",
+            params={"fields": "permalink", "access_token": at},
+            timeout=15,
         )
-        post_id = data.get("id")
-        if not post_id:
-            raise PlatformError(
-                f"threads publish returned no post id: {data}",
-                retryable=False,
-            )
-        return post_id
-
-    def publish(self, req: PublishRequest, account_token: str) -> PublishResult:
-        threads_user_id = self._get_threads_user_id(account_token)
-
-        creation_id = self._create_container(threads_user_id, account_token, req)
-
-        if req.media_kind == "video":
-            # Video containers need time to process
-            self._poll_container(creation_id, account_token)
-
-        post_id = self._publish_container(threads_user_id, creation_id, account_token)
-        permalink = f"https://www.threads.net/post/{post_id}"
+        if info_r.ok:
+            permalink = info_r.json().get("permalink")
 
         return PublishResult(
             external_post_id=post_id,
             permalink=permalink,
-            raw={"creation_id": creation_id, "threads_user_id": threads_user_id},
+            raw=pub_r.json(),
         )
 
-    def fetch_insights(
-        self, external_post_id: str, account_token: str
-    ) -> InsightsSnapshot:
-        """Fetch basic engagement metrics for a published post."""
-        data = request_json(
-            "GET",
-            f"{THREADS_BASE}/{external_post_id}/insights",
-            params={
-                "metric": "views,likes,replies,reposts,quotes",
-                "access_token": account_token,
-            },
-        )
-        metrics: dict[str, int] = {}
-        for item in data.get("data", []):
-            metrics[item["name"]] = item.get("values", [{}])[0].get("value", 0)
-
-        return InsightsSnapshot(
-            impressions=metrics.get("views"),
-            likes=metrics.get("likes"),
-            comments=metrics.get("replies"),
-            shares=metrics.get("reposts"),
-            raw=data,
-        )
+    def validate(self, request: PublishRequest) -> list[str]:
+        issues = []
+        if len(request.caption) > 500:
+            issues.append("Threads caption exceeds 500 characters")
+        return issues
