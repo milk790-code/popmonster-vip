@@ -11,6 +11,8 @@ their scheduled time and dispatches via the normal pipeline.
 """
 from __future__ import annotations
 
+import logging
+import os
 import random
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -46,7 +48,52 @@ class AutoScheduleParams:
     today: datetime | None = None  # injectable for tests; UTC
 
 
-def _platform_enums(names: Sequence[str]) -> list[Platform]:
+log = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# 品牌文案安全機制
+# ---------------------------------------------------------------------------
+BANNEDPHRASES: list[str] = [
+    "12個月",
+    "12 個月",
+    "镀膜攻擊",
+    "秒殺镀膜",
+    "比镀膜",
+    "超越镀膜",
+    "倍便宜",
+    "持久镀膜",
+    "長效镀膜",
+]
+
+
+def isclean_caption(caption: str) -> bool:
+    """Return True if caption contains no banned phrases."""
+    lower = caption.lower()
+    for phrase in BANNEDPHRASES:
+        if phrase.lower() in lower:
+            return False
+    return True
+
+
+def loadbrand_captions() -> list[str]:
+    path = os.environ.get("BRAND_CAPTIONS_FILE", "").strip()
+    if not path:
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            raw = fh.read()
+    except OSError:
+        log.warning("BRAND_CAPTIONS_FILE=%s not readable; ignoring", path)
+        return []
+    if "---" in raw:
+        blocks = [b.strip() for b in raw.split("---")]
+    else:
+        blocks = [line.strip() for line in raw.splitlines()]
+    return [b for b in blocks if b]
+
+
+def platformenums(names: Sequence[str]) -> list[Platform]:
     out = []
     for n in names:
         try:
@@ -56,9 +103,11 @@ def _platform_enums(names: Sequence[str]) -> list[Platform]:
     return out
 
 
-def _caption_pool(user_id: int, days_back: int = 90) -> list[str]:
-    """Pull distinct captions from the user's SUCCEEDED PostTargets in the
-    last ``days_back`` days. Ignores empty captions."""
+def captionpool(user_id: int, days_back: int = 90) -> list[str]:
+    brand = loadbrand_captions()
+    if brand:
+        log.info("caption_pool: using %d brand captions from BRAND_CAPTIONS_FILE", len(brand))
+        return brand
     since = datetime.now(timezone.utc) - timedelta(days=days_back)
     rows = db.session.execute(
         select(Post.caption)
@@ -71,12 +120,18 @@ def _caption_pool(user_id: int, days_back: int = 90) -> list[str]:
         )
         .distinct()
     ).all()
-    return [r[0] for r in rows if r[0] and r[0].strip()]
+    all_captions = [r[0] for r in rows if r[0] and r[0].strip()]
+    clean = [c for c in all_captions if isclean_caption(c)]
+    banned_count = len(all_captions) - len(clean)
+    if banned_count:
+        log.warning(
+            "caption_pool: filtered out %d caption(s) containing banned phrases",
+            banned_count,
+        )
+    return clean
 
 
-def _media_pools(user_id: int) -> tuple[list[MediaAsset], list[MediaAsset]]:
-    """(videos, images). Videos must have transcode_status='ready' to be
-    publishable; images need no transcode."""
+def mediapools(user_id: int) -> tuple[list[MediaAsset], list[MediaAsset]]:
     media = db.session.execute(
         select(MediaAsset).where(MediaAsset.user_id == user_id)
     ).scalars().all()
@@ -85,7 +140,7 @@ def _media_pools(user_id: int) -> tuple[list[MediaAsset], list[MediaAsset]]:
     return videos, images
 
 
-def _active_accounts(user_id: int, platforms: list[Platform]) -> list[SocialAccount]:
+def activeaccounts(user_id: int, platforms: list[Platform]) -> list[SocialAccount]:
     return db.session.execute(
         select(SocialAccount).where(
             SocialAccount.user_id == user_id,
@@ -95,7 +150,7 @@ def _active_accounts(user_id: int, platforms: list[Platform]) -> list[SocialAcco
     ).scalars().all()
 
 
-def _spread_today(
+def spreadtoday(
     n_slots: int,
     now_utc: datetime,
     start_hour: int,
@@ -103,20 +158,6 @@ def _spread_today(
     tz_name: str,
     rng: random.Random,
 ) -> list[datetime]:
-    """Evenly bin today's [start_hour, end_hour) window in the given timezone
-    into n_slots; pick one minute inside each bin (jittered). Returns sorted
-    UTC datetimes.
-
-    Window hours are interpreted in ``tz_name``: e.g. start=10, end=22,
-    tz="Asia/Taipei" means [10:00 Taipei, 22:00 Taipei) on the local
-    "today" relative to ``now_utc``. If the window has already started,
-    only future minutes are eligible.
-
-    Returns [] when:
-    - n_slots <= 0
-    - start_hour >= end_hour
-    - The window has already ended for "today" in tz_name
-    """
     if start_hour >= end_hour or n_slots <= 0:
         return []
     try:
@@ -150,18 +191,11 @@ def _spread_today(
 
 
 def build_today_schedule(params: AutoScheduleParams) -> dict:
-    """Main entry. Returns ``{"summary": {...}, "by_account": [...]}``.
-
-    When ``dry_run`` is True, no DB writes happen and ``post_ids`` /
-    ``target_ids`` are absent from the per-account entries.
-    """
-    rng = random.Random()  # deterministic seed could be wired through params later
-
-    captions = _caption_pool(params.user_id)
-    videos, images = _media_pools(params.user_id)
-    platforms = _platform_enums(params.platforms)
-    accounts = _active_accounts(params.user_id, platforms)
-
+    rng = random.Random()
+    captions = captionpool(params.user_id)
+    videos, images = mediapools(params.user_id)
+    platforms = platformenums(params.platforms)
+    accounts = activeaccounts(params.user_id, platforms)
     today = params.today or datetime.now(timezone.utc)
 
     summary = {
@@ -180,21 +214,47 @@ def build_today_schedule(params: AutoScheduleParams) -> dict:
     }
     by_account: list[dict] = []
 
+    # 防重跑：今天（用戶 TZ）已有待發排程就跳過，避免多次觸發把同帳號疊爆 → FB 限流。
+    if not params.dry_run:
+        try:
+            _tz = ZoneInfo(params.timezone)
+        except Exception:
+            _tz = ZoneInfo("UTC")
+        todaystart_utc = (
+            today.astimezone(_tz).replace(hour=0, minute=0, second=0, microsecond=0)
+        ).astimezone(timezone.utc)
+        _exists = db.session.execute(
+            select(PostTarget.id)
+            .join(Post, Post.id == PostTarget.post_id)
+            .where(
+                Post.user_id == params.user_id,
+                PostTarget.status == JobStatus.PENDING,
+                PostTarget.scheduled_for >= todaystart_utc,
+            )
+            .limit(1)
+        ).first()
+        if _exists:
+            summary["warnings"].append(
+                "今天已有待發排程，跳過以免重複疊加（防 FB 限流）"
+            )
+            return {"summary": summary, "by_account": []}
+
     if not accounts:
         summary["warnings"].append("no active accounts on selected platforms")
         return {"summary": summary, "by_account": []}
+
     if not captions:
         summary["warnings"].append(
             "no SUCCEEDED captions in the last 90 days; user must publish "
             "at least one post manually before auto-schedule has captions to reuse"
         )
         return {"summary": summary, "by_account": []}
+
     if not videos and params.videos_per_account > 0:
         summary["warnings"].append(
             "no ready videos in library; videos_per_account treated as 0"
         )
 
-    # Heads-up if today's window is already over in the user's TZ.
     try:
         tz = ZoneInfo(params.timezone)
     except Exception:
@@ -215,24 +275,18 @@ def build_today_schedule(params: AutoScheduleParams) -> dict:
         per_account = params.videos_per_account + params.posts_per_account
         if per_account <= 0:
             continue
-
-        # Mix of videos and non-videos
         n_videos = params.videos_per_account if videos else 0
         n_non_videos = per_account - n_videos
-
         chosen_videos = rng.choices(videos, k=n_videos) if n_videos else []
-        # non-video uses image if available else None (text-only post)
         if images and n_non_videos > 0:
             chosen_non_videos: list[MediaAsset | None] = rng.choices(images, k=n_non_videos)
         else:
             chosen_non_videos = [None] * n_non_videos
-
         media_picks: list[MediaAsset | None] = chosen_videos + chosen_non_videos
         rng.shuffle(media_picks)
-
         caption_picks = rng.choices(captions, k=len(media_picks))
 
-        scheduled_ats = _spread_today(
+        scheduled_ats = spreadtoday(
             n_slots=len(media_picks),
             now_utc=today,
             start_hour=params.window_start_hour,
@@ -241,18 +295,15 @@ def build_today_schedule(params: AutoScheduleParams) -> dict:
             rng=rng,
         )
         if len(scheduled_ats) < len(media_picks):
-            # Window too narrow for the requested count; truncate.
             media_picks = media_picks[: len(scheduled_ats)]
             caption_picks = caption_picks[: len(scheduled_ats)]
 
         post_ids: list[int] = []
         target_ids: list[int] = []
-
         for media, caption, sched_at in zip(media_picks, caption_picks, scheduled_ats):
             full_caption = caption
             if params.link and params.link not in full_caption:
                 full_caption = f"{caption}\n\n{params.link}"
-
             if not params.dry_run:
                 post = Post(
                     user_id=params.user_id,
@@ -272,7 +323,6 @@ def build_today_schedule(params: AutoScheduleParams) -> dict:
                 db.session.flush()
                 post_ids.append(post.id)
                 target_ids.append(target.id)
-
             all_scheduled.append(sched_at)
 
         by_account.append({
