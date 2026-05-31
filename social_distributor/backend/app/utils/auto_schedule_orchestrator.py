@@ -33,8 +33,8 @@ from ..models import (
 @dataclass
 class AutoScheduleParams:
     user_id: int
-    videos_per_account: int = 2
-    posts_per_account: int = 2
+    videos_per_account: int = 1
+    posts_per_account: int = 1
     link: str | None = None
     window_start_hour: int = 10
     window_end_hour: int = 22
