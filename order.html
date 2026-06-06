@@ -1,0 +1,144 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>官網下單｜泡泡怪獸 POP MONSTER</title>
+<meta name="description" content="泡泡怪獸官網直接下單:選品、加入購物車,LINE 快速下單或線上付款。台灣汽美職人首選品牌。">
+<meta name="theme-color" content="#0a0a0a">
+<script src="products_catalog.js"></script>
+<style>
+  :root{--bg:#0a0a0a;--card:#141414;--line:#2a2a2a;--gold:#c8a96b;--gold-d:#8a6a2f;--tx:#e8e2d6;--tx2:#cfc8ba;--mut:#a89e8e}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:'Noto Sans TC',-apple-system,sans-serif}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 14px 140px}
+  h1{color:var(--gold);text-align:center;letter-spacing:3px;font-size:1.5em;margin:10px 0 2px}
+  .sub{text-align:center;color:var(--mut);font-size:.88em;margin-bottom:18px}
+  .cats{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
+  .cats button{background:#141414;border:1px solid var(--line);color:var(--tx2);padding:7px 14px;border-radius:20px;cursor:pointer;font-size:.9em}
+  .cats button.on{background:#16120a;border-color:var(--gold-d);color:#e8c674;font-weight:700}
+  .item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .item img{width:54px;height:54px;border-radius:8px;object-fit:cover;background:#222}
+  .iname{font-weight:700;font-size:.97em}.icat{color:var(--mut);font-size:.78em}
+  .iprice{color:#e8c674;font-weight:800;font-size:.95em}.iask{color:var(--mut);font-size:.82em}
+  .qty{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .qty button{width:32px;height:32px;border-radius:50%;border:1px solid var(--gold-d);background:transparent;color:var(--gold);font-size:1.1em;cursor:pointer}
+  .qty span{min-width:20px;text-align:center;font-weight:800}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(180deg,#141414,#0a0a0a);border-top:1px solid var(--gold-d);padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+  .bar .in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .total{font-weight:800;color:#e8c674}
+  .btn{flex:1;min-width:150px;text-align:center;font-weight:800;text-decoration:none;padding:13px 10px;border-radius:30px;border:none;cursor:pointer;font-size:.98em}
+  .btn-line{background:#c8a96b;color:#0a0a0a}
+  .btn-pay{background:transparent;color:#d8c08a;border:1px solid var(--gold-d)}
+  .btn[disabled]{opacity:.35;cursor:not-allowed}
+  .ship{color:var(--mut);font-size:.8em;text-align:center;width:100%;margin-top:2px}
+  dialog{background:var(--card);color:var(--tx);border:1px solid var(--gold-d);border-radius:14px;max-width:430px;width:92%;padding:20px}
+  dialog::backdrop{background:rgba(0,0,0,.7)}
+  textarea{width:100%;min-height:170px;background:#0e0e0e;color:var(--tx2);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:.88em}
+  .note{color:var(--mut);font-size:.82em;line-height:1.6}
+</style></head><body>
+<section class="wrap">
+  <h1>官網下單</h1>
+  <p class="sub">選品 → 加入清單 → LINE 快速下單或線上付款<br>下單即成為泡泡會員,消費累積自動升級</p>
+  <div class="cats" id="cats"></div>
+  <div id="list"></div>
+</section>
+
+<div class="bar"><div class="in">
+  <div>已選 <b id="cnt">0</b> 項 <span class="total" id="total"></span></div>
+  <button class="btn btn-line" id="btnLine">💬 LINE 一鍵下單</button>
+  <button class="btn btn-pay" id="btnPay" disabled>💳 線上付款(即將開通)</button>
+  <div class="ship" id="ship"></div>
+</div></div>
+
+<dialog id="dlg">
+  <h3 style="color:var(--gold);margin:0 0 8px">LINE 下單 · 兩步完成</h3>
+  <p class="note">① 按「複製訂單」 ② 開 LINE 後直接貼上送出,小編立刻幫你結帳出貨。</p>
+  <textarea id="orderText" readonly></textarea>
+  <div style="display:flex;gap:10px;margin-top:12px">
+    <button class="btn btn-pay" id="copyBtn" style="flex:1">📋 複製訂單</button>
+    <a class="btn btn-line" style="flex:1" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">開啟 LINE</a>
+  </div>
+  <p class="note" style="text-align:center;margin-bottom:0"><a href="javascript:void(0)" onclick="dlg.close()" style="color:var(--mut)">關閉</a></p>
+</dialog>
+
+<script>
+(function(){
+  var CFG={ ECPAY_CHECKOUT_API:'/api/checkout', PAY_ENABLED:false }; // 綠界金鑰+Worker 上線後改 true
+  var cart=JSON.parse(localStorage.getItem('pm_cart')||'{}');
+  var cat='全部';
+  var cats=['全部'].concat([...new Set(PM_PRODUCTS.map(function(p){return p.cat}))]);
+
+  function save(){localStorage.setItem('pm_cart',JSON.stringify(cart));}
+  function fmt(n){return 'NT$'+n.toLocaleString('zh-Hant-TW');}
+
+  function renderCats(){
+    document.getElementById('cats').innerHTML=cats.map(function(c){
+      return '<button class="'+(c===cat?'on':'')+'" onclick="PM.setCat(\''+c+'\')">'+c+'</button>';}).join('');
+  }
+  function renderList(){
+    var el=document.getElementById('list');
+    el.innerHTML=PM_PRODUCTS.filter(function(p){return cat==='全部'||p.cat===cat}).map(function(p){
+      var q=cart[p.sku]||0;
+      var price=p.price!=null?'<div class="iprice">'+fmt(p.price)+' / '+p.unit+'</div>':'<div class="iask">價格請 LINE 詢問</div>';
+      return '<div class="item"><img loading="lazy" src="img/'+p.sku+'-main.jpg" onerror="this.style.visibility=\'hidden\'" alt="'+p.name+'">'+
+        '<div><div class="iname">'+p.name+'</div><div class="icat">'+p.sku.toUpperCase()+' · '+p.cat+'系列</div>'+price+'</div>'+
+        '<div class="qty"><button onclick="PM.add(\''+p.sku+'\',-1)">−</button><span>'+q+'</span><button onclick="PM.add(\''+p.sku+'\',1)">＋</button></div></div>';
+    }).join('');
+    renderBar();
+  }
+  function renderBar(){
+    var n=0,sum=0,unknown=false;
+    for(var k in cart){if(!cart[k])continue;n+=cart[k];
+      var p=PM_PRODUCTS.find(function(x){return x.sku===k});
+      if(p&&p.price!=null)sum+=p.price*cart[k];else unknown=true;}
+    document.getElementById('cnt').textContent=n;
+    document.getElementById('total').textContent=n?(unknown?'(部分品項 LINE 報價)':fmt(sum)):'';
+    document.getElementById('ship').textContent='📦 '+PM_SHIPPING.leadDaysText+'｜'+PM_SHIPPING.note;
+    var pay=document.getElementById('btnPay');
+    pay.disabled=!CFG.PAY_ENABLED||!n||unknown;
+    pay.textContent=CFG.PAY_ENABLED?'💳 線上付款':'💳 線上付款(即將開通)';
+    document.getElementById('btnLine').disabled=!n;
+  }
+  function orderText(){
+    var lines=['🛒 泡泡怪獸 官網訂單'];
+    for(var k in cart){if(!cart[k])continue;
+      var p=PM_PRODUCTS.find(function(x){return x.sku===k});
+      lines.push('・'+p.name+'('+k.toUpperCase()+') × '+cart[k]+(p.price!=null?'　'+fmt(p.price*cart[k]):'(請報價)'));}
+    lines.push('','收件人:','電話:','地址:','付款方式:(轉帳/貨到付款)');
+    return lines.join('\n');
+  }
+  window.PM={
+    setCat:function(c){cat=c;renderCats();renderList();},
+    add:function(sku,d){cart[sku]=Math.max(0,(cart[sku]||0)+d);save();renderList();}
+  };
+  document.getElementById('btnLine').onclick=function(){
+    document.getElementById('orderText').value=orderText();
+    document.getElementById('dlg').showModal();
+  };
+  document.getElementById('copyBtn').onclick=function(){
+    var t=document.getElementById('orderText');t.select();
+    try{navigator.clipboard.writeText(t.value);}catch(e){document.execCommand('copy');}
+    this.textContent='✅ 已複製,去 LINE 貼上';
+  };
+  document.getElementById('btnPay').onclick=function(){
+    if(!CFG.PAY_ENABLED)return;
+    var items=[];for(var k in cart){if(!cart[k])continue;
+      var p=PM_PRODUCTS.find(function(x){return x.sku===k});
+      items.push({name:p.name,price:p.price,qty:cart[k]});}
+    fetch(CFG.ECPAY_CHECKOUT_API,{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({items:items,lineUserId:''})})
+      .then(function(r){return r.text()}).then(function(html){document.open();document.write(html);document.close();})
+      .catch(function(){alert('付款頁連線失敗,請改用 LINE 下單或稍後再試');});
+  };
+  // ?add=a001 直接帶入
+  var add=new URLSearchParams(location.search).get('add');
+  if(add&&PM_PRODUCTS.find(function(x){return x.sku===add})){cart[add]=(cart[add]||0)+1;save();}
+  var dlg=document.getElementById('dlg');window.dlg=dlg;
+  renderCats();renderList();
+})();
+</script>
+<!-- 自主判斷區塊:
+  - LINE 下單為第一路(零基建、今天就能收單),綠界線上付款做成 PAY_ENABLED 開關,金鑰+Worker 上線改 true 即解鎖,不用改版。
+  - 全站現況無價格→price=null 品項自動走「LINE 報價」,不擋下單;學誼補價格表即顯示金額與線上結帳。
+  - localStorage 購物車(真實網站環境,非 claude.ai artifact,可正常使用)。
+  - ?add=aXXX 參數讓 31 個商品頁的「官網下單」按鈕一鍵帶品進來。
+  - 出貨天數標示掛 PM_SHIPPING,呼應出貨績效防線(管理期待,寧保守不跳票)。
+-->
+</body></html>
