@@ -1,15 +1,20 @@
 <!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>官網下單｜泡泡怪獸 POP MONSTER</title>
-<meta name="description" content="泡泡怪獸官網直接下單:選品選規格、加入購物車,LINE 快速下單或線上付款。台灣汽美職人首選品牌。">
+<title>官網下單 Order｜泡泡怪獸 POP MONSTER</title>
+<meta name="description" content="泡泡怪獸官網直接下單:選品選規格,LINE/WhatsApp 快速下單或線上付款。POP MONSTER official order page — car care products shipped from Taiwan.">
 <meta name="theme-color" content="#0a0a0a">
+<link rel="alternate" hreflang="zh-Hant" href="https://popmonster.vip/order.html">
+<link rel="alternate" hreflang="en" href="https://popmonster.vip/order.html?lang=en">
 <script src="products_catalog.js"></script>
 <style>
   :root{--bg:#0a0a0a;--card:#141414;--line:#2a2a2a;--gold:#c8a96b;--gold-d:#8a6a2f;--tx:#e8e2d6;--tx2:#cfc8ba;--mut:#a89e8e}
   *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:'Noto Sans TC',-apple-system,sans-serif}
   .wrap{max-width:760px;margin:0 auto;padding:24px 14px 150px}
   h1{color:var(--gold);text-align:center;letter-spacing:3px;font-size:1.5em;margin:10px 0 2px}
-  .sub{text-align:center;color:var(--mut);font-size:.88em;margin-bottom:18px}
+  .sub{text-align:center;color:var(--mut);font-size:.88em;margin-bottom:12px}
+  .langbar{text-align:center;margin-bottom:14px}
+  .langbar button{background:#141414;border:1px solid var(--line);color:var(--tx2);padding:5px 14px;border-radius:16px;cursor:pointer;font-size:.82em;margin:0 3px}
+  .langbar button.on{border-color:var(--gold-d);color:#e8c674;font-weight:700}
   .cats{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
   .cats button{background:#141414;border:1px solid var(--line);color:var(--tx2);padding:7px 14px;border-radius:20px;cursor:pointer;font-size:.9em}
   .cats button.on{background:#16120a;border-color:var(--gold-d);color:#e8c674;font-weight:700}
@@ -20,6 +25,7 @@
   .row2{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
   select{flex:1;min-width:170px;background:#0e0e0e;color:var(--tx2);border:1px solid var(--line);border-radius:8px;padding:9px 8px;font-size:.88em}
   .iprice{color:#e8c674;font-weight:800;font-size:1em;min-width:84px;text-align:right}
+  .ref{color:var(--mut);font-size:.72em;display:block;font-weight:400}
   .qty{display:flex;align-items:center;gap:8px;margin-left:auto}
   .qty button{width:32px;height:32px;border-radius:50%;border:1px solid var(--gold-d);background:transparent;color:var(--gold);font-size:1.1em;cursor:pointer}
   .qty span{min-width:20px;text-align:center;font-weight:800}
@@ -38,67 +44,122 @@
   .note{color:var(--mut);font-size:.82em;line-height:1.6}
 </style></head><body>
 <section class="wrap">
-  <h1>官網下單</h1>
-  <p class="sub">選品 → 選規格 → 加入清單 → LINE 快速下單或線上付款<br>下單即成為泡泡會員,消費累積自動升級</p>
+  <h1 id="t_title">官網下單</h1>
+  <p class="sub" id="t_sub">選品 → 選規格 → 加入清單 → LINE 快速下單或線上付款<br>下單即成為泡泡會員,消費累積自動升級</p>
+  <div class="langbar"><button id="lzh">中文</button><button id="len">EN</button></div>
   <div class="cats" id="cats"></div>
   <div id="list"></div>
 </section>
 
 <div class="bar"><div class="in">
-  <div>已選 <b id="cnt">0</b> 件 <span class="total" id="total"></span></div>
-  <button class="btn btn-line" id="btnLine">💬 LINE 一鍵下單</button>
+  <div><span id="t_picked">已選</span> <b id="cnt">0</b> <span id="t_pcs">件</span> <span class="total" id="total"></span></div>
+  <button class="btn btn-line" id="btnGo">💬 LINE 一鍵下單</button>
   <button class="btn btn-pay" id="btnPay" disabled>💳 線上付款(即將開通)</button>
   <div class="ship" id="ship"></div>
 </div></div>
 
 <dialog id="dlg">
-  <h3 style="color:var(--gold);margin:0 0 8px">LINE 下單 · 兩步完成</h3>
-  <p class="note">① 按「複製訂單」 ② 開 LINE 後直接貼上送出,小編立刻幫你結帳出貨。</p>
+  <h3 style="color:var(--gold);margin:0 0 8px" id="t_dlgTitle">下單 · 兩步完成</h3>
+  <p class="note" id="t_dlgNote">① 按「複製訂單」 ② 開 LINE 後直接貼上送出,小編立刻幫你結帳出貨。</p>
   <textarea id="orderText" readonly></textarea>
   <div style="display:flex;gap:10px;margin-top:12px">
     <button class="btn btn-pay" id="copyBtn" style="flex:1">📋 複製訂單</button>
-    <a class="btn btn-line" style="flex:1" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">開啟 LINE</a>
+    <a class="btn btn-line" style="flex:1" id="chatBtn" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">開啟 LINE</a>
   </div>
-  <p class="note" style="text-align:center;margin-bottom:0"><a href="javascript:void(0)" onclick="dlg.close()" style="color:var(--mut)">關閉</a></p>
+  <p class="note" style="text-align:center;margin-bottom:0"><a href="javascript:void(0)" onclick="dlg.close()" style="color:var(--mut)" id="t_close">關閉</a></p>
 </dialog>
 
 <script>
 (function(){
-  var CFG={ ECPAY_CHECKOUT_API:'/api/checkout', PAY_ENABLED:false }; // 綠界金鑰+Worker 上線後改 true
-  // cart: { "sku|variantIndex": qty }
-  var cart={}; try{cart=JSON.parse(localStorage.getItem('pm_cart_v2')||'{}');}catch(e){}
-  var sel={};  try{sel=JSON.parse(localStorage.getItem('pm_sel')||'{}');}catch(e){}
-  var cat='全部';
-  var cats=['全部'].concat([...new Set(PM_PRODUCTS.map(function(p){return p.cat}))]);
+  var CFG={
+    ECPAY_CHECKOUT_API:'/api/checkout', PAY_ENABLED:false, // 綠界金鑰+Worker 上線後改 true
+    WHATSAPP:'886970527037', LINE_URL:'https://line.me/R/ti/p/@150tiznd',
+    FX:{USD:32, MYR:7} // 參考匯率(TWD→外幣除數);僅顯示參考,實際以 TWD 收款
+  };
+  var I18N={
+    zh:{title:'官網下單',sub:'選品 → 選規格 → 加入清單 → LINE 快速下單或線上付款<br>下單即成為泡泡會員,消費累積自動升級',
+        all:'全部',picked:'已選',pcs:'件',go:'💬 LINE 一鍵下單',pay:'💳 線上付款(即將開通)',payOn:'💳 線上付款',
+        dlgTitle:'LINE 下單 · 兩步完成',dlgNote:'① 按「複製訂單」 ② 開 LINE 後直接貼上送出,小編立刻幫你結帳出貨。',
+        copy:'📋 複製訂單',copied:'✅ 已複製,去 LINE 貼上',chat:'開啟 LINE',close:'關閉',
+        orderHead:'🛒 泡泡怪獸 官網訂單',orderTail:['收件人:','電話:','地址:','付款方式:(轉帳/貨到付款)'],
+        payFail:'付款頁連線失敗,請改用 LINE 下單或稍後再試'},
+    en:{title:'Order Online',sub:'Pick products & size → add to list → order via WhatsApp or pay online<br>Every order earns POP membership rewards. Ships from Taiwan worldwide.',
+        all:'All',picked:'Items',pcs:'',go:'💬 Order via WhatsApp',pay:'💳 Online payment (coming soon)',payOn:'💳 Pay online',
+        dlgTitle:'WhatsApp Order · 2 steps',dlgNote:'① Tap "Open WhatsApp" — your order is pre-filled ② Send it, we reply with total + shipping quote.',
+        copy:'📋 Copy order',copied:'✅ Copied',chat:'Open WhatsApp',close:'Close',
+        orderHead:'🛒 POP MONSTER Order (International)',orderTail:['Name:','WhatsApp/Phone:','Country & Address:','Payment: (PayPal / card — we will quote shipping)'],
+        payFail:'Payment page unavailable — please order via WhatsApp.'}
+  };
+  // 規格英譯規則(不逐條翻 97 筆,規則覆蓋)
+  function specEn(s){
+    return s.replace(/(\d+)\s*入/g,'$1-pack').replace(/(\d+)\s*克/g,'$1g')
+      .replace(/入門體驗款|嚐鮮裝|體驗裝/g,'starter').replace(/熱銷首選款/g,'best seller')
+      .replace(/團購優惠款/g,'value size').replace(/超值優惠款/g,'jumbo')
+      .replace(/可兌(\d+)L成品/g,'makes $1L').replace(/樣品|試用品/g,'sample')
+      .replace(/划算/g,'best value').replace(/雙入補貨/g,'').replace(/入門囤貨|常規補貨|店家必囤/g,'')
+      .replace(/⚠️無噴頭/g,'no spray head').replace(/不附噴頭/g,'no spray head')
+      .replace(/最高300倍稀釋/g,'dilute up to 300x').replace(/20倍稀釋最高可稀釋65倍/g,'dilute 20–65x')
+      .replace(/贈油膜擦/g,'+ free applicator').replace(/（贈慕斯瓶）/g,' (+ foam bottle)')
+      .replace(/紅色（重切）/g,'Red (heavy cut)').replace(/灰色（細切）/g,'Grey (fine cut)')
+      .replace(/GA\/DA適用套裝/g,'GA/DA set').replace(/RO適用套裝/g,'RO set')
+      .replace(/單一規格/g,'standard').replace(/\s*,\s*/g,', ').replace(/\s+/g,' ').trim();
+  }
+  var lang=(new URLSearchParams(location.search).get('lang'))||localStorage.getItem('pm_lang')||'zh';
+  if(lang!=='en')lang='zh';
+  var T=I18N[lang];
+  var cart={};try{cart=JSON.parse(localStorage.getItem('pm_cart_v2')||'{}')}catch(e){}
+  var sel={};try{sel=JSON.parse(localStorage.getItem('pm_sel')||'{}')}catch(e){}
+  var cat='__all__';
+  var catKeys=[...new Set(PM_PRODUCTS.map(function(p){return p.cat}))];
 
-  function save(){localStorage.setItem('pm_cart_v2',JSON.stringify(cart));localStorage.setItem('pm_sel',JSON.stringify(sel));}
+  function save(){localStorage.setItem('pm_cart_v2',JSON.stringify(cart));localStorage.setItem('pm_sel',JSON.stringify(sel));localStorage.setItem('pm_lang',lang);}
   function fmt(n){return 'NT$'+n.toLocaleString('zh-Hant-TW');}
+  function ref(n){if(lang!=='en')return '';return '<span class="ref">≈ US$'+(n/CFG.FX.USD).toFixed(1)+' / RM'+(n/CFG.FX.MYR).toFixed(0)+' · charged in TWD</span>';}
   function prod(sku){return PM_PRODUCTS.find(function(x){return x.sku===sku});}
   function vi(sku){return sel[sku]||0;}
+  function pname(p){return lang==='en'&&p.nameEn?p.nameEn:p.name;}
+  function pcat(c){return lang==='en'?(PM_CAT_EN[c]||c):c;}
+  function pspec(s){return lang==='en'?specEn(s):s;}
 
+  function applyLang(){
+    T=I18N[lang];
+    document.documentElement.lang=lang==='en'?'en':'zh-Hant';
+    document.getElementById('t_title').textContent=T.title;
+    document.getElementById('t_sub').innerHTML=T.sub;
+    document.getElementById('t_picked').textContent=T.picked;
+    document.getElementById('t_pcs').textContent=T.pcs;
+    document.getElementById('btnGo').textContent=T.go;
+    document.getElementById('t_dlgTitle').textContent=T.dlgTitle;
+    document.getElementById('t_dlgNote').textContent=T.dlgNote;
+    document.getElementById('copyBtn').textContent=T.copy;
+    document.getElementById('t_close').textContent=T.close;
+    var chat=document.getElementById('chatBtn');chat.textContent=T.chat;
+    document.getElementById('lzh').className=lang==='zh'?'on':'';
+    document.getElementById('len').className=lang==='en'?'on':'';
+  }
   function renderCats(){
-    document.getElementById('cats').innerHTML=cats.map(function(c){
-      return '<button class="'+(c===cat?'on':'')+'" onclick="PM.setCat(\''+c+'\')">'+c+'</button>';}).join('');
+    var btn=function(key,label){return '<button class="'+(cat===key?'on':'')+'" onclick="PM.setCat(\''+key+'\')">'+label+'</button>';};
+    document.getElementById('cats').innerHTML=btn('__all__',T.all)+catKeys.map(function(c){return btn(c,pcat(c));}).join('');
   }
   function pickedLines(sku){
     var p=prod(sku),out=[];
     p.variants.forEach(function(v,i){
       var q=cart[sku+'|'+i]||0;
-      if(q>0)out.push('🛒 '+v.spec+' × '+q+'('+fmt(v.price*q)+')');
+      if(q>0)out.push('🛒 '+pspec(v.spec)+' × '+q+' ('+fmt(v.price*q)+')');
     });
     return out.length?'<div class="picked">'+out.join('<br>')+'</div>':'';
   }
   function renderList(){
     var el=document.getElementById('list');
-    el.innerHTML=PM_PRODUCTS.filter(function(p){return cat==='全部'||p.cat===cat}).map(function(p){
+    el.innerHTML=PM_PRODUCTS.filter(function(p){return cat==='__all__'||p.cat===cat}).map(function(p){
       var i=vi(p.sku),v=p.variants[i],q=cart[p.sku+'|'+i]||0;
       var opts=p.variants.map(function(x,j){
-        return '<option value="'+j+'"'+(j===i?' selected':'')+'>'+x.spec+'｜'+fmt(x.price)+'</option>';}).join('');
+        return '<option value="'+j+'"'+(j===i?' selected':'')+'>'+pspec(x.spec)+'｜'+fmt(x.price)+'</option>';}).join('');
       return '<div class="item"><div class="top">'+
-        '<img loading="lazy" src="img/'+p.sku+'-main.jpg" onerror="this.style.visibility=\'hidden\'" alt="'+p.name+'">'+
-        '<div><div class="iname">'+p.name+'</div><div class="icat">'+p.sku.toUpperCase()+' · '+p.cat+'系列</div></div></div>'+
+        '<img loading="lazy" src="img/'+p.sku+'-main.jpg" onerror="this.style.visibility=\'hidden\'" alt="'+pname(p)+'">'+
+        '<div><div class="iname">'+pname(p)+'</div><div class="icat">'+p.sku.toUpperCase()+' · '+pcat(p.cat)+'</div></div></div>'+
         '<div class="row2"><select onchange="PM.pick(\''+p.sku+'\',this.value)">'+opts+'</select>'+
-        '<div class="iprice">'+fmt(v.price)+'</div>'+
+        '<div class="iprice">'+fmt(v.price)+ref(v.price)+'</div>'+
         '<div class="qty"><button onclick="PM.add(\''+p.sku+'\',-1)">−</button><span>'+q+'</span><button onclick="PM.add(\''+p.sku+'\',1)">＋</button></div></div>'+
         pickedLines(p.sku)+'</div>';
     }).join('');
@@ -111,35 +172,42 @@
       var p=prod(sku);if(!p||!p.variants[j])continue;
       n+=q;sum+=p.variants[j].price*q;}
     document.getElementById('cnt').textContent=n;
-    document.getElementById('total').textContent=n?fmt(sum):'';
-    document.getElementById('ship').textContent='📦 '+PM_SHIPPING.leadDaysText+'｜'+PM_SHIPPING.note;
+    document.getElementById('total').innerHTML=n?(fmt(sum)+(lang==='en'?' '+ref(sum):'')):'';
+    document.getElementById('ship').textContent='📦 '+(lang==='en'?PM_SHIPPING.leadDaysTextEn+' · '+PM_SHIPPING.noteEn:PM_SHIPPING.leadDaysText+'｜'+PM_SHIPPING.note);
     var pay=document.getElementById('btnPay');
     pay.disabled=!CFG.PAY_ENABLED||!n;
-    pay.textContent=CFG.PAY_ENABLED?'💳 線上付款':'💳 線上付款(即將開通)';
-    document.getElementById('btnLine').disabled=!n;
+    pay.textContent=CFG.PAY_ENABLED?T.payOn:T.pay;
+    document.getElementById('btnGo').disabled=!n;
   }
   function orderText(){
-    var lines=['🛒 泡泡怪獸 官網訂單'];
+    var lines=[T.orderHead];
     for(var k in cart){var q=cart[k];if(!q)continue;
       var sku=k.split('|')[0],j=+k.split('|')[1];
       var p=prod(sku);if(!p)continue;var v=p.variants[j];
-      lines.push('・'+p.name+'('+sku.toUpperCase()+') '+v.spec+' × '+q+'　'+fmt(v.price*q));}
-    lines.push('','收件人:','電話:','地址:','付款方式:(轉帳/貨到付款)');
+      lines.push('- '+pname(p)+' ('+sku.toUpperCase()+') '+pspec(v.spec)+' x'+q+' '+fmt(v.price*q));}
+    lines.push('');T.orderTail.forEach(function(t){lines.push(t)});
     return lines.join('\n');
   }
   window.PM={
     setCat:function(c){cat=c;renderCats();renderList();},
     pick:function(sku,j){sel[sku]=+j;save();renderList();},
-    add:function(sku,d){var k=sku+'|'+vi(sku);cart[k]=Math.max(0,(cart[k]||0)+d);save();renderList();}
+    add:function(sku,d){var k=sku+'|'+vi(sku);cart[k]=Math.max(0,(cart[k]||0)+d);save();renderList();},
+    lang:function(l){lang=l;save();applyLang();renderCats();renderList();}
   };
-  document.getElementById('btnLine').onclick=function(){
-    document.getElementById('orderText').value=orderText();
+  document.getElementById('lzh').onclick=function(){PM.lang('zh')};
+  document.getElementById('len').onclick=function(){PM.lang('en')};
+  document.getElementById('btnGo').onclick=function(){
+    var txt=orderText();
+    document.getElementById('orderText').value=txt;
+    var chat=document.getElementById('chatBtn');
+    if(lang==='en'){chat.href='https://wa.me/'+CFG.WHATSAPP+'?text='+encodeURIComponent(txt);}
+    else{chat.href=CFG.LINE_URL;}
     document.getElementById('dlg').showModal();
   };
   document.getElementById('copyBtn').onclick=function(){
     var t=document.getElementById('orderText');t.select();
     try{navigator.clipboard.writeText(t.value);}catch(e){document.execCommand('copy');}
-    this.textContent='✅ 已複製,去 LINE 貼上';
+    this.textContent=T.copied;
   };
   document.getElementById('btnPay').onclick=function(){
     if(!CFG.PAY_ENABLED)return;
@@ -151,17 +219,19 @@
     fetch(CFG.ECPAY_CHECKOUT_API,{method:'POST',headers:{'content-type':'application/json'},
       body:JSON.stringify({items:items,lineUserId:''})})
       .then(function(r){return r.text()}).then(function(html){document.open();document.write(html);document.close();})
-      .catch(function(){alert('付款頁連線失敗,請改用 LINE 下單或稍後再試');});
+      .catch(function(){alert(T.payFail);});
   };
-  // ?add=a001 直接帶入(預設第一個規格)
   var add=new URLSearchParams(location.search).get('add');
   if(add&&prod(add)){var k0=add+'|'+vi(add);cart[k0]=(cart[k0]||0)+1;save();}
   var dlg=document.getElementById('dlg');window.dlg=dlg;
-  renderCats();renderList();
+  applyLang();renderCats();renderList();
 })();
 </script>
-<!-- v2(2026-06-07):規格×價格全展開——每品項規格下拉(來自蝦皮後台官方匯出),
-     cart key=sku|variantIndex,訂單文字帶規格名,總價按所選規格。
-     修正 v1 問題:價格未對應容量(599 其實是 30ml 入門款)。
-     自主判斷:預設選最小規格(入門款),客人自行升級容量;舊 pm_cart 鍵棄用改 pm_cart_v2 避免結構衝突。 -->
+<!-- v3 國際化(2026-06-07):
+  - 雙語 zh/EN(?lang=en 或頁內切換,localStorage 記憶);hreflang 標籤。
+  - EN 模式:品名用 catalog nameEn、分類英譯、規格走規則翻譯函式(97 筆規則覆蓋);
+    價格附 ≈USD/RM 參考(CFG.FX 可調,標 charged in TWD);CTA 改 WhatsApp(wa.me 預填完整訂單文字)。
+  - 跨境投放連結規格:popmonster.vip/order.html?lang=en&add=a001(英文落地+自動帶品)。
+  - 自主判斷:海外 CTA 用 WhatsApp 而非 LINE(海外滲透率);匯率寫死為參考值並明標 charged in TWD,
+    避免匯率宣稱失準;EN 訂單尾欄改 Country & Address + 運費另報(國際運費未定,不亂承諾)。 -->
 </body></html>
