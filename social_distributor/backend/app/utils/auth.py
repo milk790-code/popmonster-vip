@@ -21,6 +21,7 @@ flows aren't broken mid-rollout.
 from __future__ import annotations
 
 import functools
+import hmac
 import os
 from datetime import datetime, timezone
 from typing import Callable
@@ -119,6 +120,25 @@ def attach_user_id_middleware(app) -> None:
     Also adds a Deprecation header when the resolution came from the
     ``?user_id=`` backcompat path.
     """
+    @app.before_request
+    def _api_key_guard():
+        if not config.api_key:
+            return  # 未設定 API_KEY 時跳過（向後兼容）
+        path = request.path
+        # 放行健康檢查、登入流程、及非 /api/ 路由
+        if (
+            path == "/healthz"
+            or path.startswith("/healthz/")
+            or path.startswith("/auth/")
+            or not path.startswith("/api/")
+        ):
+            return
+        provided = request.headers.get("X-API-Key", "")
+        if not provided or not hmac.compare_digest(
+            provided.encode("utf-8"), config.api_key.encode("utf-8")
+        ):
+            return jsonify({"error": "invalid api key"}), 401
+
     @app.before_request
     def _resolve():
         g.user_id = None

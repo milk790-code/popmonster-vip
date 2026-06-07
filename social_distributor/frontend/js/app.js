@@ -19,7 +19,12 @@ if ("serviceWorker" in navigator) {
 const userIdInput = document.getElementById("userId");
 
 async function api(path, options = {}) {
-  const headers = { "Content-Type": "application/json", ...(options.headers ?? {}) };
+  const apiKey = localStorage.getItem("sd_api_key") || "";
+  const headers = {
+    "Content-Type": "application/json",
+    ...(apiKey ? { "X-API-Key": apiKey } : {}),
+    ...(options.headers ?? {}),
+  };
   // C3: send the session cookie cross-origin (CORS supports_credentials).
   const res = await fetch(`${API_BASE}${path}`, {
     credentials: "include",
@@ -55,6 +60,17 @@ async function api(path, options = {}) {
   } catch {
     /* not authenticated, fall back to manual user_id field */
   }
+})();
+
+// API Key: load from localStorage and persist on blur/Enter
+(function _loadApiKey() {
+  const input = document.getElementById("apiKeyInput");
+  if (!input) return;
+  const saved = localStorage.getItem("sd_api_key") || "";
+  if (saved) input.value = saved;
+  const save = () => localStorage.setItem("sd_api_key", input.value.trim());
+  input.addEventListener("change", save);
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") { save(); input.blur(); } });
 })();
 
 // --- Tabs -------------------------------------------------------------

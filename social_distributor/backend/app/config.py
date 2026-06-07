@@ -52,6 +52,9 @@ class Config:
         default_factory=lambda: int(_env("RETRY_BACKOFF_BASE_SECONDS", "30"))
     )
 
+    api_key: str | None = field(
+        default_factory=lambda: _env("API_KEY")
+    )
     perspective_api_key: str | None = field(
         default_factory=lambda: _env("PERSPECTIVE_API_KEY")
     )
@@ -130,6 +133,7 @@ class Config:
                 "tiktok": tiktok_creds.configured,
                 "google": google_creds.configured,
             },
+            "api_key": {"configured": bool(self.api_key)},
             "ai": {
                 "anthropic_api_key": bool(_env("ANTHROPIC_API_KEY")),
                 "perspective_api_key": bool(self.perspective_api_key),
