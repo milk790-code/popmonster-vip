@@ -1,0 +1,32 @@
+# Caddy 反向代理 + Bearer token 驗證
+#
+# 部署為 Railway 上獨立 service（在 agentmemory service 前面），讓 agentmemory
+# 維持私網、由本 proxy 對外提供帶 token 的存取。
+#
+# 必填環境變數（在 Railway proxy service 設）：
+#   AGENTMEMORY_INTERNAL_URL  例：http://agentmemory.railway.internal:3111
+#   AGENTMEMORY_SECRET        對外 Bearer token（自己產一串長字串）
+#
+# 使用：所有對 proxy 公網域名的請求需帶 `Authorization: Bearer $AGENTMEMORY_SECRET`，
+# proxy 才會轉發；否則回 401。
+
+{
+	# 不寫 admin API 對外
+	admin off
+	auto_https off
+}
+
+:{$PORT:8080} {
+	@noauth {
+		not header Authorization "Bearer {$AGENTMEMORY_SECRET}"
+	}
+	respond @noauth "Unauthorized" 401 {
+		close
+	}
+
+	reverse_proxy {$AGENTMEMORY_INTERNAL_URL} {
+		header_up Host {http.reverse_proxy.upstream.host}
+		# 不把外部 Authorization 透傳給後端（避免被 log）
+		header_up -Authorization
+	}
+}
