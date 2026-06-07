@@ -421,6 +421,24 @@ a:hover{color:var(--gold-lt)}
   .section-title{font-size:20px}
 }
 
+/* === MOBILE-FRIENDLY MOTION PACK(2026-06-07 夜班,全 transform/opacity GPU 動畫) === */
+@media(hover:none){
+  .card:active{transform:translateY(-2px) scale(.985);border-color:var(--gold)}
+  .btn:active,.card-btn:active,.filter-btn:active{transform:scale(.96)}
+  .related-card:active,.blog-card:active,.brand-card:active{transform:scale(.985)}
+}
+.btn,.card-btn,.filter-btn,.card{-webkit-tap-highlight-color:transparent}
+@keyframes imgIn{from{opacity:0;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}
+.card-img img,.featured-img img{animation:imgIn .55s ease both}
+@keyframes sheen{0%{background-position:-120% 0}55%{background-position:220% 0}100%{background-position:220% 0}}
+.btn-gold{position:relative;overflow:hidden}
+.btn-gold::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 38%,rgba(255,245,220,.45) 50%,transparent 62%);background-size:240% 100%;animation:sheen 4.6s ease-in-out infinite;pointer-events:none}
+.grid .fade-up:nth-child(2){transition-delay:.06s}
+.grid .fade-up:nth-child(3){transition-delay:.12s}
+.grid .fade-up:nth-child(4){transition-delay:.18s}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.featured-badge,.card-img .badge{animation:floaty 3.6s ease-in-out infinite}
+
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   .fade-up{opacity:1;transform:none}

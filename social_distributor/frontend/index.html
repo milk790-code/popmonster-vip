@@ -35,6 +35,7 @@
       <button data-tab="transfers">Ownership 轉移</button>
       <button data-tab="rebroadcast">內容重發</button>
       <button data-tab="audit">Audit log</button>
+      <button data-tab="settings">⚙ 設定</button>
     </nav>
     <label class="user-select">
       User ID
@@ -531,6 +532,28 @@
         </thead>
         <tbody></tbody>
       </table>
+    </section>
+
+    <section id="tab-settings" class="tab">
+      <h2>API 設定</h2>
+      <div class="grid" style="max-width:480px">
+        <label>API Key (X-API-Key)
+          <small>從 Railway Variables 取得 API_KEY 的值，貼入後按儲存。</small>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <input id="apiKeyInput" type="password" placeholder="e.g. a3f8c2..." style="flex:1" autocomplete="off" />
+            <button type="button" id="saveApiKeyBtn">儲存</button>
+            <button type="button" id="clearApiKeyBtn">清除</button>
+          </div>
+          <small id="apiKeyStatus" style="display:block;margin-top:4px"></small>
+        </label>
+        <hr />
+        <label>API Base URL
+          <input id="apiBaseInput" type="url" placeholder="http://localhost:5000" style="width:100%" />
+          <small>留空使用預設（由 &lt;meta&gt; 或 localhost:5000 決定）</small>
+          <button type="button" id="saveApiBaseBtn" style="margin-top:4px">儲存 Base URL</button>
+          <small id="apiBaseStatus" style="display:block;margin-top:2px"></small>
+        </label>
+      </div>
     </section>
   </main>
 

@@ -12,7 +12,10 @@ from croniter import croniter
 from ..compliance import ComplianceEngine
 from ..compliance.engine import publisher_request_from
 from ..extensions import db
-from ..models import JobStatus, MediaAsset, PostMetric, PostTarget, SocialAccount, User
+from ..models import (
+    JobStatus, MediaAsset, Platform, PostMetric, PostTarget, SocialAccount,
+    TokenExpiryAlert, User,
+)
 from ..platforms import get_oauth_provider, get_publisher
 from ..platforms.base import PlatformError, TokenBundle
 from ..utils.events import publish_event
@@ -524,3 +527,117 @@ def ingest_insights() -> None:
         fetched += 1
     db.session.commit()
     log.info("insights ingestion: %d snapshots stored", fetched)
+
+
+@celery_app.task
+def sweep_expiring_tokens() -> dict:
+    """Daily scan: alert on tokens expiring within 7 days + probe FB liveness.
+
+    Writes TokenExpiryAlert rows (upsert by account+kind so re-runs are safe).
+    Returns a JSON-serialisable report for auditing.
+    """
+    now = datetime.now(timezone.utc)
+    threshold_7d = now + timedelta(days=7)
+
+    # --- Tokens with known expiry within 7 days ---
+    expiring = (
+        db.session.query(SocialAccount)
+        .filter(SocialAccount.revoked_at.is_(None))
+        .filter(SocialAccount.token_expires_at.isnot(None))
+        .filter(SocialAccount.token_expires_at > now)
+        .filter(SocialAccount.token_expires_at <= threshold_7d)
+        .all()
+    )
+
+    # --- FB page tokens have no expiry — probe liveness via /me?fields=id ---
+    fb_accounts = (
+        db.session.query(SocialAccount)
+        .filter(SocialAccount.revoked_at.is_(None))
+        .filter(SocialAccount.platform == Platform.FACEBOOK)
+        .filter(SocialAccount.token_expires_at.is_(None))
+        .all()
+    )
+
+    report: dict = {"expiring_soon": [], "needs_reauth": []}
+
+    for acct in expiring:
+        _upsert_token_alert(
+            acct, "expiring_soon",
+            expires_at=acct.token_expires_at,
+            detail={"days_left": (acct.token_expires_at - now).days},
+        )
+        report["expiring_soon"].append({
+            "account_id": acct.id,
+            "handle": acct.handle,
+            "platform": acct.platform.value,
+            "expires_at": acct.token_expires_at.isoformat(),
+        })
+        log.warning(
+            "token expiring soon: account_id=%s handle=%s platform=%s expires=%s",
+            acct.id, acct.handle, acct.platform.value,
+            acct.token_expires_at.isoformat(),
+        )
+
+    for acct in fb_accounts:
+        alive = _probe_fb_liveness(acct)
+        if not alive:
+            _upsert_token_alert(acct, "needs_reauth", expires_at=None,
+                                detail={"reason": "/me probe failed"})
+            report["needs_reauth"].append({
+                "account_id": acct.id,
+                "handle": acct.handle,
+                "platform": "facebook",
+            })
+            log.warning(
+                "FB page token liveness failed: account_id=%s handle=%s",
+                acct.id, acct.handle,
+            )
+
+    db.session.commit()
+    log.info(
+        "sweep_expiring_tokens: %d expiring, %d needs_reauth",
+        len(report["expiring_soon"]), len(report["needs_reauth"]),
+    )
+    return report
+
+
+def _upsert_token_alert(
+    account: SocialAccount,
+    kind: str,
+    *,
+    expires_at,
+    detail: dict,
+) -> None:
+    existing = (
+        db.session.query(TokenExpiryAlert)
+        .filter_by(account_id=account.id, kind=kind)
+        .filter(TokenExpiryAlert.resolved_at.is_(None))
+        .one_or_none()
+    )
+    if existing:
+        existing.expires_at = expires_at
+        existing.detail = detail
+    else:
+        db.session.add(TokenExpiryAlert(
+            account_id=account.id,
+            kind=kind,
+            expires_at=expires_at,
+            detail=detail,
+        ))
+
+
+def _probe_fb_liveness(account: SocialAccount) -> bool:
+    """Return True if the FB token can authenticate /me, False otherwise."""
+    try:
+        import requests as _requests
+        c = cipher()
+        token = c.decrypt(account.access_token_enc)
+        r = _requests.get(
+            "https://graph.facebook.com/me",
+            params={"fields": "id", "access_token": token},
+            timeout=10,
+        )
+        return r.ok and "id" in r.json()
+    except Exception as exc:
+        log.debug("FB liveness probe failed for account %s: %s", account.id, exc)
+        return False

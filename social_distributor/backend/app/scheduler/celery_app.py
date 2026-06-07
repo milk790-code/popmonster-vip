@@ -66,6 +66,13 @@ def make_celery(flask_app=None) -> Celery:
                 "task": "app.scheduler.tasks.weekly_insights_digest",
                 "schedule": crontab(minute=0, hour=9, day_of_week="mon"),
             },
+            # Instruction 2: daily token expiry scan + FB liveness probe.
+            # Runs 08:00 UTC every day — early enough to catch 7-day warnings
+            # before the work day starts in Asia/Taipei (UTC+8 = 16:00).
+            "sweep-expiring-tokens": {
+                "task": "app.scheduler.tasks.sweep_expiring_tokens",
+                "schedule": crontab(minute=0, hour=8),
+            },
         },
     )
 

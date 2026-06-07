@@ -417,6 +417,38 @@ class OwnershipTransfer(db.Model):
     raw: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
+class TokenExpiryAlert(db.Model):
+    """Upcoming token expiration or FB liveness failure for a SocialAccount.
+
+    kind:
+    - ``expiring_soon``  — token_expires_at is within 7 days
+    - ``needs_reauth``   — FB page token failed the /me liveness probe
+    """
+
+    __tablename__ = "token_expiry_alerts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    account_id: Mapped[int] = mapped_column(
+        ForeignKey("social_accounts.id"), nullable=False
+    )
+    kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    detail: Mapped[dict] = mapped_column(JSON, default=dict)
+    detected_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow
+    )
+    resolved_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    notified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    account: Mapped["SocialAccount"] = relationship()
+
+
 class RebroadcastCandidate(db.Model):
     """A historical post discovered on a connected account, available to
     promote into a new ``Post`` for re-distribution to a persona group.
