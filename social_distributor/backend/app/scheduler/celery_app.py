@@ -1,5 +1,10 @@
 """Celery application factory.
 
+⚠ 整檔替換 social_distributor/backend/app/scheduler/celery_app.py
+   基於 main 分支 2026-06-11 原檔,僅改兩處(都有「96號」註解):
+   1. include 加 "app.scheduler.token_monitor"
+   2. beat_schedule 加 token-expiry-scan(每日 01:00 UTC = 台北 09:00)
+
 The Celery worker shares the Flask app context so tasks can use SQLAlchemy
 sessions, models, and config. ``advance_cron_targets`` is run on a 60-second
 beat: it materialises the next concrete dispatch for any cron-recurring
@@ -18,7 +23,8 @@ def make_celery(flask_app=None) -> Celery:
         "social_distributor",
         broker=config.celery_broker_url,
         backend=config.celery_result_backend,
-        include=["app.scheduler.tasks"],
+        # 96號 指令2: token_monitor module added
+        include=["app.scheduler.tasks", "app.scheduler.token_monitor"],
     )
     app.conf.update(
         task_acks_late=True,
@@ -65,6 +71,12 @@ def make_celery(flask_app=None) -> Celery:
             "weekly-insights-digest": {
                 "task": "app.scheduler.tasks.weekly_insights_digest",
                 "schedule": crontab(minute=0, hour=9, day_of_week="mon"),
+            },
+            # 96號 指令2: daily token expiry scan + Meta liveness probe.
+            # 01:00 UTC = 09:00 Asia/Taipei — 學誼早上看得到報告。
+            "token-expiry-scan": {
+                "task": "app.scheduler.token_monitor.token_expiry_scan",
+                "schedule": crontab(minute=0, hour=1),
             },
         },
     )
