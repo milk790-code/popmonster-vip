@@ -470,3 +470,55 @@ https://milk790-code.github.io/3q-hatchery-line-oa/assets/threads-auth.html
 ✅ （Phase T 完成後）Threads 自動換 token → 3Q LINE OA Threads 帳號接入
 
 → 接著走 `RUNBOOK_SEED_SPRINT.md` Phase 5–8（建 AccountGroup、上傳影片、seed、worker）
+
+---
+
+## Phase Th — Threads OAuth 接入（低垂果實）
+
+> Threads adapter 已完工（`social_distributor/backend/app/platforms/threads.py`）。
+> OAuth 路由 `/auth/threads/start` 也已就緒。
+> 只差以下三步把你的 Threads 帳號接進來。
+
+### Th.1 🔴 建立 Threads 開發者應用
+- URL：https://developers.facebook.com/apps/
+- 右上角「建立應用程式」→ 類型選 **Other** → Use Case 選 **Threads API**
+- App 名稱：`PopMonsterDistributor`（或任意名）
+- 完成後進入 App → 找到 `App ID` 和 `App Secret`（需點「顯示」）
+- 回來貼：`App ID = ___` 和 `App Secret = ___`
+
+### Th.2 🟢 設定 Redirect URI
+- 同一個 App 頁面 → Products → Threads → Basic Display 或 Threads API Settings
+- Valid OAuth Redirect URIs 加入（視你的部署網址）：
+```
+https://api-production-6de7.up.railway.app/auth/threads/callback
+```
+- 同時加入 Deauthorize Callback URL（可隨便填，如 `https://api-production-6de7.up.railway.app/auth/threads/deauth`）
+
+### Th.3 🟢 把 Threads App ID/Secret 寫進 Railway Variables
+- URL：https://railway.com（找你的 social-distributor project → Variables tab）
+- 新增三個 Variables：
+```
+THREADS_APP_ID=（你的 App ID）
+THREADS_APP_SECRET=（你的 App Secret）
+THREADS_REDIRECT_URI=https://api-production-6de7.up.railway.app/auth/threads/callback
+```
+- 儲存後等 Railway 重新部署完成
+
+### Th.4 🔴 走 OAuth 連接你的 Threads 帳號
+- 在 Social Distributor dashboard 的 Accounts tab，點「Connect Threads」（或直接打開）：
+```
+https://api-production-6de7.up.railway.app/auth/threads/start?user_id=1
+```
+- 會跳轉到 Threads 登入頁 → 授權 → 自動跳回顯示「已連接 ✓」
+- 連接成功後，Accounts tab 會出現你的 Threads 帳號
+
+### Th.5 🟢 排程 7 天文案到 Threads（13:00 時段）
+- 在 Social Distributor，Distribute tab 選天使 7 天文案的素材
+- 人設群組選你的 Threads 群組
+- 排程時間設 13:00（IG 09:00 已用，Threads 用 13:00 空檔）
+- 一次排 7 天（每天 13:00）點「Distribute」
+- 或透過 brain.py 直接生成排程 JSON：
+```bash
+cd C:\POP\智能發布中樞
+python brain.py plan --days 7 --start 2026-06-08 --platforms threads
+```

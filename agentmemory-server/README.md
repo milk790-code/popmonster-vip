@@ -51,16 +51,25 @@
 
 ## 4. 🔴 安全：選一條路（見上方 §先讀-1）
 
-- **(A) 私網**：Settings → Networking → **不要** Generate Domain。
-  其他需要的 Railway 服務用內部 hostname 連 `http://<service>.railway.internal:3111`。
+- **(A) 私網**：agentmemory service Settings → Networking → **不要** Generate Domain。
+  其他需要的 Railway 服務用內部 hostname 連 `http://agentmemory.railway.internal:3111`。
   ⚠️ 你本機 / 雲端 session 連不到 → 只適合「服務對服務」。
-- **(B) 公開 + 保護**：Generate Domain 後，**務必**在前面加保護
-  （Railway 不內建驗證）。最簡單：再加一個 Caddy/nginx 服務做反向代理，
-  檢查一組 `Authorization: Bearer <token>` 才放行到內網 agentmemory。
-  → 這步要新增 proxy 設定，需要時我再補。
+- **(B) 公開 + token proxy**（已預先鋪好設定）：agentmemory service 維持私網，
+  另開一個 Caddy proxy service 對外。設定檔在 `proxy/`：
+  - 在同 Railway 專案 **+ New → Deploy from GitHub repo** → 一樣選 `popmonster-vip`
+  - Settings → Source → Root Directory = `agentmemory-server/proxy`
+    （它會自動讀 `proxy/railway.json` → `proxy/Dockerfile`）
+  - Settings → Variables：
+    ```
+    AGENTMEMORY_INTERNAL_URL=http://agentmemory.railway.internal:3111
+    AGENTMEMORY_SECRET=<自己產一串長字串，例：python3 -c "import secrets;print(secrets.token_urlsafe(40))">
+    ```
+  - Networking → **Generate Domain**（這個才對外）
+  - 之後對外用 `https://<proxy-domain>` 當 `AGENTMEMORY_URL`，請求帶
+    `Authorization: Bearer <AGENTMEMORY_SECRET>`。
+    四個 repo 的 `.mcp.json` 已預留 `AGENTMEMORY_SECRET` 環境變數，會自動帶上。
 
-> 📌 **待你決定**：要 (A) 私網還是 (B) 公開+token？這決定接下來 `.mcp.json`
-> 的 `AGENTMEMORY_URL` 填什麼，以及是否要我加 proxy。
+> 建議路徑：先 (A) 確認 agentmemory 自己起得來；確認 OK 後再加 (B) proxy 對外。
 
 ## 5. 同步本機記憶資料 → 線上 volume
 

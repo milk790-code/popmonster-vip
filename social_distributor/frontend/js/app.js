@@ -19,7 +19,12 @@ if ("serviceWorker" in navigator) {
 const userIdInput = document.getElementById("userId");
 
 async function api(path, options = {}) {
-  const headers = { "Content-Type": "application/json", ...(options.headers ?? {}) };
+  const apiKey = localStorage.getItem('distributor_api_key') || '';
+  const headers = {
+    "Content-Type": "application/json",
+    ...(apiKey ? { "X-API-Key": apiKey } : {}),
+    ...(options.headers ?? {}),
+  };
   // C3: send the session cookie cross-origin (CORS supports_credentials).
   const res = await fetch(`${API_BASE}${path}`, {
     credentials: "include",
@@ -72,6 +77,7 @@ document.querySelectorAll(".topbar nav button").forEach((btn) => {
     if (btn.dataset.tab === "distribute") loadDistributeGroups();
     if (btn.dataset.tab === "insights") loadInsights();
     if (btn.dataset.tab === "daily") loadDailyDeps();
+    if (btn.dataset.tab === "settings") _initSettingsTab();
     if (btn.dataset.tab === "permissions") { loadGrants(); loadDrift(); }
     if (btn.dataset.tab === "transfers") loadTransfers();
     if (btn.dataset.tab === "rebroadcast") { loadRbDeps().then(loadRbCandidates); }
@@ -1496,3 +1502,45 @@ document.getElementById("mediaNextPage")?.addEventListener("click", () => {
     loadMedia();
   }
 });
+
+// --- Settings tab ---------------------------------------------------------
+function _initSettingsTab() {
+  const keyInput = document.getElementById("apiKeyInput");
+  const keyStatus = document.getElementById("apiKeyStatus");
+  const baseInput = document.getElementById("apiBaseInput");
+  const baseStatus = document.getElementById("apiBaseStatus");
+
+  if (keyInput) {
+    const stored = localStorage.getItem("distributor_api_key") || "";
+    keyInput.value = stored ? "•".repeat(Math.min(stored.length, 20)) : "";
+    keyStatus.textContent = stored ? "已儲存 ✓" : "未設定";
+  }
+  if (baseInput) {
+    baseInput.value = localStorage.getItem("distributor_api_base") || "";
+  }
+
+  document.getElementById("saveApiKeyBtn")?.addEventListener("click", () => {
+    const val = document.getElementById("apiKeyInput").value.trim();
+    if (!val || val.startsWith("•")) return;
+    localStorage.setItem("distributor_api_key", val);
+    keyStatus.textContent = "已儲存 ✓";
+    document.getElementById("apiKeyInput").value = "•".repeat(Math.min(val.length, 20));
+  });
+
+  document.getElementById("clearApiKeyBtn")?.addEventListener("click", () => {
+    localStorage.removeItem("distributor_api_key");
+    document.getElementById("apiKeyInput").value = "";
+    keyStatus.textContent = "已清除";
+  });
+
+  document.getElementById("saveApiBaseBtn")?.addEventListener("click", () => {
+    const val = document.getElementById("apiBaseInput").value.trim();
+    if (val) {
+      localStorage.setItem("distributor_api_base", val);
+      baseStatus.textContent = "已儲存，請重新整理頁面生效";
+    } else {
+      localStorage.removeItem("distributor_api_base");
+      baseStatus.textContent = "已清除，下次載入使用預設";
+    }
+  });
+}

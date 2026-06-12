@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 
+import hmac
 import logging
 import os
 
@@ -36,6 +37,23 @@ def create_app() -> Flask:
 
     db.init_app(app)
     migrate.init_app(app, db)
+
+    # Instruction 1: API key guard for all /api/* routes.
+    # Set API_KEY in Railway Variables (openssl rand -hex 24).
+    # Routes under /auth/* and /healthz* are exempt.
+    _api_key = os.environ.get("API_KEY", "").strip()
+    if _api_key:
+        @app.before_request
+        def _api_key_guard():
+            from flask import request as _req
+            if not _req.path.startswith("/api/"):
+                return
+            client = _req.headers.get("X-API-Key", "")
+            if not hmac.compare_digest(
+                client.encode("utf-8"), _api_key.encode("utf-8")
+            ):
+                return jsonify({"error": "unauthorized"}), 401
+
     raw_origins = os.environ.get("CORS_ALLOWED_ORIGINS", "*").strip()
     cors_origins = (
         "*" if raw_origins in ("", "*")

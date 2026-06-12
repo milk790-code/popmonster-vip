@@ -6,10 +6,11 @@ in each persona's voice — not deception. Identical text mass-posted across
 many accounts is what platforms' integrity heuristics flag as spam, so a
 matrix workflow needs natural variation.
 
-If ``ANTHROPIC_API_KEY`` is set we use Claude (with prompt caching on the
-style profile, since it's reused across many calls). Otherwise we fall back
-to a deterministic template that swaps hashtag pools and tone markers — not
-as good but never blocks distribution.
+If ``ANTHROPIC_API_KEY`` is set we use Claude with:
+  - Prompt caching on the style profile
+  - Few-shot examples from the group's top-performing posts (by engagement_rate)
+  - Brand-safety net: mandatory compliance check before returning the variant
+Otherwise we fall back to a deterministic template.
 """
 from __future__ import annotations
 
@@ -18,11 +19,33 @@ import json
 import logging
 import os
 import random
-from dataclasses import dataclass
+import re
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    pass
 
 log = logging.getLogger(__name__)
 
-DEFAULT_MODEL = os.environ.get("ANTHROPIC_VARIANT_MODEL", "claude-haiku-4-5-20251001")
+DEFAULT_MODEL = os.environ.get("ANTHROPIC_VARIANT_MODEL", "claude-opus-4-6")
+
+# Absolute blocklist — any variant containing these terms is rejected outright.
+# Per product brief: 維護型/保護1個月/不是鍍膜/無禁詞/數字可驗證/do_not_say絕不出現
+BRAND_BLOCKLIST: list[str] = [
+    r"鍍膜",          # product is NOT a coating
+    r"保護一個月",     # unverifiable duration claim
+    r"保護1個月",
+    r"日本原裝",      # false provenance unless product actually is
+    r"100%",          # absolute claims are unverifiable unless product spec confirms
+    r"免費",          # never offer free goods without explicit promo context
+    r"follow\s*back",
+    r"buy followers?",
+    r"crypto\s+giveaway",
+]
+
+# Numeric-fact check: caption should not introduce numbers the source didn't have.
+_NUMBER_RE = re.compile(r"\b\d+(?:\.\d+)?\s*(?:%|倍|公里|km|ml|g)\b")
 
 
 @dataclass
@@ -32,6 +55,8 @@ class VariantRequest:
     platform: str          # facebook | instagram | tiktok | youtube
     style_profile: dict
     seed: str              # stable identifier — same seed → same output
+    few_shot_examples: list[dict] = field(default_factory=list)
+    # Each example: {"caption": str, "engagement_rate": float}
 
 
 @dataclass
@@ -41,17 +66,47 @@ class VariantResult:
     used_engine: str       # "claude" | "template"
 
 
+# ---------------------------------------------------------------------------
+# Brand safety net — applied to every generated variant regardless of engine.
+# ---------------------------------------------------------------------------
+
+def _brand_safety_check(caption: str, source_caption: str) -> list[str]:
+    """Return list of violation descriptions; empty list means clean."""
+    issues: list[str] = []
+
+    for pattern in BRAND_BLOCKLIST:
+        if re.search(pattern, caption, re.IGNORECASE):
+            issues.append(f"blocklist hit: {pattern}")
+
+    # Numbers in variant that weren't in source are suspicious claims.
+    source_nums = set(_NUMBER_RE.findall(source_caption))
+    variant_nums = set(_NUMBER_RE.findall(caption))
+    new_nums = variant_nums - source_nums
+    if new_nums:
+        issues.append(f"新增未驗證數字: {', '.join(new_nums)}")
+
+    return issues
+
+
 def generate_variant(req: VariantRequest) -> VariantResult:
     if os.environ.get("ANTHROPIC_API_KEY"):
         try:
-            return _claude_variant(req)
+            result = _claude_variant(req)
+            violations = _brand_safety_check(result.caption, req.source_caption)
+            if violations:
+                log.warning(
+                    "Claude variant failed brand safety (%s); falling back to template",
+                    violations,
+                )
+            else:
+                return result
         except Exception as exc:
             log.warning("Claude variant failed (%s); falling back to template", exc)
     return _template_variant(req)
 
 
 # ---------------------------------------------------------------------------
-# Claude implementation with prompt caching of the style profile.
+# Claude implementation with prompt caching + few-shot examples.
 # ---------------------------------------------------------------------------
 
 _PLATFORM_HINTS = {
@@ -59,7 +114,19 @@ _PLATFORM_HINTS = {
     "instagram": "Engaging hook in first line. Up to 30 hashtags but quality > quantity. 2,200 char hard limit.",
     "tiktok": "Punchy first line. 2,200 char limit. Hashtags should be specific, not #fyp.",
     "youtube": "Title under 100 chars (return separately). Description can include timestamps and links.",
+    "threads": "Concise. 500 char hard limit. Conversational tone. Minimal hashtags.",
 }
+
+
+def _build_few_shot_block(examples: list[dict]) -> str:
+    if not examples:
+        return ""
+    lines = ["以下是這個人設過去互動率最高的貼文範例（供你學習文風，勿複製內容）："]
+    for i, ex in enumerate(examples[:3], 1):
+        rate = ex.get("engagement_rate", 0)
+        caption = ex.get("caption", "")[:300]
+        lines.append(f"\n範例{i}（互動率 {rate:.2%}）:\n{caption}")
+    return "\n".join(lines)
 
 
 def _claude_variant(req: VariantRequest) -> VariantResult:
@@ -67,6 +134,14 @@ def _claude_variant(req: VariantRequest) -> VariantResult:
 
     client = Anthropic()
     style_block = json.dumps(req.style_profile, ensure_ascii=False, indent=2)
+    few_shot_text = _build_few_shot_block(req.few_shot_examples)
+
+    do_not_say = req.style_profile.get("do_not_say", [])
+    blocklist_note = (
+        f"\n\n絕對禁止出現的詞彙（do_not_say）: {', '.join(do_not_say)}"
+        if do_not_say
+        else ""
+    )
 
     system = [
         {
@@ -75,14 +150,16 @@ def _claude_variant(req: VariantRequest) -> VariantResult:
                 "You rewrite social media captions so each persona speaks in "
                 "its own voice while preserving the source content's meaning. "
                 "You never invent facts, never add fake stats, never claim "
-                "endorsements. You return strict JSON: "
+                "endorsements, never introduce numbers that weren't in the source. "
+                "You return strict JSON: "
                 '{"title": "...", "caption": "..."} with no surrounding prose.'
+                + blocklist_note
             ),
         },
         {
             "type": "text",
-            "text": f"Persona style profile:\n{style_block}",
-            # Cache the style profile across calls for the same group.
+            "text": f"Persona style profile:\n{style_block}\n\n{few_shot_text}",
+            # Cache the style profile + few-shot block across calls for the same group.
             "cache_control": {"type": "ephemeral"},
         },
     ]
@@ -93,6 +170,7 @@ def _claude_variant(req: VariantRequest) -> VariantResult:
         f"Source title: {req.source_title}\n"
         f"Source caption:\n{req.source_caption}\n\n"
         f"Rewrite for this platform in the persona's voice. "
+        f"Keep emoji_density={req.style_profile.get('emoji_density', 'low')}. "
         f'Return JSON: {{"title": "...", "caption": "..."}}'
     )
 
@@ -163,3 +241,37 @@ def _template_variant(req: VariantRequest) -> VariantResult:
         title=req.source_title,
         used_engine="template",
     )
+
+
+# ---------------------------------------------------------------------------
+# Helper: fetch top-performing posts for a group (call from Flask context).
+# ---------------------------------------------------------------------------
+
+def fetch_few_shot_examples(group_id: int, limit: int = 3) -> list[dict]:
+    """Query the DB for the top-engagement posts from this persona group.
+
+    Must be called within a Flask app context. Returns [] if no data yet.
+    """
+    try:
+        from ..extensions import db
+        from ..models import AccountGroup, PostMetric, PostTarget, Post
+
+        rows = (
+            db.session.query(
+                Post.caption,
+                db.func.avg(PostMetric.likes + PostMetric.comments + PostMetric.shares)
+                .label("eng"),
+            )
+            .join(PostTarget, PostTarget.post_id == Post.id)
+            .join(PostMetric, PostMetric.target_id == PostTarget.id)
+            .filter(PostTarget.group_id == group_id)
+            .filter(PostMetric.likes.isnot(None))
+            .group_by(Post.id)
+            .order_by(db.text("eng DESC"))
+            .limit(limit)
+            .all()
+        )
+        return [{"caption": r[0], "engagement_rate": float(r[1] or 0) / 1000} for r in rows]
+    except Exception as exc:
+        log.debug("fetch_few_shot_examples failed: %s", exc)
+        return []
