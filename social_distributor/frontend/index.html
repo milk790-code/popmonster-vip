@@ -557,6 +557,56 @@
     </section>
   </main>
 
+
+  <!-- ═══ 生態工具導航(2026-06-07 整合,純靜態連結區)═══ -->
+  <section id="ecosystem" style="max-width:1100px;margin:28px auto 8px;padding:0 16px;font-family:inherit">
+    <h2 style="font-size:17px;margin-bottom:4px">🧭 生態工具導航</h2>
+    <p style="font-size:12px;opacity:.65;margin-bottom:14px">本站(Social Distributor)=API 平台自動發布(FB/IG/TikTok/YT)。以下為其餘系統入口,依用途分類。</p>
+    <style>
+      .eco-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+      .eco-card{background:rgba(125,125,160,.08);border:1px solid rgba(125,125,160,.25);border-radius:12px;padding:14px}
+      .eco-card h3{font-size:13px;letter-spacing:1px;opacity:.85;margin:0 0 8px}
+      .eco-card a{display:block;font-size:13.5px;padding:5px 0;text-decoration:none;color:inherit;opacity:.92}
+      .eco-card a:hover{opacity:1;text-decoration:underline}
+      .eco-card small{display:block;font-size:11px;opacity:.5;margin-top:-2px;padding-bottom:3px}
+    </style>
+    <div class="eco-grid">
+      <div class="eco-card"><h3>🎯 三品牌獲客前台(AI 接待)</h3>
+        <a href="https://3q-sales-ai.milk790.workers.dev/" target="_blank">3Q 引流頁</a><small>社群導流用,UTM 自動記漏斗</small>
+        <a href="https://3q-sales-ai.milk790.workers.dev/intro" target="_blank">3Q 官網接待(可 iframe 嵌官網)</a>
+        <a href="https://pop-sales-ai.milk790.workers.dev/" target="_blank">泡泡怪獸 引流頁(雙線:蝦皮/LINE)</a>
+        <a href="https://tudigong-sales-ai.milk790.workers.dev/" target="_blank">呆丸土地公 引流頁(選址三重點)</a>
+      </div>
+      <div class="eco-card"><h3>📮 3Q 自動發文線(FB/IG)</h3>
+        <a href="https://3q-art-portfolio.milk790.workers.dev/content-scheduler.html" target="_blank">排程後台(加文進佇列)</a><small>FB 3 篇/天・IG 2 篇/天 自動發,首留言自動掛引流頁</small>
+        <a href="https://github.com/milk790-code/3q-hatchery-line-oa/actions/workflows/publish-now.yml" target="_blank">立即發布一輪(Run workflow)</a>
+        <a href="https://github.com/milk790-code/3q-hatchery-line-oa/actions/workflows/backfill-links.yml" target="_blank">引流連結回填(發現缺連結按這)</a>
+        <a href="https://github.com/milk790-code/3q-hatchery-line-oa/actions/workflows/fb-token-setup.yml" target="_blank">FB/IG Token 重綁(60天快取,極少用到)</a>
+      </div>
+      <div class="eco-card"><h3>✍️ 無 API 平台(瀏覽器指令包)</h3>
+        <a href="https://3q-sales-ai.milk790.workers.dev/dcard" target="_blank">Dcard 發文指令包(3 板輪發)</a><small>複製→貼→發,30 秒一篇,每天最多 1 篇</small>
+      </div>
+      <div class="eco-card"><h3>📊 健康與監測</h3>
+        <a href="https://3q-social-publisher.milk790.workers.dev/health" target="_blank">發布線 health(facebook/instagram 要 true)</a>
+        <a href="https://3q-sales-ai.milk790.workers.dev/health" target="_blank">3Q AI 接待 health</a>
+        <a href="https://pop-sales-ai.milk790.workers.dev/health" target="_blank">泡泡怪獸 AI health</a>
+        <a href="https://tudigong-sales-ai.milk790.workers.dev/health" target="_blank">土地公 AI health</a>
+        <small style="padding-top:6px">獲客日報:每天 09:10 自動產出(Claude 排程)</small>
+      </div>
+      <div class="eco-card"><h3>🔧 技術後台</h3>
+        <a href="https://github.com/milk790-code/3q-hatchery-line-oa" target="_blank">3Q repo(發布線+三支 AI 源碼)</a>
+        <a href="https://github.com/milk790-code/3q-hatchery-line-oa/actions" target="_blank">全部 Actions(部署紀錄)</a>
+        <a href="https://hatchery-token-editor.milk790.workers.dev" target="_blank">Token Editor(設計資產庫)</a>
+        <a href="https://3q-art-portfolio.milk790.workers.dev/hub.html" target="_blank">3Q 官網 Hub</a>
+      </div>
+      <div class="eco-card"><h3>🏪 對外正式門面</h3>
+        <a href="https://popmonster.vip" target="_blank">popmonster.vip 官網(31 商品頁)</a>
+        <a href="https://s.shopee.tw/17JNC0Mfo" target="_blank">蝦皮:泡泡怪獸專業母料店</a>
+        <a href="https://sanfinger.pages.dev" target="_blank">三指客戶官網</a>
+      </div>
+    </div>
+  </section>
+
   <footer>
     <p>
       All publishing flows use the official platform APIs. Configure each platform's

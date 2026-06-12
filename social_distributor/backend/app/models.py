@@ -480,3 +480,58 @@ class RebroadcastCandidate(db.Model):
         ForeignKey("posts.id"), nullable=True
     )
     used: Mapped[bool] = mapped_column(Boolean, default=False)
+# ─── 96號 指令2 ───────────────────────────────────────────────────────
+# 貼到 social_distributor/backend/app/models.py 檔案最末尾(RebroadcastCandidate
+# class 之後)。所需 import(Integer/String/JSON/DateTime/ForeignKey/Mapped/
+# mapped_column/utcnow)原檔全部已有,不用加。
+#
+# 建表:Railway 上 AUTO_SEED_USER=1(現役設定)會在 api 服務啟動時跑
+# db.create_all(),自動補建缺少的 alerts 表,不用手動 migration。
+# 保險起見的手動 SQL(Postgres):
+#   CREATE TABLE IF NOT EXISTS alerts (
+#     id SERIAL PRIMARY KEY,
+#     user_id INTEGER REFERENCES users(id),
+#     account_id INTEGER REFERENCES social_accounts(id),
+#     kind VARCHAR(32) NOT NULL,
+#     detail JSON,
+#     created_at TIMESTAMPTZ,
+#     resolved_at TIMESTAMPTZ
+#   );
+
+
+class Alert(db.Model):
+    """96號 指令2 — token 到期/活性告警(scheduler.token_monitor 寫入).
+
+    ``kind``:
+    - ``token_expiring`` — token_expires_at 在 7 天內
+    - ``needs_reauth``   — Meta GET /me?fields=id 驗活失敗(4xx),要人工重授權
+    """
+
+    __tablename__ = "alerts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    account_id: Mapped[int | None] = mapped_column(
+        ForeignKey("social_accounts.id"), nullable=True
+    )
+    kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    detail: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow
+    )
+    resolved_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    def as_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "account_id": self.account_id,
+            "kind": self.kind,
+            "detail": self.detail,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "resolved_at": (
+                self.resolved_at.isoformat() if self.resolved_at else None
+            ),
+        }

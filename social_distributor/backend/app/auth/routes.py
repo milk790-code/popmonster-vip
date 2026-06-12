@@ -241,6 +241,33 @@ def _persist_accounts(provider: str, user_id: int, bundle):
             params = None
             if len(all_pages) > 1000:
                 break
+        # Also fetch pages owned via Business Portfolios (/me/accounts misses these)
+        try:
+            seen_ids = {p["id"] for p in all_pages}
+            biz_payload = request_json("GET", f"{GRAPH_BASE}/me/businesses", params={
+                "access_token": bundle.access_token,
+                "limit": 50,
+            })
+            for biz in biz_payload.get("data", []):
+                b_url = f"{GRAPH_BASE}/{biz['id']}/owned_pages"
+                b_params = {
+                    "access_token": bundle.access_token,
+                    "fields": "id,name,access_token,instagram_business_account",
+                    "limit": 100,
+                }
+                while b_url:
+                    b_page = request_json("GET", b_url, params=b_params)
+                    for p in b_page.get("data", []):
+                        if p.get("access_token") and p["id"] not in seen_ids:
+                            seen_ids.add(p["id"])
+                            all_pages.append(p)
+                    b_url = (b_page.get("paging") or {}).get("next")
+                    b_params = None
+                    if len(all_pages) > 1000:
+                        break
+        except Exception:
+            pass  # business pages are best-effort
+
         for page in all_pages:
             page_token = page["access_token"]
             created.append(

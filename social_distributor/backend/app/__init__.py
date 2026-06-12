@@ -1,4 +1,10 @@
-"""Flask app factory."""
+"""Flask app factory.
+
+⚠ 整檔替換 social_distributor/backend/app/__init__.py
+   基於 main 分支 2026-06-11 拉下的原檔,僅加入兩段(都有「96號」註解):
+   1. register_api_key_guard(指令1 X-API-Key 鑑權)
+   2. alerts_bp 註冊(指令2 token 監控的讀取端點)
+"""
 from __future__ import annotations
 
 import hmac
@@ -67,6 +73,11 @@ def create_app() -> Flask:
     from .utils.auth import attach_user_id_middleware
     attach_user_id_middleware(app)
 
+    # 96號 指令1: X-API-Key guard for /api/* (exempts /auth/*, /healthz*,
+    # OPTIONS preflight). Reads API_KEY from env; warn-only until it is set.
+    from .utils.api_key import register_api_key_guard
+    register_api_key_guard(app)
+
     from .auth import auth_bp
     from .api import (
         accounts_bp,
@@ -86,6 +97,9 @@ def create_app() -> Flask:
     )
     from .api.login import bp as login_bp
 
+    # 96號 指令2: read-only alerts endpoint for token monitor results.
+    from .api.alerts import bp as alerts_bp
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(login_bp)
     app.register_blueprint(accounts_bp)
@@ -102,6 +116,7 @@ def create_app() -> Flask:
     app.register_blueprint(schedules_bp)
     app.register_blueprint(transfers_bp)
     app.register_blueprint(uploads_bp)
+    app.register_blueprint(alerts_bp)
 
     @app.get("/healthz")
     def healthz():

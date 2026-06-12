@@ -421,7 +421,7 @@ a:hover{color:var(--gold-lt)}
   .section-title{font-size:20px}
 }
 
-/* === MOBILE-FRIENDLY MOTION PACK(2026-06-07 夜班,全 transform/opacity GPU 動畫) === */
+/* === MOBILE-FRIENDLY MOTION PACK(2026-06-08 夜班,全 transform/opacity GPU 動畫) === */
 @media(hover:none){
   .card:active{transform:translateY(-2px) scale(.985);border-color:var(--gold)}
   .btn:active,.card-btn:active,.filter-btn:active{transform:scale(.96)}
@@ -442,4 +442,5 @@ a:hover{color:var(--gold-lt)}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   .fade-up{opacity:1;transform:none}
+  .btn-gold::after,.featured-badge,.card-img .badge{animation:none}
 }

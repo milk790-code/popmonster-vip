@@ -1,0 +1,133 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>瀏覽器發布包｜泡泡怪獸 Social Distributor</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--bg:#0a0a0a;--card:#141414;--line:#2a2a2a;--gold:#c8a96b;--gold-l:#d8c08a;--tx:#e8e2d6;--mut:#a89e8e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:'Noto Sans TC',-apple-system,sans-serif}
+.wrap{max-width:880px;margin:0 auto;padding:22px 14px 80px}
+h1{color:var(--gold);letter-spacing:2px;font-size:1.4em;margin:6px 0 2px}
+.sub{color:var(--mut);font-size:.86em;margin-bottom:16px}
+label{display:block;color:var(--gold-l);font-size:.85em;margin:12px 0 4px}
+textarea,input[type=text],input[type=time]{width:100%;background:#101010;border:1px solid var(--line);border-radius:8px;color:var(--tx);padding:10px;font-size:.95em;font-family:inherit}
+textarea{min-height:140px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:240px}
+button{cursor:pointer;border:none;border-radius:8px;padding:9px 16px;font-size:.9em;font-family:inherit}
+.gen{background:var(--gold);color:#0a0a0a;font-weight:700;width:100%;padding:13px;margin-top:16px;font-size:1em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
+.card h3{margin:0 0 4px;color:var(--gold);font-size:1.02em;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.card h3 .t{display:flex;align-items:center;gap:8px}
+.steps{color:var(--mut);font-size:.8em;margin:6px 0;line-height:1.55}
+.warn{color:#e0a13c;font-size:.8em;margin:6px 0;line-height:1.5}
+pre{background:#0d0d0d;border:1px solid var(--line);border-radius:8px;padding:10px;white-space:pre-wrap;font-family:inherit;font-size:.9em;color:var(--tx);max-height:260px;overflow:auto}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.copy{background:#222;color:var(--gold-l);border:1px solid var(--gold)}
+.open{background:#1a1a1a;color:var(--tx);border:1px solid var(--line);text-decoration:none;display:inline-block;padding:9px 16px;border-radius:8px;font-size:.9em}
+.time{width:110px!important}
+.exp{background:#222;color:var(--gold-l);border:1px solid var(--gold);width:100%;padding:12px;margin-top:8px}
+.ok{color:#7fc97f}
+.note{border-left:3px solid var(--gold);padding:8px 12px;background:#111;border-radius:0 8px 8px 0;font-size:.84em;color:var(--mut);margin:14px 0;line-height:1.6}
+</style></head><body><div class="wrap">
+<h1>🖥️ 瀏覽器發布包</h1>
+<div class="sub">一份文案 → 全平台適配＋瀏覽器操作指令＋排程清單。不走 API、不碰自動化紅線:指令生成給「人」在瀏覽器執行,零封號風險。</div>
+
+<label>主文案(寫一次,各平台自動適配)</label>
+<textarea id="base" placeholder="例:
+很多人問我 為什麼取名「天使塗層」😇
+因為天使是守護者 默默保護 不用你一直管
+…"></textarea>
+
+<div class="row">
+  <div><label>官網連結</label><input type="text" id="site" value="https://popmonster.vip/order.html?add=a001"></div>
+  <div><label>蝦皮連結(空白=不放)</label><input type="text" id="shopee" value="https://s.shopee.tw/2LVMS0YXXE"></div>
+</div>
+<div class="row">
+  <div><label>影片/圖片檔名(提示自己抓哪個檔)</label><input type="text" id="media" placeholder="例:30D_06_命名故事_發布版.mp4(天使資料夾)"></div>
+  <div><label>狄卡標題(發狄卡必填,心得文口吻)</label><input type="text" id="dtitle" placeholder="例:自己保養車漆一年 vs 跑工坊 心得分享"></div>
+</div>
+<label>標籤組(IG/TikTok 用)</label>
+<input type="text" id="tags" value="#汽車美容 #DIY保養 #天使塗層 #泡泡怪獸 #車主日常 #漆面保護 #fyp">
+
+<button class="gen" onclick="gen()">⚡ 生成全平台發布包</button>
+<div id="out"></div>
+<button class="exp" id="expBtn" style="display:none" onclick="exportTxt()">⬇️ 匯出完整發布包(.txt,含排程時間)</button>
+
+<div class="note">
+紅線提醒:本工具只「生成內容與指令」,發布動作由你本人(或你授權的瀏覽器協作)執行。狄卡/論壇類嚴禁硬廣,模板已轉心得口吻;各平台一天別超過平台慣例頻率。
+</div>
+
+<script>
+const P = [
+ {id:'fbp', name:'📘 FB 粉絲專頁', url:'https://www.facebook.com/', steps:'開粉專 → 建立貼文 → 貼文案 → 上傳媒體 → 發布;連結可點、會帶官網預覽卡。',
+  make:(b,s,sh,tags)=> b+'\n\n下單 👉 '+s},
+ {id:'fbm', name:'👤 FB 個人帳號', url:'https://www.facebook.com/', steps:'發布後**馬上留言**官網連結並按置頂(內文外連壓觸及,導流靠置頂留言)。',
+  make:(b,s,sh)=> b + (sh?('\n\n蝦皮下單 👉 '+sh):'') ,
+  extra:(s)=>'📌 置頂留言(發完馬上貼):\n完整教學和下單都在官網 👇\n'+s+'\nLINE 問我:@150tiznd'},
+ {id:'ig', name:'📸 Instagram', url:'https://www.instagram.com/', steps:'網頁版可直接發。連結不可點 → 導流靠 bio;Reel 用直式影片。',
+  make:(b,s,sh,tags)=> b+'\n\n下單連結在主頁 bio 🔗\n\n'+tags},
+ {id:'th', name:'🧵 Threads', url:'https://www.threads.net/', steps:'點下方「開啟並帶入文字」直接預填;連結可點。長文自動截前段+連結。',
+  make:(b,s)=>{const lines=b.split('\n').filter(x=>x.trim());const cut=lines.slice(0,6).join('\n');return cut+'\n\n官網 👉 '+s},
+  intent:(t)=>'https://www.threads.net/intent/post?text='+encodeURIComponent(t)},
+ {id:'tt', name:'🎵 TikTok', url:'https://www.tiktok.com/tiktokstudio/upload', steps:'TikTok Studio 上傳 → 可排程(上限約10天)。文案不可放連結,導流靠主頁 bio。',
+  make:(b,s,sh,tags)=>{const lines=b.split('\n').filter(x=>x.trim());return lines.slice(0,4).join('\n')+'\n官網 popmonster.vip|教學在主頁\n'+tags}},
+ {id:'yt', name:'▶️ YouTube Shorts', url:'https://studio.youtube.com/', steps:'YT Studio → 上傳直式影片(<60s 自動成 Shorts)→ 標題用第一行 → 可排程。',
+  make:(b,s,sh,tags)=>{const lines=b.split('\n').filter(x=>x.trim());return '【標題】'+(lines[0]||'').slice(0,90)+'\n\n【說明】\n'+b+'\n\n官網下單:'+s+'\n'+tags.split(' ').slice(0,5).join(' ')}},
+ {id:'dc', name:'🃏 狄卡 Dcard(汽車板)', url:'https://www.dcard.tw/f/car', steps:'登入 → 汽車板 → 發文。狄卡嚴禁廣告文:用心得分享口吻、別放優惠碼;連結別放內文,有人問再留言回。',
+  warn:'⚠️ 狄卡反商業守則:自然分享、不喊買、不放短連結。被檢舉=刪文+黑名單,寧可軟不可硬。',
+  make:(b,s,sh,tags,dt)=>{
+    const body=b.replace(/蝦皮下單.*$/gm,'').replace(/下單 👉.*$/gm,'').trim();
+    return '【標題】'+(dt||'(請填狄卡標題)')+'\n\n【內文】\n'+body+'\n\n———\n以上純心得分享,有問題留言我都會回。\n(有人問哪裡買 → 再用留言回官網連結,內文不放)'}},
+ {id:'sp', name:'🛒 蝦皮動態(賣場貼文)', url:'https://seller.shopee.tw/', steps:'賣家中心 → 行銷中心 → 貼文/動態 → 貼短版+商品連結。店剛解鎖,頻率保守(1天1則內)。',
+  make:(b,s,sh)=>{const lines=b.split('\n').filter(x=>x.trim());return lines.slice(0,5).join('\n')+(sh?('\n\n👉 '+sh):'')}}
+];
+let lastPack=null;
+function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+function gen(){
+  const b=document.getElementById('base').value.trim();
+  if(!b){alert('先貼主文案');return}
+  const s=document.getElementById('site').value.trim();
+  const sh=document.getElementById('shopee').value.trim();
+  const tags=document.getElementById('tags').value.trim();
+  const dt=document.getElementById('dtitle').value.trim();
+  const media=document.getElementById('media').value.trim();
+  const out=document.getElementById('out');out.innerHTML='';
+  lastPack={media:media,items:[]};
+  P.forEach(p=>{
+    const txt=p.make(b,s,sh,tags,dt);
+    const extra=p.extra?p.extra(s):null;
+    lastPack.items.push({name:p.name,url:p.url,txt:txt,extra:extra,steps:p.steps,id:p.id});
+    const div=document.createElement('div');div.className='card';
+    let h='<h3><span class="t">'+p.name+'</span><span><input type="time" class="time" id="t_'+p.id+'" title="排程時間"></span></h3>';
+    if(media)h+='<div class="steps">🎬 媒體:'+esc(media)+'</div>';
+    h+='<div class="steps">'+p.steps+'</div>';
+    if(p.warn)h+='<div class="warn">'+p.warn+'</div>';
+    h+='<pre id="x_'+p.id+'">'+esc(txt)+'</pre>';
+    if(extra)h+='<pre id="e_'+p.id+'">'+esc(extra)+'</pre>';
+    h+='<div class="btns"><button class="copy" onclick="cp(\'x_'+p.id+'\',this)">📋 複製文案</button>';
+    if(extra)h+='<button class="copy" onclick="cp(\'e_'+p.id+'\',this)">📋 複製置頂留言</button>';
+    if(p.intent)h+='<a class="open" target="_blank" id="i_'+p.id+'" href="'+p.intent(txt)+'">🚀 開啟並帶入文字</a>';
+    h+='<a class="open" target="_blank" href="'+p.url+'">🌐 開啟平台</a></div>';
+    div.innerHTML=h;out.appendChild(div);
+  });
+  document.getElementById('expBtn').style.display='block';
+  window.scrollTo({top:out.offsetTop-10,behavior:'smooth'});
+}
+function cp(id,btn){
+  const t=document.getElementById(id).textContent;
+  navigator.clipboard.writeText(t).then(()=>{btn.textContent='✅ 已複製';setTimeout(()=>btn.textContent='📋 複製文案',1500)});
+}
+function exportTxt(){
+  if(!lastPack)return;
+  let s='泡泡怪獸 · 瀏覽器發布包 '+new Date().toLocaleString('zh-TW')+'\n'+'='.repeat(40)+'\n';
+  if(lastPack.media)s+='🎬 媒體檔:'+lastPack.media+'\n';
+  lastPack.items.forEach(it=>{
+    const tv=document.getElementById('t_'+it.id);
+    s+='\n'+'-'.repeat(40)+'\n'+it.name+(tv&&tv.value?('|⏰ '+tv.value):'')+'\n平台:'+it.url+'\n步驟:'+it.steps+'\n\n'+it.txt+'\n';
+    if(it.extra)s+='\n[置頂留言]\n'+it.extra+'\n';
+  });
+  const blob=new Blob([s],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='瀏覽器發布包_'+new Date().toISOString().slice(0,10)+'.txt';a.click();
+}
+</script>
+</div></body></html>
