@@ -8,9 +8,9 @@
 >
 > | Repo | PR | 狀態 |
 > |---|---|---|
-> | `popmonster-vip` | #20 ✅ merged | agentmemory-server/ + index.html ?ref 捕獲 + Caddy proxy 設定 |
-> | `popmonster-linebot` | #2 ✅ merged | render.yaml + /邀請 intent + Azure workflow 改手動 |
-> | `customer-project-portal` | #2 ✅ merged、#3 ✅ merged（router wire）、#4 ✅ merged（ReferralBinder） | schema 還原 + 自動裂變閉環 |
+> | `popmonster-vip` | [#20](https://github.com/milk790-code/popmonster-vip/pull/20) ✅ merged | agentmemory-server/ + index.html ?ref 捕獲 + Caddy proxy + social_distributor referral CTA |
+> | `popmonster-linebot` | [#2](https://github.com/milk790-code/popmonster-linebot/pull/2) ✅ merged、[#4](https://github.com/milk790-code/popmonster-linebot/pull/4) 🔐 draft（credentials fix） | render.yaml + /邀請 intent + 移除硬寫 LINE 憑證（⚠️ 合前先確認 Render env） |
+> | `customer-project-portal` | [#2](https://github.com/milk790-code/customer-project-portal/pull/2) ✅ merged、#3 ✅ merged、#4 ✅ merged、[#5](https://github.com/milk790-code/customer-project-portal/pull/5) ✅ merged | schema 還原 + referral router + ReferralBinder + ReferralPanel — 自動裂變閉環完整 ✅ |
 > | `popmonster-website-deployment` | (memory wiring only) | GitHub Pages artifact，不需新部署 |
 
 ---
@@ -91,11 +91,10 @@ OPENAI_API_KEY=<OpenAI>
 
 詳細：`customer-project-portal/DEPLOY_STEPS.md`。
 
-### 3-pre. ⚠️ 必須先處理的預存問題（不修就 build fail）
-`server/db.ts` import 了 `activities` / `catalogProducts` / `knowledgeBase` 等 symbol，
-但 `drizzle/schema.ts` 沒 export。在 Render 點 Deploy 之前，二選一：
-- (a) 把缺漏的 table 補回 `drizzle/schema.ts`（推薦，跟你舊資料對齊），或
-- (b) 把 `server/db.ts` 多餘 import + 相關 function 拿掉（破壞性，會少功能）。
+### ~~3-pre. ⚠️ 必須先處理的預存問題~~（✅ 已修）
+~~`server/db.ts` import 了 `activities` / `catalogProducts` / `knowledgeBase` 等 symbol，
+但 `drizzle/schema.ts` 沒 export。~~
+`drizzle/schema.ts` 已完整還原（PR #2），所有 TS 型別錯誤清乾淨，`pnpm build` 通過。
 
 ### 3.1 🔴 PlanetScale 建 DB
 - https://app.planetscale.com/ → Create database `customer-project-portal`，Region `ap-southeast`
@@ -163,9 +162,9 @@ agentmemory status
 ## 6. 🔴 合 main 觸發自動部署
 
 **所有 secrets 都進 Render/Railway 之後**，依序合：
-1. `popmonster-linebot#2` → Render auto-deploy → 拿 webhook URL 回填 LINE
-2. `popmonster-vip#20` → Railway / Render auto-deploy（agentmemory + social_distributor）
-3. `customer-project-portal#2` → 在 §3-pre 修好後才合 → Render auto-deploy
+1. ~~`popmonster-linebot#2`~~ ✅ 已合；**`linebot#4`**（credentials 安全修補）→ 確認 Render env 後合 → Render auto-deploy → 拿 webhook URL 回填 LINE
+2. ~~`popmonster-vip#20`~~ ✅ 已合；Railway / Render 已可讀到設定（agentmemory + social_distributor）
+3. ~~`customer-project-portal#2–#5`~~ ✅ 全合；Render Deploy 時跑 §3.3 migration + seed
 
 > Cloudflare Pages preview build 持續 0 秒 fail 是 Cloudflare 側問題（額度 / 設定），
 > 不阻擋 production，可以忽略。`popmonster.vip` 走 GitHub Pages 不受影響。
@@ -179,7 +178,7 @@ agentmemory status
 | linebot | `curl https://<svc>.onrender.com/health` → 200；LINE 傳「邀請」→ 收到 8 碼 Flex 卡 |
 | portal | `curl https://<svc>/` → 200；`/portal/` 開得起；`/ai-search` 有 Claude 回覆 |
 | social_distributor | `curl https://<api>/healthz` → 200；frontend 載得起 |
-| agentmemory | `curl -H "Authorization: Bearer $AGENTMEMORY_SECRET" https://<proxy>/agentmemory/health` → 200；MCP `memory_recall` 回得到舊記憶 |
+| agentmemory | `curl -H "Authorization: Bearer $AGENTMEMORY_SECRET" https://<proxy>/...` → 200；MCP `memory_recall` 回得到舊記憶 |
 | 邀請碼 | LINE 取得碼 → 開 `https://popmonster.vip/?ref=<code>` → DevTools localStorage 有 `pm_ref` |
 
 ---
@@ -203,7 +202,7 @@ agentmemory status
 
 ## 附錄 — 已知地雷
 
-1. **linebot `app.py` L18-20 寫死 LINE 憑證當 env default** — 應 rotate + 改成 `os.environ["LINE_CHANNEL_SECRET"]` 沒 fallback。**未動**，因為你要先在 Render 把 env 設好再切，否則活著的 bot 會收不到訊息。
-2. ~~**portal 預存 build issue**~~ — ✅ 已修：schema 還原 + ts 錯誤清乾淨，`pnpm build` 跑得過。
+1. ~~**linebot `app.py` 寫死 LINE 憑證**~~ — ✅ **已修（PR #4 draft）**：改成 `os.environ["LINE_CHANNEL_SECRET"]` 嚴格讀取，無 fallback。合 PR 前必須先在 Render dashboard 設好兩個 env var，否則 bot 啟動即 `KeyError` crash。
+2. ~~**portal §3-pre 預存 build issue**~~ — ✅ **已修（PR #2）**：`drizzle/schema.ts` 完整還原，`pnpm build` 通過。
 3. **agentmemory native iii-engine 在 slim 容器啟動性未驗證** — 若 fail 看 Railway log，可能要加系統依賴或改 `AGENTMEMORY_USE_DOCKER=1`（Railway 內較麻煩）。
-4. ~~**agentmemory 健康檢查路徑未文件化**~~ — ✅ 從 package README 確認：`/agentmemory/health`（或 `/agentmemory/livez`）。Railway healthcheck path 直接填。
+4. ~~**agentmemory 健康檢查路徑未文件化**~~ — ✅ **已確認**：`/agentmemory/health`（或 `/agentmemory/livez`）。已寫進 `railway.json` healthcheckPath。
