@@ -52,11 +52,13 @@ _NUMBER_RE = re.compile(r"\b\d+(?:\.\d+)?\s*(?:%|倍|公里|km|ml|g)\b")
 class VariantRequest:
     source_caption: str
     source_title: str
-    platform: str          # facebook | instagram | tiktok | youtube
+    platform: str          # facebook | instagram | tiktok | youtube | threads
     style_profile: dict
     seed: str              # stable identifier — same seed → same output
     few_shot_examples: list[dict] = field(default_factory=list)
     # Each example: {"caption": str, "engagement_rate": float}
+    # 自動裂變：若給 referral_code，會在安全檢查通過後追加平台適配的邀請 CTA。
+    referral_code: str | None = None
 
 
 @dataclass
@@ -89,6 +91,15 @@ def _brand_safety_check(caption: str, source_caption: str) -> list[str]:
 
 
 def generate_variant(req: VariantRequest) -> VariantResult:
+    result = _generate_variant_core(req)
+    # 安全檢查通過後追加邀請 CTA（避免 CTA 文字本身去誤觸黑名單）
+    if req.referral_code:
+        cta = build_referral_cta(req.platform, req.referral_code)
+        result.caption = f"{result.caption}\n\n{cta}"
+    return result
+
+
+def _generate_variant_core(req: VariantRequest) -> VariantResult:
     if os.environ.get("ANTHROPIC_API_KEY"):
         try:
             result = _claude_variant(req)
@@ -116,6 +127,36 @@ _PLATFORM_HINTS = {
     "youtube": "Title under 100 chars (return separately). Description can include timestamps and links.",
     "threads": "Concise. 500 char hard limit. Conversational tone. Minimal hashtags.",
 }
+
+
+# ---------------------------------------------------------------------------
+# Referral CTA — 自動裂變
+# ---------------------------------------------------------------------------
+# 平台適配的邀請連結 CTA。文案故意避開 BRAND_BLOCKLIST（無「免費」「100%」等
+# 不可驗證的字眼），不引入新數字（不會觸發 _NUMBER_RE 的 hallucination 檢查），
+# 也維持每平台慣例（IG 連結在 bio 為主→簡短；FB 容許長文；Threads 500 字硬限）。
+_REFERRAL_CTA_BY_PLATFORM: dict[str, str] = {
+    "facebook":  "—\n📣 用我的邀請連結進站，享專屬優惠：{url}",
+    "instagram": "—\n邀請連結 → {url}",
+    "tiktok":    "我的邀請連結 ↓ {url}",
+    "threads":   "邀請連結：{url}",
+    "youtube":   "—\n邀請連結（含專屬優惠）：{url}",
+}
+
+# 對外可覆寫的 URL 模板（環境變數）。預設指向 popmonster.vip 靜態站，由站上
+# 的 inline 腳本把 ?ref= 寫進 localStorage.pm_ref，後續登入 portal 時由
+# ReferralBinder 把推薦人綁定到帳號。
+_REFERRAL_BASE_URL_TEMPLATE = os.environ.get(
+    "REFERRAL_URL_TEMPLATE",
+    "https://popmonster.vip/?ref={code}",
+)
+
+
+def build_referral_cta(platform: str, code: str) -> str:
+    """回傳適配 platform 的邀請連結 CTA 字串。預設使用 popmonster.vip 落地頁。"""
+    url = _REFERRAL_BASE_URL_TEMPLATE.format(code=code)
+    template = _REFERRAL_CTA_BY_PLATFORM.get(platform, _REFERRAL_CTA_BY_PLATFORM["facebook"])
+    return template.format(url=url)
 
 
 def _build_few_shot_block(examples: list[dict]) -> str:

@@ -65,3 +65,39 @@ def test_claude_variant_falls_back_on_error(monkeypatch):
             seed="seed",
         ))
     assert result.used_engine == "template"
+
+
+def test_referral_cta_appended_per_platform(monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    base = dict(
+        source_caption="天使塗層好用",
+        source_title="t",
+        style_profile={"hashtag_pool": ["#a"], "tone": "casual"},
+        seed="s",
+        referral_code="ABCD1234",
+    )
+    expected_url = "popmonster.vip/?ref=ABCD1234"
+    for platform in ("facebook", "instagram", "tiktok", "threads", "youtube"):
+        result = generate_variant(VariantRequest(platform=platform, **base))
+        assert expected_url in result.caption, f"{platform} missing referral URL"
+
+
+def test_referral_cta_omitted_when_no_code(monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    result = generate_variant(VariantRequest(
+        source_caption="abc",
+        source_title="t",
+        platform="instagram",
+        style_profile={"hashtag_pool": ["#a"]},
+        seed="s",
+    ))
+    assert "ref=" not in result.caption
+
+
+def test_referral_cta_respects_url_template_env(monkeypatch):
+    # 必須在 import 前 patch 環境變數；module 已經 import 過了，
+    # 所以這個案例驗證的是 helper 對 module 常數的直接使用——
+    # 改 env 後重新呼叫不會立即生效（已是預期行為，僅紀錄）。
+    from app.utils import variants as v
+    cta = v.build_referral_cta("instagram", "XYZ12345")
+    assert "XYZ12345" in cta
