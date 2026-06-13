@@ -8,9 +8,9 @@
 >
 > | Repo | PR | 狀態 |
 > |---|---|---|
-> | `popmonster-vip` | [#20](https://github.com/milk790-code/popmonster-vip/pull/20) | agentmemory-server/ + index.html ?ref 捕獲 + social_distributor 已含 BROWSER_STEPS |
-> | `popmonster-linebot` | [#2](https://github.com/milk790-code/popmonster-linebot/pull/2) | render.yaml + DEPLOY_STEPS.md + /邀請 intent |
-> | `customer-project-portal` | [#2](https://github.com/milk790-code/customer-project-portal/pull/2) | render.yaml + 邀請碼 schema + migration（⚠️ 有預存 build 問題見 §3-pre） |
+> | `popmonster-vip` | #20 ✅ merged | agentmemory-server/ + index.html ?ref 捕獲 + Caddy proxy 設定 |
+> | `popmonster-linebot` | #2 ✅ merged | render.yaml + /邀請 intent + Azure workflow 改手動 |
+> | `customer-project-portal` | #2 ✅ merged、#3 ✅ merged（router wire）、#4 ✅ merged（ReferralBinder） | schema 還原 + 自動裂變閉環 |
 > | `popmonster-website-deployment` | (memory wiring only) | GitHub Pages artifact，不需新部署 |
 
 ---
@@ -179,7 +179,7 @@ agentmemory status
 | linebot | `curl https://<svc>.onrender.com/health` → 200；LINE 傳「邀請」→ 收到 8 碼 Flex 卡 |
 | portal | `curl https://<svc>/` → 200；`/portal/` 開得起；`/ai-search` 有 Claude 回覆 |
 | social_distributor | `curl https://<api>/healthz` → 200；frontend 載得起 |
-| agentmemory | `curl -H "Authorization: Bearer $AGENTMEMORY_SECRET" https://<proxy>/...` → 200；MCP `memory_recall` 回得到舊記憶 |
+| agentmemory | `curl -H "Authorization: Bearer $AGENTMEMORY_SECRET" https://<proxy>/agentmemory/health` → 200；MCP `memory_recall` 回得到舊記憶 |
 | 邀請碼 | LINE 取得碼 → 開 `https://popmonster.vip/?ref=<code>` → DevTools localStorage 有 `pm_ref` |
 
 ---
@@ -203,7 +203,7 @@ agentmemory status
 
 ## 附錄 — 已知地雷
 
-1. **linebot `app.py` L18-20 寫死 LINE 憑證當 env default** — 應 rotate + 改成 `os.environ["LINE_CHANNEL_SECRET"]` 沒 fallback。我沒動是怕舊環境炸。
-2. **portal §3-pre 預存 build issue** — 沒修 Render build 一定失敗。
+1. **linebot `app.py` L18-20 寫死 LINE 憑證當 env default** — 應 rotate + 改成 `os.environ["LINE_CHANNEL_SECRET"]` 沒 fallback。**未動**，因為你要先在 Render 把 env 設好再切，否則活著的 bot 會收不到訊息。
+2. ~~**portal 預存 build issue**~~ — ✅ 已修：schema 還原 + ts 錯誤清乾淨，`pnpm build` 跑得過。
 3. **agentmemory native iii-engine 在 slim 容器啟動性未驗證** — 若 fail 看 Railway log，可能要加系統依賴或改 `AGENTMEMORY_USE_DOCKER=1`（Railway 內較麻煩）。
-4. **agentmemory 健康檢查路徑未文件化** — 部署後實測。
+4. ~~**agentmemory 健康檢查路徑未文件化**~~ — ✅ 從 package README 確認：`/agentmemory/health`（或 `/agentmemory/livez`）。Railway healthcheck path 直接填。
