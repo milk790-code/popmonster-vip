@@ -8,7 +8,7 @@
 >
 > | Repo | PR | 狀態 |
 > |---|---|---|
-> | `popmonster-vip` | [#20](https://github.com/milk790-code/popmonster-vip/pull/20) ✅ merged | agentmemory-server/ + index.html ?ref 捕獲 + Caddy proxy + social_distributor referral CTA |
+> | `popmonster-vip` | [#20](https://github.com/milk790-code/popmonster-vip/pull/20) ✅ merged、[#23](https://github.com/milk790-code/popmonster-vip/pull/23) ✅ merged | agentmemory-server/ + index.html ?ref 捕獲 + Caddy proxy + social_distributor referral CTA + ?ref= 訪客歡迎橫幅 |
 > | `popmonster-linebot` | [#2](https://github.com/milk790-code/popmonster-linebot/pull/2) ✅ merged、[#4](https://github.com/milk790-code/popmonster-linebot/pull/4) 🔐 draft（credentials fix） | render.yaml + /邀請 intent + 移除硬寫 LINE 憑證（⚠️ 合前先確認 Render env） |
 > | `customer-project-portal` | [#2](https://github.com/milk790-code/customer-project-portal/pull/2) ✅ merged、#3 ✅ merged、#4 ✅ merged、[#5](https://github.com/milk790-code/customer-project-portal/pull/5) ✅ merged | schema 還原 + referral router + ReferralBinder + ReferralPanel — 自動裂變閉環完整 ✅ |
 > | `popmonster-website-deployment` | (memory wiring only) | GitHub Pages artifact，不需新部署 |
