@@ -116,7 +116,7 @@ agentmemory status
 - [ ] Railway service 部署成功（build log 無錯、容器有起來）
 - [ ] iii-engine 在容器內正常啟動（看 deploy log；native 引擎在 slim 容器是否需額外
       依賴**尚待驗證** — 若起不來，改用 `AGENTMEMORY_USE_DOCKER=1` 路徑或加缺漏套件）
-- [ ] `curl https://<url>/` 或正確健康路徑有回應（**確切 health path 待驗證**）
+- [ ] `curl https://<url>/agentmemory/health` 回 200（package README 文件確認的健康路徑；`/agentmemory/livez` 也是同類）
 - [ ] 用 MCP `memory_recall` 對線上 URL 查得到剛同步進去的舊記憶
 - [ ] 四個 repo 連線正常（`agentmemory status` 指向線上 URL 顯示 memory count > 0）
 
@@ -124,6 +124,6 @@ agentmemory status
 
 1. **native iii-engine 在 `node:22-slim` 容器能否啟動** —— 可能缺系統依賴或需 Docker-in-Docker。
    若失敗，試 `AGENTMEMORY_USE_DOCKER=1`（但 Railway 容器內跑 Docker 較麻煩）。
-2. **確切健康檢查路徑** —— 文件未明示；部署後實測。
+2. ✅ **確切健康檢查路徑已確認**：`/agentmemory/health`（livez 替代：`/agentmemory/livez`）。Railway healthcheck path 直接填 `/agentmemory/health` 即可。
 3. **data 目錄跨機/跨版本還原相容性** —— 同步前先在本機備份。
 4. **對外驗證機制** —— agentmemory 無內建 auth，§4 的保護方案需落實。
