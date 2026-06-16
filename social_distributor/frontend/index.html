@@ -355,6 +355,7 @@
         <button data-provider="meta">Connect Facebook + Instagram</button>
         <button data-provider="tiktok">Connect TikTok</button>
         <button data-provider="youtube">Connect YouTube</button>
+        <button data-provider="linkedin">Connect LinkedIn</button>
       </div>
       <p class="hint" style="margin:8px 0 4px;font-size:12px;">
         同平台可綁多個帳號：重複點上方按鈕（或 Cookie 綁定）即可新增，每次 OAuth 會以
@@ -381,6 +382,15 @@
               <li>貼到上方輸入框 → 點「綁定帳號」</li>
             </ol>
           </details>
+        </div>
+      </details>
+      <details id="linkedinPanel" style="margin-top:12px;border:1px solid #2a2d34;border-radius:8px;padding:0;">
+        <summary style="cursor:pointer;padding:10px 14px;background:#1a1d24;border-radius:8px;font-size:13px;color:#0a66c2;list-style:none;display:flex;align-items:center;gap:8px;">
+          💼 LinkedIn OAuth — 按上方「Connect LinkedIn」直接授權
+        </summary>
+        <div style="padding:14px 16px;display:flex;flex-direction:column;gap:8px;">
+          <p style="margin:0;font-size:12px;color:#9aa0a6;">點「Connect LinkedIn」→ LinkedIn 授權頁 → 允許 → 自動回調完成。適合米速 B2B 推廣。</p>
+          <p style="margin:0;font-size:12px;color:#9aa0a6;">所需 Railway 環境變數：<code>LINKEDIN_CLIENT_ID</code>、<code>LINKEDIN_CLIENT_SECRET</code>、<code>LINKEDIN_REDIRECT_URI</code>（見下方 ⚠️ 設定指引）</p>
         </div>
       </details>
       <table id="accountsTable">

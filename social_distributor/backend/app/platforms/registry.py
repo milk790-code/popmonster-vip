@@ -9,6 +9,7 @@ from .shopee import ShopeeOAuth, ShopeePublisher
 from .threads import ThreadsOAuth, ThreadsPublisher
 from .tiktok import TikTokOAuth, TikTokPublisher
 from .youtube import YouTubeOAuth, YouTubePublisher
+from .linkedin import LinkedInOAuth, LinkedInPublisher
 
 _PUBLISHERS: dict[Platform, Publisher] = {
     Platform.FACEBOOK: FacebookPublisher(),
@@ -17,6 +18,7 @@ _PUBLISHERS: dict[Platform, Publisher] = {
     Platform.TIKTOK: TikTokPublisher(),
     Platform.YOUTUBE: YouTubePublisher(),
     Platform.SHOPEE: ShopeePublisher(),
+    Platform.LINKEDIN: LinkedInPublisher(),
 }
 
 _OAUTH: dict[str, OAuthProvider] = {
@@ -25,6 +27,7 @@ _OAUTH: dict[str, OAuthProvider] = {
     "tiktok": TikTokOAuth(),
     "youtube": YouTubeOAuth(),
     "shopee": ShopeeOAuth(),
+    "linkedin": LinkedInOAuth(),
 }
 
 
