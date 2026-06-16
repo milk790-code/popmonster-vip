@@ -32,6 +32,8 @@ def list_accounts():
                 if a.token_expires_at
                 else None,
                 "scopes": (a.scopes or "").split(",") if a.scopes else [],
+                "extra": {k: v for k, v in (a.extra or {}).items() if k != "proxy_url"},
+                "proxy_configured": bool((a.extra or {}).get("proxy_url")),
             }
             for a in rows
         ]
@@ -70,3 +72,34 @@ def request_erasure(user_id: int):
     audit("user.erasure_requested", "user", user.id, actor_user_id=user.id)
     db.session.commit()
     return jsonify({"queued": user.id})
+
+
+@bp.patch("/<int:account_id>/proxy")
+def set_proxy_url(account_id: int):
+    """Set or clear the egress proxy URL for a connected account.
+
+    Body (JSON): {"proxy_url": "socks5://user:pass@host:port"}
+    Send {"proxy_url": null} or omit key to clear.
+    The proxy_url is stored in SocialAccount.extra and is picked up by
+    the publish task via platforms._http.set_proxy().
+    """
+    account = db.session.get(SocialAccount, account_id)
+    if not account:
+        return jsonify({"error": "not found"}), 404
+    body = request.get_json(silent=True) or {}
+    proxy_url = body.get("proxy_url")  # None = clear
+    extra = dict(account.extra or {})
+    if proxy_url:
+        extra["proxy_url"] = proxy_url
+    else:
+        extra.pop("proxy_url", None)
+    account.extra = extra
+    audit(
+        "account.proxy_updated",
+        "social_account",
+        account.id,
+        actor_user_id=account.user_id,
+        detail={"proxy_set": bool(proxy_url)},
+    )
+    db.session.commit()
+    return jsonify({"id": account_id, "proxy_set": bool(proxy_url)})

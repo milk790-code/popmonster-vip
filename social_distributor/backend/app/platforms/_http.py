@@ -3,10 +3,16 @@
 B6: ``timeout`` defaults to ``PLATFORM_HTTP_TIMEOUT`` env var (or 60s if
 unset). Video upload / IG container poll callsites pass an explicit longer
 timeout when needed (these can take 60–120s legitimately).
+
+Proxy support: call ``set_proxy(proxy_url)`` before issuing requests in a
+thread to route all ``request_json`` calls through that proxy.  Call
+``clear_proxy()`` afterwards.  Tasks use this to give each SocialAccount its
+own egress IP without touching individual platform modules.
 """
 from __future__ import annotations
 
 import os
+import threading
 from typing import Any
 
 import requests
@@ -14,6 +20,24 @@ import requests
 from .base import PlatformError
 
 DEFAULT_TIMEOUT = float(os.environ.get("PLATFORM_HTTP_TIMEOUT", "60"))
+
+_proxy_local = threading.local()
+
+
+def set_proxy(proxy_url: str | None) -> None:
+    """Set a per-thread proxy URL for all subsequent request_json calls."""
+    _proxy_local.url = proxy_url
+
+
+def clear_proxy() -> None:
+    _proxy_local.url = None
+
+
+def _current_proxies() -> dict | None:
+    url = getattr(_proxy_local, "url", None)
+    if not url:
+        return None
+    return {"http": url, "https": url}
 
 
 def request_json(
@@ -29,6 +53,7 @@ def request_json(
 ) -> dict[str, Any]:
     if timeout is None:
         timeout = DEFAULT_TIMEOUT
+    proxies = _current_proxies()
     try:
         response = requests.request(
             method,
@@ -39,6 +64,7 @@ def request_json(
             headers=headers,
             files=files,
             timeout=timeout,
+            proxies=proxies,
         )
     except requests.RequestException as exc:
         raise PlatformError(f"network failure calling {url}", retryable=True) from exc

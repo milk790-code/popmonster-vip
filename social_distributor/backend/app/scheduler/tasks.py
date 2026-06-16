@@ -17,6 +17,7 @@ from ..models import (
     TokenExpiryAlert, User,
 )
 from ..platforms import get_oauth_provider, get_publisher
+from ..platforms._http import clear_proxy, set_proxy
 from ..platforms.base import PlatformError, TokenBundle
 from ..utils.events import publish_event
 from ..utils.telemetry import add_breadcrumb, trace_dispatch
@@ -167,6 +168,7 @@ def _dispatch_body(self, target: PostTarget) -> None:
         platform=target.account.platform.value,
         attempt=target.attempt_count,
     )
+    set_proxy((target.account.extra or {}).get("proxy_url"))
     try:
         with trace_dispatch(**trace_kwargs) as span:
             token = _decrypt_token(target.account)
@@ -209,6 +211,8 @@ def _dispatch_body(self, target: PostTarget) -> None:
             target_id=target.id,
         )
         return
+    finally:
+        clear_proxy()
 
     target.status = JobStatus.SUCCEEDED
     target.external_post_id = result.external_post_id
