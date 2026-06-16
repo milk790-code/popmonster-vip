@@ -8,9 +8,9 @@
 >
 > | Repo | PR | 狀態 |
 > |---|---|---|
-> | `popmonster-vip` | #20 ✅ #23 ✅ [#25](https://github.com/milk790-code/popmonster-vip/pull/25) ✅ [#26](https://github.com/milk790-code/popmonster-vip/pull/26) ✅ | agentmemory-server/ + ?ref 捕獲 + Caddy proxy + referral CTA 變體引擎（build_referral_cta）+ dispatch API wiring |
+> | `popmonster-vip` | #20–#26 ✅ #27 ✅ #28 ✅ #29 ✅ #30 ✅ #31 ✅ #32 ✅ #33 ✅ | agentmemory + ?ref 全站捕獲 + 跨域橫幅 + Caddy proxy + variant CTA + dispatch/A/B UI + verify.sh |
 > | `popmonster-linebot` | #2 ✅ #4 ✅ #5 ✅ | render.yaml + /邀請 intent + 嚴格 LINE env 讀取 + follow 事件帶邀請碼 Flex 卡 ✅ |
-> | `customer-project-portal` | #2–#12 ✅ [#13](https://github.com/milk790-code/customer-project-portal/pull/13) ✅ [#14](https://github.com/milk790-code/customer-project-portal/pull/14) ✅ | schema + referral router + ReferralBinder + ReferralPanel + admin 統計 + LINE userId 碼對齊 + 通知鈴鐺全頁面 + 30s live poll ✅ |
+> | `customer-project-portal` | #2–#14 ✅ [#15](https://github.com/milk790-code/customer-project-portal/pull/15) ✅ [#16](https://github.com/milk790-code/customer-project-portal/pull/16) ✅ | referral 閉環完整 + 通知鈴鐺全 7 頁面（30s poll + 跨域捕獲）✅ TypeScript clean ✅ |
 > | `popmonster-website-deployment` | (memory wiring only) | GitHub Pages artifact，不需新部署 |
 
 ---
