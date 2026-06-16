@@ -77,6 +77,7 @@ def distribute_ab(post_id: int):
 
     base = _parse_when(body.get("scheduled_for")) or datetime.now(timezone.utc)
     jitter = max(0, int(body.get("jitter_minutes", 0)))
+    referral_code: str | None = body.get("referral_code") or None
     dry_run = bool(body.get("dry_run", False))
 
     active_accounts = [a for a in group.accounts if a.revoked_at is None]
@@ -108,6 +109,7 @@ def distribute_ab(post_id: int):
                 platform=account.platform.value,
                 style_profile=group.style_profile or {},
                 seed=f"{seed}:{variant_label}:{account.id}",
+                referral_code=referral_code,
             )
             result = generate_variant(req)
             # Honest about what actually ran — generate_variant might fall
