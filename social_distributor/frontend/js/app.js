@@ -18,23 +18,92 @@ if ("serviceWorker" in navigator) {
 
 const userIdInput = document.getElementById("userId");
 
+// === Phase 1 hardening: surface every failure ========================
+// Before: 12 load functions ran bare; a backend error failed silently and
+// the user saw a stale/blank panel with no signal. Now every unhandled
+// rejection throws a toast, and consecutive api() failures raise a top banner.
+let _consecutiveApiFailures = 0;
+let _apiHealthBanner = null;
+
+function _showToast(msg, kind = "error") {
+  const t = document.createElement("div");
+  t.className = `toast toast-${kind}`;
+  t.textContent = msg;
+  t.style.cssText =
+    "position:fixed;top:16px;right:16px;max-width:380px;padding:12px 16px;border-radius:8px;z-index:10000;font-size:13px;line-height:1.45;box-shadow:0 4px 16px rgba(0,0,0,.45);" +
+    (kind === "error"
+      ? "background:#3a1a1a;color:#ff9b9b;border:1px solid #5a2d2d;"
+      : "background:#1a3a1a;color:#6abf69;border:1px solid #2d5a2d;");
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 6000);
+}
+
+function _setApiHealthBanner(show, msg) {
+  if (show) {
+    if (!_apiHealthBanner) {
+      _apiHealthBanner = document.createElement("div");
+      _apiHealthBanner.style.cssText =
+        "position:fixed;top:0;left:0;right:0;background:#5a1f1f;color:#ffd9d9;padding:8px 16px;text-align:center;z-index:10001;font-size:13px;border-bottom:1px solid #7a2d2d;";
+      document.body.appendChild(_apiHealthBanner);
+    }
+    _apiHealthBanner.textContent = msg;
+  } else if (_apiHealthBanner) {
+    _apiHealthBanner.remove();
+    _apiHealthBanner = null;
+  }
+}
+
+window.addEventListener("unhandledrejection", (e) => {
+  const msg = e.reason?.message || String(e.reason || "未知錯誤");
+  _showToast(`操作失敗：${msg}`);
+  console.error("[unhandledrejection]", e.reason);
+});
+window.addEventListener("error", (e) => {
+  console.error("[error]", e.error || e.message);
+});
+
+// safe URL for href injection — block javascript:/data: schemes.
+function safeUrl(u) {
+  const s = String(u ?? "").trim();
+  return /^(https?:|\/|#)/i.test(s) ? escapeHtml(s) : "#";
+}
+
+const API_TIMEOUT_MS = 15000;
 async function api(path, options = {}) {
-  const apiKey = localStorage.getItem('distributor_api_key') || '';
-  const headers = {
-    "Content-Type": "application/json",
-    ...(apiKey ? { "X-API-Key": apiKey } : {}),
-    ...(options.headers ?? {}),
-  };
-  // C3: send the session cookie cross-origin (CORS supports_credentials).
-  const res = await fetch(`${API_BASE}${path}`, {
-    credentials: "include",
-    ...options,
-    headers,
-  });
+  const headers = { "Content-Type": "application/json", ...(options.headers ?? {}) };
+  // Phase 1: 15s timeout via AbortController so a hung backend route can't
+  // freeze the UI indefinitely (the original bare fetch had no ceiling).
+  const controller = new AbortController();
+  const timeoutMs = options.timeoutMs ?? API_TIMEOUT_MS;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let res;
+  try {
+    // C3: send the session cookie cross-origin (CORS supports_credentials).
+    res = await fetch(`${API_BASE}${path}`, {
+      credentials: "include",
+      signal: controller.signal,
+      ...options,
+      headers,
+    });
+  } catch (err) {
+    _consecutiveApiFailures++;
+    if (_consecutiveApiFailures >= 3)
+      _setApiHealthBanner(true, `⚠ 後端連續 ${_consecutiveApiFailures} 次無回應——可能離線或逾時。`);
+    if (err.name === "AbortError")
+      throw new Error(`請求逾時（>${timeoutMs / 1000}s）：${path}`);
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
   if (!res.ok) {
+    _consecutiveApiFailures++;
+    if (_consecutiveApiFailures >= 3)
+      _setApiHealthBanner(true, `⚠ 後端連續 ${_consecutiveApiFailures} 次錯誤回應。`);
     const text = await res.text();
     throw new Error(`${res.status} ${res.statusText}: ${text}`);
   }
+  _consecutiveApiFailures = 0;
+  _setApiHealthBanner(false);
   if (res.status === 204) return null;
   return res.json();
 }
@@ -77,10 +146,10 @@ document.querySelectorAll(".topbar nav button").forEach((btn) => {
     if (btn.dataset.tab === "distribute") loadDistributeGroups();
     if (btn.dataset.tab === "insights") loadInsights();
     if (btn.dataset.tab === "daily") loadDailyDeps();
-    if (btn.dataset.tab === "settings") _initSettingsTab();
     if (btn.dataset.tab === "permissions") { loadGrants(); loadDrift(); }
     if (btn.dataset.tab === "transfers") loadTransfers();
     if (btn.dataset.tab === "rebroadcast") { loadRbDeps().then(loadRbCandidates); }
+    if (btn.dataset.tab === "browser") renderBrowserTier();
   });
 });
 
@@ -183,39 +252,45 @@ async function handleFile(file) {
 const postForm = document.getElementById("postForm");
 postForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const fd = new FormData(postForm);
-  const userId = Number(userIdInput.value);
+  const out = document.getElementById("postOutput");
+  try {
+    const fd = new FormData(postForm);
+    const userId = Number(userIdInput.value);
 
-  let mediaId = fd.get("media_id") ? Number(fd.get("media_id")) : null;
+    let mediaId = fd.get("media_id") ? Number(fd.get("media_id")) : null;
 
-  // Allow URL fallback for users who already have hosted media.
-  const mediaUrl = fd.get("media_url");
-  const mediaKind = fd.get("media_kind");
-  if (!mediaId && mediaUrl) {
-    const inferredKind = mediaKind || (/\.(mp4|mov|webm)$/i.test(mediaUrl) ? "video" : "image");
-    const media = await api("/api/posts/media", {
+    // Allow URL fallback for users who already have hosted media.
+    const mediaUrl = fd.get("media_url");
+    const mediaKind = fd.get("media_kind");
+    if (!mediaId && mediaUrl) {
+      const inferredKind = mediaKind || (/\.(mp4|mov|webm)$/i.test(mediaUrl) ? "video" : "image");
+      const media = await api("/api/posts/media", {
+        method: "POST",
+        body: JSON.stringify({
+          user_id: userId,
+          kind: inferredKind,
+          storage_url: mediaUrl,
+          mime_type: inferredKind === "video" ? "video/mp4" : "image/jpeg",
+        }),
+      });
+      mediaId = media.id;
+    }
+
+    const post = await api("/api/posts", {
       method: "POST",
       body: JSON.stringify({
         user_id: userId,
-        kind: inferredKind,
-        storage_url: mediaUrl,
-        mime_type: inferredKind === "video" ? "video/mp4" : "image/jpeg",
+        title: fd.get("title") ?? "",
+        caption: fd.get("caption") ?? "",
+        link_url: fd.get("link_url") || null,
+        media_id: mediaId,
       }),
     });
-    mediaId = media.id;
+    out.textContent = JSON.stringify(post, null, 2);
+  } catch (err) {
+    out.textContent = `❌ 建立失敗：${err.message}`;
+    _showToast(`貼文建立失敗：${err.message}`);
   }
-
-  const post = await api("/api/posts", {
-    method: "POST",
-    body: JSON.stringify({
-      user_id: userId,
-      title: fd.get("title") ?? "",
-      caption: fd.get("caption") ?? "",
-      link_url: fd.get("link_url") || null,
-      media_id: mediaId,
-    }),
-  });
-  document.getElementById("postOutput").textContent = JSON.stringify(post, null, 2);
 });
 
 const previewForm = document.getElementById("previewForm");
@@ -273,18 +348,24 @@ async function loadStatus() {
   const rows = await api(`/api/schedules?user_id=${userId}`);
   const tbody = document.querySelector("#statusTable tbody");
   tbody.innerHTML = "";
-  for (const row of rows) {
+  // Phase 1: 13k+ schedules would blow up the DOM. Cap render at 300, failures
+  // first so the rows that need action are always on screen.
+  const STATUS_RENDER_CAP = 300;
+  const prio = (s) => (s === "failed" ? 0 : ["pending", "queued"].includes(s) ? 1 : 2);
+  const sorted = [...rows].sort((a, b) => prio(a.status) - prio(b.status));
+  const shown = sorted.slice(0, STATUS_RENDER_CAP);
+  for (const row of shown) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${row.id}</td>
-      <td>${row.platform}</td>
-      <td>${row.handle ?? ""}</td>
-      <td><span class="status-pill ${row.status}">${row.status}</span></td>
-      <td>${row.scheduled_for ?? ""}</td>
-      <td>${row.cron ?? ""}</td>
+      <td>${escapeHtml(row.platform)}</td>
+      <td>${escapeHtml(row.handle ?? "")}</td>
+      <td><span class="status-pill ${escapeHtml(row.status)}">${escapeHtml(row.status)}</span></td>
+      <td>${escapeHtml(row.scheduled_for ?? "")}</td>
+      <td>${escapeHtml(row.cron ?? "")}</td>
       <td>${row.attempt_count}</td>
-      <td>${row.external_post_id ?? ""}</td>
-      <td>${row.last_error ?? ""}</td>
+      <td>${escapeHtml(row.external_post_id ?? "")}</td>
+      <td>${escapeHtml(row.last_error ?? "")}</td>
       <td></td>
     `;
     const actions = tr.lastElementChild;
@@ -308,6 +389,11 @@ async function loadStatus() {
     }
     tbody.appendChild(tr);
   }
+  if (rows.length > STATUS_RENDER_CAP) {
+    const note = document.createElement("tr");
+    note.innerHTML = `<td colspan="10" class="hint">顯示前 ${STATUS_RENDER_CAP} 筆（失敗優先），共 ${rows.length} 筆。請用上游篩選縮小範圍。</td>`;
+    tbody.appendChild(note);
+  }
 }
 
 // --- Accounts ---------------------------------------------------------
@@ -317,8 +403,35 @@ document.querySelectorAll(".connect-row button").forEach((btn) => {
     const result = await api(
       `/auth/${btn.dataset.provider}/start?user_id=${userId}`
     );
-    window.open(result.authorization_url, "_blank", "noopener");
+    // Fix: remove "noopener" so the callback popup can reach window.opener
+    // and send postMessage back. "noopener" sets opener=null in the popup,
+    // which silently breaks the entire OAuth completion flow.
+    window.open(
+      result.authorization_url,
+      "oauth_popup",
+      "width=620,height=720,scrollbars=yes,resizable=yes"
+    );
   });
+});
+
+// Fix: listen for OAuth completion message from the callback popup.
+// The backend callback HTML does window.opener.postMessage({type:"distributor.oauth.complete"})
+// but the original code never listened for this message, so accounts never auto-refreshed.
+window.addEventListener("message", (event) => {
+  if (!event.data || event.data.type !== "distributor.oauth.complete") return;
+  const result = event.data.result;
+  if (result && result.ok) {
+    // Refresh accounts table so newly connected pages appear immediately
+    loadAccounts();
+    // Brief visual feedback
+    const banner = document.createElement("div");
+    banner.textContent = `✓ 連接成功：${(result.connected || []).map(a => a.handle).join("、")}`;
+    banner.style.cssText = "position:fixed;top:16px;right:16px;background:#1a3a1a;color:#6abf69;padding:12px 20px;border-radius:8px;z-index:9999;font-size:14px;border:1px solid #2d5a2d;";
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 4000);
+  } else if (result && !result.ok) {
+    console.error("[OAuth]", result.message);
+  }
 });
 
 async function loadAccounts() {
@@ -330,9 +443,9 @@ async function loadAccounts() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${row.id}</td>
-      <td>${row.platform}</td>
-      <td>${row.handle}</td>
-      <td>${row.token_expires_at ?? "—"}</td>
+      <td>${escapeHtml(row.platform)}</td>
+      <td>${escapeHtml(row.handle)}</td>
+      <td>${escapeHtml(row.token_expires_at ?? "—")}</td>
       <td></td>
     `;
     const actions = tr.lastElementChild;
@@ -357,11 +470,11 @@ async function loadAudit() {
   for (const row of rows) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${row.created_at}</td>
-      <td>${row.actor_user_id ?? ""}</td>
-      <td>${row.action}</td>
-      <td>${row.resource_type}#${row.resource_id ?? ""}</td>
-      <td><pre style="max-height:120px">${JSON.stringify(row.detail, null, 2)}</pre></td>
+      <td>${escapeHtml(row.created_at)}</td>
+      <td>${escapeHtml(row.actor_user_id ?? "")}</td>
+      <td>${escapeHtml(row.action)}</td>
+      <td>${escapeHtml(row.resource_type)}#${escapeHtml(row.resource_id ?? "")}</td>
+      <td><pre style="max-height:120px">${escapeHtml(JSON.stringify(row.detail, null, 2))}</pre></td>
     `;
     tbody.appendChild(tr);
   }
@@ -539,7 +652,6 @@ const PLATFORM_PREVIEW_RULES = {
   instagram: { label: "Instagram", caption_max: 2200,  title_max: null, aspect: "9:16" },
   tiktok:    { label: "TikTok",    caption_max: 2200,  title_max: null, aspect: "9:16" },
   youtube:   { label: "YouTube",   caption_max: 5000,  title_max: 100,  aspect: "16:9" },
-  shopee:    { label: "蝦皮短影音", caption_max: 500,   title_max: 100,  aspect: "9:16" },
 };
 
 function renderPreview() {
@@ -610,12 +722,34 @@ document.getElementById("hashtagSuggestBtn").addEventListener("click", async () 
 async function loadInsights() {
   const postId = document.getElementById("insightsPostId").value;
   const groupId = document.getElementById("insightsGroupId").value;
-  const params = new URLSearchParams();
-  if (postId) params.set("post_id", postId);
-  if (groupId) params.set("group_id", groupId);
-  const rows = await api(`/api/insights?${params.toString()}`);
   const tbody = document.querySelector("#insightsTable tbody");
+  let rows;
+  if (postId || groupId) {
+    // Filtered path uses the healthy post_id/group_id branch.
+    const params = new URLSearchParams();
+    if (postId) params.set("post_id", postId);
+    if (groupId) params.set("group_id", groupId);
+    rows = await api(`/api/insights?${params.toString()}`);
+  } else {
+    // Phase 1: the unfiltered /api/insights branch hangs ~30s on the backend.
+    // Fan out instead — pull recent posts, query each by post_id (healthy
+    // branch), merge. Per-post failures are swallowed so one bad post can't
+    // sink the whole panel. (Assumes GET /api/posts returns a list or {items}.)
+    tbody.innerHTML = `<tr><td colspan="10" class="hint">載入最近貼文成效中…</td></tr>`;
+    const userId = Number(userIdInput.value);
+    const posts = await api(`/api/posts?user_id=${userId}`);
+    const list = Array.isArray(posts) ? posts : posts.items || [];
+    const recent = list.slice(0, 8);
+    const chunks = await Promise.all(
+      recent.map((p) => api(`/api/insights?post_id=${p.id}`).catch(() => []))
+    );
+    rows = chunks.flat();
+  }
   tbody.innerHTML = "";
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="10" class="hint">無資料。可用上方 Post ID / Group ID 篩選查特定貼文。</td></tr>`;
+    return;
+  }
   for (const r of rows) {
     const m = r.metric;
     const tr = document.createElement("tr");
@@ -942,42 +1076,47 @@ document.getElementById("dailyGoBtn").addEventListener("click", async () => {
     return;
   }
 
-  out.textContent = "建立 post…";
-  const post = await api("/api/posts", {
-    method: "POST",
-    body: JSON.stringify({
-      user_id: userId,
-      title,
-      caption,
-      link_url: document.getElementById("dailyLinkUrl").value || null,
-      media_id: dailyState.mediaId,
-    }),
-  });
+  try {
+    out.textContent = "建立 post…";
+    const post = await api("/api/posts", {
+      method: "POST",
+      body: JSON.stringify({
+        user_id: userId,
+        title,
+        caption,
+        link_url: document.getElementById("dailyLinkUrl").value || null,
+        media_id: dailyState.mediaId,
+      }),
+    });
 
-  const when = document.querySelector('input[name="dailyWhen"]:checked').value;
-  let scheduled_for = null;
-  let use_best_time = false;
-  if (when === "at") scheduled_for = document.getElementById("dailyAt").value || null;
-  if (when === "best") use_best_time = true;  // backend handles fallback per-group
+    const when = document.querySelector('input[name="dailyWhen"]:checked').value;
+    let scheduled_for = null;
+    let use_best_time = false;
+    if (when === "at") scheduled_for = document.getElementById("dailyAt").value || null;
+    if (when === "best") use_best_time = true;  // backend handles fallback per-group
 
-  const body = {
-    group_ids: Array.from(dailyState.selectedGroups),
-    scheduled_for,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
-    jitter_minutes: Number(document.getElementById("dailyJitter").value || 0),
-    generate_variants: document.getElementById("dailyVariants").checked,
-    use_best_time,
-    dry_run: document.getElementById("dailyDryRun").checked,
-  };
-  out.textContent = "Distribute…";
-  const res = await api(`/api/posts/${post.id}/distribute`, {
-    method: "POST",
-    body: JSON.stringify(body),
-  });
-  out.innerHTML = `<strong>✓ ${res.dry_run ? "Dry-run 預覽" : `建立 ${res.created_target_ids.length} 個目標`}</strong>
-    <pre>${escapeHtml(JSON.stringify(res.plan, null, 2))}</pre>`;
-  dailyState.lastTargets = res.created_target_ids;
-  loadDailyStatus();
+    const body = {
+      group_ids: Array.from(dailyState.selectedGroups),
+      scheduled_for,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+      jitter_minutes: Number(document.getElementById("dailyJitter").value || 0),
+      generate_variants: document.getElementById("dailyVariants").checked,
+      use_best_time,
+      dry_run: document.getElementById("dailyDryRun").checked,
+    };
+    out.textContent = "Distribute…";
+    const res = await api(`/api/posts/${post.id}/distribute`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+    out.innerHTML = `<strong>✓ ${res.dry_run ? "Dry-run 預覽" : `建立 ${res.created_target_ids.length} 個目標`}</strong>
+      <pre>${escapeHtml(JSON.stringify(res.plan, null, 2))}</pre>`;
+    dailyState.lastTargets = res.created_target_ids;
+    loadDailyStatus();
+  } catch (err) {
+    out.textContent = `❌ 失敗：${err.message}`;
+    _showToast(`一鍵發送失敗：${err.message}`);
+  }
 });
 
 function nextOccurrence(dayLabel, hour) {
@@ -1365,7 +1504,7 @@ async function loadRbCandidates() {
       <td>${escapeHtml(sourceLabel)}</td>
       <td>${escapeHtml(c.external_post_id)}</td>
       <td>${escapeHtml((c.snippet || "").slice(0, 200))}</td>
-      <td>${c.permalink ? `<a href="${c.permalink}" target="_blank">原文</a>` : ""}</td>
+      <td>${c.permalink ? `<a href="${safeUrl(c.permalink)}" target="_blank" rel="noopener noreferrer">原文</a>` : ""}</td>
       <td>${c.used ? `→ post #${c.promoted_post_id}` : ""}</td>
     `;
     tbody.appendChild(tr);
@@ -1462,30 +1601,27 @@ async function loadMedia() {
 }
 
 function _useMediaInActiveForm(mediaId) {
-  // Try to fill the most likely target field. Compose's media id input wins
-  // if present and visible; otherwise fall back to the Daily flow.
-  const candidates = ["composeMediaId", "dailyMediaId"];
-  for (const id of candidates) {
-    const el = document.getElementById(id);
-    if (el) {
-      el.value = String(mediaId);
-      el.dispatchEvent(new Event("change", { bubbles: true }));
-      // Flash a short status
-      const banner = document.createElement("div");
-      banner.className = "onboarding accent";
-      banner.style.position = "fixed";
-      banner.style.bottom = "20px";
-      banner.style.right = "20px";
-      banner.style.zIndex = "9999";
-      banner.innerHTML = `<strong>素材 #${mediaId}</strong><p>已填入 ${id}</p>`;
-      document.body.appendChild(banner);
-      setTimeout(() => banner.remove(), 2500);
-      return;
+  // Phase 1 fix: the original looked up element ids "composeMediaId" /
+  // "dailyMediaId" that never existed in the DOM, so clicking a thumbnail did
+  // nothing. The real targets are Compose's hidden <input name="media_id">
+  // (mediaIdField) and the Daily flow's in-memory dailyState.mediaId.
+  const activeTab = document.querySelector(".tab.active")?.id;
+  if (activeTab === "tab-daily") {
+    dailyState.mediaId = mediaId;
+    if (typeof dailyHint !== "undefined" && dailyHint) {
+      dailyHint.textContent = `✓ 已選素材 media_id=${mediaId}`;
     }
+    _showToast(`素材 #${mediaId} 已填入 Daily 流程`, "ok");
+    return;
   }
-  // No active form found — copy to clipboard as fallback
+  if (mediaIdField) {
+    mediaIdField.value = String(mediaId);
+    _showToast(`素材 #${mediaId} 已填入 Compose（media_id）`, "ok");
+    return;
+  }
+  // No form available — clipboard fallback.
   navigator.clipboard?.writeText(String(mediaId));
-  alert(`media_id ${mediaId} copied to clipboard`);
+  _showToast(`media_id ${mediaId} 已複製到剪貼簿`, "ok");
 }
 
 document.getElementById("reloadMedia")?.addEventListener("click", () => {
@@ -1503,44 +1639,134 @@ document.getElementById("mediaNextPage")?.addEventListener("click", () => {
   }
 });
 
-// --- Settings tab ---------------------------------------------------------
-function _initSettingsTab() {
-  const keyInput = document.getElementById("apiKeyInput");
-  const keyStatus = document.getElementById("apiKeyStatus");
-  const baseInput = document.getElementById("apiBaseInput");
-  const baseStatus = document.getElementById("apiBaseStatus");
+// --- 🌐 Browser publish (the 4th target type) -------------------------
+// The control panel does NOT add a backend API for these platforms. It emits
+// a self-contained "instruction pack" JSON that a browser-automation consumer
+// (Cowork Computer Use / Claude in Chrome) executes. Two hardening additions
+// over the original plan: (1) idempotency_key so re-running a pack never double
+// posts on a follow-grow account; (2) a result_report skeleton the consumer
+// must fill and return, so browser targets aren't fire-and-forget blind spots.
+const BROWSER_PLATFORMS = {
+  line_voom:   { label: "LINE VOOM",   tier: "green",  full_auto: true  },
+  google_biz:  { label: "Google 商家",  tier: "green",  full_auto: true  },
+  website:     { label: "官網後台",     tier: "green",  full_auto: true  },
+  pinterest:   { label: "Pinterest",   tier: "green",  full_auto: true  },
+  xiaohongshu: { label: "小紅書",       tier: "yellow", full_auto: false },
+  x_twitter:   { label: "X (Twitter)", tier: "yellow", full_auto: false },
+  dcard:       { label: "Dcard",       tier: "yellow", full_auto: false },
+  coupang:     { label: "酷澎",         tier: "yellow", full_auto: false },
+  shopee:      { label: "蝦皮",         tier: "red",    full_auto: false },
+  douyin:      { label: "抖音",         tier: "red",    full_auto: false },
+};
+const TIER_BADGE = { green: "🟢 全自動", yellow: "🟡 半人工", red: "🔴 禁全自動" };
 
-  if (keyInput) {
-    const stored = localStorage.getItem("distributor_api_key") || "";
-    keyInput.value = stored ? "•".repeat(Math.min(stored.length, 20)) : "";
-    keyStatus.textContent = stored ? "已儲存 ✓" : "未設定";
+function renderBrowserTier() {
+  const sel = document.getElementById("bpPlatform");
+  if (sel && !sel.options.length) {
+    sel.innerHTML = Object.entries(BROWSER_PLATFORMS)
+      .map(([k, v]) => `<option value="${k}">${TIER_BADGE[v.tier]} · ${escapeHtml(v.label)}</option>`)
+      .join("");
   }
-  if (baseInput) {
-    baseInput.value = localStorage.getItem("distributor_api_base") || "";
-  }
-
-  document.getElementById("saveApiKeyBtn")?.addEventListener("click", () => {
-    const val = document.getElementById("apiKeyInput").value.trim();
-    if (!val || val.startsWith("•")) return;
-    localStorage.setItem("distributor_api_key", val);
-    keyStatus.textContent = "已儲存 ✓";
-    document.getElementById("apiKeyInput").value = "•".repeat(Math.min(val.length, 20));
-  });
-
-  document.getElementById("clearApiKeyBtn")?.addEventListener("click", () => {
-    localStorage.removeItem("distributor_api_key");
-    document.getElementById("apiKeyInput").value = "";
-    keyStatus.textContent = "已清除";
-  });
-
-  document.getElementById("saveApiBaseBtn")?.addEventListener("click", () => {
-    const val = document.getElementById("apiBaseInput").value.trim();
-    if (val) {
-      localStorage.setItem("distributor_api_base", val);
-      baseStatus.textContent = "已儲存，請重新整理頁面生效";
-    } else {
-      localStorage.removeItem("distributor_api_base");
-      baseStatus.textContent = "已清除，下次載入使用預設";
-    }
-  });
+  const slot = document.getElementById("bpTierTable");
+  if (!slot) return;
+  const byTier = { green: [], yellow: [], red: [] };
+  for (const v of Object.values(BROWSER_PLATFORMS)) byTier[v.tier].push(v.label);
+  slot.innerHTML = `
+    <table>
+      <thead><tr><th>分級</th><th>平台</th><th>政策</th></tr></thead>
+      <tbody>
+        <tr><td>🟢 全自動</td><td>${byTier.green.join("、")}</td><td>Cowork 可全自動跑</td></tr>
+        <tr><td>🟡 半人工</td><td>${byTier.yellow.join("、")}</td><td>Claude in Chrome 協作，人工把關</td></tr>
+        <tr><td>🔴 禁全自動</td><td>${byTier.red.join("、")}</td><td>風險閘擋下，僅限手動</td></tr>
+      </tbody>
+    </table>`;
 }
+
+function _todayStamp() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}`;
+}
+
+document.getElementById("browserPackForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const out = document.getElementById("bpOutput");
+  const postId = Number(document.getElementById("bpPostId").value);
+  const platformKey = document.getElementById("bpPlatform").value;
+  const consumer = document.getElementById("bpConsumer").value;
+  const plat = BROWSER_PLATFORMS[platformKey];
+
+  // Risk gate: 🔴 platforms never get a Cowork full-auto pack.
+  if (plat.tier === "red" && consumer === "cowork") {
+    out.textContent = `🚫 風險閘：${plat.label} 屬 🔴 禁全自動層，不產生 Cowork 全自動指令包。改用 Claude in Chrome 半人工，或手動發布。`;
+    window.__lastBrowserPack = null;
+    return;
+  }
+
+  try {
+    out.textContent = "讀取貼文內容…";
+    // GET single post may not exist on the backend; fall back to id-only.
+    let post = null;
+    try { post = await api(`/api/posts/${postId}`); } catch { /* embed id only */ }
+
+    const pack = {
+      schema_version: "1.0",
+      kind: "browser_publish_instruction",
+      generated_at: new Date().toISOString(),
+      // Phase-1 add: re-running this pack on the same day is a no-op for the consumer.
+      idempotency_key: `${postId}:${platformKey}:${_todayStamp()}`,
+      consumer,                       // "cowork" | "chrome"
+      platform: platformKey,
+      platform_label: plat.label,
+      tier: plat.tier,
+      full_auto_allowed: plat.full_auto && consumer === "cowork",
+      // Injection guard: anything the consumer reads off the target page is
+      // untrusted data, never an instruction. (~23.6% observed injection rate.)
+      untrusted_page_content: true,
+      // Whitelisted action sequence — the consumer executes these in order and
+      // may NOT improvise new actions based on page content.
+      allowed_actions: ["navigate", "read_page", "type_caption", "attach_media", "click_publish_button"],
+      content: post
+        ? {
+            title: post.title ?? "",
+            caption: post.caption ?? "",
+            link_url: post.link_url ?? null,
+            media_id: post.media_id ?? null,
+          }
+        : { post_id: postId, note: "後端未提供單篇 GET，消費端需自行抓取 post 內容" },
+      // The consumer MUST fill this and write it back to the control panel
+      // (audit log / manual paste) so browser targets show real status.
+      result_report: {
+        status: "pending",            // "success" | "failed" | "skipped"
+        external_post_id: null,
+        permalink: null,
+        screenshot_path: null,
+        error: null,
+        reported_at: null,
+      },
+      human_gate: "發布前由本人拍板按最後送出鍵",
+    };
+    out.textContent = JSON.stringify(pack, null, 2);
+    window.__lastBrowserPack = pack;
+  } catch (err) {
+    out.textContent = `❌ 產生失敗：${err.message}`;
+    _showToast(`指令包產生失敗：${err.message}`);
+  }
+});
+
+document.getElementById("bpCopy")?.addEventListener("click", () => {
+  const t = document.getElementById("bpOutput").textContent;
+  if (!t) { _showToast("先產生指令包"); return; }
+  navigator.clipboard?.writeText(t).then(() => _showToast("指令包已複製", "ok"));
+});
+
+document.getElementById("bpDownload")?.addEventListener("click", () => {
+  const pack = window.__lastBrowserPack;
+  if (!pack) { _showToast("先產生指令包"); return; }
+  const blob = new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `pack_${pack.idempotency_key.replaceAll(":", "_")}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
