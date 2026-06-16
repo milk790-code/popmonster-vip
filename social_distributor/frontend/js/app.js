@@ -493,16 +493,37 @@ async function loadAccounts() {
   tbody.innerHTML = "";
   for (const row of rows) {
     const tr = document.createElement("tr");
+    const proxySet = !!(row.proxy_configured);
     tr.innerHTML = `
       <td>${row.id}</td>
       <td>${escapeHtml(row.platform)}</td>
       <td>${escapeHtml(row.handle)}</td>
       <td>${escapeHtml(row.token_expires_at ?? "—")}</td>
+      <td><span class="proxy-badge" data-id="${row.id}" style="font-size:11px;color:${proxySet ? "#6abf69" : "#555"};">${proxySet ? "🔀 已設定" : "—"}</span></td>
       <td></td>
     `;
     const actions = tr.lastElementChild;
+    // Proxy button
+    const proxyBtn = document.createElement("button");
+    proxyBtn.textContent = proxySet ? "改 Proxy" : "設 Proxy";
+    proxyBtn.style.cssText = "margin-right:4px;font-size:11px;padding:2px 8px;";
+    proxyBtn.addEventListener("click", async () => {
+      const url = prompt(
+        `帳號 #${row.id} (${row.handle}) 的 Proxy URL\n格式: socks5://user:pass@host:port 或 http://host:port\n留空 = 清除`,
+        "" // current proxy not exposed for security
+      );
+      if (url === null) return; // cancelled
+      await api(`/api/accounts/${row.id}/proxy`, {
+        method: "PATCH",
+        body: JSON.stringify({ proxy_url: url || null }),
+      });
+      loadAccounts();
+    });
+    actions.appendChild(proxyBtn);
+    // Revoke button
     const revoke = document.createElement("button");
     revoke.textContent = "Revoke";
+    revoke.style.cssText = "font-size:11px;padding:2px 8px;";
     revoke.addEventListener("click", async () => {
       await api(`/auth/${row.id}/revoke`, { method: "POST" });
       loadAccounts();
