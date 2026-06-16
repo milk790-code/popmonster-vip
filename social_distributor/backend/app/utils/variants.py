@@ -30,6 +30,23 @@ log = logging.getLogger(__name__)
 
 DEFAULT_MODEL = os.environ.get("ANTHROPIC_VARIANT_MODEL", "claude-opus-4-6")
 
+REFERRAL_URL_BASE = os.environ.get("REFERRAL_URL_BASE", "https://popmonster.vip/?ref=")
+
+_REFERRAL_CTA_BY_PLATFORM: dict[str, str] = {
+    "facebook":  "🎁 用我的連結進站：{url}",
+    "instagram": "🎁 用我的連結進站：{url}",
+    "tiktok":    "🎁 進站連結：{url}",
+    "threads":   "🎁 {url}",
+    "youtube":   "🎁 用我的連結進站，送你專屬優惠：{url}",
+}
+
+
+def build_referral_cta(platform: str, code: str) -> str:
+    url = REFERRAL_URL_BASE + code
+    template = _REFERRAL_CTA_BY_PLATFORM.get(platform, "🎁 進站連結：{url}")
+    return template.format(url=url)
+
+
 # Absolute blocklist — any variant containing these terms is rejected outright.
 # Per product brief: 維護型/保護1個月/不是鍍膜/無禁詞/數字可驗證/do_not_say絕不出現
 BRAND_BLOCKLIST: list[str] = [
@@ -52,11 +69,12 @@ _NUMBER_RE = re.compile(r"\b\d+(?:\.\d+)?\s*(?:%|倍|公里|km|ml|g)\b")
 class VariantRequest:
     source_caption: str
     source_title: str
-    platform: str          # facebook | instagram | tiktok | youtube
+    platform: str          # facebook | instagram | tiktok | youtube | threads
     style_profile: dict
     seed: str              # stable identifier — same seed → same output
     few_shot_examples: list[dict] = field(default_factory=list)
     # Each example: {"caption": str, "engagement_rate": float}
+    referral_code: str | None = None  # 若設定，caption 結尾附上裂變 CTA
 
 
 @dataclass
@@ -99,10 +117,19 @@ def generate_variant(req: VariantRequest) -> VariantResult:
                     violations,
                 )
             else:
+                if req.referral_code:
+                    result.caption = (
+                        f"{result.caption}\n\n{build_referral_cta(req.platform, req.referral_code)}"
+                    )
                 return result
         except Exception as exc:
             log.warning("Claude variant failed (%s); falling back to template", exc)
-    return _template_variant(req)
+    result = _template_variant(req)
+    if req.referral_code:
+        result.caption = (
+            f"{result.caption}\n\n{build_referral_cta(req.platform, req.referral_code)}"
+        )
+    return result
 
 
 # ---------------------------------------------------------------------------
