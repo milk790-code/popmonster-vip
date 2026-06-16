@@ -249,6 +249,7 @@ def distribute(post_id: int):
 
     jitter = max(0, int(body.get("jitter_minutes", 0)))
     do_variants = bool(body.get("generate_variants", False))
+    referral_code: str | None = body.get("referral_code") or None
     dry_run = bool(body.get("dry_run", False))
 
     # B7: validate caller-provided overrides against the platform whitelist.
@@ -300,6 +301,7 @@ def distribute(post_id: int):
                     platform=account.platform.value,
                     style_profile=group.style_profile or {},
                     seed=f"{seed}:{account.id}",
+                    referral_code=referral_code,
                 )
                 result = generate_variant(req)
                 overrides["caption"] = result.caption
