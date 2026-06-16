@@ -622,11 +622,13 @@ distributeForm.addEventListener("submit", async (e) => {
     alert("請選擇至少一個群組");
     return;
   }
+  const referralCode = (fd.get("referral_code") || "").trim().toUpperCase();
   const body = {
     group_ids: groupIds,
     scheduled_for: fd.get("scheduled_for") || null,
     timezone: fd.get("timezone") || "UTC",
     jitter_minutes: Number(fd.get("jitter_minutes") || 0),
+    referral_code: referralCode || null,
     generate_variants: fd.get("generate_variants") === "on",
     use_best_time: fd.get("use_best_time") === "on",
     dry_run: fd.get("dry_run") === "on",
