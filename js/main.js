@@ -130,6 +130,17 @@
   els.forEach(function(el){io.observe(el)});
 })();
 
+// === ?ref= 邀請碼捕獲（所有頁面） ===
+(function(){
+  try{
+    var r=new URLSearchParams(location.search).get('ref');
+    if(r&&/^[A-Za-z0-9_-]{4,16}$/.test(r)){
+      localStorage.setItem('pm_ref',r);
+      localStorage.setItem('pm_ref_ts',String(Date.now()));
+    }
+  }catch(e){}
+})();
+
 // === FAQ Toggle ===
 document.querySelectorAll('.faq-q').forEach(function(q){
   q.addEventListener('click',function(){this.parentElement.classList.toggle('open')});
