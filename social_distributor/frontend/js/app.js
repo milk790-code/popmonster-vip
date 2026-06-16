@@ -1158,22 +1158,6 @@ document.getElementById("dailyGoBtn").addEventListener("click", async () => {
   }
 });
 
-function nextOccurrence(dayLabel, hour) {
-  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const target = days.indexOf(dayLabel);
-  if (target < 0) return null;
-  const now = new Date();
-  const todayIdx = (now.getDay() + 6) % 7; // make Mon=0
-  let delta = (target - todayIdx + 7) % 7;
-  const candidate = new Date(now);
-  candidate.setDate(candidate.getDate() + delta);
-  candidate.setHours(hour, 0, 0, 0);
-  if (candidate <= now) candidate.setDate(candidate.getDate() + 7);
-  // Format as local naive ISO so backend localizes with the explicit tz field.
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${candidate.getFullYear()}-${pad(candidate.getMonth() + 1)}-${pad(candidate.getDate())}T${pad(candidate.getHours())}:${pad(candidate.getMinutes())}`;
-}
-
 document.getElementById("dailyRefreshStatus").addEventListener("click", loadDailyStatus);
 
 // --- Auto-schedule "today" ---------------------------------------------
