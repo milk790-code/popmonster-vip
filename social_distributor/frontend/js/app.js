@@ -610,7 +610,44 @@ async function loadDistributeGroups() {
         `<option value="${g.id}">${escapeHtml(g.name)} (${g.members.length} accounts)</option>`
     )
     .join("");
+  populateAbGroupSelect(groups);
 }
+
+// Populate A/B group select from the same groups list used by distribute.
+function populateAbGroupSelect(groups) {
+  const sel = document.getElementById("distributeAbGroupSelect");
+  if (!sel) return;
+  sel.innerHTML = "";
+  groups.forEach((g) => {
+    const opt = document.createElement("option");
+    opt.value = g.id;
+    opt.textContent = `${g.name} (${g.accounts?.length ?? 0} accounts)`;
+    sel.appendChild(opt);
+  });
+}
+
+const distributeAbForm = document.getElementById("distributeAbForm");
+distributeAbForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fd = new FormData(distributeAbForm);
+  const groupId = Number(document.getElementById("distributeAbGroupSelect").value);
+  if (!groupId) { alert("請選擇一個群組"); return; }
+  const referralCode = (fd.get("referral_code") || "").trim().toUpperCase();
+  const body = {
+    group_id: groupId,
+    engine_a: fd.get("engine_a"),
+    engine_b: fd.get("engine_b"),
+    jitter_minutes: Number(fd.get("jitter_minutes") || 0),
+    referral_code: referralCode || null,
+    dry_run: fd.get("dry_run") === "on",
+  };
+  const postId = Number(fd.get("post_id"));
+  const result = await api(`/api/posts/${postId}/distribute_ab`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+  document.getElementById("distributeAbOutput").textContent = JSON.stringify(result, null, 2);
+});
 
 const distributeForm = document.getElementById("distributeForm");
 distributeForm.addEventListener("submit", async (e) => {

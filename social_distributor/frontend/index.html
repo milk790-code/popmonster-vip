@@ -219,6 +219,43 @@
         <button type="submit">Distribute</button>
       </form>
       <pre id="distributeOutput"></pre>
+
+      <h3 style="margin-top:2rem">A/B 測試分發</h3>
+      <p class="hint">
+        把同一篇帖文在同一個群組內做 A/B 測試 — 偶數帳號走引擎 A，奇數帳號走引擎 B，
+        之後在 Insights 頁面查看哪個引擎互動率更高。
+      </p>
+      <form id="distributeAbForm" class="grid">
+        <label>Post ID<input name="post_id" type="number" min="1" required /></label>
+        <label>群組（單選）
+          <select name="group_id" id="distributeAbGroupSelect" size="4"></select>
+        </label>
+        <label>Engine A
+          <select name="engine_a">
+            <option value="claude" selected>claude</option>
+            <option value="template">template</option>
+            <option value="none">none（原文）</option>
+          </select>
+        </label>
+        <label>Engine B
+          <select name="engine_b">
+            <option value="template" selected>template</option>
+            <option value="claude">claude</option>
+            <option value="none">none（原文）</option>
+          </select>
+        </label>
+        <label>Jitter window（分鐘）
+          <input name="jitter_minutes" type="number" min="0" value="20" />
+        </label>
+        <label>邀請碼（選填）
+          <input name="referral_code" placeholder="ABCD1234" style="text-transform:uppercase" />
+        </label>
+        <label class="hint">
+          <input type="checkbox" name="dry_run" /> Dry run
+        </label>
+        <button type="submit">Run A/B</button>
+      </form>
+      <pre id="distributeAbOutput"></pre>
     </section>
 
     <section id="tab-groups" class="tab">
