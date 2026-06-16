@@ -9,8 +9,8 @@
 > | Repo | PR | 狀態 |
 > |---|---|---|
 > | `popmonster-vip` | [#20](https://github.com/milk790-code/popmonster-vip/pull/20) ✅ merged、[#23](https://github.com/milk790-code/popmonster-vip/pull/23) ✅ merged | agentmemory-server/ + index.html ?ref 捕獲 + Caddy proxy + social_distributor referral CTA + ?ref= 訪客歡迎橫幅 |
-> | `popmonster-linebot` | [#2](https://github.com/milk790-code/popmonster-linebot/pull/2) ✅ merged、[#4](https://github.com/milk790-code/popmonster-linebot/pull/4) 🔐 draft（credentials fix） | render.yaml + /邀請 intent + 移除硬寫 LINE 憑證（⚠️ 合前先確認 Render env） |
-> | `customer-project-portal` | [#2](https://github.com/milk790-code/customer-project-portal/pull/2) ✅ merged、#3 ✅ merged、#4 ✅ merged、[#5](https://github.com/milk790-code/customer-project-portal/pull/5) ✅ merged | schema 還原 + referral router + ReferralBinder + ReferralPanel — 自動裂變閉環完整 ✅ |
+> | `popmonster-linebot` | [#2](https://github.com/milk790-code/popmonster-linebot/pull/2) ✅ merged、[#4](https://github.com/milk790-code/popmonster-linebot/pull/4) ✅ merged、[#5](https://github.com/milk790-code/popmonster-linebot/pull/5) ✅ merged | render.yaml + /邀請 intent + 嚴格 LINE env 讀取 + follow 事件帶邀請碼 Flex 卡 ✅ |
+> | `customer-project-portal` | #2–#11 ✅ 全合、[#12](https://github.com/milk790-code/customer-project-portal/pull/12) ✅ merged | schema 還原 + referral router + ReferralBinder + ReferralPanel + LIFF/admin 統計 + LINE userId 推導碼對齊 — 自動裂變閉環完整 ✅ |
 > | `popmonster-website-deployment` | (memory wiring only) | GitHub Pages artifact，不需新部署 |
 
 ---
@@ -162,7 +162,7 @@ agentmemory status
 ## 6. 🔴 合 main 觸發自動部署
 
 **所有 secrets 都進 Render/Railway 之後**，依序合：
-1. ~~`popmonster-linebot#2`~~ ✅ 已合；**`linebot#4`**（credentials 安全修補）→ 確認 Render env 後合 → Render auto-deploy → 拿 webhook URL 回填 LINE
+1. ~~`popmonster-linebot#2`~~ ✅ 已合、~~`linebot#4`~~ ✅ 已合（credentials 安全修補）、~~`linebot#5`~~ ✅ 已合（follow 帶邀請卡）；前提：Render 已設好 `LINE_CHANNEL_SECRET` / `LINE_CHANNEL_ACCESS_TOKEN`
 2. ~~`popmonster-vip#20`~~ ✅ 已合；Railway / Render 已可讀到設定（agentmemory + social_distributor）
 3. ~~`customer-project-portal#2–#5`~~ ✅ 全合；Render Deploy 時跑 §3.3 migration + seed
 
