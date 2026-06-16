@@ -299,7 +299,35 @@
         <label>Scheduled for (ISO 8601, local)
           <input name="scheduled_for" type="datetime-local" />
         </label>
-        <label>Cron expression (overrides scheduled_for)<input name="cron" /></label>
+        <label>排程模式
+          <select id="scheduleMode" onchange="onScheduleModeChange(this.value)">
+            <option value="once">單次（指定時間）</option>
+            <option value="cron">重複排程（cron）</option>
+          </select>
+        </label>
+        <div id="scheduleOnceRow">
+          <label>發布時間（留空 = 立即）
+            <input name="scheduled_for" type="datetime-local" />
+          </label>
+        </div>
+        <div id="scheduleCronRow" style="display:none;display:flex;flex-direction:column;gap:8px;">
+          <label>快速選擇
+            <select id="cronPreset" onchange="onCronPreset(this.value)">
+              <option value="">自訂…</option>
+              <option value="0 9 * * *">每天早上 9:00</option>
+              <option value="0 12 * * *">每天中午 12:00</option>
+              <option value="0 19 * * *">每天晚上 19:00</option>
+              <option value="0 9 * * 1">每週一 09:00</option>
+              <option value="0 9 * * 1,3,5">週一三五 09:00</option>
+              <option value="0 9 1 * *">每月 1 號 09:00</option>
+              <option value="0 9 1,15 * *">每月 1、15 號 09:00</option>
+            </select>
+          </label>
+          <label>Cron 表達式（可手改）
+            <input name="cron" id="cronInput" placeholder="0 9 * * *" style="font-family:monospace;" />
+          </label>
+          <p class="hint" style="font-size:11px;margin:0;">格式：分 時 日 月 週。例：<code>0 9 * * 1</code> = 每週一 09:00 UTC</p>
+        </div>
         <label>Timezone<input name="timezone" value="UTC" /></label>
         <label>Per-platform overrides (JSON)
           <textarea name="overrides" rows="4">{}</textarea>
@@ -328,6 +356,10 @@
         <button data-provider="tiktok">Connect TikTok</button>
         <button data-provider="youtube">Connect YouTube</button>
       </div>
+      <p class="hint" style="margin:8px 0 4px;font-size:12px;">
+        同平台可綁多個帳號：重複點上方按鈕（或 Cookie 綁定）即可新增，每次 OAuth 會以
+        <strong>當前登入的瀏覽器帳號</strong>建立獨立紀錄，不會覆蓋已綁定的帳號。
+      </p>
       <details id="tiktokCookiePanel" style="margin-top:12px;border:1px solid #2a2d34;border-radius:8px;padding:0;">
         <summary style="cursor:pointer;padding:10px 14px;background:#1a1d24;border-radius:8px;font-size:13px;color:#c8a96b;list-style:none;display:flex;align-items:center;gap:8px;">
           🍪 TikTok Cookie 快速綁定（不需 OAuth 審核）

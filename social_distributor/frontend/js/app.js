@@ -310,6 +310,29 @@ previewForm.addEventListener("submit", async (e) => {
 });
 
 // --- Schedule ---------------------------------------------------------
+// --- Schedule mode toggle (once / cron) --------------------------------
+function onScheduleModeChange(val) {
+  document.getElementById("scheduleOnceRow").style.display = val === "once" ? "" : "none";
+  document.getElementById("scheduleCronRow").style.display = val === "cron" ? "flex" : "none";
+  if (val === "once") {
+    const ci = document.getElementById("cronInput");
+    if (ci) ci.value = "";
+  } else {
+    const sf = document.querySelector('#scheduleForm [name="scheduled_for"]');
+    if (sf) sf.value = "";
+  }
+}
+
+function onCronPreset(val) {
+  if (val) document.getElementById("cronInput").value = val;
+}
+
+// init: hide cron row on load (scheduleMode defaults to "once")
+document.addEventListener("DOMContentLoaded", () => {
+  const cronRow = document.getElementById("scheduleCronRow");
+  if (cronRow) cronRow.style.display = "none";
+});
+
 const scheduleForm = document.getElementById("scheduleForm");
 scheduleForm.addEventListener("submit", async (e) => {
   e.preventDefault();
