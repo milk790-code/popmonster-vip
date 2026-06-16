@@ -8,9 +8,9 @@
 >
 > | Repo | PR | 狀態 |
 > |---|---|---|
-> | `popmonster-vip` | [#20](https://github.com/milk790-code/popmonster-vip/pull/20) ✅ merged、[#23](https://github.com/milk790-code/popmonster-vip/pull/23) ✅ merged | agentmemory-server/ + index.html ?ref 捕獲 + Caddy proxy + social_distributor referral CTA + ?ref= 訪客歡迎橫幅 |
-> | `popmonster-linebot` | [#2](https://github.com/milk790-code/popmonster-linebot/pull/2) ✅ merged、[#4](https://github.com/milk790-code/popmonster-linebot/pull/4) ✅ merged、[#5](https://github.com/milk790-code/popmonster-linebot/pull/5) ✅ merged | render.yaml + /邀請 intent + 嚴格 LINE env 讀取 + follow 事件帶邀請碼 Flex 卡 ✅ |
-> | `customer-project-portal` | #2–#11 ✅ 全合、[#12](https://github.com/milk790-code/customer-project-portal/pull/12) ✅ merged | schema 還原 + referral router + ReferralBinder + ReferralPanel + LIFF/admin 統計 + LINE userId 推導碼對齊 — 自動裂變閉環完整 ✅ |
+> | `popmonster-vip` | #20 ✅ #23 ✅ [#25](https://github.com/milk790-code/popmonster-vip/pull/25) ✅ [#26](https://github.com/milk790-code/popmonster-vip/pull/26) ✅ | agentmemory-server/ + ?ref 捕獲 + Caddy proxy + referral CTA 變體引擎（build_referral_cta）+ dispatch API wiring |
+> | `popmonster-linebot` | #2 ✅ #4 ✅ #5 ✅ | render.yaml + /邀請 intent + 嚴格 LINE env 讀取 + follow 事件帶邀請碼 Flex 卡 ✅ |
+> | `customer-project-portal` | #2–#12 ✅ [#13](https://github.com/milk790-code/customer-project-portal/pull/13) ✅ [#14](https://github.com/milk790-code/customer-project-portal/pull/14) ✅ | schema + referral router + ReferralBinder + ReferralPanel + admin 統計 + LINE userId 碼對齊 + 通知鈴鐺全頁面 + 30s live poll ✅ |
 > | `popmonster-website-deployment` | (memory wiring only) | GitHub Pages artifact，不需新部署 |
 
 ---
