@@ -400,3 +400,78 @@ def revoke(account_id: int):
           detail={"platform": account.platform.value})
     db.session.commit()
     return jsonify({"revoked": account_id})
+
+
+# ---------------------------------------------------------------------------
+# TikTok Cookie binding (no OAuth app approval needed)
+# ---------------------------------------------------------------------------
+
+@bp.post("/tiktok/cookie")
+def tiktok_cookie_connect():
+    """Bind a TikTok account using a browser sessionid cookie.
+
+    Body (JSON):
+      user_id   int     required — owner user
+      sessionid str     required — value of the ``sessionid`` cookie from
+                                   a logged-in TikTok web session
+
+    Returns the same shape as the OAuth callback postMessage payload so the
+    frontend can handle both flows identically.
+    """
+    from ..platforms.tiktok import cookie_whoami
+
+    body = request.get_json(silent=True) or {}
+    user_id = body.get("user_id")
+    sessionid = (body.get("sessionid") or "").strip()
+
+    if not user_id or not db.session.get(User, user_id):
+        return jsonify({"ok": False, "error": "user_id required"}), 400
+    if not sessionid:
+        return jsonify({"ok": False, "error": "sessionid required"}), 400
+
+    # Validate the cookie and fetch profile info
+    try:
+        profile = cookie_whoami(sessionid)
+    except Exception as exc:
+        logger.exception("tiktok.cookie_connect whoami failed user_id=%s", user_id)
+        return jsonify({"ok": False, "error": str(exc)}), 400
+
+    open_id = profile["open_id"]
+    handle = profile["handle"]
+
+    c = cipher()
+    existing = (
+        db.session.query(SocialAccount)
+        .filter_by(user_id=user_id, platform=Platform.TIKTOK, external_account_id=open_id)
+        .one_or_none()
+    )
+    if existing is None:
+        existing = SocialAccount(
+            user_id=user_id,
+            platform=Platform.TIKTOK,
+            external_account_id=open_id,
+        )
+        db.session.add(existing)
+
+    existing.handle = handle
+    existing.access_token_enc = c.encrypt(sessionid)   # sessionid stored as access_token
+    existing.refresh_token_enc = None
+    existing.token_expires_at = None                   # cookie has no known expiry
+    existing.scopes = "cookie"
+    existing.extra = {"auth_type": "cookie", "open_id": open_id}
+    existing.revoked_at = None
+    db.session.flush()
+    audit(
+        "account.connected",
+        "social_account",
+        existing.id,
+        actor_user_id=user_id,
+        detail={"platform": "tiktok", "handle": handle, "auth_type": "cookie"},
+    )
+    db.session.commit()
+
+    return jsonify({
+        "ok": True,
+        "connected": [{"id": existing.id, "platform": "tiktok", "handle": handle, "auth_type": "cookie"}],
+        "skipped": [],
+    })
