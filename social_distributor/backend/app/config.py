@@ -96,6 +96,11 @@ class Config:
                 "SHOPEE_PARTNER_KEY",
                 "SHOPEE_REDIRECT_URI",
             ),
+            "linkedin": (
+                "LINKEDIN_CLIENT_ID",
+                "LINKEDIN_CLIENT_SECRET",
+                "LINKEDIN_REDIRECT_URI",
+            ),
         }
         cid_key, sec_key, redir_key = mapping[name]
         return PlatformCredentials(

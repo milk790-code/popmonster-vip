@@ -51,6 +51,7 @@ PROVIDERS = {
     "tiktok": {"platforms": [Platform.TIKTOK]},
     "youtube": {"platforms": [Platform.YOUTUBE]},
     "shopee": {"platforms": [Platform.SHOPEE]},
+    "linkedin": {"platforms": [Platform.LINKEDIN]},
 }
 
 
