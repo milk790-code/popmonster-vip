@@ -113,10 +113,23 @@ agentmemory status
 
 ## 驗證清單
 
+部署完成後，執行以下指令做完整驗證（健康路徑 `/agentmemory/health` 已確認）：
+
+```bash
+# 若走 Caddy proxy（推薦）：
+AGENTMEMORY_URL=https://<proxy-domain> \
+AGENTMEMORY_SECRET=<你設的 token> \
+bash agentmemory-server/verify.sh
+
+# 若只走 Railway 私網（services 之間）：
+AGENTMEMORY_URL=http://agentmemory.railway.internal:3111 \
+bash agentmemory-server/verify.sh
+```
+
 - [ ] Railway service 部署成功（build log 無錯、容器有起來）
-- [ ] iii-engine 在容器內正常啟動（看 deploy log；native 引擎在 slim 容器是否需額外
-      依賴**尚待驗證** — 若起不來，改用 `AGENTMEMORY_USE_DOCKER=1` 路徑或加缺漏套件）
-- [ ] `curl https://<url>/agentmemory/health` 回 200（package README 文件確認的健康路徑；`/agentmemory/livez` 也是同類）
+- [ ] `verify.sh` 全 ✅（health 200 + livez 200 + memory list 有回應）
+- [ ] iii-engine 在容器內正常啟動（若 log 顯示 native 引擎失敗，
+      加 env var `AGENTMEMORY_USE_DOCKER=1` 後 redeploy）
 - [ ] 用 MCP `memory_recall` 對線上 URL 查得到剛同步進去的舊記憶
 - [ ] 四個 repo 連線正常（`agentmemory status` 指向線上 URL 顯示 memory count > 0）
 
