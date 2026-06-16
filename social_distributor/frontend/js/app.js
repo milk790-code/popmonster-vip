@@ -434,6 +434,35 @@ window.addEventListener("message", (event) => {
   }
 });
 
+// --- TikTok Cookie binding -------------------------------------------
+document.getElementById("tiktokCookieBind").addEventListener("click", async () => {
+  const userId = Number(userIdInput.value);
+  const sessionid = document.getElementById("tiktokSessionId").value.trim();
+  const msg = document.getElementById("tiktokCookieMsg");
+  if (!userId) { msg.style.color = "#e57373"; msg.textContent = "請先填入 User ID"; return; }
+  if (!sessionid) { msg.style.color = "#e57373"; msg.textContent = "請貼上 sessionid"; return; }
+  msg.style.color = "#9aa0a6"; msg.textContent = "驗證中…";
+  try {
+    const res = await api("/auth/tiktok/cookie", {
+      method: "POST",
+      body: JSON.stringify({ user_id: userId, sessionid }),
+    });
+    if (res.ok) {
+      const handles = (res.connected || []).map(a => a.handle).join("、");
+      msg.style.color = "#6abf69";
+      msg.textContent = `✓ 已綁定：@${handles}`;
+      document.getElementById("tiktokSessionId").value = "";
+      loadAccounts();
+    } else {
+      msg.style.color = "#e57373";
+      msg.textContent = `✗ ${res.error || "綁定失敗"}`;
+    }
+  } catch (err) {
+    msg.style.color = "#e57373";
+    msg.textContent = `✗ ${err.message}`;
+  }
+});
+
 async function loadAccounts() {
   const userId = Number(userIdInput.value);
   const rows = await api(`/api/accounts?user_id=${userId}`);

@@ -328,6 +328,29 @@
         <button data-provider="tiktok">Connect TikTok</button>
         <button data-provider="youtube">Connect YouTube</button>
       </div>
+      <details id="tiktokCookiePanel" style="margin-top:12px;border:1px solid #2a2d34;border-radius:8px;padding:0;">
+        <summary style="cursor:pointer;padding:10px 14px;background:#1a1d24;border-radius:8px;font-size:13px;color:#c8a96b;list-style:none;display:flex;align-items:center;gap:8px;">
+          🍪 TikTok Cookie 快速綁定（不需 OAuth 審核）
+        </summary>
+        <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+          <p style="margin:0;font-size:12px;color:#9aa0a6;">適用：個人帳號 / app 尚未過審。從瀏覽器 Cookie 取得 <code>sessionid</code> 貼入即可。</p>
+          <label style="font-size:13px;">sessionid
+            <input id="tiktokSessionId" type="password" placeholder="貼上 sessionid 值"
+              style="display:block;width:100%;margin-top:4px;padding:8px 10px;background:#0f1115;border:1px solid #2a2d34;border-radius:6px;color:#ecedef;font-size:13px;box-sizing:border-box;" />
+          </label>
+          <button id="tiktokCookieBind" style="align-self:flex-start;padding:8px 18px;background:#c8a96b;color:#0f1115;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">綁定帳號</button>
+          <p id="tiktokCookieMsg" style="margin:0;font-size:12px;color:#9aa0a6;min-height:16px;"></p>
+          <details style="margin-top:4px;">
+            <summary style="font-size:12px;color:#9aa0a6;cursor:pointer;">如何取得 sessionid？</summary>
+            <ol style="font-size:12px;color:#9aa0a6;margin:8px 0 0 16px;line-height:1.8;">
+              <li>在 Chrome 登入 <a href="https://www.tiktok.com" target="_blank" style="color:#c8a96b;">tiktok.com</a></li>
+              <li>按 F12 → Application → Cookies → <code>https://www.tiktok.com</code></li>
+              <li>找到 <code>sessionid</code> 那列，複製 Value 欄的值</li>
+              <li>貼到上方輸入框 → 點「綁定帳號」</li>
+            </ol>
+          </details>
+        </div>
+      </details>
       <table id="accountsTable">
         <thead>
           <tr><th>ID</th><th>Platform</th><th>Handle</th><th>Token expires</th><th></th></tr>
