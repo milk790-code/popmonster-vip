@@ -96,8 +96,11 @@
 
 <script>
 (function(){
+  var params=new URLSearchParams(location.search);
   var CFG={
-    ECPAY_CHECKOUT_API:'/api/checkout', PAY_ENABLED:false, // 綠界金鑰+Worker 上線後改 true
+    BRAND:'pop',
+    ECPAY_CHECKOUT_API:'https://cdg-core-eyes.milk790.workers.dev/api/checkout',
+    PAY_ENABLED:false, // cdg-core-eyes secrets + deploy + ECPay callback 確認後改 true
     WHATSAPP:'886970527037', LINE_URL:'https://line.me/R/ti/p/@150tiznd',
     FX:{USD:32, MYR:7} // 參考匯率(TWD→外幣除數);僅顯示參考,實際以 TWD 收款
   };
@@ -129,7 +132,7 @@
       .replace(/GA\/DA適用套裝/g,'GA/DA set').replace(/RO適用套裝/g,'RO set')
       .replace(/單一規格/g,'standard').replace(/\s*,\s*/g,', ').replace(/\s+/g,' ').trim();
   }
-  var lang=(new URLSearchParams(location.search).get('lang'))||localStorage.getItem('pm_lang')||'zh';
+  var lang=params.get('lang')||localStorage.getItem('pm_lang')||'zh';
   if(lang!=='en')lang='zh';
   var T=I18N[lang];
   var cart={};try{cart=JSON.parse(localStorage.getItem('pm_cart_v2')||'{}')}catch(e){}
@@ -145,6 +148,11 @@
   function pname(p){return lang==='en'&&p.nameEn?p.nameEn:p.name;}
   function pcat(c){return lang==='en'?(PM_CAT_EN[c]||c):c;}
   function pspec(s){return lang==='en'?specEn(s):s;}
+  function checkoutCid(){
+    var key='pm_checkout_cid', cid=localStorage.getItem(key);
+    if(!cid){cid=(window.crypto&&window.crypto.randomUUID?window.crypto.randomUUID():('pm_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2)));localStorage.setItem(key,cid);}
+    return cid;
+  }
 
   function applyLang(){
     T=I18N[lang];
@@ -240,13 +248,20 @@
     for(var k in cart){var q=cart[k];if(!q)continue;
       var sku=k.split('|')[0],j=+k.split('|')[1];
       var p=prod(sku);if(!p)continue;var v=p.variants[j];
-      items.push({name:p.name+' '+v.spec,price:v.price,qty:q});}
+      items.push({name:p.name+' '+v.spec,sku:sku.toUpperCase(),price:v.price,qty:q});}
     fetch(CFG.ECPAY_CHECKOUT_API,{method:'POST',headers:{'content-type':'application/json'},
-      body:JSON.stringify({items:items,lineUserId:'',lang:lang})})
+      body:JSON.stringify({
+        brand:CFG.BRAND,
+        items:items,
+        cid:checkoutCid(),
+        ref_code:params.get('ref')||'',
+        client_back_url:location.origin+location.pathname,
+        lang:lang
+      })})
       .then(function(r){return r.text()}).then(function(html){document.open();document.write(html);document.close();})
       .catch(function(){alert(T.payFail);});
   };
-  var add=new URLSearchParams(location.search).get('add');
+  var add=params.get('add');
   if(add&&prod(add)){var k0=add+'|'+vi(add);cart[k0]=(cart[k0]||0)+1;save();}
   var dlg=document.getElementById('dlg');window.dlg=dlg;
   applyLang();renderCats();renderList();
