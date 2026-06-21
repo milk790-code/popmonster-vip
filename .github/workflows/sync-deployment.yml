@@ -1,16 +1,22 @@
-name: Sync to Deployment Repo
+name: Prepare Deployment Bundle
 
 on:
   push:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      publish_bundle:
+        description: "Push popmonster-pages.zip to popmonster-website-deployment"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
 
 jobs:
-  sync:
+  bundle:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,16 +28,19 @@ jobs:
           # 建立臨時目錄用於轉換後的檔案
           mkdir -p bundle
 
-          # 複製所有 .html 和 .json 檔案，並進行小寫->大寫轉換
-          for file in a*.html; do
+          # 複製所有 HTML；只有商品頁 a001.html 轉成 A001.html
+          shopt -s nullglob
+          for file in *.html; do
             if [ -f "$file" ]; then
-              uppercase_name=$(echo "$file" | sed 's/^a/A/')
-              cp "$file" "bundle/$uppercase_name"
+              case "$file" in
+                a[0-9][0-9][0-9].html) target_name="A${file#a}" ;;
+                *) target_name="$file" ;;
+              esac
+              cp "$file" "bundle/$target_name"
             fi
           done
 
           # 複製其他必要的檔案
-          cp index.html bundle/ 2>/dev/null || true
           cp products_catalog.js bundle/products.json 2>/dev/null || true
           cp manifest.json bundle/ 2>/dev/null || true
           cp robots.txt bundle/ 2>/dev/null || true
@@ -49,13 +58,25 @@ jobs:
           cd ..
           ls -lh popmonster-pages.zip
 
+      - name: Upload deployment bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: popmonster-pages
+          path: popmonster-pages.zip
+
       - name: Push to deployment repo
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_bundle }}
         env:
           DEPLOYMENT_REPO: popmonster-website-deployment
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOYMENT_REPO_TOKEN: ${{ secrets.DEPLOYMENT_REPO_TOKEN }}
         run: |
+          if [ -z "${DEPLOYMENT_REPO_TOKEN}" ]; then
+            echo "DEPLOYMENT_REPO_TOKEN is required to publish the bundle." >&2
+            exit 1
+          fi
+
           # Clone deployment repo
-          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository_owner }}/${DEPLOYMENT_REPO}.git deploy-repo
+          git clone https://x-access-token:${DEPLOYMENT_REPO_TOKEN}@github.com/${{ github.repository_owner }}/${DEPLOYMENT_REPO}.git deploy-repo
 
           # 替換 zip 檔案
           cp popmonster-pages.zip deploy-repo/
