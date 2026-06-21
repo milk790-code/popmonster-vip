@@ -1,0 +1,69 @@
+name: Sync to Deployment Repo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create bundle zip
+        run: |
+          # 建立臨時目錄用於轉換後的檔案
+          mkdir -p bundle
+
+          # 複製所有 .html 和 .json 檔案，並進行小寫->大寫轉換
+          for file in a*.html; do
+            if [ -f "$file" ]; then
+              uppercase_name=$(echo "$file" | sed 's/^a/A/')
+              cp "$file" "bundle/$uppercase_name"
+            fi
+          done
+
+          # 複製其他必要的檔案
+          cp index.html bundle/ 2>/dev/null || true
+          cp products_catalog.js bundle/products.json 2>/dev/null || true
+          cp manifest.json bundle/ 2>/dev/null || true
+          cp robots.txt bundle/ 2>/dev/null || true
+          cp CNAME bundle/ 2>/dev/null || true
+
+          # 複製資源檔案
+          cp -r css bundle/ 2>/dev/null || true
+          cp -r js bundle/ 2>/dev/null || true
+          cp -r img bundle/ 2>/dev/null || true
+          cp -r assets bundle/ 2>/dev/null || true
+
+          # 生成 zip
+          cd bundle
+          zip -r ../popmonster-pages.zip . -x "*.git*"
+          cd ..
+          ls -lh popmonster-pages.zip
+
+      - name: Push to deployment repo
+        env:
+          DEPLOYMENT_REPO: popmonster-website-deployment
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Clone deployment repo
+          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository_owner }}/${DEPLOYMENT_REPO}.git deploy-repo
+
+          # 替換 zip 檔案
+          cp popmonster-pages.zip deploy-repo/
+
+          # 進入 deployment repo 並提交
+          cd deploy-repo
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+          git add popmonster-pages.zip
+          git commit -m "chore: update popmonster-pages bundle from popmonster-vip [skip ci]" || echo "No changes to commit"
+          git push origin main
