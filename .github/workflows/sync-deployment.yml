@@ -1,9 +1,11 @@
 name: Prepare Deployment Bundle
 
 on:
+  pull_request:
   push:
     branches:
       - main
+      - codex/**
   workflow_dispatch:
     inputs:
       publish_bundle:
