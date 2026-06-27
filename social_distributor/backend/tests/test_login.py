@@ -108,26 +108,30 @@ def test_logout_clears_session(client, app):
     assert client.get("/auth/me").status_code == 401
 
 
-# -- backcompat header on ?user_id= ----------------------------------
+# -- backcompat ?user_id= path is removed (security) ------------------
 
-def test_backcompat_query_user_id_emits_deprecation_header(client, app):
-    """Old code paths still work but Deprecation header surfaces."""
+def test_query_user_id_no_longer_authenticates(client, app):
+    """The ?user_id= impersonation backcompat path was removed.
+
+    A request that supplies ?user_id= but has no session must be rejected with
+    401 and must NOT emit the old Deprecation header.
+    """
     with app.app_context():
         user = User(email="bc@example.com", display_name="bc")
         db.session.add(user); db.session.commit()
         uid = user.id
 
     res = client.get(f"/api/groups?user_id={uid}")
-    assert res.status_code == 200
-    # Deprecation header should be present on backcompat use.
-    assert "Deprecation" in res.headers
+    assert res.status_code == 401
+    assert "Deprecation" not in res.headers
 
 
-def test_session_user_does_not_emit_deprecation_header(client, app):
+def test_session_user_is_authenticated_for_api(client, app):
     with app.app_context():
-        token = issue_magic_token("nobackcompat@example.com")
+        token = issue_magic_token("sessionuser@example.com")
     client.get(f"/auth/login/verify?token={token}")
     res = client.get("/api/groups")
+    assert res.status_code == 200
     assert "Deprecation" not in res.headers
 
 

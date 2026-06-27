@@ -14,6 +14,8 @@ from app.models import (
 )
 from app.utils.jitter import spread
 
+from .conftest import login_as
+
 
 def _make_group(app, *, accounts: list[Platform], style: dict | None = None):
     with app.app_context():
@@ -63,9 +65,10 @@ def test_jitter_zero_window_returns_base_repeated():
 
 
 def test_distribute_creates_targets_for_all_group_accounts(client, app):
-    _, group_id, post_id = _make_group(
+    user_id, group_id, post_id = _make_group(
         app, accounts=[Platform.FACEBOOK, Platform.INSTAGRAM, Platform.YOUTUBE]
     )
+    login_as(client, user_id)
     future = (datetime.now(timezone.utc) + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%S")
     with patch("app.api.posts.dispatch_target.delay") as dispatch:
         res = client.post(
@@ -95,7 +98,8 @@ def test_distribute_creates_targets_for_all_group_accounts(client, app):
 
 
 def test_distribute_dry_run_persists_nothing(client, app):
-    _, group_id, post_id = _make_group(app, accounts=[Platform.FACEBOOK])
+    user_id, group_id, post_id = _make_group(app, accounts=[Platform.FACEBOOK])
+    login_as(client, user_id)
     res = client.post(
         f"/api/posts/{post_id}/distribute",
         json={"group_ids": [group_id], "dry_run": True},
@@ -108,12 +112,13 @@ def test_distribute_dry_run_persists_nothing(client, app):
 
 def test_distribute_with_variants_uses_template_fallback(client, app):
     """Without ANTHROPIC_API_KEY the variant engine falls back to templates."""
-    _, group_id, post_id = _make_group(
+    user_id, group_id, post_id = _make_group(
         app, accounts=[Platform.INSTAGRAM, Platform.TIKTOK],
         style={"tone": "casual", "emoji_density": "high",
                "hashtag_pool": ["#美食", "#日常", "#推薦", "#療癒",
                                 "#週末", "#輕食", "#台北", "#甜點"]},
     )
+    login_as(client, user_id)
     future = (datetime.now(timezone.utc) + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%S")
     res = client.post(
         f"/api/posts/{post_id}/distribute",
@@ -132,7 +137,8 @@ def test_distribute_with_variants_uses_template_fallback(client, app):
 
 
 def test_distribute_skips_revoked_accounts(client, app):
-    _, group_id, post_id = _make_group(app, accounts=[Platform.FACEBOOK, Platform.TIKTOK])
+    user_id, group_id, post_id = _make_group(app, accounts=[Platform.FACEBOOK, Platform.TIKTOK])
+    login_as(client, user_id)
     with app.app_context():
         from datetime import datetime
         group = db.session.get(AccountGroup, group_id)
@@ -146,3 +152,29 @@ def test_distribute_skips_revoked_accounts(client, app):
     plan = res.get_json()["plan"]
     assert len(plan) == 1
     assert plan[0]["platform"] == "tiktok"
+
+
+def test_distribute_unauthenticated_is_rejected(client, app):
+    """No session → 401, never silent impersonation."""
+    _, group_id, post_id = _make_group(app, accounts=[Platform.FACEBOOK])
+    res = client.post(
+        f"/api/posts/{post_id}/distribute",
+        json={"group_ids": [group_id], "dry_run": True},
+    )
+    assert res.status_code == 401
+
+
+def test_distribute_other_users_post_is_forbidden(client, app):
+    """IDOR: logging in as a different user must not reach another's post."""
+    _, group_id, post_id = _make_group(app, accounts=[Platform.FACEBOOK])
+    with app.app_context():
+        attacker = User(email="attacker@example.com", display_name="x")
+        db.session.add(attacker)
+        db.session.commit()
+        attacker_id = attacker.id
+    login_as(client, attacker_id)
+    res = client.post(
+        f"/api/posts/{post_id}/distribute",
+        json={"group_ids": [group_id], "dry_run": True},
+    )
+    assert res.status_code == 403

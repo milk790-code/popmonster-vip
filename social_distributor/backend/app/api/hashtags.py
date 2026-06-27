@@ -5,6 +5,7 @@ from flask import Blueprint, jsonify, request
 
 from ..extensions import db
 from ..models import AccountGroup
+from ..utils.auth import current_user_id
 from ..utils.hashtags import HashtagRequest, suggest_hashtags
 
 bp = Blueprint("hashtags", __name__, url_prefix="/api/hashtags")
@@ -28,6 +29,8 @@ def suggest():
         group = db.session.get(AccountGroup, int(gid))
         if group is None:
             return jsonify({"error": "group_id not found"}), 404
+        if group.user_id != current_user_id():
+            return jsonify({"error": "forbidden"}), 403
         style_profile = group.style_profile or {}
 
     req = HashtagRequest(

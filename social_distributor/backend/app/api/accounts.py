@@ -9,16 +9,15 @@ from ..extensions import db
 from ..models import Platform, SocialAccount, User
 from ..platforms import all_platforms
 from ..utils.audit import record as audit
+from ..utils.auth import current_user_id
 
 bp = Blueprint("accounts", __name__, url_prefix="/api/accounts")
 
 
 @bp.get("")
 def list_accounts():
-    user_id = request.args.get("user_id", type=int)
-    query = db.session.query(SocialAccount)
-    if user_id:
-        query = query.filter_by(user_id=user_id)
+    # Always scope to the logged-in user.
+    query = db.session.query(SocialAccount).filter_by(user_id=current_user_id())
     rows = query.filter(SocialAccount.revoked_at.is_(None)).all()
     return jsonify(
         [
@@ -51,6 +50,8 @@ def test_account(account_id: int):
     account = db.session.get(SocialAccount, account_id)
     if not account:
         return jsonify({"error": "not found"}), 404
+    if account.user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
     fresh = (
         account.token_expires_at is None
         or account.token_expires_at > datetime.now(timezone.utc)
@@ -65,6 +66,8 @@ def request_erasure(user_id: int):
     The actual purge is done by an out-of-band worker so we can keep an
     auditable trail of the request itself.
     """
+    if user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
     user = db.session.get(User, user_id)
     if not user:
         return jsonify({"error": "not found"}), 404
@@ -86,6 +89,8 @@ def set_proxy_url(account_id: int):
     account = db.session.get(SocialAccount, account_id)
     if not account:
         return jsonify({"error": "not found"}), 404
+    if account.user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
     body = request.get_json(silent=True) or {}
     proxy_url = body.get("proxy_url")  # None = clear
     extra = dict(account.extra or {})

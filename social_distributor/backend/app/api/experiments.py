@@ -31,6 +31,7 @@ from ..models import (
     SocialAccount,
 )
 from ..utils.audit import record as audit
+from ..utils.auth import current_user_id
 from ..utils.experiments import backtest_and_persist_winners, compare_variants
 from ..utils.jitter import spread
 from ..utils.variants import VariantRequest, generate_variant
@@ -57,11 +58,15 @@ def distribute_ab(post_id: int):
     post = db.session.get(Post, post_id)
     if not post:
         return jsonify({"error": "post not found"}), 404
+    if post.user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
     body = request.get_json(force=True) or {}
 
     group = db.session.get(AccountGroup, body.get("group_id"))
     if not group:
         return jsonify({"error": "group not found"}), 404
+    if group.user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
 
     engine_a = body.get("engine_a", "claude")
     engine_b = body.get("engine_b", "none")
@@ -174,6 +179,11 @@ def experiment_results():
     group_id = request.args.get("group_id", type=int)
     if not group_id:
         return jsonify({"error": "group_id required"}), 400
+    group = db.session.get(AccountGroup, group_id)
+    if not group:
+        return jsonify({"error": "group not found"}), 404
+    if group.user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
     since_arg = request.args.get("since")
     since = _parse_when(since_arg) if since_arg else None
 

@@ -10,6 +10,8 @@ from app.utils.hashtags import (
     suggest_hashtags,
 )
 
+from .conftest import login_as
+
 
 def test_normalise_adds_hash_and_strips_whitespace():
     assert _normalise("foo bar") == "#foobar"
@@ -83,7 +85,9 @@ def test_endpoint_uses_group_style(client, app):
         )
         db.session.add(group); db.session.commit()
         gid = group.id
+        uid = user.id
 
+    login_as(client, uid)
     res = client.post("/api/hashtags/suggest", json={
         "caption": "test", "platform": "instagram",
         "group_id": gid, "count": 3,
@@ -96,7 +100,12 @@ def test_endpoint_uses_group_style(client, app):
         assert tag in ["#台北", "#美食", "#日常"]
 
 
-def test_endpoint_404s_unknown_group(client):
+def test_endpoint_404s_unknown_group(client, app):
+    with app.app_context():
+        user = User(email="hg@example.com", display_name="hg")
+        db.session.add(user); db.session.commit()
+        uid = user.id
+    login_as(client, uid)
     res = client.post("/api/hashtags/suggest", json={
         "caption": "x", "platform": "instagram", "group_id": 99999,
     })

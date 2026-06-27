@@ -26,3 +26,15 @@ def app():
 @pytest.fixture()
 def client(app):
     return app.test_client()
+
+
+def login_as(client, user_id: int) -> None:
+    """Authenticate the test client as ``user_id`` via the real session flow.
+
+    Identity now comes only from the session (the ``?user_id=`` backcompat
+    impersonation path was removed for security), so endpoint tests must log in
+    instead of passing ``user_id`` in the request. This mirrors what the
+    magic-link verify endpoint does: set ``session['user_id']``.
+    """
+    with client.session_transaction() as sess:
+        sess["user_id"] = user_id

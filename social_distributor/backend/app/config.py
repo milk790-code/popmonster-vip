@@ -12,6 +12,28 @@ def _env(key: str, default: str | None = None) -> str | None:
     return value
 
 
+_INSECURE_SECRET = "dev-secret"
+
+
+def _require_secret_key() -> str:
+    """Fail-closed at boot: refuse to start without a real SECRET_KEY.
+
+    A missing key, an empty key, or the placeholder ``dev-secret`` would let
+    anyone forge session cookies (and magic-link tokens). We raise instead of
+    silently falling back, so a misconfigured deploy never serves traffic with
+    a predictable signing key.
+    """
+    value = os.environ.get("SECRET_KEY", "")
+    if not value or value == _INSECURE_SECRET:
+        raise RuntimeError(
+            "SECRET_KEY is unset or set to the insecure default "
+            f"'{_INSECURE_SECRET}'. Generate one with "
+            "`python -c \"import secrets; print(secrets.token_hex(32))\"` "
+            "and set it in the environment before starting."
+        )
+    return value
+
+
 @dataclass
 class PlatformCredentials:
     client_id: str | None
@@ -25,7 +47,7 @@ class PlatformCredentials:
 
 @dataclass
 class Config:
-    secret_key: str = field(default_factory=lambda: _env("SECRET_KEY", "dev-secret"))
+    secret_key: str = field(default_factory=_require_secret_key)
     token_encryption_key: str | None = field(
         default_factory=lambda: _env("TOKEN_ENCRYPTION_KEY")
     )

@@ -14,6 +14,8 @@ from app.permissions import meta_bm
 from app.permissions.health import run_health_sweep
 from app.utils.crypto import cipher
 
+from .conftest import login_as
+
 
 def _seed(app, *, platform=Platform.FACEBOOK, ext_id="page-1"):
     with app.app_context():
@@ -34,10 +36,10 @@ def _seed(app, *, platform=Platform.FACEBOOK, ext_id="page-1"):
 
 def test_grant_calls_platform_then_persists(client, app):
     user_id, _ = _seed(app)
+    login_as(client, user_id)
     raw = {"success": True}
     with patch("app.api.permissions.meta_bm.grant_role", return_value=raw) as grant:
         res = client.post("/api/permissions/grants", json={
-            "user_id": user_id,
             "platform": "facebook",
             "asset_kind": "page",
             "asset_external_id": "page-1",
@@ -56,8 +58,9 @@ def test_grant_calls_platform_then_persists(client, app):
 
 def test_grant_rejects_youtube_with_runbook_pointer(client, app):
     user_id, _ = _seed(app)
+    login_as(client, user_id)
     res = client.post("/api/permissions/grants", json={
-        "user_id": user_id, "platform": "youtube", "asset_kind": "channel",
+        "platform": "youtube", "asset_kind": "channel",
         "asset_external_id": "UC123", "grantee_external_id": "x", "role": "ADMIN",
     })
     assert res.status_code == 422
@@ -66,9 +69,10 @@ def test_grant_rejects_youtube_with_runbook_pointer(client, app):
 
 def test_revoke_calls_platform_and_marks_status(client, app):
     user_id, _ = _seed(app)
+    login_as(client, user_id)
     with patch("app.api.permissions.meta_bm.grant_role", return_value={}):
         client.post("/api/permissions/grants", json={
-            "user_id": user_id, "platform": "facebook", "asset_kind": "page",
+            "platform": "facebook", "asset_kind": "page",
             "asset_external_id": "page-1", "grantee_external_id": "u",
             "role": "ADMIN",
         })
@@ -82,7 +86,9 @@ def test_revoke_calls_platform_and_marks_status(client, app):
     assert res.get_json()["status"] == "revoked"
 
 
-def test_runbook_endpoint_serves_youtube_doc(client):
+def test_runbook_endpoint_serves_youtube_doc(client, app):
+    user_id, _ = _seed(app)
+    login_as(client, user_id)
     res = client.get("/api/permissions/runbooks/youtube_transfer.md")
     assert res.status_code == 200
     body = res.get_data(as_text=True)

@@ -11,6 +11,7 @@ from ..extensions import db
 from ..models import JobStatus, Post, PostTarget, SocialAccount
 from ..scheduler import dispatch_target
 from ..utils.audit import record as audit
+from ..utils.auth import current_user_id
 
 bp = Blueprint("schedules", __name__, url_prefix="/api/schedules")
 
@@ -31,6 +32,8 @@ def create_schedule():
     post = db.session.get(Post, body["post_id"])
     if not post:
         return jsonify({"error": "post not found"}), 404
+    if post.user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
 
     from ..utils.overrides import validate_overrides
 
@@ -39,6 +42,9 @@ def create_schedule():
         account = db.session.get(SocialAccount, item["account_id"])
         if not account or account.revoked_at is not None:
             return jsonify({"error": f"account {item['account_id']} not connected"}), 400
+        # IDOR guard: only schedule onto the caller's own accounts.
+        if account.user_id != current_user_id():
+            return jsonify({"error": "forbidden"}), 403
 
         # B7: per-target overrides validated against the account's platform.
         item_overrides = item.get("overrides", {})
@@ -98,10 +104,12 @@ def create_schedule():
 
 @bp.get("")
 def list_schedules():
-    user_id = request.args.get("user_id", type=int)
-    query = db.session.query(PostTarget).join(SocialAccount)
-    if user_id:
-        query = query.filter(SocialAccount.user_id == user_id)
+    # Always scope to the logged-in user's accounts.
+    query = (
+        db.session.query(PostTarget)
+        .join(SocialAccount)
+        .filter(SocialAccount.user_id == current_user_id())
+    )
     rows = query.order_by(PostTarget.scheduled_for.is_(None), PostTarget.scheduled_for).all()
     return jsonify(
         [
@@ -129,6 +137,8 @@ def cancel_target(target_id: int):
     target = db.session.get(PostTarget, target_id)
     if not target:
         return jsonify({"error": "not found"}), 404
+    if target.post.user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
     if target.status in (JobStatus.SUCCEEDED, JobStatus.RUNNING):
         return jsonify({"error": f"cannot cancel from {target.status.value}"}), 409
     target.status = JobStatus.CANCELLED
@@ -143,6 +153,8 @@ def retry_target(target_id: int):
     target = db.session.get(PostTarget, target_id)
     if not target:
         return jsonify({"error": "not found"}), 404
+    if target.post.user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
     if target.status != JobStatus.FAILED:
         return jsonify({"error": "only failed targets can be retried"}), 409
     target.status = JobStatus.QUEUED

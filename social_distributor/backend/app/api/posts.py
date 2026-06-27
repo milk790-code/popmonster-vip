@@ -18,11 +18,26 @@ from ..models import (
 )
 from ..scheduler import dispatch_target
 from ..utils.audit import record as audit
+from ..utils.auth import current_user_id
 from ..utils.best_times import next_best_time_for_group
 from ..utils.jitter import spread
 from ..utils.variants import VariantRequest, generate_variant
 
 bp = Blueprint("posts", __name__, url_prefix="/api/posts")
+
+
+def _load_owned_post(post_id: int):
+    """Return (post, None) if the post belongs to the logged-in user.
+
+    Returns (None, response) otherwise: 404 if the post doesn't exist, 403 if
+    it belongs to another user. Prevents cross-tenant IDOR on every post route.
+    """
+    post = db.session.get(Post, post_id)
+    if not post:
+        return None, (jsonify({"error": "not found"}), 404)
+    if post.user_id != current_user_id():
+        return None, (jsonify({"error": "forbidden"}), 403)
+    return post, None
 
 
 def _serialize_post(post: Post) -> dict:
@@ -58,10 +73,14 @@ def _serialize_post(post: Post) -> dict:
 def create_post():
     """Create a draft post. Targets are added separately via /schedules."""
     body = request.get_json(force=True)
-    user_id = body["user_id"]
+    user_id = current_user_id()
     media_id = body.get("media_id")
-    if media_id and not db.session.get(MediaAsset, media_id):
-        return jsonify({"error": "unknown media_id"}), 400
+    if media_id:
+        media = db.session.get(MediaAsset, media_id)
+        if not media:
+            return jsonify({"error": "unknown media_id"}), 400
+        if media.user_id != user_id:
+            return jsonify({"error": "forbidden"}), 403
 
     post = Post(
         user_id=user_id,
@@ -79,9 +98,9 @@ def create_post():
 
 @bp.get("/<int:post_id>")
 def get_post(post_id: int):
-    post = db.session.get(Post, post_id)
-    if not post:
-        return jsonify({"error": "not found"}), 404
+    post, err = _load_owned_post(post_id)
+    if err:
+        return err
     return jsonify(_serialize_post(post))
 
 
@@ -91,9 +110,9 @@ def update_post(post_id: int):
 
     This gives the rollback endpoint something to revert to.
     """
-    post = db.session.get(Post, post_id)
-    if not post:
-        return jsonify({"error": "not found"}), 404
+    post, err = _load_owned_post(post_id)
+    if err:
+        return err
     body = request.get_json(force=True)
 
     revision = Post(
@@ -121,8 +140,10 @@ def update_post(post_id: int):
 @bp.post("/<int:post_id>/rollback")
 def rollback(post_id: int):
     """Roll back to the previous version of the post."""
-    post = db.session.get(Post, post_id)
-    if not post or not post.parent_post_id:
+    post, err = _load_owned_post(post_id)
+    if err:
+        return err
+    if not post.parent_post_id:
         return jsonify({"error": "no parent version"}), 400
     parent = db.session.get(Post, post.parent_post_id)
     revision = Post(
@@ -150,10 +171,12 @@ def rollback(post_id: int):
 @bp.get("/<int:post_id>/diff/<int:other_id>")
 def diff_post(post_id: int, other_id: int):
     """Multi-platform / cross-version diff helper."""
-    a = db.session.get(Post, post_id)
-    b = db.session.get(Post, other_id)
-    if not a or not b:
-        return jsonify({"error": "not found"}), 404
+    a, err = _load_owned_post(post_id)
+    if err:
+        return err
+    b, err = _load_owned_post(other_id)
+    if err:
+        return err
     diff = {
         field: {"a": getattr(a, field), "b": getattr(b, field)}
         for field in ("title", "caption", "link_url", "media_id")
@@ -165,19 +188,25 @@ def diff_post(post_id: int, other_id: int):
 @bp.post("/<int:post_id>/preview-compliance")
 def preview_compliance(post_id: int):
     """Run the compliance engine without scheduling the publish."""
-    post = db.session.get(Post, post_id)
-    if not post:
-        return jsonify({"error": "not found"}), 404
+    post, err = _load_owned_post(post_id)
+    if err:
+        return err
 
     body = request.get_json(silent=True) or {}
     account_ids: list[int] = body.get("account_ids", [])
+    # IDOR guard: only the caller's own accounts may be referenced.
     accounts = (
         db.session.query(SocialAccount)
-        .filter(SocialAccount.id.in_(account_ids))
+        .filter(
+            SocialAccount.id.in_(account_ids),
+            SocialAccount.user_id == current_user_id(),
+        )
         .all()
         if account_ids
         else []
     )
+    if account_ids and len(accounts) != len(set(account_ids)):
+        return jsonify({"error": "one or more account_ids not found"}), 404
     targets = [
         PostTarget(
             post=post,
@@ -222,18 +251,22 @@ def distribute(post_id: int):
           "dry_run": false
         }
     """
-    post = db.session.get(Post, post_id)
-    if not post:
-        return jsonify({"error": "post not found"}), 404
+    post, err = _load_owned_post(post_id)
+    if err:
+        return err
     body = request.get_json(force=True) or {}
 
     group_ids: list[int] = body.get("group_ids", [])
     if not group_ids:
         return jsonify({"error": "group_ids is required"}), 400
 
+    # IDOR guard: only fan out to the caller's own account groups.
     groups = (
         db.session.query(AccountGroup)
-        .filter(AccountGroup.id.in_(group_ids))
+        .filter(
+            AccountGroup.id.in_(group_ids),
+            AccountGroup.user_id == current_user_id(),
+        )
         .all()
     )
     if len(groups) != len(set(group_ids)):
@@ -385,7 +418,7 @@ def _parse_when(raw: str | None, tz_name: str):
 def create_media():
     body = request.get_json(force=True)
     media = MediaAsset(
-        user_id=body["user_id"],
+        user_id=current_user_id(),
         kind=body["kind"],
         storage_url=body["storage_url"],
         mime_type=body.get("mime_type", "application/octet-stream"),

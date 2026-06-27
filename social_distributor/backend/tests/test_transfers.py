@@ -7,6 +7,8 @@ from app.models import OwnershipTransfer, Platform, SocialAccount, User
 from app.transfers.manual_transfer import advance, transition_expired_if_overdue
 from app.utils.crypto import cipher
 
+from .conftest import login_as
+
 
 def _seed_user(app):
     with app.app_context():
@@ -18,8 +20,9 @@ def _seed_user(app):
 
 def test_manual_transfer_creation(client, app):
     user_id = _seed_user(app)
+    login_as(client, user_id)
     res = client.post("/api/transfers", json={
-        "user_id": user_id, "platform": "youtube", "channel": "manual",
+        "platform": "youtube", "channel": "manual",
         "asset_kind": "channel", "asset_external_id": "UC123",
         "source_label": "personal", "target_label": "Brand A",
     })
@@ -31,8 +34,9 @@ def test_manual_transfer_creation(client, app):
 
 def test_api_channel_rejects_non_facebook(client, app):
     user_id = _seed_user(app)
+    login_as(client, user_id)
     res = client.post("/api/transfers", json={
-        "user_id": user_id, "platform": "tiktok", "channel": "api",
+        "platform": "tiktok", "channel": "api",
         "asset_kind": "creator_account", "asset_external_id": "x",
     })
     assert res.status_code == 422
@@ -40,6 +44,7 @@ def test_api_channel_rejects_non_facebook(client, app):
 
 def test_api_channel_calls_meta_initiation(client, app):
     user_id = _seed_user(app)
+    login_as(client, user_id)
     with app.app_context():
         c = cipher()
         db.session.add(SocialAccount(
@@ -52,7 +57,7 @@ def test_api_channel_calls_meta_initiation(client, app):
     with patch("app.api.transfers.meta_transfer.initiate_page_transfer",
                return_value={"ok": True}) as init:
         res = client.post("/api/transfers", json={
-            "user_id": user_id, "platform": "facebook", "channel": "api",
+            "platform": "facebook", "channel": "api",
             "asset_kind": "page", "asset_external_id": "page-9",
             "from_business_id": "bm-source", "to_business_id": "bm-target",
         })

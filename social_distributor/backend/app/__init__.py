@@ -54,11 +54,29 @@ def create_app() -> Flask:
             ):
                 return jsonify({"error": "unauthorized"}), 401
 
-    raw_origins = os.environ.get("CORS_ALLOWED_ORIGINS", "*").strip()
-    cors_origins = (
-        "*" if raw_origins in ("", "*")
-        else [o.strip() for o in raw_origins.split(",") if o.strip()]
-    )
+    # CRIT: never reflect `*` with credentials. CORS_ALLOWED_ORIGINS must be an
+    # explicit comma-separated allow-list in any shared/prod deploy; when unset
+    # we fall back to a safe localhost-only list for first-time dev, NOT `*`.
+    _DEFAULT_DEV_ORIGINS = [
+        "http://localhost:5173",
+        "http://localhost:8080",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:8080",
+    ]
+    raw_origins = os.environ.get("CORS_ALLOWED_ORIGINS", "").strip()
+    if raw_origins == "*":
+        # Explicit wildcard is incompatible with credentialed CORS and unsafe;
+        # refuse it and fall back to the dev allow-list with a loud warning.
+        log.warning(
+            "CORS_ALLOWED_ORIGINS='*' is not allowed with credentials; "
+            "set an explicit comma-separated origin allow-list. Falling back "
+            "to localhost-only origins."
+        )
+        cors_origins = _DEFAULT_DEV_ORIGINS
+    elif raw_origins:
+        cors_origins = [o.strip() for o in raw_origins.split(",") if o.strip()]
+    else:
+        cors_origins = _DEFAULT_DEV_ORIGINS
     cors.init_app(
         app,
         resources={
@@ -68,10 +86,25 @@ def create_app() -> Flask:
         },
     )
 
-    # C3: resolve current user once per request, surface deprecation header
-    # for any caller still using ?user_id= backcompat.
+    # C3: resolve current user once per request from the authenticated session.
     from .utils.auth import attach_user_id_middleware
     attach_user_id_middleware(app)
+
+    # CRIT: session login guard for all /api/* routes. Identity must come from
+    # an authenticated session (set via the magic-link flow). Requests with no
+    # logged-in user get 401 — there is no ?user_id= impersonation path anymore.
+    # Exemptions: OPTIONS preflight (CORS), and non-/api paths (/auth/*,
+    # /healthz*) which handle their own auth.
+    @app.before_request
+    def _require_login_for_api():
+        from flask import request as _req, g as _g
+        if _req.method == "OPTIONS":
+            return None
+        if not (_req.path or "").startswith("/api/"):
+            return None
+        if getattr(_g, "user_id", None) is None:
+            return jsonify({"error": "authentication required"}), 401
+        return None
 
     # 96號 指令1: X-API-Key guard for /api/* (exempts /auth/*, /healthz*,
     # OPTIONS preflight). Reads API_KEY from env; warn-only until it is set.

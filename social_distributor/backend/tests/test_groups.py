@@ -2,6 +2,8 @@
 from app.extensions import db
 from app.models import Platform, SocialAccount, User
 
+from .conftest import login_as
+
 
 def _seed_user_and_account(app, platform: Platform = Platform.FACEBOOK):
     with app.app_context():
@@ -22,10 +24,10 @@ def _seed_user_and_account(app, platform: Platform = Platform.FACEBOOK):
 
 def test_group_create_with_members(client, app):
     user_id, account_id = _seed_user_and_account(app)
+    login_as(client, user_id)
     res = client.post(
         "/api/groups",
         json={
-            "user_id": user_id,
             "name": "美食日常 A",
             "description": "casual foodie persona",
             "style_profile": {"tone": "casual", "emoji_density": "medium"},
@@ -41,14 +43,16 @@ def test_group_create_with_members(client, app):
 
 def test_group_name_unique_per_user(client, app):
     user_id, _ = _seed_user_and_account(app)
-    client.post("/api/groups", json={"user_id": user_id, "name": "dup"})
-    res = client.post("/api/groups", json={"user_id": user_id, "name": "dup"})
+    login_as(client, user_id)
+    client.post("/api/groups", json={"name": "dup"})
+    res = client.post("/api/groups", json={"name": "dup"})
     assert res.status_code == 409
 
 
 def test_group_member_add_remove(client, app):
     user_id, account_id = _seed_user_and_account(app)
-    res = client.post("/api/groups", json={"user_id": user_id, "name": "g1"})
+    login_as(client, user_id)
+    res = client.post("/api/groups", json={"name": "g1"})
     group_id = res.get_json()["id"]
 
     res = client.post(
@@ -64,9 +68,10 @@ def test_group_member_add_remove(client, app):
 
 def test_group_update_style_profile(client, app):
     user_id, _ = _seed_user_and_account(app)
+    login_as(client, user_id)
     res = client.post(
         "/api/groups",
-        json={"user_id": user_id, "name": "g", "style_profile": {"tone": "casual"}},
+        json={"name": "g", "style_profile": {"tone": "casual"}},
     )
     group_id = res.get_json()["id"]
     res = client.put(
@@ -78,15 +83,16 @@ def test_group_update_style_profile(client, app):
 
 
 def test_group_rejects_account_from_other_user(client, app):
-    _, _ = _seed_user_and_account(app)
+    _, victim_account_id = _seed_user_and_account(app)
     with app.app_context():
         other = User(email="o@example.com", display_name="o")
         db.session.add(other)
         db.session.commit()
         other_id = other.id
-    res = client.post("/api/groups", json={"user_id": other_id, "name": "g"})
+    login_as(client, other_id)
+    res = client.post("/api/groups", json={"name": "g"})
     group_id = res.get_json()["id"]
     res = client.post(
-        f"/api/groups/{group_id}/members", json={"account_id": 1}
+        f"/api/groups/{group_id}/members", json={"account_id": victim_account_id}
     )
     assert res.status_code == 400

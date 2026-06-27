@@ -593,13 +593,13 @@ async function loadGroups() {
     const memberRows = group.members
       .map(
         (m) =>
-          `<li>${m.platform} · ${m.handle} <button data-account="${m.account_id}" data-group="${group.id}" class="rm-member">移除</button></li>`
+          `<li>${escapeHtml(m.platform)} · ${escapeHtml(m.handle)} <button data-account="${m.account_id}" data-group="${group.id}" class="rm-member">移除</button></li>`
       )
       .join("");
 
     const availableOptions = accounts
       .filter((a) => !group.members.find((m) => m.account_id === a.id))
-      .map((a) => `<option value="${a.id}">${a.platform} · ${a.handle}</option>`)
+      .map((a) => `<option value="${a.id}">${escapeHtml(a.platform)} · ${escapeHtml(a.handle)}</option>`)
       .join("");
 
     card.innerHTML = `
@@ -755,7 +755,8 @@ function escapeHtml(s) {
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 // --- WYSIWYG preview --------------------------------------------------

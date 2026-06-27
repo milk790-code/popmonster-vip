@@ -13,6 +13,8 @@ from app.models import (
 )
 from app.utils.best_times import best_times_for_account
 
+from .conftest import login_as
+
 
 def _publish_at(app, *, account_id, post_id, dt: datetime, reach: int, likes: int):
     target = PostTarget(
@@ -98,6 +100,12 @@ def test_best_times_respects_min_samples(app):
         assert len(best_times_for_account(account.id, min_samples=1)) == 1
 
 
-def test_best_times_endpoint_requires_filter(client):
+def test_best_times_endpoint_requires_filter(client, app):
+    with app.app_context():
+        user = User(email="bt@example.com", display_name="bt")
+        db.session.add(user)
+        db.session.commit()
+        uid = user.id
+    login_as(client, uid)
     res = client.get("/api/insights/best-times")
     assert res.status_code == 400

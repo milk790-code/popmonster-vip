@@ -5,19 +5,18 @@ from flask import Blueprint, jsonify, request
 
 from ..extensions import db
 from ..models import AuditLog
+from ..utils.auth import current_user_id
 
 bp = Blueprint("audit", __name__, url_prefix="/api/audit")
 
 
 @bp.get("")
 def list_audit():
-    user_id = request.args.get("user_id", type=int)
     resource_type = request.args.get("resource_type")
     limit = min(request.args.get("limit", default=200, type=int), 1000)
 
-    query = db.session.query(AuditLog)
-    if user_id:
-        query = query.filter_by(actor_user_id=user_id)
+    # Always scope to the logged-in user — never expose other users' audit log.
+    query = db.session.query(AuditLog).filter_by(actor_user_id=current_user_id())
     if resource_type:
         query = query.filter_by(resource_type=resource_type)
     rows = query.order_by(AuditLog.created_at.desc()).limit(limit).all()

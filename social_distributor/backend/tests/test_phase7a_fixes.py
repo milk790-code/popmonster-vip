@@ -19,6 +19,8 @@ from app.models import (
 )
 from app.platforms.base import TokenBundle
 
+from .conftest import login_as
+
 
 # -- A1: OAuth callback returns HTML not JSON ---------------------------
 
@@ -93,7 +95,9 @@ def test_preview_compliance_endpoint_does_not_persist(client, app):
         post = Post(user_id=user.id, title="t", caption="c")
         db.session.add(post); db.session.commit()
         post_id = post.id
+        user_id = user.id
 
+    login_as(client, user_id)
     for _ in range(5):
         res = client.post(f"/api/posts/{post_id}/preview-compliance",
                           json={})

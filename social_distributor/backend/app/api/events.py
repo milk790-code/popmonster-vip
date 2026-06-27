@@ -6,8 +6,9 @@ similar async worker) so SSE doesn't pin your whole pool.
 """
 from __future__ import annotations
 
-from flask import Blueprint, Response, request, stream_with_context
+from flask import Blueprint, Response, stream_with_context
 
+from ..utils.auth import current_user_id
 from ..utils.events import subscribe
 
 bp = Blueprint("events", __name__, url_prefix="/api/events")
@@ -15,9 +16,11 @@ bp = Blueprint("events", __name__, url_prefix="/api/events")
 
 @bp.get("/stream")
 def stream():
-    user_id = request.args.get("user_id", type=int)
+    # EventSource carries the session cookie same-origin; identity is the
+    # logged-in user, never a caller-supplied ?user_id=.
+    user_id = current_user_id()
     if not user_id:
-        return {"error": "user_id required"}, 400
+        return {"error": "authentication required"}, 401
 
     @stream_with_context
     def generator():

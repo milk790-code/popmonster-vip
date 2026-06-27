@@ -18,6 +18,8 @@ from app.models import (
     User,
 )
 
+from .conftest import login_as
+
 
 def _seed_user(app):
     with app.app_context():
@@ -38,7 +40,8 @@ def test_check_endpoint_finds_existing_media(client, app):
         db.session.add(media)
         db.session.commit()
 
-    res = client.get(f"/api/uploads/check?sha256=abc123&user_id={user_id}")
+    login_as(client, user_id)
+    res = client.get("/api/uploads/check?sha256=abc123")
     assert res.status_code == 200
     data = res.get_json()
     assert data["found"] is True
@@ -47,7 +50,8 @@ def test_check_endpoint_finds_existing_media(client, app):
 
 def test_check_endpoint_returns_not_found_for_unknown_hash(client, app):
     user_id = _seed_user(app)
-    res = client.get(f"/api/uploads/check?sha256=nope&user_id={user_id}")
+    login_as(client, user_id)
+    res = client.get("/api/uploads/check?sha256=nope")
     assert res.get_json() == {"found": False}
 
 
@@ -62,9 +66,10 @@ def test_complete_with_matching_sha256_dedupes(client, app):
         db.session.commit()
         existing_id = existing.id
 
+    login_as(client, user_id)
     with patch("app.api.uploads.transcode_media.delay") as transcode:
         res = client.post("/api/uploads/complete", json={
-            "user_id": user_id, "kind": "video", "content_type": "video/mp4",
+            "kind": "video", "content_type": "video/mp4",
             "bucket": "b", "key": "k",
             "public_get_url": "https://b/k", "sha256": "dup-hash",
         })
@@ -80,9 +85,10 @@ def test_complete_with_matching_sha256_dedupes(client, app):
 
 def test_complete_without_dedup_creates_new(client, app):
     user_id = _seed_user(app)
+    login_as(client, user_id)
     with patch("app.api.uploads.transcode_media.delay") as transcode:
         res = client.post("/api/uploads/complete", json={
-            "user_id": user_id, "kind": "video", "content_type": "video/mp4",
+            "kind": "video", "content_type": "video/mp4",
             "bucket": "b", "key": "k",
             "public_get_url": "https://b/k", "sha256": "new-hash",
         })

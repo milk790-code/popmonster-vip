@@ -24,6 +24,8 @@ from app.utils.digest import (
     send_weekly_digests,
 )
 
+from .conftest import login_as
+
 
 def _seed_user_with_published_targets(app, *, count, with_emoji=False, reach=1000,
                                        engagement=50):
@@ -167,24 +169,25 @@ def test_send_weekly_digests_skips_users_with_no_data(app):
 
 def test_digest_preview_endpoint_returns_json(client, app):
     uid, _ = _seed_user_with_published_targets(app, count=4)
-    res = client.get(f"/api/insights/digest/preview?user_id={uid}")
+    login_as(client, uid)
+    res = client.get("/api/insights/digest/preview")
     assert res.status_code == 200
     body = res.get_json()
     assert body["total_published"] == 4
     assert body["narrative"]
 
 
-def test_digest_preview_unknown_user_404(client):
-    res = client.get("/api/insights/digest/preview?user_id=999999")
-    assert res.status_code == 404
+def test_digest_preview_requires_login(client):
+    res = client.get("/api/insights/digest/preview")
+    assert res.status_code == 401
 
 
 def test_digest_send_returns_sent_false_without_sendgrid(client, app):
     uid, _ = _seed_user_with_published_targets(app, count=2)
+    login_as(client, uid)
     # SENDGRID_API_KEY not set in test env → sent:false but no error
     with patch("app.utils.notify.send_failure_email"):
-        res = client.post("/api/insights/digest/send",
-                          json={"user_id": uid})
+        res = client.post("/api/insights/digest/send", json={})
     assert res.status_code == 200
     body = res.get_json()
     assert body["sent"] is False  # no SendGrid creds in test env
@@ -195,7 +198,8 @@ def test_digest_send_no_data_returns_skip_reason(client, app):
     with app.app_context():
         u = User(email="qq@e.com", display_name="qq")
         db.session.add(u); db.session.commit(); uid = u.id
-    res = client.post("/api/insights/digest/send", json={"user_id": uid})
+    login_as(client, uid)
+    res = client.post("/api/insights/digest/send", json={})
     body = res.get_json()
     assert body["sent"] is False
     assert "no published" in body["reason"]

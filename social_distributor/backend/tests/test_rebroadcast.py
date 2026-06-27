@@ -14,6 +14,8 @@ from app.models import (
 )
 from app.utils.crypto import cipher
 
+from .conftest import login_as
+
 
 def _seed(app, *, platform=Platform.FACEBOOK):
     with app.app_context():
@@ -34,6 +36,7 @@ def _seed(app, *, platform=Platform.FACEBOOK):
 
 def test_scan_inserts_candidates(client, app):
     user_id, account_id = _seed(app)
+    login_as(client, user_id)
     fake_items = [
         {"external_post_id": "p-1", "snippet": "hello world",
          "media_urls": ["https://cdn/img1.jpg"], "permalink": "https://fb/1"},
@@ -55,6 +58,7 @@ def test_scan_inserts_candidates(client, app):
 
 def test_scan_dedupes_existing_external_ids(client, app):
     user_id, account_id = _seed(app)
+    login_as(client, user_id)
     fake_items = [
         {"external_post_id": "dup", "snippet": "x", "media_urls": [], "permalink": None},
     ]
@@ -83,6 +87,7 @@ def test_promote_creates_post_and_marks_used(client, app):
         db.session.commit()
         candidate_id, group_id = candidate.id, group.id
 
+    login_as(client, user_id)
     res = client.post("/api/rebroadcast/promote", json={
         "candidate_id": candidate_id, "group_ids": [group_id],
         "jitter_minutes": 10, "generate_variants": False,
@@ -108,6 +113,7 @@ def test_promote_rejects_already_used_candidate(client, app):
         db.session.add(candidate)
         db.session.commit()
         candidate_id = candidate.id
+    login_as(client, user_id)
     res = client.post("/api/rebroadcast/promote", json={
         "candidate_id": candidate_id, "group_ids": [1],
     })
