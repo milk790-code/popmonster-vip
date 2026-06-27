@@ -21,6 +21,16 @@ from app.utils.experiments import (
     compare_variants,
 )
 
+from .conftest import login_as
+
+
+def _login_group_owner(client, app, group_id):
+    """Authenticate the client as the user who owns ``group_id``."""
+    with app.app_context():
+        owner_id = db.session.get(AccountGroup, group_id).user_id
+    login_as(client, owner_id)
+    return owner_id
+
 
 def _seed_group_with_targets(app, *, engine_a_count, engine_a_engagement,
                               engine_b_count, engine_b_engagement,
@@ -173,6 +183,7 @@ def test_distribute_ab_dry_run_assigns_alternating_engines(client, app):
         engine_a_count=2, engine_a_engagement=0,
         engine_b_count=2, engine_b_engagement=0,
     )
+    _login_group_owner(client, app, gid)
     with patch("app.api.experiments.generate_variant") as gen:
         gen.side_effect = lambda req: type("V", (), {
             "caption": f"variant-{req.seed}",
@@ -207,6 +218,7 @@ def test_distribute_ab_rejects_same_engine(client, app):
         engine_a_count=2, engine_a_engagement=0,
         engine_b_count=2, engine_b_engagement=0,
     )
+    _login_group_owner(client, app, gid)
     res = client.post(f"/api/posts/{pid}/distribute_ab", json={
         "group_id": gid, "engine_a": "claude", "engine_b": "claude",
         "dry_run": True,
@@ -228,8 +240,9 @@ def test_distribute_ab_rejects_too_few_accounts(client, app):
         db.session.add(group); db.session.flush()
         post = Post(user_id=user.id, title="t", caption="c")
         db.session.add(post); db.session.commit()
-        gid, pid = group.id, post.id
+        gid, pid, uid = group.id, post.id, user.id
 
+    login_as(client, uid)
     res = client.post(f"/api/posts/{pid}/distribute_ab", json={
         "group_id": gid, "engine_a": "claude", "engine_b": "none",
         "dry_run": True,
@@ -246,6 +259,7 @@ def test_results_endpoint_returns_engine_breakdown(client, app):
         engine_b_count=MIN_SAMPLES_PER_ENGINE,
         engine_b_engagement=50,
     )
+    _login_group_owner(client, app, gid)
     res = client.get(f"/api/experiments/results?group_id={gid}")
     assert res.status_code == 200
     body = res.get_json()
@@ -262,6 +276,7 @@ def test_backtest_endpoint_runs_immediately(client, app):
         engine_b_count=MIN_SAMPLES_PER_ENGINE,
         engine_b_engagement=50,
     )
+    _login_group_owner(client, app, gid)
     res = client.post("/api/experiments/backtest")
     assert res.status_code == 200
     body = res.get_json()

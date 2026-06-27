@@ -19,6 +19,8 @@ from app.utils.audit import record as audit_record
 from app.utils.overrides import validate_overrides
 from app.utils.redact import redact
 
+from .conftest import login_as
+
 
 # -- B2: refresh distinguishes 401 from 5xx ----------------------------
 
@@ -219,8 +221,9 @@ def test_distribute_rejects_invalid_overrides(client, app):
         db.session.add(group); db.session.flush()
         post = Post(user_id=user.id, title="t", caption="c")
         db.session.add(post); db.session.commit()
-        post_id, group_id = post.id, group.id
+        post_id, group_id, user_id = post.id, group.id, user.id
 
+    login_as(client, user_id)
     res = client.post(f"/api/posts/{post_id}/distribute", json={
         "group_ids": [group_id],
         "dry_run": True,

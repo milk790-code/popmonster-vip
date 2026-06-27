@@ -19,6 +19,8 @@ from app.utils.best_times import (
     next_best_time_for_group,
 )
 
+from .conftest import login_as
+
 
 def test_next_future_occurrence_skips_to_next_week_when_today_already_passed():
     # Tuesday 14:00 UTC
@@ -102,8 +104,9 @@ def test_distribute_with_use_best_time_overrides_scheduled_for(client, app):
         db.session.add(group); db.session.flush()
         post = Post(user_id=user.id, title="t", caption="c")
         db.session.add(post); db.session.commit()
-        group_id, post_id = group.id, post.id
+        group_id, post_id, user_id = group.id, post.id, user.id
 
+    login_as(client, user_id)
     forced_time = datetime(2026, 6, 1, 9, 0, tzinfo=timezone.utc)
     with patch("app.api.posts.next_best_time_for_group", return_value=forced_time):
         res = client.post(f"/api/posts/{post_id}/distribute", json={
@@ -133,8 +136,9 @@ def test_distribute_with_use_best_time_falls_back_when_no_data(client, app):
         db.session.add(group); db.session.flush()
         post = Post(user_id=user.id, title="t", caption="c")
         db.session.add(post); db.session.commit()
-        group_id, post_id = group.id, post.id
+        group_id, post_id, user_id = group.id, post.id, user.id
 
+    login_as(client, user_id)
     res = client.post(f"/api/posts/{post_id}/distribute", json={
         "group_ids": [group_id],
         "use_best_time": True,

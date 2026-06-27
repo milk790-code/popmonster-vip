@@ -5,7 +5,8 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy.orm import joinedload
 
 from ..extensions import db
-from ..models import AccountGroup, PostMetric, PostTarget, SocialAccount
+from ..models import AccountGroup, Post, PostMetric, PostTarget, SocialAccount
+from ..utils.auth import current_user_id
 from ..utils.best_times import best_times_for_account, best_times_for_group
 
 bp = Blueprint("insights", __name__, url_prefix="/api/insights")
@@ -49,21 +50,27 @@ def list_insights():
     """
     post_id = request.args.get("post_id", type=int)
     group_id = request.args.get("group_id", type=int)
-    user_id = request.args.get("user_id", type=int)
+    uid = current_user_id()
 
     query = db.session.query(PostTarget).options(joinedload(PostTarget.account))
     if post_id:
+        post = db.session.get(Post, post_id)
+        if not post:
+            return jsonify({"error": "post not found"}), 404
+        if post.user_id != uid:
+            return jsonify({"error": "forbidden"}), 403
         query = query.filter_by(post_id=post_id)
     elif group_id:
         group = db.session.get(AccountGroup, group_id)
         if not group:
             return jsonify({"error": "group not found"}), 404
+        if group.user_id != uid:
+            return jsonify({"error": "forbidden"}), 403
         query = query.filter(
             PostTarget.account_id.in_([a.id for a in group.accounts])
         )
     else:
-        # ★ 根治關鍵:一律按 user 邊界,絕不裸掃全表。
-        uid = user_id or 1  # 現役單 user;多 user 時改:uid = current_user.id
+        # ★ 一律按登入者邊界,絕不裸掃全表、絕不預設成別人的 user_id。
         query = query.join(
             SocialAccount, PostTarget.account_id == SocialAccount.id
         ).filter(SocialAccount.user_id == uid)
@@ -94,9 +101,7 @@ def digest_preview():
     """C5: render the weekly digest for a user as JSON, no email sent."""
     from ..utils.digest import build_user_digest, _ts_dict
 
-    user_id = request.args.get("user_id", type=int)
-    if not user_id:
-        return jsonify({"error": "user_id required"}), 400
+    user_id = current_user_id()
     digest = build_user_digest(user_id, days=int(request.args.get("days", 7)))
     if digest is None:
         return jsonify({"error": "user not found"}), 404
@@ -125,10 +130,7 @@ def digest_send():
     from ..utils.notify import send_failure_email
     from ..config import config
 
-    body_in = request.get_json(silent=True) or {}
-    user_id = body_in.get("user_id") or request.args.get("user_id", type=int)
-    if not user_id:
-        return jsonify({"error": "user_id required"}), 400
+    user_id = current_user_id()
     digest = build_user_digest(int(user_id))
     if digest is None:
         return jsonify({"error": "user not found"}), 404
@@ -157,9 +159,20 @@ def best_times():
     top_n = min(request.args.get("top_n", default=5, type=int), 20)
     min_samples = max(request.args.get("min_samples", default=3, type=int), 1)
 
+    uid = current_user_id()
     if account_id:
+        account = db.session.get(SocialAccount, account_id)
+        if not account:
+            return jsonify({"error": "account not found"}), 404
+        if account.user_id != uid:
+            return jsonify({"error": "forbidden"}), 403
         slots = best_times_for_account(account_id, top_n=top_n, min_samples=min_samples)
     elif group_id:
+        group = db.session.get(AccountGroup, group_id)
+        if not group:
+            return jsonify({"error": "group not found"}), 404
+        if group.user_id != uid:
+            return jsonify({"error": "forbidden"}), 403
         slots = best_times_for_group(group_id, top_n=top_n, min_samples=min_samples)
     else:
         return jsonify({"error": "account_id or group_id is required"}), 400

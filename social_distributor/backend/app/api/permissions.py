@@ -24,6 +24,7 @@ from ..models import (
 from ..permissions import meta_bm, tiktok_bc
 from ..permissions.health import run_health_sweep
 from ..utils.audit import record as audit
+from ..utils.auth import current_user_id
 from ..utils.crypto import cipher
 
 bp = Blueprint("permissions", __name__, url_prefix="/api/permissions")
@@ -48,10 +49,8 @@ def _serialize(grant: PermissionGrant) -> dict:
 
 @bp.get("/grants")
 def list_grants():
-    user_id = request.args.get("user_id", type=int)
-    query = db.session.query(PermissionGrant)
-    if user_id:
-        query = query.filter_by(user_id=user_id)
+    # Always scope to the logged-in user — no cross-tenant listing.
+    query = db.session.query(PermissionGrant).filter_by(user_id=current_user_id())
     rows = query.order_by(PermissionGrant.granted_at.desc()).all()
     return jsonify([_serialize(g) for g in rows])
 
@@ -88,7 +87,7 @@ def create_grant():
     asset_id = body["asset_external_id"]
     grantee = body["grantee_external_id"]
     role = body["role"]
-    user_id = int(body["user_id"])
+    user_id = current_user_id()
 
     # Look up the source account whose token we'll use to perform the grant.
     source_account = (
@@ -148,6 +147,8 @@ def revoke_grant(grant_id: int):
     grant = db.session.get(PermissionGrant, grant_id)
     if not grant:
         return jsonify({"error": "not found"}), 404
+    if grant.user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
     if grant.status != "active":
         return jsonify({"error": f"grant is {grant.status}, not active"}), 409
 
@@ -189,10 +190,8 @@ def revoke_grant(grant_id: int):
 
 @bp.get("/drift")
 def list_drift():
-    user_id = request.args.get("user_id", type=int)
-    query = db.session.query(PermissionDriftAlert)
-    if user_id:
-        query = query.filter_by(user_id=user_id)
+    # Always scope to the logged-in user — no cross-tenant listing.
+    query = db.session.query(PermissionDriftAlert).filter_by(user_id=current_user_id())
     if request.args.get("unresolved", default="1") == "1":
         query = query.filter(PermissionDriftAlert.resolved_at.is_(None))
     rows = query.order_by(PermissionDriftAlert.detected_at.desc()).limit(200).all()
@@ -215,6 +214,8 @@ def resolve_drift(alert_id: int):
     alert = db.session.get(PermissionDriftAlert, alert_id)
     if not alert:
         return jsonify({"error": "not found"}), 404
+    if alert.user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
     alert.resolved_at = datetime.now(timezone.utc)
     audit("permission.drift_resolved", "permission_drift_alert", alert.id,
           actor_user_id=alert.user_id)

@@ -29,6 +29,7 @@ from ..models import (
 from ..platforms._http import request_json
 from ..platforms.facebook import GRAPH_BASE
 from ..utils.audit import record as audit
+from ..utils.auth import current_user_id
 from ..utils.crypto import cipher
 from ..utils.jitter import spread
 
@@ -53,11 +54,9 @@ def _serialize(c: RebroadcastCandidate) -> dict:
 
 @bp.get("/candidates")
 def list_candidates():
-    user_id = request.args.get("user_id", type=int)
     source_account_id = request.args.get("source_account_id", type=int)
-    query = db.session.query(RebroadcastCandidate)
-    if user_id:
-        query = query.filter_by(user_id=user_id)
+    # Always scope to the logged-in user.
+    query = db.session.query(RebroadcastCandidate).filter_by(user_id=current_user_id())
     if source_account_id:
         query = query.filter_by(source_account_id=source_account_id)
     rows = query.order_by(RebroadcastCandidate.fetched_at.desc()).limit(200).all()
@@ -74,6 +73,8 @@ def scan():
     account = db.session.get(SocialAccount, source_account_id)
     if not account:
         return jsonify({"error": "account not found"}), 404
+    if account.user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
     if account.revoked_at is not None:
         return jsonify({"error": "account is revoked"}), 400
 
@@ -225,6 +226,8 @@ def promote():
     candidate = db.session.get(RebroadcastCandidate, int(body["candidate_id"]))
     if not candidate:
         return jsonify({"error": "candidate not found"}), 404
+    if candidate.user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
     if candidate.used:
         return jsonify({"error": "candidate already promoted"}), 409
 

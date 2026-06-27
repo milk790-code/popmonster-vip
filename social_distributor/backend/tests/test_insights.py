@@ -16,6 +16,8 @@ from app.models import (
 from app.platforms.base import InsightsSnapshot
 from app.scheduler import tasks
 
+from .conftest import login_as
+
 
 def _seed(app, *, platform=Platform.INSTAGRAM):
     with app.app_context():
@@ -73,7 +75,7 @@ def test_ingest_skips_when_publisher_returns_none(app):
 
 
 def test_insights_endpoint_returns_latest_per_target(client, app):
-    _, _, post_id, target_id = _seed(app)
+    user_id, _, post_id, target_id = _seed(app)
     with app.app_context():
         db.session.add(PostMetric(target_id=target_id, reach=100, likes=5,
                                   fetched_at=datetime.now(timezone.utc)
@@ -81,6 +83,7 @@ def test_insights_endpoint_returns_latest_per_target(client, app):
         db.session.add(PostMetric(target_id=target_id, reach=300, likes=20))
         db.session.commit()
 
+    login_as(client, user_id)
     res = client.get(f"/api/insights?post_id={post_id}")
     assert res.status_code == 200
     data = res.get_json()
@@ -98,6 +101,7 @@ def test_insights_endpoint_filter_by_group(client, app):
         db.session.add(PostMetric(target_id=target_id, reach=42))
         db.session.commit()
         group_id = group.id
+    login_as(client, user_id)
     res = client.get(f"/api/insights?group_id={group_id}")
     assert res.status_code == 200
     assert len(res.get_json()) == 1

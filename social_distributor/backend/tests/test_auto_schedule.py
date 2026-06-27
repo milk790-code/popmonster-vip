@@ -22,6 +22,8 @@ from app.utils.auto_schedule_orchestrator import (
     build_today_schedule,
 )
 
+from .conftest import login_as
+
 
 def _seed_succeeded_post(user_id: int, caption: str) -> Post:
     """Create a Post + a SUCCEEDED PostTarget (so it counts toward caption pool)."""
@@ -260,8 +262,9 @@ def test_endpoint_dry_run(client, app):
         _seed_media(user_id, "image")
         db.session.commit()
 
+    login_as(client, user_id)
     res = client.post(
-        f"/api/auto-schedule/today?user_id={user_id}",
+        "/api/auto-schedule/today",
         json={"videos_per_account": 1, "posts_per_account": 1, "dry_run": True},
     )
     assert res.status_code == 200
@@ -274,8 +277,9 @@ def test_endpoint_rejects_bad_window(client, app):
     with app.app_context():
         user_id, _ = _seed_user_and_accounts(1)
 
+    login_as(client, user_id)
     res = client.post(
-        f"/api/auto-schedule/today?user_id={user_id}",
+        "/api/auto-schedule/today",
         json={"window_start_hour": 22, "window_end_hour": 10, "dry_run": True},
     )
     assert res.status_code == 400

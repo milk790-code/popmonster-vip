@@ -10,9 +10,20 @@ from ..models import OwnershipTransfer, Platform, SocialAccount
 from ..transfers import meta_transfer
 from ..transfers.manual_transfer import advance, transition_expired_if_overdue
 from ..utils.audit import record as audit
+from ..utils.auth import current_user_id
 from ..utils.crypto import cipher
 
 bp = Blueprint("transfers", __name__, url_prefix="/api/transfers")
+
+
+def _load_owned_transfer(transfer_id: int):
+    """Return (transfer, None) if it belongs to the logged-in user, else error."""
+    transfer = db.session.get(OwnershipTransfer, transfer_id)
+    if not transfer:
+        return None, (jsonify({"error": "not found"}), 404)
+    if transfer.user_id != current_user_id():
+        return None, (jsonify({"error": "forbidden"}), 403)
+    return transfer, None
 
 
 def _serialize(t: OwnershipTransfer) -> dict:
@@ -35,10 +46,8 @@ def _serialize(t: OwnershipTransfer) -> dict:
 
 @bp.get("")
 def list_transfers():
-    user_id = request.args.get("user_id", type=int)
-    query = db.session.query(OwnershipTransfer)
-    if user_id:
-        query = query.filter_by(user_id=user_id)
+    # Always scope to the logged-in user — no cross-tenant listing.
+    query = db.session.query(OwnershipTransfer).filter_by(user_id=current_user_id())
     rows = query.order_by(OwnershipTransfer.requested_at.desc()).limit(200).all()
     return jsonify([_serialize(t) for t in rows])
 
@@ -67,7 +76,7 @@ def create_transfer():
         }
     """
     body = request.get_json(force=True)
-    user_id = int(body["user_id"])
+    user_id = current_user_id()
     platform = Platform(body["platform"])
     channel = body.get("channel", "manual")
     if channel not in ("api", "manual"):
@@ -134,9 +143,9 @@ def create_transfer():
 
 @bp.post("/<int:transfer_id>/complete")
 def mark_complete(transfer_id: int):
-    transfer = db.session.get(OwnershipTransfer, transfer_id)
-    if not transfer:
-        return jsonify({"error": "not found"}), 404
+    transfer, err = _load_owned_transfer(transfer_id)
+    if err:
+        return err
     body = request.get_json(silent=True) or {}
     advance(transfer, "completed", notes=body.get("notes"))
     db.session.commit()
@@ -145,9 +154,9 @@ def mark_complete(transfer_id: int):
 
 @bp.post("/<int:transfer_id>/reject")
 def mark_rejected(transfer_id: int):
-    transfer = db.session.get(OwnershipTransfer, transfer_id)
-    if not transfer:
-        return jsonify({"error": "not found"}), 404
+    transfer, err = _load_owned_transfer(transfer_id)
+    if err:
+        return err
     body = request.get_json(silent=True) or {}
     advance(transfer, "rejected", notes=body.get("notes"))
     db.session.commit()

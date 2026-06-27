@@ -34,11 +34,12 @@ from itsdangerous import BadSignature, URLSafeTimedSerializer
 
 from ..config import config
 from ..extensions import db
-from ..models import Platform, SocialAccount, User
+from ..models import Platform, SocialAccount
 from ..platforms import get_oauth_provider
 from ..platforms._http import request_json
 from ..platforms.facebook import GRAPH_BASE
 from ..utils.audit import record as audit
+from ..utils.auth import current_user_id, login_required
 from ..utils.crypto import cipher
 
 logger = logging.getLogger(__name__)
@@ -60,13 +61,15 @@ def _serializer() -> URLSafeTimedSerializer:
 
 
 @bp.get("/<provider>/start")
+@login_required
 def start(provider: str):
     if provider not in PROVIDERS:
         return jsonify({"error": "unknown provider"}), 404
 
-    user_id = request.args.get("user_id", type=int)
-    if not user_id or not db.session.get(User, user_id):
-        return jsonify({"error": "user_id required"}), 400
+    # Identity comes from the authenticated session only — never from the
+    # request — so a caller can't kick off an OAuth flow that binds the
+    # connected account to someone else's user_id.
+    user_id = current_user_id()
 
     state = _serializer().dumps({"user_id": user_id, "provider": provider})
     url = get_oauth_provider(provider).authorization_url(state)
@@ -389,10 +392,14 @@ def _persist_accounts(provider: str, user_id: int, bundle):
 
 
 @bp.post("/<int:account_id>/revoke")
+@login_required
 def revoke(account_id: int):
     account = db.session.get(SocialAccount, account_id)
     if not account:
         return jsonify({"error": "not found"}), 404
+    # Ownership check: a logged-in user may only revoke their OWN accounts.
+    if account.user_id != current_user_id():
+        return jsonify({"error": "forbidden"}), 403
     account.revoked_at = datetime.now(timezone.utc)
     account.access_token_enc = b""
     account.refresh_token_enc = None
@@ -408,13 +415,16 @@ def revoke(account_id: int):
 # ---------------------------------------------------------------------------
 
 @bp.post("/tiktok/cookie")
+@login_required
 def tiktok_cookie_connect():
     """Bind a TikTok account using a browser sessionid cookie.
 
     Body (JSON):
-      user_id   int     required — owner user
       sessionid str     required — value of the ``sessionid`` cookie from
                                    a logged-in TikTok web session
+
+    The owner user_id comes from the authenticated session, never the body,
+    so a caller can't bind a TikTok account to someone else's user_id.
 
     Returns the same shape as the OAuth callback postMessage payload so the
     frontend can handle both flows identically.
@@ -422,11 +432,9 @@ def tiktok_cookie_connect():
     from ..platforms.tiktok import cookie_whoami
 
     body = request.get_json(silent=True) or {}
-    user_id = body.get("user_id")
+    user_id = current_user_id()
     sessionid = (body.get("sessionid") or "").strip()
 
-    if not user_id or not db.session.get(User, user_id):
-        return jsonify({"ok": False, "error": "user_id required"}), 400
     if not sessionid:
         return jsonify({"ok": False, "error": "sessionid required"}), 400
 

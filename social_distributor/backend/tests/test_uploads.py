@@ -5,12 +5,16 @@ from app.extensions import db
 from app.models import MediaAsset, User
 from app.utils.storage import PresignedUpload
 
+from .conftest import login_as
+
 
 def test_presign_returns_signed_urls(client, app):
     with app.app_context():
         user = User(email="t@example.com", display_name="t")
         db.session.add(user)
         db.session.commit()
+        uid = user.id
+    login_as(client, uid)
 
     fake = PresignedUpload(
         bucket="my-bucket",
@@ -21,7 +25,7 @@ def test_presign_returns_signed_urls(client, app):
     with patch("app.api.uploads.presign_upload", return_value=fake):
         res = client.post(
             "/api/uploads/presign",
-            json={"user_id": 1, "kind": "video", "content_type": "video/mp4"},
+            json={"kind": "video", "content_type": "video/mp4"},
         )
     assert res.status_code == 200
     data = res.get_json()
@@ -35,12 +39,13 @@ def test_complete_creates_media_and_queues_transcode(client, app):
         user = User(email="t@example.com", display_name="t")
         db.session.add(user)
         db.session.commit()
+        uid = user.id
+    login_as(client, uid)
 
     with patch("app.api.uploads.transcode_media.delay") as transcode:
         res = client.post(
             "/api/uploads/complete",
             json={
-                "user_id": 1,
                 "kind": "video",
                 "content_type": "video/mp4",
                 "bucket": "my-bucket",
@@ -57,9 +62,15 @@ def test_complete_creates_media_and_queues_transcode(client, app):
         assert media.transcode_status == "pending"
 
 
-def test_presign_rejects_bad_kind(client):
+def test_presign_rejects_bad_kind(client, app):
+    with app.app_context():
+        user = User(email="bk@example.com", display_name="bk")
+        db.session.add(user)
+        db.session.commit()
+        uid = user.id
+    login_as(client, uid)
     res = client.post(
         "/api/uploads/presign",
-        json={"user_id": 1, "kind": "audio", "content_type": "audio/mp3"},
+        json={"kind": "audio", "content_type": "audio/mp3"},
     )
     assert res.status_code == 400

@@ -14,8 +14,19 @@ from flask import Blueprint, jsonify, request
 from ..extensions import db
 from ..models import AccountGroup, SocialAccount, User
 from ..utils.audit import record as audit
+from ..utils.auth import current_user_id
 
 bp = Blueprint("groups", __name__, url_prefix="/api/groups")
+
+
+def _load_owned_group(group_id: int):
+    """Return (group, None) if the group belongs to the logged-in user, else error."""
+    group = db.session.get(AccountGroup, group_id)
+    if not group:
+        return None, (jsonify({"error": "not found"}), 404)
+    if group.user_id != current_user_id():
+        return None, (jsonify({"error": "forbidden"}), 403)
+    return group, None
 
 
 def _serialize(group: AccountGroup) -> dict:
@@ -43,10 +54,8 @@ def _serialize(group: AccountGroup) -> dict:
 
 @bp.get("")
 def list_groups():
-    user_id = request.args.get("user_id", type=int)
-    query = db.session.query(AccountGroup)
-    if user_id:
-        query = query.filter_by(user_id=user_id)
+    # Always scope to the logged-in user.
+    query = db.session.query(AccountGroup).filter_by(user_id=current_user_id())
     rows = query.order_by(AccountGroup.created_at.desc()).all()
     return jsonify([_serialize(g) for g in rows])
 
@@ -54,7 +63,7 @@ def list_groups():
 @bp.post("")
 def create_group():
     body = request.get_json(force=True)
-    user_id = int(body["user_id"])
+    user_id = current_user_id()
     if not db.session.get(User, user_id):
         return jsonify({"error": "unknown user"}), 400
 
@@ -88,17 +97,17 @@ def create_group():
 
 @bp.get("/<int:group_id>")
 def get_group(group_id: int):
-    group = db.session.get(AccountGroup, group_id)
-    if not group:
-        return jsonify({"error": "not found"}), 404
+    group, err = _load_owned_group(group_id)
+    if err:
+        return err
     return jsonify(_serialize(group))
 
 
 @bp.put("/<int:group_id>")
 def update_group(group_id: int):
-    group = db.session.get(AccountGroup, group_id)
-    if not group:
-        return jsonify({"error": "not found"}), 404
+    group, err = _load_owned_group(group_id)
+    if err:
+        return err
     body = request.get_json(force=True)
     for field in ("name", "description", "default_timezone"):
         if field in body:
@@ -115,9 +124,9 @@ def update_group(group_id: int):
 
 @bp.delete("/<int:group_id>")
 def delete_group(group_id: int):
-    group = db.session.get(AccountGroup, group_id)
-    if not group:
-        return jsonify({"error": "not found"}), 404
+    group, err = _load_owned_group(group_id)
+    if err:
+        return err
     user_id = group.user_id
     db.session.delete(group)
     audit("group.deleted", "account_group", group_id, actor_user_id=user_id)
@@ -127,9 +136,9 @@ def delete_group(group_id: int):
 
 @bp.post("/<int:group_id>/members")
 def add_member(group_id: int):
-    group = db.session.get(AccountGroup, group_id)
-    if not group:
-        return jsonify({"error": "not found"}), 404
+    group, err = _load_owned_group(group_id)
+    if err:
+        return err
     body = request.get_json(force=True)
     account_id = int(body["account_id"])
     err = _attach_account(group, account_id)
@@ -143,9 +152,9 @@ def add_member(group_id: int):
 
 @bp.delete("/<int:group_id>/members/<int:account_id>")
 def remove_member(group_id: int, account_id: int):
-    group = db.session.get(AccountGroup, group_id)
-    if not group:
-        return jsonify({"error": "not found"}), 404
+    group, err = _load_owned_group(group_id)
+    if err:
+        return err
     account = db.session.get(SocialAccount, account_id)
     if account and account in group.accounts:
         group.accounts.remove(account)

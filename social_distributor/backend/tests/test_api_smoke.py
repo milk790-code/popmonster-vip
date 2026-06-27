@@ -2,6 +2,8 @@
 from app.extensions import db
 from app.models import User
 
+from .conftest import login_as
+
 
 def test_healthz(client):
     res = client.get("/healthz")
@@ -16,9 +18,10 @@ def test_create_post_and_diff(client, app):
         db.session.commit()
         user_id = user.id
 
+    login_as(client, user_id)
     res = client.post(
         "/api/posts",
-        json={"user_id": user_id, "title": "v1", "caption": "first"},
+        json={"title": "v1", "caption": "first"},
     )
     assert res.status_code == 201, res.data
     post_id = res.get_json()["id"]
