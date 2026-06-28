@@ -95,6 +95,23 @@ def test_empty_operator_token_rejected(app):
         assert verify_operator_token("") is None
 
 
+def test_auth_me_recognizes_bearer_token(app, monkeypatch):
+    """/auth/me must report authenticated when only a bearer token is present
+    (the cross-origin frontend relies on this at startup; a SameSite cookie
+    isn't sent cross-site, so session-only would loop the user back to login)."""
+    monkeypatch.setattr(app_config, "operator_password", "pw")
+    token = app.test_client().post(
+        "/auth/login/password", json={"password": "pw"}
+    ).get_json()["token"]
+    res = app.test_client().get(
+        "/auth/me", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert res.status_code == 200
+    assert res.get_json()["authenticated"] is True
+    # No auth at all → 401.
+    assert app.test_client().get("/auth/me").status_code == 401
+
+
 def test_request_has_operator_via_bearer(app):
     with app.app_context():
         tok = issue_operator_token(1)

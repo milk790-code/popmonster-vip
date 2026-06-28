@@ -25,6 +25,7 @@ from ..models import User
 from ..utils.audit import record as audit
 from ..utils.auth import (
     consume_magic_token,
+    current_user_id,
     find_or_create_user,
     issue_magic_token,
     issue_operator_token,
@@ -139,8 +140,13 @@ def logout():
 
 @bp.get("/me")
 def me():
-    """Quick identity probe used by the dashboard at startup."""
-    uid = session.get("user_id")
+    """Quick identity probe used by the dashboard at startup.
+
+    Resolves identity from the session cookie OR a signed operator bearer
+    token (the cross-origin frontend/api split can't rely on a SameSite
+    cookie), so password-login users are correctly reported as authenticated.
+    """
+    uid = current_user_id()
     if not uid:
         return jsonify({"authenticated": False}), 401
     user = db.session.get(User, uid)
