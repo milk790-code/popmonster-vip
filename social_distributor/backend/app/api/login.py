@@ -12,6 +12,7 @@ request so legitimate operators can see what was attempted.
 """
 from __future__ import annotations
 
+import hashlib
 import hmac
 import os
 
@@ -35,25 +36,37 @@ bp = Blueprint("login", __name__, url_prefix="/auth")
 _DASHBOARD_URL = os.environ.get("DASHBOARD_URL", "/")
 
 
+def _operator_password_ok(supplied: str) -> bool | None:
+    """Verify the supplied password. Returns None if password login is not
+    configured at all, else True/False. Precedence: plaintext env, then a
+    SHA-256 verifier (env or baked default). Constant-time comparison."""
+    plain = config.operator_password
+    if plain:
+        return hmac.compare_digest(supplied.encode("utf-8"), plain.encode("utf-8"))
+    digest = config.operator_password_sha256
+    if digest:
+        supplied_hash = hashlib.sha256(supplied.encode("utf-8")).hexdigest()
+        return hmac.compare_digest(supplied_hash, digest)
+    return None
+
+
 @bp.post("/login/password")
 def login_password():
     """Single-operator password login.
 
-    Requires OPERATOR_PASSWORD to be set in the environment. On a correct
-    password we log in as the operator user (the lowest-id existing user, or
-    a freshly created OPERATOR_EMAIL user) by setting BOTH a session cookie
+    The password is verified against OPERATOR_PASSWORD (plaintext env) or a
+    SHA-256 verifier (OPERATOR_PASSWORD_SHA256 env, or a baked default). On
+    success we log in as the operator user (the lowest-id existing user, or a
+    freshly created OPERATOR_EMAIL user) by setting BOTH a session cookie
     (works same-origin) and returning a signed bearer token (works
     cross-origin, which is how the Railway frontend/api split is deployed).
     """
-    expected = config.operator_password
-    if not expected:
-        return jsonify({"error": "password login not configured"}), 503
-
     body = request.get_json(force=True) or {}
     supplied = body.get("password") or ""
-    if not hmac.compare_digest(
-        supplied.encode("utf-8"), expected.encode("utf-8")
-    ):
+    ok = _operator_password_ok(supplied)
+    if ok is None:
+        return jsonify({"error": "password login not configured"}), 503
+    if not ok:
         audit("login.password.failed", "user", None, actor_user_id=None,
               detail={"ip": request.remote_addr})
         db.session.commit()

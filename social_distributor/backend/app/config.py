@@ -14,6 +14,15 @@ def _env(key: str, default: str | None = None) -> str | None:
 
 _INSECURE_SECRET = "dev-secret"
 
+# One-way SHA-256 of the default single-operator password, used only when no
+# password is configured via env. This is a verifier, NOT a usable credential:
+# the repo cannot be used to log in (you need the plaintext, which is not
+# stored here). Rotate by setting OPERATOR_PASSWORD (plaintext) or
+# OPERATOR_PASSWORD_SHA256 in the environment — env always wins.
+_DEFAULT_OPERATOR_PASSWORD_SHA256 = (
+    "74f22e37ca7fe636668b103a95452f039ac247a5f8015caf3377b813e8d6dd37"
+)
+
 
 def _require_secret_key() -> str:
     """Fail-closed at boot: refuse to start without a real SECRET_KEY.
@@ -79,12 +88,18 @@ class Config:
     )
     aws_region: str = field(default_factory=lambda: _env("AWS_REGION", "us-east-1"))
 
-    # Operator password login (single-operator convenience). When
-    # OPERATOR_PASSWORD is set, POST /auth/login/password accepts it and mints
-    # an operator session + bearer token. Unset -> that endpoint returns 503
-    # and nothing changes (the magic-link flow stays the only login path).
+    # Operator password login (single-operator convenience). Precedence:
+    # OPERATOR_PASSWORD (plaintext env) > OPERATOR_PASSWORD_SHA256 (env) >
+    # baked default hash. The baked value is only a verifier hash, so the sole
+    # operator is never locked out on a fresh deploy yet no usable credential
+    # lives in the repo. POST /auth/login/password mints a session + token.
     operator_password: str | None = field(
         default_factory=lambda: _env("OPERATOR_PASSWORD")
+    )
+    operator_password_sha256: str | None = field(
+        default_factory=lambda: (
+            _env("OPERATOR_PASSWORD_SHA256") or _DEFAULT_OPERATOR_PASSWORD_SHA256
+        )
     )
     operator_email: str = field(
         default_factory=lambda: _env("OPERATOR_EMAIL", "operator@local")

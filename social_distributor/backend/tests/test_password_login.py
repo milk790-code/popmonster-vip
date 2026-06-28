@@ -18,9 +18,26 @@ from app.utils.auth import (
 
 def test_password_login_not_configured_returns_503(client, monkeypatch):
     monkeypatch.setattr(app_config, "operator_password", None)
+    monkeypatch.setattr(app_config, "operator_password_sha256", None)
     res = client.post("/auth/login/password", json={"password": "whatever"})
     assert res.status_code == 503
     assert "not configured" in res.get_json()["error"]
+
+
+def test_password_login_via_sha256_default(client, app, monkeypatch):
+    """No plaintext env: the SHA-256 verifier accepts the matching plaintext
+    and rejects anything else (the repo holds only the hash)."""
+    import hashlib
+    secret = "PopM-test-only-secret-123"
+    digest = hashlib.sha256(secret.encode()).hexdigest()
+    monkeypatch.setattr(app_config, "operator_password", None)
+    monkeypatch.setattr(app_config, "operator_password_sha256", digest)
+    assert client.post(
+        "/auth/login/password", json={"password": "wrong"}
+    ).status_code == 401
+    ok = client.post("/auth/login/password", json={"password": secret})
+    assert ok.status_code == 200
+    assert ok.get_json()["token"]
 
 
 def test_password_login_wrong_password_401(client, monkeypatch):
