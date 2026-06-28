@@ -21,6 +21,15 @@ function sdGoLogin() {
 
 // Register the service worker for PWA / offline shell support.
 if ("serviceWorker" in navigator) {
+  // When a new SW takes control (a new deploy landed), reload once so the
+  // fresh shell/app.js is used immediately instead of the page that loaded
+  // the old build. Guarded so it can't loop.
+  let _swRefreshing = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (_swRefreshing) return;
+    _swRefreshing = true;
+    location.reload();
+  });
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./sw.js").catch(() => {
       /* SW registration is a progressive enhancement; ignore failures. */

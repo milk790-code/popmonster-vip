@@ -1,21 +1,22 @@
 // Service worker for the Social Distributor dashboard.
 //
-// Caching strategy:
-// - Static shell (HTML, CSS, JS, icons): cache-first, refreshed in the
-//   background so the dashboard opens instantly even on flaky links.
-// - API calls: never cached. The dashboard is a control surface — stale data
-//   is worse than a brief offline error.
-// - Navigation requests fall back to the cached index when offline so PWA
-//   launches don't show a browser error page.
+// Caching strategy (B11): NETWORK-FIRST for the shell.
+// - Shell (HTML, CSS, JS, icons): try the network first, update the cache,
+//   and fall back to cache ONLY when offline. A control surface must never be
+//   pinned to a stale build — the previous cache-first strategy meant a new
+//   deploy never reached users whose browser had the old shell cached.
+// - API / auth: never cached.
+// - Offline navigation falls back to the cached index so the PWA still opens.
 
-// B10: cache name carries a build/version token so each deploy invalidates
-// the previous shell. nginx (in docker-compose) substitutes ${CACHE_VERSION}
-// at container start; for local dev the literal stays and SubstrFromActivate
-// claims clients on update.
+// SW_BUILD is bumped on each shell change so the byte-different sw.js is
+// detected and installed by the browser even when CACHE_VERSION is constant
+// (Railway renders CACHE_VERSION=prod every deploy). Network-first then keeps
+// assets fresh without needing a per-deploy bump.
+const SW_BUILD = "2026-06-28-netfirst-1";
 const CACHE_VERSION = "${CACHE_VERSION}".startsWith("$")
   ? "dev-" + Date.now()
   : "${CACHE_VERSION}";
-const CACHE = `distributor-shell-${CACHE_VERSION}`;
+const CACHE = `distributor-shell-${CACHE_VERSION}-${SW_BUILD}`;
 const SHELL = [
   "./index.html",
   "./css/app.css",
@@ -51,25 +52,25 @@ self.addEventListener("fetch", (event) => {
     return; // let the request go to the network
   }
 
-  if (event.request.mode === "navigate") {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match("./index.html"))
-    );
-    return;
-  }
-
+  // Network-first: always fetch the latest shell; refresh the cache; fall back
+  // to cache (or the cached index for navigations) only when offline.
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const networkFetch = fetch(event.request)
-        .then((res) => {
-          if (res && res.ok && event.request.method === "GET") {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(event.request, copy));
-          }
-          return res;
-        })
-        .catch(() => cached);
-      return cached || networkFetch;
-    })
+    fetch(event.request)
+      .then((res) => {
+        if (res && res.ok && event.request.method === "GET") {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(event.request, copy));
+        }
+        return res;
+      })
+      .catch(() =>
+        caches.match(event.request).then(
+          (cached) =>
+            cached ||
+            (event.request.mode === "navigate"
+              ? caches.match("./index.html")
+              : undefined)
+        )
+      )
   );
 });
