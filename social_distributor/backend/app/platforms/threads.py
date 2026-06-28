@@ -28,9 +28,16 @@ from .base import (
 _THREADS_API = "https://graph.threads.net/v1.0"
 _AUTH_BASE   = "https://www.threads.net/oauth"
 
-APP_ID     = os.getenv("THREADS_APP_ID", "")
+# Public defaults reuse the existing "3q-threads-publisher" consumer app.
+# The App ID is a public OAuth client_id (already shipped in 3q-hatchery's
+# threads-auth.html and visible in every authorize URL). Only
+# THREADS_APP_SECRET is a real secret and must be set in the environment.
+# Env always overrides these defaults.
+APP_ID     = os.getenv("THREADS_APP_ID", "") or "3114808732061005"
 APP_SECRET = os.getenv("THREADS_APP_SECRET", "")
-REDIRECT   = os.getenv("THREADS_REDIRECT_URI", "")
+REDIRECT   = os.getenv("THREADS_REDIRECT_URI", "") or (
+    "https://api-production-6de7.up.railway.app/auth/threads/callback"
+)
 
 
 def _raise(resp: requests.Response, context: str) -> None:
