@@ -26,6 +26,8 @@ from .base import (
 )
 
 _THREADS_API = "https://graph.threads.net/v1.0"
+# Public alias used by the OAuth callback (routes.py) to resolve /me.
+THREADS_BASE = _THREADS_API
 _AUTH_BASE   = "https://www.threads.net/oauth"
 
 # Public defaults reuse the existing "3q-threads-publisher" consumer app.
