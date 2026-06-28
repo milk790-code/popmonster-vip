@@ -14,7 +14,7 @@ RUN mkdir -p /usr/share/nginx/html \
     && cp -r /tmp/frontend/js /usr/share/nginx/html/js \
     && cp -r /tmp/frontend/icons /usr/share/nginx/html/icons 2>/dev/null || true \
     && cp /tmp/frontend/manifest.json /usr/share/nginx/html/ 2>/dev/null || true \
-    && cp /tmp/frontend/login.html /usr/share/nginx/html/ 2>/dev/null || true \
+    && cp /tmp/frontend/login.html /usr/share/nginx/html/login.html.tpl 2>/dev/null || true \
     && rm -rf /tmp/frontend
 
 COPY scripts/frontend-entrypoint.sh /docker-entrypoint.d/99-render.sh

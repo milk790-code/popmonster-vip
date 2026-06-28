@@ -5,8 +5,10 @@ set -e
 : "${API_BASE_URL:=http://localhost:5000}"
 : "${CACHE_VERSION:=prod}"
 
-# Render templates with env vars (no envsubst dependency on alpine)
-for f in index.html sw.js; do
+# Render templates with env vars (no envsubst dependency on alpine).
+# login.html MUST be here too — it reads ${API_BASE_URL} for the cross-origin
+# login POST; left unsubstituted it posts to the frontend origin and 405s.
+for f in index.html login.html sw.js; do
     sed -e "s|\${API_BASE_URL}|${API_BASE_URL}|g" \
         -e "s|\${CACHE_VERSION}|${CACHE_VERSION}|g" \
         "/usr/share/nginx/html/${f}.tpl" > "/usr/share/nginx/html/${f}"
