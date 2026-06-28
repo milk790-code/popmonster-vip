@@ -72,9 +72,12 @@ class ThreadsOAuth(OAuthProvider):
         )
 
     def exchange_code(self, code: str) -> TokenBundle:
-        # Step 1: short-lived token
+        # Step 1: short-lived token. The token endpoint lives on
+        # graph.threads.net (NOT www.threads.net, which only hosts the
+        # authorize dialog) — posting to www.threads.net/oauth/access_token
+        # returns a platform error and the whole exchange fails.
         r = requests.post(
-            f"{_AUTH_BASE}/access_token",
+            "https://graph.threads.net/oauth/access_token",
             data={
                 "client_id": APP_ID,
                 "client_secret": APP_SECRET,
