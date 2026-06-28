@@ -12,7 +12,7 @@ from __future__ import annotations
 from flask import Blueprint, jsonify, request
 
 from ..extensions import db
-from ..models import AccountGroup, SocialAccount, User
+from ..models import AccountGroup, PostTarget, SocialAccount, User
 from ..utils.audit import record as audit
 from ..utils.auth import current_user_id
 
@@ -128,6 +128,13 @@ def delete_group(group_id: int):
     if err:
         return err
     user_id = group.user_id
+    # Unlink historical post targets first. PostTarget.group_id is a nullable
+    # FK with no ON DELETE rule, so deleting a group that was ever used for
+    # dispatch would raise a foreign-key violation (500). Null the reference
+    # to preserve post history (account/post stay intact) and allow deletion.
+    db.session.query(PostTarget).filter_by(group_id=group_id).update(
+        {"group_id": None}, synchronize_session=False
+    )
     db.session.delete(group)
     audit("group.deleted", "account_group", group_id, actor_user_id=user_id)
     db.session.commit()
