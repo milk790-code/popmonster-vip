@@ -67,11 +67,17 @@ def create_app() -> Flask:
     # CRIT: never reflect `*` with credentials. CORS_ALLOWED_ORIGINS must be an
     # explicit comma-separated allow-list in any shared/prod deploy; when unset
     # we fall back to a safe localhost-only list for first-time dev, NOT `*`.
+    # Localhost-only origins are always allowed (they are only reachable from
+    # the operator's own machine, so this is not a cross-site risk). This lets
+    # local cockpit tools (e.g. the 8777 每日內容工作台) call the API and push
+    # to the publisher without needing a Railway CORS_ALLOWED_ORIGINS change.
     _DEFAULT_DEV_ORIGINS = [
         "http://localhost:5173",
         "http://localhost:8080",
+        "http://localhost:8777",
         "http://127.0.0.1:5173",
         "http://127.0.0.1:8080",
+        "http://127.0.0.1:8777",
     ]
     raw_origins = os.environ.get("CORS_ALLOWED_ORIGINS", "").strip()
     if raw_origins == "*":
@@ -84,7 +90,9 @@ def create_app() -> Flask:
         )
         cors_origins = _DEFAULT_DEV_ORIGINS
     elif raw_origins:
+        # Production origins from env PLUS the always-allowed localhost origins.
         cors_origins = [o.strip() for o in raw_origins.split(",") if o.strip()]
+        cors_origins += [o for o in _DEFAULT_DEV_ORIGINS if o not in cors_origins]
     else:
         cors_origins = _DEFAULT_DEV_ORIGINS
     cors.init_app(
