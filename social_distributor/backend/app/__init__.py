@@ -46,7 +46,17 @@ def create_app() -> Flask:
         @app.before_request
         def _api_key_guard():
             from flask import request as _req
+            if _req.method == "OPTIONS":
+                return
             if not _req.path.startswith("/api/"):
+                return
+            # A logged-in operator (session cookie or signed bearer token) is
+            # a valid identity for the browser dashboard — it must not be
+            # forced to also carry the server-side X-API-Key (which would have
+            # to be embedded in client JS, defeating the point). X-API-Key
+            # stays available for external/programmatic callers.
+            from .utils.auth import request_has_operator
+            if request_has_operator():
                 return
             client = _req.headers.get("X-API-Key", "")
             if not hmac.compare_digest(

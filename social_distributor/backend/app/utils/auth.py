@@ -53,6 +53,61 @@ def consume_magic_token(token: str) -> str:
     return payload["email"]
 
 
+# --- Operator bearer-token auth --------------------------------------
+# The dashboard and API live on different Railway domains, so a SameSite
+# session cookie is not sent cross-site. The password login therefore also
+# mints a signed bearer token the frontend stores and sends as
+# ``Authorization: Bearer <token>`` (or ``?op_token=`` for EventSource SSE,
+# which cannot set headers). The token is signed with SECRET_KEY, so it is
+# unforgeable, and is treated as a valid operator identity by the guards.
+OPERATOR_TOKEN_TTL = int(os.environ.get("OPERATOR_TOKEN_TTL", str(60 * 60 * 24 * 30)))
+
+
+def _operator_signer() -> URLSafeTimedSerializer:
+    return URLSafeTimedSerializer(config.secret_key, salt="operator-session")
+
+
+def issue_operator_token(user_id: int) -> str:
+    return _operator_signer().dumps({"uid": int(user_id)})
+
+
+def verify_operator_token(token: str) -> int | None:
+    """Return the user_id encoded in a valid token, else None."""
+    if not token:
+        return None
+    try:
+        data = _operator_signer().loads(token, max_age=OPERATOR_TOKEN_TTL)
+        return int(data["uid"])
+    except (BadSignature, SignatureExpired, KeyError, ValueError, TypeError):
+        return None
+
+
+def _bearer_user_id() -> int | None:
+    """Resolve operator user_id from the Authorization header or ?op_token=."""
+    if not has_request_context():
+        return None
+    from flask import request
+    auth = request.headers.get("Authorization", "")
+    token = auth[7:].strip() if auth.startswith("Bearer ") else ""
+    if not token:
+        token = request.args.get("op_token", "")
+    return verify_operator_token(token)
+
+
+def request_has_operator() -> bool:
+    """True if the request carries a valid operator session OR bearer token.
+
+    Reads session/headers directly (not flask.g) so it is correct regardless
+    of before_request ordering — the api-key guard can call it before the
+    user-id middleware has run.
+    """
+    if not has_request_context():
+        return False
+    if session.get("user_id") is not None:
+        return True
+    return _bearer_user_id() is not None
+
+
 def find_or_create_user(email: str) -> User:
     user = (
         db.session.query(User)
@@ -89,6 +144,10 @@ def current_user_id() -> int | None:
     if sess_uid is not None:
         g.user_id = int(sess_uid)
         return g.user_id
+    bid = _bearer_user_id()
+    if bid is not None:
+        g.user_id = bid
+        return g.user_id
     return None
 
 
@@ -113,4 +172,7 @@ def attach_user_id_middleware(app) -> None:
     @app.before_request
     def _resolve():
         sess_uid = session.get("user_id")
-        g.user_id = int(sess_uid) if sess_uid is not None else None
+        if sess_uid is not None:
+            g.user_id = int(sess_uid)
+        else:
+            g.user_id = _bearer_user_id()

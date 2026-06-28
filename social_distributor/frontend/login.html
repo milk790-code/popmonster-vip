@@ -11,20 +11,63 @@
 <body>
   <main style="max-width:420px;margin:80px auto;padding:32px;background:#181b22;border-radius:12px;border:1px solid #23272e;">
     <h1 style="color:#c8a96b;margin:0 0 8px 0;">Social Distributor</h1>
-    <p class="hint">輸入 email 收 magic link。30 分鐘內有效，沒收到看一下垃圾信。</p>
-    <form id="loginForm" style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
-      <input type="email" id="email" required placeholder="you@example.com" autofocus />
-      <button type="submit" style="background:#c8a96b;color:#0f1115;border:none;padding:12px;border-radius:6px;font-weight:700;cursor:pointer;">寄 magic link</button>
+
+    <p class="hint">輸入密碼登入。</p>
+    <form id="pwForm" style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
+      <input type="password" id="password" required placeholder="密碼" autofocus
+             style="padding:12px;border-radius:6px;border:1px solid #23272e;background:#0f1115;color:#e6edf3;" />
+      <button type="submit" style="background:#c8a96b;color:#0f1115;border:none;padding:12px;border-radius:6px;font-weight:700;cursor:pointer;">登入</button>
     </form>
-    <p id="loginStatus" class="hint" style="margin-top:12px;"></p>
+    <p id="pwStatus" class="hint" style="margin-top:12px;"></p>
+
+    <details style="margin-top:24px;">
+      <summary class="hint" style="cursor:pointer;">改用 email magic link 登入</summary>
+      <p class="hint" style="margin-top:8px;">輸入 email 收 magic link。30 分鐘內有效，沒收到看一下垃圾信。（需後台已設定寄信服務）</p>
+      <form id="loginForm" style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
+        <input type="email" id="email" placeholder="you@example.com"
+               style="padding:12px;border-radius:6px;border:1px solid #23272e;background:#0f1115;color:#e6edf3;" />
+        <button type="submit" style="background:#23272e;color:#c8a96b;border:1px solid #c8a96b;padding:12px;border-radius:6px;font-weight:700;cursor:pointer;">寄 magic link</button>
+      </form>
+      <p id="loginStatus" class="hint" style="margin-top:8px;"></p>
+    </details>
   </main>
   <script>
     const META = document.querySelector('meta[name="distributor-api"]')?.content?.trim();
     const API_BASE = (META && !META.startsWith("$")) ? META : "";
+    const TOKEN_KEY = "sd_operator_token";
+    const DASHBOARD = "index.html";
+
+    document.getElementById("pwForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const password = document.getElementById("password").value;
+      const status = document.getElementById("pwStatus");
+      status.textContent = "登入中…";
+      try {
+        const res = await fetch(`${API_BASE}/auth/login/password`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          credentials: "include",
+          body: JSON.stringify({password}),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 503) {
+          status.textContent = "後台尚未設定密碼登入（OPERATOR_PASSWORD）。";
+          return;
+        }
+        if (!res.ok) throw new Error(data.error || `${res.status}`);
+        if (data.token) localStorage.setItem(TOKEN_KEY, data.token);
+        status.textContent = "✓ 登入成功，前往工作台…";
+        window.location.href = DASHBOARD;
+      } catch (err) {
+        status.textContent = `登入失敗：${err.message}`;
+      }
+    });
+
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("email").value;
       const status = document.getElementById("loginStatus");
+      if (!email) { status.textContent = "請先輸入 email。"; return; }
       status.textContent = "Sending…";
       try {
         const res = await fetch(`${API_BASE}/auth/login/request`, {

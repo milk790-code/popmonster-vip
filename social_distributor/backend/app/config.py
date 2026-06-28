@@ -79,6 +79,17 @@ class Config:
     )
     aws_region: str = field(default_factory=lambda: _env("AWS_REGION", "us-east-1"))
 
+    # Operator password login (single-operator convenience). When
+    # OPERATOR_PASSWORD is set, POST /auth/login/password accepts it and mints
+    # an operator session + bearer token. Unset -> that endpoint returns 503
+    # and nothing changes (the magic-link flow stays the only login path).
+    operator_password: str | None = field(
+        default_factory=lambda: _env("OPERATOR_PASSWORD")
+    )
+    operator_email: str = field(
+        default_factory=lambda: _env("OPERATOR_EMAIL", "operator@local")
+    )
+
     sendgrid_api_key: str | None = field(
         default_factory=lambda: _env("SENDGRID_API_KEY")
     )

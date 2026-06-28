@@ -7,6 +7,18 @@ const API_BASE = (_META_API && !_META_API.startsWith("$"))
   ? _META_API
   : (window.SOCIAL_DISTRIBUTOR_API ?? "http://localhost:5000");
 
+// Operator bearer token (set by login.html after password login). Sent on
+// every API call so the cross-origin frontend/api split works without a
+// SameSite cookie, and so the X-API-Key wall lets the logged-in operator
+// through. Falls back to "" when absent.
+const SD_TOKEN_KEY = "sd_operator_token";
+function sdToken() { try { return localStorage.getItem(SD_TOKEN_KEY) || ""; } catch (_) { return ""; } }
+function sdAuthHeaders() { const t = sdToken(); return t ? { Authorization: "Bearer " + t } : {}; }
+function sdGoLogin() {
+  try { localStorage.removeItem(SD_TOKEN_KEY); } catch (_) {}
+  if (!/login\.html$/.test(location.pathname)) location.href = "login.html";
+}
+
 // Register the service worker for PWA / offline shell support.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -70,7 +82,7 @@ function safeUrl(u) {
 
 const API_TIMEOUT_MS = 15000;
 async function api(path, options = {}) {
-  const headers = { "Content-Type": "application/json", ...(options.headers ?? {}) };
+  const headers = { "Content-Type": "application/json", ...sdAuthHeaders(), ...(options.headers ?? {}) };
   // Phase 1: 15s timeout via AbortController so a hung backend route can't
   // freeze the UI indefinitely (the original bare fetch had no ceiling).
   const controller = new AbortController();
@@ -96,6 +108,12 @@ async function api(path, options = {}) {
     clearTimeout(timer);
   }
   if (!res.ok) {
+    // Not authenticated → bounce to the login page instead of spamming the
+    // error banner. (401 is the api-key wall / session guard saying "log in".)
+    if (res.status === 401) {
+      sdGoLogin();
+      throw new Error("尚未登入，導向登入頁");
+    }
     _consecutiveApiFailures++;
     if (_consecutiveApiFailures >= 3)
       _setApiHealthBanner(true, `⚠ 後端連續 ${_consecutiveApiFailures} 次錯誤回應。`);
@@ -116,6 +134,7 @@ async function api(path, options = {}) {
   try {
     const me = await fetch(`${API_BASE}/auth/me`, {
       credentials: "include",
+      headers: { ...sdAuthHeaders() },
     }).then((r) => (r.ok ? r.json() : null));
     if (me && me.authenticated) {
       const userIdEl = document.getElementById("userId");
@@ -125,9 +144,12 @@ async function api(path, options = {}) {
         const wrap = userIdEl.closest("label");
         if (wrap) wrap.title = `signed in as ${me.email}`;
       }
+    } else {
+      // No valid session/token → require login before showing the dashboard.
+      sdGoLogin();
     }
   } catch {
-    /* not authenticated, fall back to manual user_id field */
+    sdGoLogin();
   }
 })();
 
@@ -982,7 +1004,11 @@ function connectEvents() {
   if (_eventSource) _eventSource.close();
   const userId = Number(userIdInput.value);
   if (!userId) return;
-  _eventSource = new EventSource(`${API_BASE}/api/events/stream?user_id=${userId}`);
+  // EventSource can't set headers; pass the operator token as ?op_token= so
+  // the api-key wall / login guard recognize it (server reads op_token query).
+  const _tok = sdToken();
+  const _q = `user_id=${userId}` + (_tok ? `&op_token=${encodeURIComponent(_tok)}` : "");
+  _eventSource = new EventSource(`${API_BASE}/api/events/stream?${_q}`);
   _eventSource.onmessage = (ev) => {
     try {
       const data = JSON.parse(ev.data);

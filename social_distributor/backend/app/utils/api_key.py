@@ -52,6 +52,13 @@ def register_api_key_guard(app) -> None:
             return None
         if not path.startswith("/api/"):
             return None
+        # A logged-in operator (session or signed bearer token) bypasses the
+        # X-API-Key wall — the browser dashboard authenticates via password
+        # login, not the server-side API key. X-API-Key remains for external
+        # programmatic callers.
+        from .auth import request_has_operator
+        if request_has_operator():
+            return None
         supplied = (
             request.headers.get("X-API-Key")
             or request.args.get("api_key")
