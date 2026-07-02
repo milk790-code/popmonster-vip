@@ -146,6 +146,8 @@ async function api(path, options = {}) {
       headers: { ...sdAuthHeaders() },
     }).then((r) => (r.ok ? r.json() : null));
     if (me && me.authenticated) {
+      // Reveal the dashboard (index.html keeps <body> hidden until auth passes).
+      document.documentElement.classList.add("sd-authed");
       const userIdEl = document.getElementById("userId");
       if (userIdEl) {
         userIdEl.value = String(me.id);

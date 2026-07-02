@@ -4,8 +4,21 @@
   <meta charset="utf-8" />
   <meta name="build-date" content="2026-06-16">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Social Distributor — Dashboard</title>
+  <title>POP MONSTER 發布台 · 工作台</title>
   <meta name="theme-color" content="#0f1115" />
+  <script>
+    // Auth guard (pre-paint): operator auth is bearer-token-only (cookies don't
+    // cross the frontend/api origins), so no token in localStorage means the
+    // visitor cannot be authenticated — send them to login before anything renders.
+    try {
+      if (!localStorage.getItem("sd_operator_token")) location.replace("login.html");
+    } catch (e) { /* storage blocked → fall through; /auth/me gate still hides UI */ }
+  </script>
+  <style>
+    /* Dashboard stays invisible until app.js confirms /auth/me — prevents the
+       backoffice shell from flashing (or being scraped visually) before auth. */
+    html:not(.sd-authed) body { visibility: hidden; }
+  </style>
   <!--
     A6: API base URL injection. nginx (in docker-compose) runs envsubst on
     this file at container startup and replaces https://api-production-6de7.up.railway.app with whatever
@@ -21,7 +34,7 @@
 </head>
 <body>
   <header class="topbar">
-    <h1>Social Distributor</h1>
+    <h1>POP MONSTER 發布台</h1>
     <nav>
       <button data-tab="daily" class="active">每日工作流</button>
       <button data-tab="compose">Compose</button>

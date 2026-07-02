@@ -12,7 +12,7 @@
 // detected and installed by the browser even when CACHE_VERSION is constant
 // (Railway renders CACHE_VERSION=prod every deploy). Network-first then keeps
 // assets fresh without needing a per-deploy bump.
-const SW_BUILD = "2026-06-28-netfirst-1";
+const SW_BUILD = "2026-07-03-authguard-1";
 const CACHE_VERSION = "${CACHE_VERSION}".startsWith("$")
   ? "dev-" + Date.now()
   : "${CACHE_VERSION}";
