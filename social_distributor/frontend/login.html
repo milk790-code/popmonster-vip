@@ -3,14 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Sign in — Social Distributor</title>
+  <title>POP MONSTER 發布台 · 一鍵多平台發文</title>
+  <meta name="description" content="一次把內容發到 Facebook、Instagram、YouTube、Threads 等多平台，支援分組、排程、變體改寫。POP MONSTER × 3Q 孵化所。" />
+  <meta property="og:title" content="POP MONSTER 發布台 · 一鍵多平台發文" />
+  <meta property="og:description" content="一次發多平台、多帳號、可排程、自動變體。想導入這套發文系統？加 LINE 聊。" />
+  <meta property="og:type" content="website" />
   <meta name="theme-color" content="#0f1115" />
   <meta name="distributor-api" content="${API_BASE_URL}" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c8a96b'/%3E%3Ctext x='16' y='23' font-size='17' font-weight='700' text-anchor='middle' fill='%230f1115' font-family='sans-serif'%3E發%3C/text%3E%3C/svg%3E" />
   <link rel="stylesheet" href="css/app.css" />
 </head>
 <body>
-  <main style="max-width:420px;margin:80px auto;padding:32px;background:#181b22;border-radius:12px;border:1px solid #23272e;">
-    <h1 style="color:#c8a96b;margin:0 0 8px 0;">Social Distributor</h1>
+  <main style="max-width:420px;margin:64px auto;padding:32px;background:#181b22;border-radius:12px;border:1px solid #23272e;">
+    <h1 style="color:#c8a96b;margin:0 0 4px 0;">POP MONSTER 發布台</h1>
+    <p class="hint" style="margin:0 0 16px 0;">一鍵把內容發到多平台、多帳號 · 支援排程與變體改寫</p>
 
     <p class="hint">輸入密碼登入。</p>
     <form id="pwForm" style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
@@ -30,10 +36,17 @@
       </form>
       <p id="loginStatus" class="hint" style="margin-top:8px;"></p>
     </details>
+
+    <div style="margin-top:28px;padding-top:20px;border-top:1px solid #23272e;text-align:center;">
+      <a href="https://lin.ee/80AW8WV" target="_blank" rel="noopener"
+         style="display:inline-block;background:#06c755;color:#fff;text-decoration:none;padding:11px 20px;border-radius:8px;font-weight:700;font-size:14px;">💬 想導入這套發文系統？加 LINE 聊</a>
+      <p class="hint" style="margin-top:10px;font-size:12px;">POP MONSTER × 3Q 孵化所 · 幫你把多平台發文變成一鍵</p>
+    </div>
   </main>
   <script>
     const META = document.querySelector('meta[name="distributor-api"]')?.content?.trim();
-    const API_BASE = (META && !META.startsWith("$")) ? META : "";
+    // envsubst 沒跑到時（META 仍是 ${...}），退回正式 API，避免登入打到相對路徑而無反應
+    const API_BASE = (META && !META.startsWith("$")) ? META : "https://api-production-6de7.up.railway.app";
     const TOKEN_KEY = "sd_operator_token";
     const DASHBOARD = "index.html";
 
