@@ -15,6 +15,9 @@ from __future__ import annotations
 import hashlib
 import hmac
 import os
+import time
+from collections import deque
+from threading import Lock
 
 from flask import Blueprint, jsonify, redirect, request, session
 from itsdangerous import BadSignature, SignatureExpired
@@ -35,6 +38,31 @@ from ..utils.notify import send_failure_email
 bp = Blueprint("login", __name__, url_prefix="/auth")
 
 _DASHBOARD_URL = os.environ.get("DASHBOARD_URL", "/")
+
+# Security-audit follow-up (2026-07-07): /login/password previously had zero
+# rate limiting, so an unsalted SHA-256 verifier was brute-forceable at
+# whatever speed the attacker's network allowed. Process-local sliding-window
+# limiter, keyed by IP: generous enough that the legitimate operator never
+# notices it (a handful of logins per five minutes), but turns brute force
+# into a multi-year exercise. Single-process assumption is fine here — same
+# fallback pattern as utils/rate_limit.py's in-memory counter.
+_LOGIN_MAX_ATTEMPTS = 8
+_LOGIN_WINDOW_SECONDS = 300
+_login_attempts: dict[str, deque] = {}
+_login_lock = Lock()
+
+
+def _login_rate_limited(ip: str) -> int:
+    """Returns retry-after seconds if rate-limited, else 0. Records this attempt."""
+    now = time.time()
+    with _login_lock:
+        bucket = _login_attempts.setdefault(ip, deque())
+        while bucket and now - bucket[0] > _LOGIN_WINDOW_SECONDS:
+            bucket.popleft()
+        if len(bucket) >= _LOGIN_MAX_ATTEMPTS:
+            return int(_LOGIN_WINDOW_SECONDS - (now - bucket[0])) + 1
+        bucket.append(now)
+        return 0
 
 
 def _operator_password_ok(supplied: str) -> bool | None:
@@ -62,6 +90,16 @@ def login_password():
     (works same-origin) and returning a signed bearer token (works
     cross-origin, which is how the Railway frontend/api split is deployed).
     """
+    ip = request.remote_addr or "unknown"
+    retry_after = _login_rate_limited(ip)
+    if retry_after:
+        audit("login.password.rate_limited", "user", None, actor_user_id=None, detail={"ip": ip})
+        db.session.commit()
+        resp = jsonify({"error": "too many attempts", "retry_after_seconds": retry_after})
+        resp.status_code = 429
+        resp.headers["Retry-After"] = str(retry_after)
+        return resp
+
     body = request.get_json(force=True) or {}
     supplied = body.get("password") or ""
     ok = _operator_password_ok(supplied)

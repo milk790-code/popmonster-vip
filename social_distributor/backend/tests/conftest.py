@@ -28,6 +28,17 @@ def client(app):
     return app.test_client()
 
 
+@pytest.fixture(autouse=True)
+def _reset_login_rate_limit():
+    """The login-password rate limiter (added 2026-07-07) is a process-local
+    module-level dict, so without this it leaks state across tests that share
+    the test client's IP and starts failing tests order-dependently."""
+    from app.api import login as login_module
+    login_module._login_attempts.clear()
+    yield
+    login_module._login_attempts.clear()
+
+
 def login_as(client, user_id: int) -> None:
     """Authenticate the test client as ``user_id`` via the real session flow.
 

@@ -27,7 +27,7 @@ from ..models import MediaAsset
 from ..scheduler.tasks import transcode_media
 from ..utils.audit import record as audit
 from ..utils.auth import current_user_id
-from ..utils.storage import presign_upload
+from ..utils.storage import media_bucket, presign_get, presign_upload
 
 bp = Blueprint("uploads", __name__, url_prefix="/api/uploads")
 
@@ -166,8 +166,26 @@ def complete():
     user_id = current_user_id()
     if not user_id:
         return jsonify({"error": "user_id required"}), 400
-    if not body.get("kind") or not body.get("bucket") or not body.get("key") or not body.get("public_get_url"):
-        return jsonify({"error": "kind, bucket, key, public_get_url required"}), 400
+    if not body.get("kind") or not body.get("bucket") or not body.get("key"):
+        return jsonify({"error": "kind, bucket, key required"}), 400
+    if body["kind"] not in ("image", "video"):
+        return jsonify({"error": "kind must be image|video"}), 400
+
+    # Security-audit follow-up (2026-07-07): this endpoint used to trust
+    # body.bucket/body.key/body.public_get_url verbatim, so any authenticated
+    # session could register a MediaAsset pointing at an arbitrary bucket/key
+    # (or an arbitrary external URL via public_get_url) — not just the object
+    # it just PUT via /presign. That object then flows straight into the
+    # distribute pipeline, posted out to real connected accounts. Now: the
+    # key must live under this user's own presign prefix, the bucket must be
+    # our configured media bucket, and the GET url is always regenerated
+    # server-side from bucket+key rather than trusted from the client.
+    key = body["key"]
+    if not key.startswith(f"users/{user_id}/"):
+        return jsonify({"error": "key must be under the caller's own upload prefix"}), 403
+    if body["bucket"] != media_bucket():
+        return jsonify({"error": "unknown bucket"}), 403
+    public_get_url = presign_get(body["bucket"], key)
     sha = body.get("sha256") or None
 
     if sha:
@@ -195,7 +213,7 @@ def complete():
     media = MediaAsset(
         user_id=user_id,
         kind=body["kind"],
-        storage_url=body["public_get_url"],
+        storage_url=public_get_url,
         mime_type=body.get("content_type", "application/octet-stream"),
         sha256=sha,
         compliance_report={"s3_bucket": body["bucket"], "s3_key": body["key"]},

@@ -67,11 +67,15 @@ def test_complete_with_matching_sha256_dedupes(client, app):
         existing_id = existing.id
 
     login_as(client, user_id)
-    with patch("app.api.uploads.transcode_media.delay") as transcode:
+    # bucket/key must match this session's own presign prefix (security-audit
+    # follow-up, 2026-07-07); public_get_url is regenerated server-side.
+    with patch("app.api.uploads.transcode_media.delay") as transcode, \
+         patch("app.api.uploads.media_bucket", return_value="b"), \
+         patch("app.api.uploads.presign_get", return_value="https://b/k"):
         res = client.post("/api/uploads/complete", json={
             "kind": "video", "content_type": "video/mp4",
-            "bucket": "b", "key": "k",
-            "public_get_url": "https://b/k", "sha256": "dup-hash",
+            "bucket": "b", "key": f"users/{user_id}/video/k",
+            "sha256": "dup-hash",
         })
     assert res.status_code == 200
     body = res.get_json()
@@ -86,11 +90,13 @@ def test_complete_with_matching_sha256_dedupes(client, app):
 def test_complete_without_dedup_creates_new(client, app):
     user_id = _seed_user(app)
     login_as(client, user_id)
-    with patch("app.api.uploads.transcode_media.delay") as transcode:
+    with patch("app.api.uploads.transcode_media.delay") as transcode, \
+         patch("app.api.uploads.media_bucket", return_value="b"), \
+         patch("app.api.uploads.presign_get", return_value="https://b/k"):
         res = client.post("/api/uploads/complete", json={
             "kind": "video", "content_type": "video/mp4",
-            "bucket": "b", "key": "k",
-            "public_get_url": "https://b/k", "sha256": "new-hash",
+            "bucket": "b", "key": f"users/{user_id}/video/k",
+            "sha256": "new-hash",
         })
     assert res.status_code == 201
     assert res.get_json()["deduped"] is False

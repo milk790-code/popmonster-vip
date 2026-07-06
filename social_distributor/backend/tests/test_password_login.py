@@ -46,6 +46,21 @@ def test_password_login_wrong_password_401(client, monkeypatch):
     assert res.status_code == 401
 
 
+def test_password_login_rate_limited_after_repeated_attempts(client, monkeypatch):
+    """Security-audit regression (2026-07-07): /login/password previously had
+    no rate limiting at all, so an unsalted SHA-256 verifier was brute-forceable
+    at network speed. After enough attempts from the same source, further
+    attempts (even with the correct password) must be throttled with 429."""
+    monkeypatch.setattr(app_config, "operator_password", "correct-horse")
+    from app.api.login import _LOGIN_MAX_ATTEMPTS
+    for _ in range(_LOGIN_MAX_ATTEMPTS):
+        res = client.post("/auth/login/password", json={"password": "nope"})
+        assert res.status_code == 401
+    limited = client.post("/auth/login/password", json={"password": "correct-horse"})
+    assert limited.status_code == 429
+    assert "retry_after_seconds" in limited.get_json()
+
+
 def test_password_login_correct_returns_token_and_user(client, app, monkeypatch):
     monkeypatch.setattr(app_config, "operator_password", "correct-horse")
     monkeypatch.setattr(app_config, "operator_email", "operator@local")
