@@ -80,23 +80,57 @@
 # 本機：確認 agentmemory 在跑、看記憶數量
 agentmemory status
 
-# 找出本機記憶資料目錄（state_store.db + stream_store 所在的 ./data/）
-# 通常在你最常啟動 agentmemory 的工作目錄下，或用 export 工具：
+# 找出並確認資料目錄（通常是你最常啟動 agentmemory 的工作目錄下的 ./data/）
+ls -la ./data/
+# 應看到：state_store.db  stream_store/
 ```
 
-兩種同步法：
+### 法一（推薦）：整包搬 data 目錄 → Railway volume
 
-- **法一（推薦）：直接搬 data 目錄。**
-  把本機的 `data/state_store.db` 與 `data/stream_store/` 整包，
-  在 Railway volume（`/app/data`）還原。Railway 可用
-  `railway run` / `railway volume` CLI 或臨時 shell 上傳。
-- **法二：用 MCP `memory_export` 匯出 JSON 備份。**
-  注意：agentmemory **沒有對應的 import 指令**（CLI 只有 `import-jsonl`，
-  那是匯入 Claude Code 轉錄，不是還原匯出 JSON）。所以 JSON 僅作**備份/保險**，
-  正式同步仍走法一（搬 data 目錄）。
+```bash
+# ── 本機 ──────────────────────────────────────────
 
-> 🔴 **退路**：若搬 data 目錄遇到版本/格式問題，退而求其次＝線上實例重新開始累積，
-> 本機 JSON 僅留存。是否接受此退路請告知。
+# 步驟 1：打包備份
+tar -czf agentmemory-backup-$(date +%Y%m%d).tar.gz data/
+echo "備份：$(du -sh agentmemory-backup-$(date +%Y%m%d).tar.gz)"
+
+# 步驟 2：暫存到 transfer.sh（7 天、匿名、100MB 限制）
+# ⚠️ 記憶有隱私疑慮時改用 ngrok 方法（見下方備選）
+UPLOAD_URL=$(curl --upload-file agentmemory-backup-$(date +%Y%m%d).tar.gz \
+  https://transfer.sh/agentmemory-data.tar.gz)
+echo "取得暫存 URL：$UPLOAD_URL"  # 記下這個 URL，下面容器內要用
+
+# 步驟 3：Railway CLI 進容器（需先 `npm i -g @railway/cli` 並 `railway login`）
+railway link   # 選 project：popmonster-vip → service：agentmemory
+railway shell --service agentmemory
+
+# ── 容器內（railway shell 連進去之後）──────────────
+
+curl -o /tmp/data.tar.gz "$UPLOAD_URL"
+# 解壓時 ./data/ 會還原到 /app/data/
+tar -xzf /tmp/data.tar.gz --strip-components=1 -C /app/data/
+# 確認
+ls -la /app/data/          # 應看到 state_store.db  stream_store/
+exit                       # 離開 shell
+```
+
+> **備選（不想外部上傳）：本機 ngrok + python3 HTTP server**
+> ```bash
+> # 另開兩個終端
+> cd <包含備份的目錄> && python3 -m http.server 8888
+> ngrok http 8888           # 取得 https://xxx.ngrok-free.app
+> # Railway shell 內：
+> # curl -o /tmp/data.tar.gz https://xxx.ngrok-free.app/agentmemory-backup-YYYYMMDD.tar.gz
+> # tar -xzf /tmp/data.tar.gz --strip-components=1 -C /app/data/
+> ```
+
+### 法二：JSON 備份（僅保險，無法完整還原）
+
+MCP `memory_export` 可匯出 JSON 快照，但 agentmemory CLI 沒有對應的 `import` 指令
+（`import-jsonl` 是匯入 Claude Code 轉錄，不是還原記憶 JSON）。JSON 備份**只當保險存底**，
+正式還原仍需走法一。
+
+> 🔴 **退路**：若搬 data 目錄遇到版本/格式問題，可接受線上實例重新累積，本機 JSON 留存。
 
 ## 6. 🟢 把四個 repo 指向線上實例
 
