@@ -455,18 +455,31 @@ async function loadStatus() {
 // --- Accounts ---------------------------------------------------------
 document.querySelectorAll(".connect-row button").forEach((btn) => {
   btn.addEventListener("click", async () => {
-    const userId = Number(userIdInput.value);
-    const result = await api(
-      `/auth/${btn.dataset.provider}/start?user_id=${userId}`
-    );
-    // Fix: remove "noopener" so the callback popup can reach window.opener
-    // and send postMessage back. "noopener" sets opener=null in the popup,
-    // which silently breaks the entire OAuth completion flow.
-    window.open(
-      result.authorization_url,
+    const popup = window.open(
+      "about:blank",
       "oauth_popup",
       "width=620,height=720,scrollbars=yes,resizable=yes"
     );
+    let result;
+    try {
+      result = await api(`/auth/${btn.dataset.provider}/start-url`);
+    } catch (err) {
+      if (popup && !popup.closed) popup.close();
+      throw err;
+    }
+    const redirectUrl = result.redirect_url || result.authorization_url;
+    if (!redirectUrl) {
+      if (popup && !popup.closed) popup.close();
+      throw new Error("OAuth start-url did not return redirect_url");
+    }
+    // Fix: remove "noopener" so the callback popup can reach window.opener
+    // and send postMessage back. "noopener" sets opener=null in the popup,
+    // which silently breaks the entire OAuth completion flow.
+    if (popup && !popup.closed) {
+      popup.location.href = redirectUrl;
+    } else {
+      window.location.href = redirectUrl;
+    }
   });
 });
 

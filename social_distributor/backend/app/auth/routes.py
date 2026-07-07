@@ -34,7 +34,7 @@ from itsdangerous import BadSignature, URLSafeTimedSerializer
 
 from ..config import config
 from ..extensions import db
-from ..models import Platform, SocialAccount
+from ..models import Platform, SocialAccount, User
 from ..platforms import get_oauth_provider
 from ..platforms._http import request_json
 from ..platforms.facebook import GRAPH_BASE
@@ -60,9 +60,7 @@ def _serializer() -> URLSafeTimedSerializer:
     return URLSafeTimedSerializer(config.secret_key, salt="oauth-state")
 
 
-@bp.get("/<provider>/start")
-@login_required
-def start(provider: str):
+def _start_payload(provider: str) -> dict | tuple:
     if provider not in PROVIDERS:
         return jsonify({"error": "unknown provider"}), 404
 
@@ -70,9 +68,31 @@ def start(provider: str):
     # request — so a caller can't kick off an OAuth flow that binds the
     # connected account to someone else's user_id.
     user_id = current_user_id()
+    if user_id is None or db.session.get(User, user_id) is None:
+        return jsonify({"error": "authentication required"}), 401
 
     state = _serializer().dumps({"user_id": user_id, "provider": provider})
     url = get_oauth_provider(provider).authorization_url(state)
+    return {"state": state, "url": url}
+
+
+@bp.get("/<provider>/start-url")
+@login_required
+def start_url(provider: str):
+    payload = _start_payload(provider)
+    if not isinstance(payload, dict):
+        return payload
+    return jsonify({"redirect_url": payload["url"], "state": payload["state"]})
+
+
+@bp.get("/<provider>/start")
+@login_required
+def start(provider: str):
+    payload = _start_payload(provider)
+    if not isinstance(payload, dict):
+        return payload
+    url = payload["url"]
+    state = payload["state"]
     return jsonify({"authorization_url": url, "state": state})
 
 

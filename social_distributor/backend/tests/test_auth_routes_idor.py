@@ -5,6 +5,9 @@ identity is taken ONLY from the authenticated session, and the cross-tenant
 revoke is gated by an ownership check.
 
 Covered:
+- GET  /auth/<provider>/start-url
+                                — login required; returns a browser-safe OAuth
+                                  redirect URL after authenticated fetch.
 - GET  /auth/<provider>/start   — login required; user_id derived from session,
                                   never from ?user_id=.
 - POST /auth/<account_id>/revoke — login required; 403 when the target account
@@ -12,6 +15,7 @@ Covered:
 - POST /auth/tiktok/cookie      — login required; user_id derived from session,
                                   never from body user_id.
 """
+from urllib.parse import parse_qs, urlparse
 from unittest.mock import MagicMock, patch
 
 from app.auth import routes as auth_routes
@@ -48,6 +52,11 @@ def test_start_requires_login(client):
     assert res.status_code == 401
 
 
+def test_start_url_requires_login(client):
+    res = client.get("/auth/tiktok/start-url")
+    assert res.status_code == 401
+
+
 def test_start_ignores_query_user_id_and_uses_session(client, app):
     with app.app_context():
         victim = _make_user("victim-start@example.com")
@@ -65,6 +74,76 @@ def test_start_ignores_query_user_id_and_uses_session(client, app):
     payload = auth_routes._serializer().loads(state, max_age=600)
     assert payload["user_id"] == attacker
     assert payload["user_id"] != victim
+
+
+def test_start_url_ignores_query_user_id_and_uses_session(client, app):
+    with app.app_context():
+        victim = _make_user("victim-start-url@example.com")
+        attacker = _make_user("attacker-start-url@example.com")
+
+    login_as(client, attacker)
+    fake_provider = MagicMock()
+    fake_provider.authorization_url.return_value = "https://example.test/oauth"
+    with patch("app.auth.routes.get_oauth_provider", return_value=fake_provider):
+        res = client.get(f"/auth/tiktok/start-url?user_id={victim}")
+    assert res.status_code == 200
+    body = res.get_json()
+    state = body["state"]
+    assert body["redirect_url"] == "https://example.test/oauth"
+    payload = auth_routes._serializer().loads(state, max_age=600)
+    assert payload["user_id"] == attacker
+    assert payload["user_id"] != victim
+
+
+def test_start_url_rejects_missing_session_user(client):
+    login_as(client, 999_999)
+    res = client.get("/auth/tiktok/start-url")
+    assert res.status_code == 401
+
+
+def test_start_url_returns_oauth_urls_for_connect_buttons(client, app, monkeypatch):
+    env = {
+        "META_APP_ID": "meta-client-id",
+        "META_APP_SECRET": "meta-client-secret",
+        "META_REDIRECT_URI": "https://api.example.test/auth/meta/callback",
+        "TIKTOK_CLIENT_KEY": "tiktok-client-key",
+        "TIKTOK_CLIENT_SECRET": "tiktok-client-secret",
+        "TIKTOK_REDIRECT_URI": "https://api.example.test/auth/tiktok/callback",
+        "GOOGLE_CLIENT_ID": "google-client-id.apps.googleusercontent.com",
+        "GOOGLE_CLIENT_SECRET": "google-client-secret",
+        "GOOGLE_REDIRECT_URI": "https://api.example.test/auth/youtube/callback",
+        "LINKEDIN_CLIENT_ID": "linkedin-client-id",
+        "LINKEDIN_CLIENT_SECRET": "linkedin-client-secret",
+        "LINKEDIN_REDIRECT_URI": "https://api.example.test/auth/linkedin/callback",
+    }
+    for key, value in env.items():
+        monkeypatch.setenv(key, value)
+
+    with app.app_context():
+        user_id = _make_user("oauth-start-url@example.com")
+    login_as(client, user_id)
+
+    expected_hosts = {
+        "meta": "www.facebook.com",
+        "tiktok": "www.tiktok.com",
+        "youtube": "accounts.google.com",
+        "linkedin": "www.linkedin.com",
+    }
+
+    for provider, expected_host in expected_hosts.items():
+        res = client.get(f"/auth/{provider}/start-url")
+        assert res.status_code == 200
+        body = res.get_json()
+        redirect_url = body["redirect_url"]
+        parsed = urlparse(redirect_url)
+        params = parse_qs(parsed.query)
+
+        assert parsed.scheme == "https"
+        assert parsed.netloc == expected_host
+        assert params["state"][0] == body["state"]
+
+        payload = auth_routes._serializer().loads(body["state"], max_age=600)
+        assert payload == {"user_id": user_id, "provider": provider}
 
 
 # -- /auth/<account_id>/revoke ----------------------------------------
