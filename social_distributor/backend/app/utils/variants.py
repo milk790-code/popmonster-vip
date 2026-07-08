@@ -47,19 +47,34 @@ def build_referral_cta(platform: str, code: str) -> str:
     return template.format(url=url)
 
 
-# Absolute blocklist — any variant containing these terms is rejected outright.
-# Per product brief: 維護型/保護1個月/不是鍍膜/無禁詞/數字可驗證/do_not_say絕不出現
-BRAND_BLOCKLIST: list[str] = [
-    r"鍍膜",          # product is NOT a coating
-    r"保護一個月",     # unverifiable duration claim
-    r"保護1個月",
-    r"日本原裝",      # false provenance unless product actually is
-    r"100%",          # absolute claims are unverifiable unless product spec confirms
-    r"免費",          # never offer free goods without explicit promo context
+# Spam/safety terms are rejected even if Claude copies them from the source.
+ALWAYS_BLOCKLIST: list[str] = [
     r"follow\s*back",
     r"buy followers?",
     r"crypto\s+giveaway",
 ]
+
+# Product-claim terms are rejected only when Claude introduces them. The source
+# caption is already an operator-reviewed campaign asset, and some approved POP
+# MONSTER calendars intentionally include search/category tags such as #鍍膜.
+SOURCE_BOUND_BLOCKLIST: list[str] = [
+    r"鍍膜",          # product should not be newly positioned as a coating
+    r"保護一個月",     # unverifiable duration claim
+    r"保護1個月",
+    r"日本原裝",      # false provenance unless product actually is
+    r"100%",          # absolute claims are unverifiable unless product spec confirms
+]
+
+# Do not block legitimate consultation CTAs such as "免費諮詢" or "免費 10 題 AI
+# 診斷"; block free-goods style claims when they are newly introduced.
+FREE_GOODS_BLOCKLIST: list[str] = [
+    r"免費\s*(?:送|領|拿|試用|產品|商品|樣品|贈品|索取|兌換|抽)",
+]
+
+# Backward-compatible aggregate for tests/admin introspection.
+BRAND_BLOCKLIST: list[str] = (
+    ALWAYS_BLOCKLIST + SOURCE_BOUND_BLOCKLIST + FREE_GOODS_BLOCKLIST
+)
 
 # Numeric-fact check: caption should not introduce numbers the source didn't have.
 _NUMBER_RE = re.compile(r"\b\d+(?:\.\d+)?\s*(?:%|倍|公里|km|ml|g)\b")
@@ -92,9 +107,15 @@ def _brand_safety_check(caption: str, source_caption: str) -> list[str]:
     """Return list of violation descriptions; empty list means clean."""
     issues: list[str] = []
 
-    for pattern in BRAND_BLOCKLIST:
+    for pattern in ALWAYS_BLOCKLIST:
         if re.search(pattern, caption, re.IGNORECASE):
             issues.append(f"blocklist hit: {pattern}")
+
+    for pattern in SOURCE_BOUND_BLOCKLIST + FREE_GOODS_BLOCKLIST:
+        if re.search(pattern, caption, re.IGNORECASE) and not re.search(
+            pattern, source_caption, re.IGNORECASE
+        ):
+            issues.append(f"new blocked claim: {pattern}")
 
     # Numbers in variant that weren't in source are suspicious claims.
     source_nums = set(_NUMBER_RE.findall(source_caption))

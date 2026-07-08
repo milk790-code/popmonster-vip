@@ -67,6 +67,51 @@ def test_claude_variant_falls_back_on_error(monkeypatch):
     assert result.used_engine == "template"
 
 
+def test_claude_allows_approved_free_consultation_and_source_terms(monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+
+    fake_response = MagicMock()
+    fake_block = MagicMock()
+    fake_block.type = "text"
+    fake_block.text = '{"title":"t","caption":"免費諮詢看這邊，洗車分類也含 #鍍膜"}'
+    fake_response.content = [fake_block]
+
+    with patch("anthropic.Anthropic") as anthropic_cls:
+        anthropic_cls.return_value.messages.create.return_value = fake_response
+        result = generate_variant(VariantRequest(
+            source_caption="原始分類 #鍍膜 #洗車",
+            source_title="t",
+            platform="facebook",
+            style_profile={"tone": "casual"},
+            seed="seed",
+        ))
+
+    assert result.used_engine == "claude"
+    assert "免費諮詢" in result.caption
+
+
+def test_claude_still_blocks_new_free_goods_claim(monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+
+    fake_response = MagicMock()
+    fake_block = MagicMock()
+    fake_block.type = "text"
+    fake_block.text = '{"title":"t","caption":"今天下單免費送商品"}'
+    fake_response.content = [fake_block]
+
+    with patch("anthropic.Anthropic") as anthropic_cls:
+        anthropic_cls.return_value.messages.create.return_value = fake_response
+        result = generate_variant(VariantRequest(
+            source_caption="今天有新品",
+            source_title="t",
+            platform="facebook",
+            style_profile={"tone": "casual", "hashtag_pool": ["#a"]},
+            seed="seed",
+        ))
+
+    assert result.used_engine == "template"
+
+
 def test_referral_cta_appended_per_platform(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     base = dict(
