@@ -10,7 +10,7 @@ import pytz
 from croniter import croniter
 
 from ..compliance import ComplianceEngine
-from ..compliance.engine import publisher_request_from
+from ..compliance.engine import publisher_request_from, target_media_asset
 from ..extensions import db
 from ..models import (
     JobStatus, MediaAsset, Platform, PostMetric, PostTarget, SocialAccount,
@@ -149,7 +149,9 @@ def _dispatch_body(self, target: PostTarget) -> None:
 
     publisher = get_publisher(target.account.platform)
     request = publisher_request_from(target.post, target)
-    _swap_in_preferred_derivative(request, target.post.media, target.account.platform.value)
+    _swap_in_preferred_derivative(
+        request, target_media_asset(target.post, target), target.account.platform.value
+    )
 
     try:
         check_and_consume(

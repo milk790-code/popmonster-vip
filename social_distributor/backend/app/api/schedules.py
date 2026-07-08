@@ -8,7 +8,7 @@ from croniter import croniter
 from flask import Blueprint, jsonify, request
 
 from ..extensions import db
-from ..models import JobStatus, Post, PostTarget, SocialAccount
+from ..models import JobStatus, MediaAsset, Post, PostTarget, SocialAccount
 from ..scheduler import dispatch_target
 from ..utils.audit import record as audit
 from ..utils.auth import current_user_id
@@ -27,7 +27,7 @@ def _parse_when(when: str | None, tz_name: str) -> datetime | None:
 
 @bp.post("")
 def create_schedule():
-    """Body: {post_id, items: [{account_id, scheduled_for?, cron?, timezone?, overrides?}]}"""
+    """Body: {post_id, items: [{account_id, scheduled_for?, cron?, timezone?, media_id?, overrides?}]}"""
     body = request.get_json(force=True)
     post = db.session.get(Post, body["post_id"])
     if not post:
@@ -57,13 +57,22 @@ def create_schedule():
                     "platform": account.platform.value,
                     "details": errors,
                 }), 400
+        if "media_id" in item:
+            media = db.session.get(MediaAsset, item["media_id"])
+            if not media or media.user_id != post.user_id:
+                return jsonify({
+                    "error": "media_id not found",
+                    "account_id": account.id,
+                    "media_id": item["media_id"],
+                }), 400
+            item_overrides = {**item_overrides, "_media_id": media.id}
 
         tz_name = item.get("timezone", "UTC")
         cron_expr = item.get("cron")
         if cron_expr and not croniter.is_valid(cron_expr):
             return jsonify({"error": f"invalid cron expression: {cron_expr}"}), 400
 
-        scheduled_for = _parse_when(item.get("scheduled_for"), tz_name)
+        scheduled_for = _parse_when(item.get("scheduled_for") or item.get("scheduled_at"), tz_name)
         if cron_expr and scheduled_for is None:
             tz = pytz.timezone(tz_name)
             scheduled_for = (

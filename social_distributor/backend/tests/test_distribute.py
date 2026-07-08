@@ -6,6 +6,7 @@ from app.extensions import db
 from app.models import (
     AccountGroup,
     JobStatus,
+    MediaAsset,
     Platform,
     Post,
     PostTarget,
@@ -64,6 +65,29 @@ def test_jitter_zero_window_returns_base_repeated():
     assert out == [base, base, base]
 
 
+def test_distribute_jitter_is_centered_and_scheduled_at_alias(client, app):
+    user_id, group_id, post_id = _make_group(
+        app, accounts=[Platform.FACEBOOK] * 20
+    )
+    login_as(client, user_id)
+    res = client.post(
+        f"/api/posts/{post_id}/distribute",
+        json={
+            "group_ids": [group_id],
+            "scheduled_at": "2026-05-04T18:00:00+08:00",
+            "timezone": "Asia/Taipei",
+            "jitter_minutes": 90,
+            "dry_run": True,
+        },
+    )
+    assert res.status_code == 200, res.data
+    scheduled = [datetime.fromisoformat(p["scheduled_for"]) for p in res.get_json()["plan"]]
+    base = datetime(2026, 5, 4, 10, 0, 0, tzinfo=timezone.utc)
+    assert all(base - timedelta(minutes=90) <= t <= base + timedelta(minutes=90) for t in scheduled)
+    assert min(scheduled) < base
+    assert max(scheduled) > base
+
+
 def test_distribute_creates_targets_for_all_group_accounts(client, app):
     user_id, group_id, post_id = _make_group(
         app, accounts=[Platform.FACEBOOK, Platform.INSTAGRAM, Platform.YOUTUBE]
@@ -108,6 +132,125 @@ def test_distribute_dry_run_persists_nothing(client, app):
     assert res.get_json()["created_target_ids"] == []
     with app.app_context():
         assert db.session.query(PostTarget).count() == 0
+
+
+def test_distribute_media_map_sets_per_account_media(client, app):
+    user_id, group_id, post_id = _make_group(
+        app, accounts=[Platform.FACEBOOK, Platform.YOUTUBE]
+    )
+    login_as(client, user_id)
+    with app.app_context():
+        account_ids = [
+            a.id for a in db.session.get(AccountGroup, group_id).accounts
+        ]
+        media = [
+            MediaAsset(
+                user_id=user_id,
+                kind="video",
+                storage_url=f"https://cdn.test/{i}.mp4",
+                mime_type="video/mp4",
+            )
+            for i in range(2)
+        ]
+        db.session.add_all(media)
+        db.session.commit()
+        media_ids = [m.id for m in media]
+
+    media_map = {str(account_ids[0]): media_ids[0], str(account_ids[1]): media_ids[1]}
+    res = client.post(
+        f"/api/posts/{post_id}/distribute",
+        json={"group_ids": [group_id], "media_map": media_map, "dry_run": True},
+    )
+    assert res.status_code == 200, res.data
+    plan = sorted(res.get_json()["plan"], key=lambda p: p["account_id"])
+    assert {p["media_source"] for p in plan} == {"media_map"}
+    assert {p["media_id"] for p in plan} == set(media_ids)
+
+    res = client.post(
+        f"/api/posts/{post_id}/distribute",
+        json={
+            "group_ids": [group_id],
+            "media_map": media_map,
+            "scheduled_for": (
+                datetime.now(timezone.utc) + timedelta(days=1)
+            ).strftime("%Y-%m-%dT%H:%M:%S"),
+        },
+    )
+    assert res.status_code == 201, res.data
+    with app.app_context():
+        targets = db.session.query(PostTarget).filter_by(post_id=post_id).all()
+        assert {
+            t.account_id: t.overrides["_media_id"] for t in targets
+        } == {account_ids[0]: media_ids[0], account_ids[1]: media_ids[1]}
+
+
+def test_distribute_media_map_rejects_other_group_accounts(client, app):
+    user_id, group_id, post_id = _make_group(app, accounts=[Platform.FACEBOOK])
+    login_as(client, user_id)
+    with app.app_context():
+        other_account = SocialAccount(
+            user_id=user_id,
+            platform=Platform.FACEBOOK,
+            external_account_id="outside-group",
+            handle="outside",
+            access_token_enc=b"a",
+        )
+        media = MediaAsset(
+            user_id=user_id,
+            kind="video",
+            storage_url="https://cdn.test/v.mp4",
+            mime_type="video/mp4",
+        )
+        db.session.add_all([other_account, media])
+        db.session.commit()
+        other_account_id = other_account.id
+        media_id = media.id
+    res = client.post(
+        f"/api/posts/{post_id}/distribute",
+        json={
+            "group_ids": [group_id],
+            "media_map": {str(other_account_id): media_id},
+            "dry_run": True,
+        },
+    )
+    assert res.status_code == 400
+    assert res.get_json()["error"] == "media_map includes accounts outside selected groups"
+
+
+def test_schedule_item_can_override_media_id(client, app):
+    user_id, group_id, post_id = _make_group(app, accounts=[Platform.YOUTUBE])
+    login_as(client, user_id)
+    with app.app_context():
+        account_id = db.session.get(AccountGroup, group_id).accounts[0].id
+        media = MediaAsset(
+            user_id=user_id,
+            kind="video",
+            storage_url="https://cdn.test/y.mp4",
+            mime_type="video/mp4",
+        )
+        db.session.add(media)
+        db.session.commit()
+        media_id = media.id
+
+    res = client.post(
+        "/api/schedules",
+        json={
+            "post_id": post_id,
+            "items": [
+                {
+                    "account_id": account_id,
+                    "media_id": media_id,
+                    "scheduled_at": "2026-05-04T18:00:00+08:00",
+                    "timezone": "Asia/Taipei",
+                }
+            ],
+        },
+    )
+    assert res.status_code == 201, res.data
+    with app.app_context():
+        target = db.session.query(PostTarget).filter_by(post_id=post_id).one()
+        assert target.overrides["_media_id"] == media_id
+        assert target.scheduled_for == datetime(2026, 5, 4, 10, 0, 0)
 
 
 def test_distribute_with_variants_uses_template_fallback(client, app):

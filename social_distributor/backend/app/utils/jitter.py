@@ -27,3 +27,18 @@ def spread(base: datetime, window_minutes: int, seed: str, count: int) -> list[d
         offsets.append(int.from_bytes(chunk[:4], "big") % seconds)
     offsets.sort()
     return [base + timedelta(seconds=offset) for offset in offsets]
+
+
+def spread_centered(base: datetime, radius_minutes: int, seed: str, count: int) -> list[datetime]:
+    """Scatter times across ``base ± radius_minutes``.
+
+    ``spread`` keeps the historical "base then later" behavior. Campaign-style
+    releases usually mean "around 18:00", so distribute uses this helper to
+    avoid silently pushing every account later than the requested time.
+    """
+    if count <= 0:
+        return []
+    if radius_minutes <= 0:
+        return [base for _ in range(count)]
+    start = base - timedelta(minutes=radius_minutes)
+    return spread(start, radius_minutes * 2, seed, count)

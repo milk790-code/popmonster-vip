@@ -20,7 +20,7 @@ from ..scheduler import dispatch_target
 from ..utils.audit import record as audit
 from ..utils.auth import current_user_id
 from ..utils.best_times import next_best_time_for_group
-from ..utils.jitter import spread
+from ..utils.jitter import spread_centered
 from ..utils.variants import VariantRequest, generate_variant
 
 bp = Blueprint("posts", __name__, url_prefix="/api/posts")
@@ -38,6 +38,36 @@ def _load_owned_post(post_id: int):
     if post.user_id != current_user_id():
         return None, (jsonify({"error": "forbidden"}), 403)
     return post, None
+
+
+def _parse_media_map(raw: object, user_id: int):
+    if raw in (None, {}):
+        return {}, None
+    if not isinstance(raw, dict):
+        return None, (jsonify({"error": "media_map must be an object"}), 400)
+
+    media_map: dict[int, int] = {}
+    for raw_account_id, raw_media_id in raw.items():
+        try:
+            account_id = int(raw_account_id)
+            media_id = int(raw_media_id)
+        except (TypeError, ValueError):
+            return None, (jsonify({"error": "media_map keys and values must be integers"}), 400)
+        media_map[account_id] = media_id
+
+    if not media_map:
+        return {}, None
+
+    owned_media_ids = {
+        m.id
+        for m in db.session.query(MediaAsset)
+        .filter(MediaAsset.id.in_(set(media_map.values())), MediaAsset.user_id == user_id)
+        .all()
+    }
+    missing = sorted(set(media_map.values()) - owned_media_ids)
+    if missing:
+        return None, (jsonify({"error": "one or more media_ids not found", "media_ids": missing}), 400)
+    return media_map, None
 
 
 def _serialize_post(post: Post) -> dict:
@@ -245,9 +275,11 @@ def distribute(post_id: int):
         {
           "group_ids": [1, 2, 3],
           "scheduled_for": "2026-05-04T09:00:00",  // optional ISO 8601
+          "scheduled_at": "2026-05-04T09:00:00",   // accepted alias
           "timezone": "Asia/Taipei",
-          "jitter_minutes": 30,                     // spread starts across window
+          "jitter_minutes": 30,                     // spread across scheduled_for ± N min
           "generate_variants": true,                // per-group/per-platform rewriting
+          "media_map": {"123": 456},                // optional account_id → media_id
           "dry_run": false
         }
     """
@@ -278,12 +310,17 @@ def distribute(post_id: int):
 
     # Best time is per-group, so we compute per group below. ``base`` is
     # only used as the fallback when a group has no data yet.
-    base = _parse_when(body.get("scheduled_for"), tz_name) or datetime.now(timezone.utc)
+    base = _parse_when(
+        body.get("scheduled_for") or body.get("scheduled_at"), tz_name
+    ) or datetime.now(timezone.utc)
 
     jitter = max(0, int(body.get("jitter_minutes", 0)))
     do_variants = bool(body.get("generate_variants", False))
     referral_code: str | None = body.get("referral_code") or None
     dry_run = bool(body.get("dry_run", False))
+    media_map, media_map_err = _parse_media_map(body.get("media_map"), post.user_id)
+    if media_map_err:
+        return media_map_err
 
     # B7: validate caller-provided overrides against the platform whitelist.
     # We validate against every member platform in the selected groups, since
@@ -306,6 +343,15 @@ def distribute(post_id: int):
 
     plan: list[dict] = []
     created_ids: list[int] = []
+    selected_account_ids = {
+        a.id for g in groups for a in g.accounts if a.revoked_at is None
+    }
+    unknown_account_ids = sorted(set(media_map) - selected_account_ids)
+    if unknown_account_ids:
+        return jsonify({
+            "error": "media_map includes accounts outside selected groups",
+            "account_ids": unknown_account_ids,
+        }), 400
 
     for group in groups:
         active_accounts = [a for a in group.accounts if a.revoked_at is None]
@@ -322,10 +368,13 @@ def distribute(post_id: int):
                 best_time_used[group.id] = "fallback_no_data"
 
         seed = f"distribute:{post.id}:group:{group.id}:{group_base.isoformat()}"
-        starts = spread(group_base, jitter, seed, len(active_accounts))
+        starts = spread_centered(group_base, jitter, seed, len(active_accounts))
 
         for account, when in zip(active_accounts, starts):
-            overrides: dict = {}
+            overrides: dict = dict(body_overrides or {})
+            mapped_media_id = media_map.get(account.id)
+            if mapped_media_id is not None:
+                overrides["_media_id"] = mapped_media_id
             engine_used = "none"
             if do_variants:
                 req = VariantRequest(
@@ -348,6 +397,8 @@ def distribute(post_id: int):
                 "platform": account.platform.value,
                 "handle": account.handle,
                 "scheduled_for": when.isoformat(),
+                "media_id": mapped_media_id or post.media_id,
+                "media_source": "media_map" if mapped_media_id is not None else "post",
                 "variant_engine": engine_used,
                 "preview_caption": overrides.get("caption", post.caption)[:200],
             }

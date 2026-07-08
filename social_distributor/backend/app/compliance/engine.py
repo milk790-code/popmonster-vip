@@ -108,8 +108,9 @@ class ComplianceEngine:
                 )
             if rules.title_max and len(title) > rules.title_max:
                 issues.append(f"title {len(title)}/{rules.title_max} chars")
-            media_kind = post.media.kind if post.media else None
-            if rules.requires_media and not post.media:
+            media = target_media_asset(post, target)
+            media_kind = media.kind if media else None
+            if rules.requires_media and not media:
                 issues.append("media is required")
             if media_kind and media_kind not in rules.allowed_media:
                 issues.append(
@@ -166,6 +167,21 @@ class ComplianceEngine:
             )
 
 
+def target_media_asset(post: Post, target: PostTarget):
+    """Return the media asset for this target, honoring internal media overrides."""
+    raw_media_id = (target.overrides or {}).get("_media_id")
+    if raw_media_id is None:
+        return post.media
+    try:
+        media_id = int(raw_media_id)
+    except (TypeError, ValueError):
+        raise ValueError("invalid target media override") from None
+    media = db.session.get(MediaAsset, media_id)
+    if media is None or media.user_id != post.user_id:
+        raise ValueError("target media override not found")
+    return media
+
+
 def publisher_request_from(post: Post, target: PostTarget):
     """Build a PublishRequest from ORM rows. Defined here to avoid a cycle."""
     from ..platforms.base import PublishRequest
@@ -173,8 +189,10 @@ def publisher_request_from(post: Post, target: PostTarget):
     overrides = dict(target.overrides or {})
     caption = overrides.pop("caption", post.caption)
     title = overrides.pop("title", post.title)
-    media_url = post.media.storage_url if post.media else None
-    media_kind = post.media.kind if post.media else None
+    overrides.pop("_media_id", None)
+    media = target_media_asset(post, target)
+    media_url = media.storage_url if media else None
+    media_kind = media.kind if media else None
     return PublishRequest(
         caption=caption,
         title=title,
