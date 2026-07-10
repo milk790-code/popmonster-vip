@@ -121,3 +121,11 @@
 
 /* 抽屜縮圖占位(墨紙) */
 .pm-item-ph{display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#f6f1e5,#ece4d4);color:#1b1712;font-family:"Ma Shan Zheng","Noto Serif TC",serif;font-size:22px;border:1px solid rgba(27,23,18,.14);}
+
+/* ── 價格顯示(卡片+商品頁) ── */
+.card-price{font-family:"Montserrat","Noto Serif TC",serif;color:var(--gold-lt,#d8c08a);font-weight:800;font-size:17px;margin:2px 0 4px;letter-spacing:.01em;}
+.card-price .cur{font-size:12px;font-weight:600;opacity:.85;margin-right:1px;}
+.card-price.tbd{color:var(--txt-dim,#8a8378);font-size:13px;font-weight:500;}
+.pd-price{font-family:var(--serif-p,"Playfair Display"),serif;font-size:30px;font-weight:800;color:var(--gold-lt,#d8c08a);line-height:1;margin:16px 0 4px;}
+.pd-price .cur{font-size:16px;font-weight:500;color:var(--txt-m,#a89e8e);margin-right:3px;}
+.pd-price.tbd{font-size:17px;color:var(--txt-dim,#8a8378);font-weight:500;}
