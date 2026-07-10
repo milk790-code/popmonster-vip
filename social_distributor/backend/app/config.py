@@ -211,6 +211,7 @@ class Config:
                     and self.twilio_auth_token
                     and self.twilio_from_number
                 ),
+                "line": bool(self.line_channel_access_token and self.line_admin_user_id),
             },
             "encryption": {"token_key_set": bool(self.token_encryption_key)},
         }
