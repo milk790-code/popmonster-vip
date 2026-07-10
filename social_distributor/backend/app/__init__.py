@@ -78,6 +78,12 @@ def create_app() -> Flask:
         "http://127.0.0.1:5173",
         "http://127.0.0.1:8080",
         "http://127.0.0.1:8777",
+        "http://localhost:8803",
+        "http://127.0.0.1:8803",
+        # First-party production tools (operator-owned origins; auth is still
+        # enforced per-request via bearer/session, CORS only unblocks the call).
+        # CreatorKit 標題 AB 測試器 pushes drafts into distribute_ab from here.
+        "https://creatorkit.milk790.workers.dev",
     ]
     raw_origins = os.environ.get("CORS_ALLOWED_ORIGINS", "").strip()
     if raw_origins == "*":
