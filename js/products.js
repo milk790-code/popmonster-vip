@@ -42,6 +42,9 @@ window.PM_PRICES = {
   A041: 999,      // 米速鍍鉻拋光劑
   A042: 999,      // 柔和真皮清潔劑（慕斯款）
   A043: 499,      // 柏油清潔劑
+  A044: null,      // 超級泡沫洗車精 Super Foam
+  A045: null,      // 木瓜怪獸洗車打底劑
+  A046: null,      // 黑曼羅酸性洗車泡沫
 };
 
 window.PM_PRODUCTS = [
@@ -74,4 +77,7 @@ window.PM_PRODUCTS = [
   { sku:"A041", name:"米速鍍鉻拋光劑", cat:"研磨系列", img:"", url:"a041.html", tagline:"鍍鉻件去氧化 · 光澤完全恢復", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A042", name:"柔和真皮清潔劑（慕斯款）", cat:"護理系列", img:"", url:"a042.html", tagline:"慕斯泡沫護皮革 · 弱酸性深層護理", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A043", name:"柏油清潔劑", cat:"清潔系列", img:"img/a043-main.jpg", url:"a043.html", tagline:"柏油一抹即去 · 車漆安全無腐蝕", get price(){ return window.PM_PRICES[this.sku] || null; } },
+  { sku:"A044", name:"超級泡沫洗車精 Super Foam", cat:"清潔系列", img:"img/a044-main.jpg", url:"a044.html", tagline:"洗車前置厚泡沫 · 高濃縮", get price(){ return window.PM_PRICES[this.sku] || null; } },
+  { sku:"A045", name:"木瓜怪獸洗車打底劑", cat:"清潔系列", img:"img/a045-main.jpg", url:"a045.html", tagline:"Papaya Monster · 稀釋 1:10 免刷預洗", get price(){ return window.PM_PRICES[this.sku] || null; } },
+  { sku:"A046", name:"黑曼羅酸性洗車泡沫", cat:"清潔系列", img:"img/a046-main.jpg", url:"a046.html", tagline:"NEGROAMARO · 酸性洗車工作液", get price(){ return window.PM_PRICES[this.sku] || null; } },
 ];
