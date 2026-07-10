@@ -1,0 +1,103 @@
+/* ============================================================
+   POP MONSTER — 參無 Cānwú 點綴層 · canwu-accents.css
+   黑金基底上的水墨點綴：墨紙占位塊、朱砂印、飛白字。
+   來源：參無 Cānwú Design System（tokens: 紙 #f4efe3 / 墨 #1b1712 / 朱砂 #9e3a2b）
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
+
+/* ── 墨紙占位塊（商品圖位置：紙上飛白字＋朱砂小印） ── */
+.ink-ph{
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  width:100%;height:100%;
+  aspect-ratio:1/1;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255,255,255,.5) 0%, transparent 60%),
+    linear-gradient(160deg,#f6f1e5 0%,#f4efe3 55%,#ece4d4 100%);
+  border:1px solid rgba(27,23,18,.14);
+  box-shadow:inset 0 0 60px rgba(202,191,164,.35);
+  overflow:hidden;
+}
+.ink-ph::after{ /* 紙紋 */
+  content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.52 0 0 0 0 0.45 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.ink-ph-char{
+  font-family:'Ma Shan Zheng','Noto Serif TC',serif;
+  font-size:clamp(72px,42%,150px);
+  font-size:min(150px,38cqw,9em);
+  line-height:1;color:#1b1712;
+  transform:rotate(-2deg);
+  text-shadow:0 0 18px rgba(27,23,18,.12);
+}
+.ink-ph-seal{
+  position:absolute;right:10%;bottom:10%;
+  width:34px;height:34px;
+  background:#9e3a2b;color:#f4efe3;
+  font-family:'Ma Shan Zheng','Noto Serif TC',serif;
+  font-size:13px;line-height:1.15;
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;writing-mode:vertical-rl;
+  border-radius:3px;transform:rotate(-2.5deg);
+  box-shadow:0 1px 4px rgba(0,0,0,.25);
+}
+.card-img .ink-ph,.related-img-new .ink-ph{height:100%;aspect-ratio:auto;min-height:0}
+.ink-ph--sm .ink-ph-char{font-size:min(64px,30cqw,4em)}
+.ink-ph--sm .ink-ph-seal{width:22px;height:22px;font-size:9px;right:8%;bottom:8%}
+.ink-ph-note{
+  position:absolute;left:10%;top:9%;
+  font-family:'Noto Serif TC',serif;font-size:11px;letter-spacing:.35em;
+  color:rgba(27,23,18,.45);writing-mode:vertical-rl;
+}
+
+/* ── 卡片內加入購物車鈕（span 版,可放在 <a> 卡片內） ── */
+.card-btn--cart{
+  display:inline-block;margin-left:8px;cursor:pointer;
+  border:1px solid var(--gold,#c8a96b);color:var(--gold,#c8a96b);
+  padding:6px 14px;border-radius:6px;font-size:12px;letter-spacing:.08em;
+  transition:background .2s,color .2s;
+}
+.card-btn--cart:hover{background:var(--gold,#c8a96b);color:#0a0a0a}
+
+/* ── 商品頁數量＋加購列 ── */
+.pd-buy{display:flex;gap:10px;align-items:stretch;flex:1;min-width:230px}
+.pd-buy input[data-pm-qty-input]{
+  width:74px;background:transparent;border:1px solid var(--border,#2a2a2a);
+  color:var(--txt,#e8e2d6);text-align:center;font-size:16px;border-radius:8px;
+}
+.pd-buy .btn{flex:1}
+
+/* ── 朱砂印點綴（導覽/頁尾用小印） ── */
+.seal-dot{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;background:#9e3a2b;color:#f4efe3;
+  font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:12px;
+  border-radius:3px;transform:rotate(-2.5deg);vertical-align:middle;
+  margin-left:8px;
+}
+
+/* ── about 品牌圖騰：暗牆掛紙軸 ── */
+.totem-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,4fr);gap:48px;align-items:center;margin-top:40px}
+.totem-fig{margin:0}
+.totem-fig canvas{
+  display:block;width:100%;max-width:440px;height:auto;margin:0 auto;
+  background:#f4efe3;border:1px solid rgba(232,226,214,.12);
+  box-shadow:0 12px 48px rgba(0,0,0,.55), 0 2px 8px rgba(0,0,0,.4);
+}
+.totem-fig figcaption{
+  margin-top:14px;text-align:center;
+  font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--txt-dim,#8a8378);
+}
+.totem-notes{display:flex;flex-direction:column;gap:26px}
+.totem-notes .tn h3{
+  font-family:'Noto Serif TC',serif;font-size:17px;font-weight:700;
+  color:var(--txt,#e8e2d6);margin:0 0 6px;
+}
+.totem-notes .tn h3 .zhu{color:#c8543f}
+.totem-notes .tn p{font-size:13px;line-height:1.8;color:var(--txt-m,#a89e8e);margin:0}
+@media (prefers-reduced-motion:no-preference){
+  .totem-fig canvas{animation:totem-breathe 4.2s ease-in-out infinite}
+  @keyframes totem-breathe{0%,100%{opacity:1}50%{opacity:.93}}
+}
+@media (max-width:768px){.totem-grid{grid-template-columns:1fr;gap:32px}}

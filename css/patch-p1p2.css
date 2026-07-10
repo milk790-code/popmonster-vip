@@ -88,3 +88,12 @@
   width:200px;
   height:auto;
 }
+
+/* ── mobile menu 基準(index/members 等缺本地規則的頁面) ── */
+.mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:#0a0a0a;border-bottom:1px solid var(--border);padding:20px;z-index:99;flex-direction:column;gap:16px;}
+.mobile-menu.show{display:flex;}
+.mobile-menu a.active{color:var(--gold);}
+@media(min-width:921px){.mobile-menu{display:none !important;}}
+
+/* 缺失變數補定義(guide/商品頁使用) */
+:root{--border-w:rgba(200,169,107,.22);--txt-dim:#5a5347;}

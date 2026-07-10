@@ -117,8 +117,10 @@
     var priceHtml = e.p.price
       ? '<div class="pm-item-price">' + nt(e.p.price) + (e.qty > 1 ? ' ×' + e.qty : '') + '</div>'
       : '<div class="pm-item-price tbd">價格由 LINE 報價</div>';
-    return '<div class="pm-item" data-sku="' + e.sku + '">' +
-      '<img class="pm-item-img" src="' + esc(e.p.img) + '" alt="' + esc(e.p.name) + '" loading="lazy" onerror="this.style.visibility=\'hidden\'">' +
+    var thumb = e.p.img
+      ? '<img class="pm-item-img" src="' + esc(e.p.img) + '" alt="' + esc(e.p.name) + '" loading="lazy" onerror="this.style.visibility=\'hidden\'">'
+      : '<span class="pm-item-img pm-item-ph" aria-hidden="true">' + esc(e.p.name.charAt(0)) + '</span>';
+    return '<div class="pm-item" data-sku="' + e.sku + '">' + thumb +
       '<div class="pm-item-info"><div class="pm-item-sku">' + e.sku + ' · ' + esc(e.p.cat) + '</div>' +
       '<div class="pm-item-name">' + esc(e.p.name) + '</div>' + priceHtml + '</div>' +
       '<div class="pm-item-right"><div class="pm-qty">' +
@@ -333,6 +335,9 @@
     }
   });
   document.addEventListener('keydown', function (ev) {
+    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.closest && ev.target.closest('[data-pm-add][role="button"]')) {
+      ev.preventDefault(); ev.target.closest('[data-pm-add][role="button"]').click(); return;
+    }
     if (ev.key === 'Escape' && $('.pm-drawer.on')) closeDrawer();
   });
 

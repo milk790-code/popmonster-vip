@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="theme-color" content="#f4efe3">
+<meta name="theme-color" content="#0a0a0a">
 <title>購物車結帳｜泡泡怪獸 POP MONSTER</title>
 <meta name="description" content="確認訂單內容與收件資訊，透過 LINE 一鍵送出訂單。">
 <meta name="robots" content="noindex">
@@ -11,7 +11,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600&family=Noto+Serif+TC:wght@300;400;500;600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Montserrat:wght@400;500;600;700;800&family=Noto+Serif+TC:wght@400;500;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WTKLHW33D7"></script>
 <script>
 window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
@@ -19,6 +19,7 @@ gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_pers
 gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_flags':'SameSite=None;Secure'});
 </script>
 <link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/patch-p1p2.css">
 <link rel="stylesheet" href="css/store.css">
 <script>addEventListener('unhandledrejection',function(e){var m=e.reason&&(e.reason.message||String(e.reason));if(m&&m.indexOf('Transition was skipped')!==-1)e.preventDefault();});</script>
 </head>
@@ -32,7 +33,7 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
     <a href="about.html">關於我們</a>
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
   </div>
-  <button class="nav-menu-btn" aria-label="選單">☰</button>
+  <button class="nav-menu-btn" aria-label="選單" onclick="var m=this.nextElementSibling;var o=m.classList.toggle('show');m.setAttribute('aria-hidden',!o)">☰</button>
   <div class="mobile-menu" aria-hidden="true">
     <a href="index.html#products">全部商品</a>
     <a href="members.html">會員生態</a>
