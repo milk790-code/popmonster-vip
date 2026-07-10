@@ -1,97 +1,311 @@
 <!DOCTYPE html>
-<html lang="zh-Hant-TW">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0a0a0a">
-<title>推薦好禮即將推出｜泡泡怪獸 POP MONSTER</title>
-<meta name="description" content="會員推薦功能準備中，敬請期待。">
-<meta name="robots" content="noindex">
-<link rel="canonical" href="https://popmonster.vip/referral.html">
-<link rel="alternate" hreflang="zh-Hant-TW" href="https://popmonster.vip/referral.html">
-<link rel="alternate" hreflang="x-default" href="https://popmonster.vip/referral.html">
-<meta property="og:type" content="website">
-<meta property="og:locale" content="zh_TW">
-<meta property="og:site_name" content="泡泡怪獸 POP MONSTER">
-<meta property="og:title" content="推薦好禮即將推出｜泡泡怪獸 POP MONSTER">
-<meta property="og:description" content="會員推薦功能準備中，敬請期待。">
-<meta property="og:url" content="https://popmonster.vip/referral.html">
-<meta name="twitter:card" content="summary">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="/css/main.css">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>我的推薦碼 | 泡泡怪獸 POP MONSTER</title>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --gold:#c8a96b;--gold-l:#f0d080;--gold-d:#8a6a2f;
+  --bg:#0a0a0a;--s1:#141414;--s2:#1e1e1e;
+  --tx:#e8e2d6;--tx2:#cfc8ba;--mut:#7a7060;
+  --line-green:#06c755;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font-family:'Noto Sans TC',-apple-system,sans-serif;min-height:100vh;padding:0 0 60px}
 
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="apple-touch-icon" href="/favicon.svg">
-<link rel="manifest" href="/manifest.json">
-<meta property="og:image" content="https://popmonster.vip/img/og-default.svg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:image" content="https://popmonster.vip/img/og-default.svg">
-<!-- Google tag (gtag.js) - GA4 with Consent Mode v2 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-WTKLHW33D7"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-// Consent Mode v2 - 預設拒絕，符合 PDPA / GDPR
-gtag('consent', 'default', {
-  'ad_storage': 'denied',
-  'ad_user_data': 'denied',
-  'ad_personalization': 'denied',
-  'analytics_storage': 'denied',
-  'wait_for_update': 500
-});
-gtag('js', new Date());
-gtag('config', 'G-WTKLHW33D7', {
-  'anonymize_ip': true,
-  'cookie_flags': 'SameSite=None;Secure'
-});
-</script>
+/* Loading */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:16px}
+.spin{width:38px;height:38px;border:3px solid #222;border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hidden{display:none!important}
+
+/* Header */
+.hd{background:var(--s1);border-bottom:1px solid #1c1c1c;padding:16px 20px;display:flex;align-items:center;gap:12px}
+.hd-logo{font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-weight:700}
+.hd-avatar{width:36px;height:36px;border-radius:50%;background:#222;border:2px solid var(--gold-d);object-fit:cover;flex-shrink:0}
+.hd-name{font-size:13px;color:var(--tx2);margin-left:auto;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Sections */
+.sec{padding:20px 16px 0}
+.sec-title{font-size:10px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
+
+/* Code card */
+.code-card{background:var(--s1);border:1px solid var(--gold-d);border-radius:16px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden}
+.code-card::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:radial-gradient(circle,rgba(200,169,107,.12),transparent 70%);pointer-events:none}
+.code-wrap{display:flex;align-items:center;gap:12px;background:#0e0e0e;border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.code-val{flex:1;font-size:22px;font-weight:800;letter-spacing:5px;color:var(--gold-l);font-variant-numeric:tabular-nums}
+.copy-btn{background:transparent;border:1px solid var(--gold-d);color:var(--gold);border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.copy-btn:active{background:var(--gold);color:var(--bg)}
+.qr-wrap{display:flex;justify-content:center;margin:4px 0 14px}
+.qr-wrap canvas,.qr-wrap img{background:#fff;border-radius:8px;padding:6px}
+.code-hint{font-size:11px;color:var(--mut);text-align:center}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--s1);border:1px solid #1c1c1c;border-radius:12px;padding:14px 8px;text-align:center}
+.stat-val{font-size:26px;font-weight:800;color:var(--gold-l);display:block;line-height:1}
+.stat-lbl{font-size:10px;color:var(--mut);margin-top:6px;letter-spacing:.5px}
+
+/* How it works */
+.steps{display:flex;flex-direction:column;gap:14px}
+.step{display:flex;gap:14px;align-items:flex-start}
+.step-n{width:26px;height:26px;background:var(--gold);color:var(--bg);border-radius:50%;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-body{font-size:13px;line-height:1.6;color:var(--tx2)}
+.step-body strong{color:var(--gold-l)}
+
+/* Tier badge */
+.tier-badge{display:inline-block;background:var(--gold-d);color:var(--gold-l);font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 10px;border-radius:20px;margin-left:8px;vertical-align:middle}
+
+/* Buttons */
+.btns{padding:16px 16px 0;display:flex;flex-direction:column;gap:10px}
+.btn-share{background:var(--line-green);color:#fff;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:opacity .15s}
+.btn-share:active{opacity:.8}
+.btn-shop{display:block;background:var(--gold);color:var(--bg);border-radius:12px;padding:15px;font-size:15px;font-weight:700;text-align:center;text-decoration:none;width:100%;transition:opacity .15s}
+.btn-shop:active{opacity:.8}
+.btn-copy-link{background:transparent;border:1px solid var(--gold-d);color:var(--gold);border-radius:12px;padding:13px;font-size:13px;cursor:pointer;width:100%;transition:opacity .15s}
+.btn-copy-link:active{opacity:.7}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2a2a2a;color:var(--tx);border-radius:10px;padding:10px 22px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;z-index:999;border:1px solid #333}
+.toast.on{opacity:1}
+
+/* Divider */
+.divider{height:1px;background:linear-gradient(90deg,transparent,#222,transparent);margin:20px 0 0}
+
+/* Milestone bar */
+.milestone{background:var(--s1);border:1px solid #1c1c1c;border-radius:12px;padding:14px 16px}
+.mile-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.mile-lbl{font-size:12px;color:var(--tx2)}
+.mile-val{font-size:12px;color:var(--gold)}
+.bar-bg{background:#1a1a1a;border-radius:4px;height:6px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--gold-d),var(--gold-l));border-radius:4px;transition:width .6s ease}
+.mile-hint{font-size:11px;color:var(--mut);margin-top:6px}
+</style>
 </head>
 <body>
-<nav class="nav"><div class="nav-inner">
-  <a href="/index.html" class="nav-logo">POP MONSTER<span>泡泡怪獸</span></a>
-  <div class="nav-links">
-    <a href="/index.html">全部商品</a>
-    <a href="/members.html">會員生態</a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
-    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
-  </div>
-  <button class="nav-menu-btn" aria-label="選單" onclick="this.nextElementSibling.classList.toggle('show')">☰</button>
-  <div class="mobile-menu" style="display:none;position:fixed;top:60px;left:0;right:0;background:#0a0a0a;border-bottom:1px solid rgba(200,169,107,.15);padding:20px;z-index:99;flex-direction:column;gap:16px;">
-    <a href="/index.html" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">全部商品</a>
-    <a href="/members.html" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">會員生態</a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">蝦皮賣場</a>
-    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">LINE 諮詢</a>
-  </div>
-</div></nav>
-<script>document.querySelector('.nav-menu-btn')&&document.querySelector('.nav-menu-btn').addEventListener('click',function(){var m=this.nextElementSibling;m.style.display=m.style.display==='flex'?'none':'flex'})</script>
-<div class="page-404">
-  <h1 style="font-size:40px">推薦好禮</h1>
-  <p>會員推薦功能準備中，敬請期待</p>
-  <a href="/index.html" class="btn btn-gold">回首頁逛逛</a>
+
+<div id="loading" class="loading">
+  <div class="spin"></div>
+  <p style="color:var(--mut);font-size:13px">載入中…</p>
 </div>
-<footer class="footer">
-  <div class="footer-brand">泡泡怪獸 POP MONSTER × 米速 MISO</div>
-  <div class="footer-sub">把關每一道工序｜任何人都能輕鬆上手｜按說明操作 放心使用</div>
-  <div class="brand-belief"><span><b>過去</b>安全是立身根本</span><span><b>現在</b>安全是產品底線</span><span><b>未來</b>安全是永不變的堅守</span></div>
-  <div class="footer-links">
-    <a href="/index.html">全部商品</a>
-    <a href="/members.html">會員生態</a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
-    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
-    <a href="https://wa.me/886970527037" target="_blank" rel="noopener">WhatsApp</a>
-    <a href="https://www.facebook.com/share/1AcLN6W6HU/" target="_blank" rel="noopener">Facebook</a>
-    <a href="https://www.instagram.com/ssss4845454" target="_blank" rel="noopener">Instagram</a>
+
+<div id="app" class="hidden">
+
+  <!-- Header -->
+  <div class="hd">
+    <span class="hd-logo">POP MONSTER</span>
+    <img id="hdAvatar" class="hd-avatar" src="" alt="">
+    <span id="hdName" class="hd-name"></span>
   </div>
-  <div class="footer-legal" style="margin-bottom:8px">
-    <a href="/privacy.html" style="font-size:12px;color:var(--txt-m)">隱私權政策</a>
-    <span style="color:var(--txt-m);margin:0 8px">|</span>
-    <a href="/terms.html" style="font-size:12px;color:var(--txt-m)">服務條款</a>
+
+  <!-- 推薦碼 + QR -->
+  <div class="sec">
+    <div class="sec-title">· 我的推薦碼 ·</div>
+    <div class="code-card">
+      <div class="code-wrap">
+        <span class="code-val" id="codeVal">——</span>
+        <button class="copy-btn" onclick="copyCode()">複製碼</button>
+      </div>
+      <div class="qr-wrap"><div id="qrcode"></div></div>
+      <p class="code-hint">掃 QR 或分享連結，朋友開啟就自動帶你的推薦碼</p>
+    </div>
+
+    <!-- 成果統計 -->
+    <div class="stats-row">
+      <div class="stat">
+        <span class="stat-val" id="statReferred">0</span>
+        <div class="stat-lbl">推薦成功</div>
+      </div>
+      <div class="stat">
+        <span class="stat-val" id="statPoints">0</span>
+        <div class="stat-lbl">泡泡幣</div>
+      </div>
+      <div class="stat">
+        <span class="stat-val" id="statTier">—</span>
+        <div class="stat-lbl">會員等級</div>
+      </div>
+    </div>
+
+    <!-- 里程碑進度條 -->
+    <div class="milestone" id="milestone">
+      <div class="mile-row">
+        <span class="mile-lbl">推薦進度</span>
+        <span class="mile-val" id="mileText">0 / 5 人</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" id="mileBar" style="width:0%"></div></div>
+      <p class="mile-hint" id="mileHint">推薦滿 5 人，解鎖金泡專屬禮</p>
+    </div>
   </div>
-  <div class="footer-copy">&copy; 2026 泡泡怪獸 POP MONSTER. All rights reserved.</div>
-</footer>
-<script src="/js/main.js" defer></script>
-<div class="cookie-bar"><span>本站使用 Cookie 提升瀏覽體驗。繼續瀏覽即表示同意。</span><span><button class="cookie-accept" id="ck-accept">接受</button> <button class="cookie-decline" id="ck-decline">拒絕</button></span></div>
-</body></html>
+
+  <div class="divider"></div>
+
+  <!-- 怎麼賺 -->
+  <div class="sec" style="padding-top:16px">
+    <div class="sec-title">· 怎麼賺 ·</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">1</div>
+        <div class="step-body">點下方「分享給 LINE 好友」，把你的推薦連結傳出去</div>
+      </div>
+      <div class="step">
+        <div class="step-n">2</div>
+        <div class="step-body">朋友透過你的連結首次下單成功<br>你立刻獲得 <strong>+200 泡泡幣</strong></div>
+      </div>
+      <div class="step">
+        <div class="step-n">3</div>
+        <div class="step-body">朋友首購也額外多拿 <strong>+50 泡泡幣</strong>，雙贏</div>
+      </div>
+      <div class="step">
+        <div class="step-n">4</div>
+        <div class="step-body">泡泡幣可折抵下次訂單（1幣=NT$1），永不過期</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分享按鈕 -->
+  <div class="btns">
+    <button class="btn-share" onclick="shareToLine()">📤 分享給 LINE 好友</button>
+    <button class="btn-copy-link" onclick="copyLink()">🔗 複製推薦連結</button>
+    <a id="shopLink" href="https://popmonster.vip/order.html" class="btn-shop">🛒 去選購</a>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── 設定 ─────────────────────────────────────────────────────────
+const LIFF_ID   = '2010669277-4IRJYWtw';
+// Worker 網址 - pop-ecpay(2026-07-11 起改用 LIFF ID Token 驗證,不再信任 client 傳的 userId)
+const API       = 'https://pop-ecpay.milk790.workers.dev';
+const SITE      = 'https://popmonster.vip';
+const MILESTONE = 5; // 推薦滿幾人解鎖里程碑獎勵
+
+// ── 狀態 ─────────────────────────────────────────────────────────
+let profile = null;
+let stats   = null;
+let idToken = null;
+
+// ── 初始化 ────────────────────────────────────────────────────────
+(async () => {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+
+    idToken = liff.getIDToken();
+    profile = await liff.getProfile();
+    document.getElementById('hdAvatar').src = profile.pictureUrl || '';
+    document.getElementById('hdName').textContent  = profile.displayName || '';
+
+    // 抓 URL 中的推薦碼(此用戶若是透過別人推薦連結進來)
+    const inRef = new URLSearchParams(location.search).get('ref') || null;
+
+    // 建立/確認會員(帶推薦碼歸因)— 身分一律由 idToken 驗證,不再傳 lineUserId
+    await fetch(`${API}/api/member/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({
+        displayName: profile.displayName,
+        refCode:     inRef,
+      }),
+    });
+
+    // 拉推薦統計
+    const r = await fetch(`${API}/api/referral/stats`, {
+      headers: { 'Authorization': `Bearer ${idToken}` },
+    });
+    stats = await r.json();
+    render(stats);
+  } catch (e) {
+    console.error(e);
+    toast('載入失敗，請重試');
+    // Fallback:非 LIFF 環境(開發除錯用)
+    if (location.hostname === 'localhost') {
+      stats = { referral_code:'POPABC123', tier:'L0', points:150, total_spent:600, referred_count:1, share_url:`${SITE}/order.html?ref=POPABC123` };
+      render(stats);
+    }
+  }
+})();
+
+function render(s) {
+  const code     = s.referral_code || '——';
+  const shareUrl = s.share_url || `${SITE}/order.html?ref=${code}`;
+
+  document.getElementById('codeVal').textContent     = code;
+  document.getElementById('statReferred').textContent = s.referred_count || 0;
+  document.getElementById('statPoints').textContent   = s.points || 0;
+  document.getElementById('statTier').textContent     = tierLabel(s.tier);
+  document.getElementById('shopLink').href            = shareUrl;
+
+  // 里程碑進度條
+  const cnt   = Math.min(s.referred_count || 0, MILESTONE);
+  const pct   = Math.round(cnt / MILESTONE * 100);
+  document.getElementById('mileText').textContent = `${cnt} / ${MILESTONE} 人`;
+  document.getElementById('mileBar').style.width  = pct + '%';
+  document.getElementById('mileHint').textContent =
+    cnt >= MILESTONE ? '🎉 里程碑達成！禮遇等待負責人確認寄發' : `再邀 ${MILESTONE - cnt} 人解鎖金泡專屬禮`;
+
+  // QR Code
+  new QRCode(document.getElementById('qrcode'), {
+    text:       shareUrl,
+    width:      148, height: 148,
+    colorDark:  '#0a0a0a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M,
+  });
+
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+}
+
+function tierLabel(t) {
+  return ({ L0:'白泡', L1:'銀泡', L2:'金泡', B2B:'特約門市' })[t] || t || '—';
+}
+
+function buildShareMsg() {
+  const code = stats?.referral_code || '';
+  const url  = stats?.share_url || `${SITE}/order.html?ref=${code}`;
+  return `我在用泡泡怪獸汽美耗材，洗車保養效果真的不錯 🚗\n\n用我的推薦碼 ${code} 首購多得 +50 泡泡幣 🎁\n>> ${url}`;
+}
+
+async function shareToLine() {
+  const msg = buildShareMsg();
+  try {
+    if (liff.isApiAvailable('shareTargetPicker')) {
+      await liff.shareTargetPicker([{ type: 'text', text: msg }]);
+    } else {
+      throw new Error('no shareTargetPicker');
+    }
+  } catch {
+    // Fallback:開啟 LINE share URL
+    const url  = stats?.share_url || SITE;
+    window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}`);
+  }
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(stats?.referral_code || '').then(() => toast('推薦碼已複製！'));
+}
+
+function copyLink() {
+  const url = stats?.share_url || SITE;
+  navigator.clipboard.writeText(url).then(() => toast('推薦連結已複製！'));
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('on'), 2400);
+}
+</script>
+</body>
+</html>
