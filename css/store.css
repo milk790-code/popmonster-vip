@@ -1,0 +1,96 @@
+/* ═══ POP MONSTER 購物車 UI · v3 紙墨版 css/store.css ═══
+   class API 與 v2 完全一致；視覺換為參無紙墨。 */
+
+/* 遮罩與抽屜 */
+.pm-overlay{position:fixed;inset:0;z-index:400;background:rgba(27,23,18,.4);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .3s;}
+.pm-overlay.on{opacity:1;pointer-events:auto;}
+.pm-drawer{position:fixed;top:0;right:0;bottom:0;z-index:401;width:min(420px,94vw);background:var(--bg-1);border-left:1px solid var(--bdr-w);display:flex;flex-direction:column;transform:translateX(102%);transition:transform .38s cubic-bezier(.16,1,.3,1);}
+.pm-drawer.on{transform:none;box-shadow:-24px 0 80px rgba(40,32,22,.25);}
+.pm-dw-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--bdr);}
+.pm-dw-head h3{font-family:var(--ff-ui);font-weight:600;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--txt-strong);}
+.pm-dw-head .ct{font-family:var(--ff-mono);font-size:10px;color:var(--txt-dim);letter-spacing:.1em;margin-left:8px;}
+.pm-dw-close{background:none;border:1px solid var(--bdr);color:var(--txt-m);width:38px;height:38px;font-size:16px;cursor:pointer;transition:all .2s;}
+.pm-dw-close:hover{color:var(--txt-strong);border-color:var(--bdr-w);}
+
+/* 免運進度 */
+.pm-ship-bar{padding:14px 20px;border-bottom:1px solid var(--bdr);background:var(--bg-2);}
+.pm-ship-bar .t{font-size:12px;color:var(--txt-m);margin-bottom:8px;}
+.pm-ship-bar .t b{color:var(--gold);font-weight:700;}
+.pm-ship-track{height:3px;background:rgba(27,23,18,.12);position:relative;}
+.pm-ship-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--gold-dk),var(--gold));width:0%;transition:width .5s ease;}
+
+/* 品項列表 */
+.pm-dw-items{flex:1;overflow-y:auto;padding:8px 20px;}
+.pm-item{display:grid;grid-template-columns:64px 1fr auto;gap:14px;padding:16px 0;border-bottom:1px solid var(--bdr);align-items:center;}
+.pm-item-img{width:64px;height:64px;object-fit:cover;border:1px solid var(--bdr);background:var(--bg-2);}
+.pm-item-info{min-width:0;}
+.pm-item-sku{font-family:var(--ff-mono);font-size:8px;letter-spacing:.24em;color:var(--txt-dim);text-transform:uppercase;margin-bottom:3px;}
+.pm-item-name{font-family:var(--ff-tc);font-weight:700;font-size:14px;color:var(--txt-strong);line-height:1.4;margin-bottom:6px;}
+.pm-item-price{font-family:var(--ff-mono);font-weight:700;font-size:12px;color:var(--gold);}
+.pm-item-price.tbd{color:var(--txt-dim);font-weight:400;font-size:10px;letter-spacing:.1em;}
+.pm-item-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.pm-qty{display:inline-flex;align-items:stretch;border:1px solid var(--bdr-w);background:var(--bg-1);}
+.pm-qty button{width:30px;height:30px;background:none;border:none;color:var(--txt);font-size:14px;cursor:pointer;}
+.pm-qty button:hover{background:rgba(27,23,18,.05);}
+.pm-qty span{width:34px;display:flex;align-items:center;justify-content:center;font-family:var(--ff-mono);font-weight:700;font-size:12px;color:var(--txt-strong);border-left:1px solid var(--bdr);border-right:1px solid var(--bdr);}
+.pm-item-rm{background:none;border:none;color:var(--txt-dim);font-size:11px;cursor:pointer;letter-spacing:.1em;padding:2px;}
+.pm-item-rm:hover{color:var(--gold);}
+.pm-empty{text-align:center;padding:64px 20px;color:var(--txt-dim);}
+.pm-empty .big{font-size:34px;margin-bottom:14px;opacity:.5;}
+.pm-empty p{font-size:13px;line-height:1.8;}
+
+/* 抽屜底部 */
+.pm-dw-foot{border-top:1px solid var(--bdr-w);padding:16px 20px 18px;background:var(--bg-2);}
+.pm-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--txt-m);padding:3px 0;}
+.pm-row b{font-family:var(--ff-mono);font-weight:700;color:var(--txt-strong);}
+.pm-row.total{font-size:14px;padding-top:8px;margin-top:6px;border-top:1px solid var(--bdr-w);}
+.pm-row.total b{color:var(--gold);font-size:19px;}
+.pm-note{font-size:11px;color:var(--txt-dim);margin:8px 0 12px;line-height:1.7;}
+.pm-dw-foot .btn{width:100%;margin-top:4px;}
+
+/* 結帳頁 */
+.pm-cart-page{max-width:1100px;margin:0 auto;padding:104px 24px 80px;}
+.pm-cart-page h1{font-family:var(--ff-tc);font-weight:900;font-size:clamp(30px,4vw,46px);color:var(--txt-strong);margin-bottom:6px;}
+.pm-cart-page .sub{font-size:14px;color:var(--txt-m);margin-bottom:36px;line-height:1.8;}
+.pm-cart-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:start;}
+@media(max-width:900px){.pm-cart-grid{grid-template-columns:1fr;}}
+.pm-panel{border:1px solid var(--bdr-w);background:var(--bg-1);box-shadow:var(--shadow-sm);}
+.pm-panel-h{font-family:var(--ff-ui);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--txt-strong);padding:16px 20px;border-bottom:1px solid var(--bdr);}
+.pm-panel-b{padding:8px 20px 20px;}
+.pm-panel-b .pm-item:last-child{border-bottom:none;}
+
+/* 表單 */
+.pm-field{margin-top:16px;}
+.pm-field label{display:block;font-family:var(--ff-ui);font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--txt-m);margin-bottom:8px;}
+.pm-field label .req{color:var(--gold);}
+.pm-field input,.pm-field textarea{width:100%;background:var(--bg);border:1px solid var(--bdr-w);color:var(--txt-strong);font-family:var(--ff-tc);font-size:15px;padding:13px 14px;transition:border-color .2s,box-shadow .2s;min-height:48px;border-radius:2px;}
+.pm-field textarea{min-height:84px;resize:vertical;}
+.pm-field input:focus,.pm-field textarea:focus{outline:none;border-color:var(--ink-burnt);box-shadow:0 0 0 1px var(--ink-burnt);}
+.pm-field input.err,.pm-field textarea.err{border-color:var(--gold-lt);box-shadow:0 0 0 1px var(--gold-lt);}
+.pm-field .hint{font-size:11px;color:var(--txt-dim);margin-top:6px;line-height:1.6;}
+.pm-info-strip{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--bdr);background:var(--bg-2);padding:13px 15px;margin-top:16px;font-size:12px;line-height:1.75;color:var(--txt-m);}
+.pm-info-strip .ic{color:var(--gold);flex-shrink:0;}
+.pm-submit{width:100%;margin-top:20px;font-size:13px;padding:17px;}
+.pm-err-msg{display:none;color:var(--gold-dk);font-size:12px;margin-top:10px;line-height:1.7;}
+.pm-err-msg.on{display:block;}
+
+/* 訂單完成畫面 */
+.pm-done{display:none;text-align:center;padding:48px 24px;}
+.pm-done.on{display:block;}
+.pm-done .oid{font-family:var(--ff-mono);font-weight:700;font-size:20px;letter-spacing:.14em;color:var(--gold);margin:12px 0 4px;}
+.pm-done h2{font-family:var(--ff-tc);font-weight:900;font-size:26px;color:var(--txt-strong);margin-bottom:12px;}
+.pm-done p{font-size:13px;color:var(--txt-m);line-height:1.85;max-width:400px;margin:0 auto 20px;}
+.pm-done .btn{margin:4px;}
+.pm-order-txt{width:100%;background:var(--bg);border:1px solid var(--bdr-w);color:var(--txt);font-size:12px;font-family:var(--ff-tc);padding:14px;min-height:180px;margin:14px 0;line-height:1.8;}
+
+/* Toast */
+.pm-toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);z-index:500;background:var(--bg-1);border:1px solid var(--ink-burnt);color:var(--txt-strong);font-size:13px;padding:13px 22px;display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:all .3s;box-shadow:var(--shadow-lg);white-space:nowrap;border-radius:2px;}
+.pm-toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+.pm-toast .ck{color:var(--gold);font-weight:700;}
+.pm-toast a{color:var(--gold);text-decoration:underline;text-underline-offset:3px;margin-left:4px;}
+@media(min-width:901px){.pm-toast{bottom:32px;}}
+
+/* 浮動購物車（手機） */
+.pm-fab{position:fixed;right:16px;bottom:84px;z-index:190;width:54px;height:54px;border-radius:3px;background:var(--ink-burnt);color:var(--bg);border:none;font-size:20px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow-lg);transform:rotate(-1.5deg);}
+.pm-fab .pm-fab-badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 6px;background:var(--gold);border:none;color:var(--bg-1);font-family:var(--ff-mono);font-weight:700;font-size:10px;border-radius:3px;display:flex;align-items:center;justify-content:center;}
+@media(max-width:900px){.pm-fab.has{display:flex;}}

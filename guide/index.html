@@ -2,7 +2,7 @@
 <html lang="zh-Hant-TW">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#f4efe3">
 <title>教學攻略 ｜ 泡泡怪獸 POP MONSTER</title>
 <meta name="description" content="泡泡怪獸 POP MONSTER 教學攻略：天使塗層施工、RO 拋光入門、研磨劑番數對照、完整洗車流程。台灣汽美職人知識庫。">
 <link rel="canonical" href="https://popmonster.vip/guide/">
@@ -16,7 +16,7 @@
 <meta property="og:image" content="https://popmonster.vip/img/og-default.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Montserrat:wght@400;600;700;800&family=Noto+Serif+TC:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600&family=Noto+Serif+TC:wght@300;400;500;600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WTKLHW33D7"></script>
 <script>
 window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
@@ -24,26 +24,25 @@ gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_pers
 gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_flags':'SameSite=None;Secure'});
 </script>
 <link rel="stylesheet" href="../css/main.css">
-<link rel="stylesheet" href="../css/patch-p1p2.css">
 <style>
 :root{
-  --serif-g:"Playfair Display","Noto Serif TC",ui-serif,serif;
-  --tcserif-g:"Noto Serif TC","Playfair Display",serif;
+  --serif-g:"Cormorant Garamond","Noto Serif TC",ui-serif,serif;
+  --tcserif-g:"Noto Serif TC","Cormorant Garamond",serif;
 }
 /* mobile menu fix */
-.mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:#0a0a0a;border-bottom:1px solid var(--border);padding:20px;z-index:99;flex-direction:column;gap:16px;}
+.mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:var(--bg);border-bottom:1px solid var(--border);padding:20px;z-index:99;flex-direction:column;gap:16px;}
 .mobile-menu.show{display:flex;}
-.mobile-menu a{color:#e8e2d6;font-size:16px;display:block;padding:8px 0;}
+.mobile-menu a{color:var(--txt);font-size:16px;display:block;padding:8px 0;}
 .mobile-menu a.active{color:var(--gold);}
 
 /* COVER */
 .g-cover{
   padding:110px 24px 64px;
-  background:radial-gradient(ellipse at 50% 0%,rgba(200,169,107,.07) 0%,transparent 65%);
+  background:radial-gradient(ellipse at 50% 0%,rgba(27,23,18,.07) 0%,transparent 65%);
   text-align:center;
 }
 .g-cover .kicker{
-  font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.42em;
+  font-family:'Work Sans',sans-serif;font-size:11px;letter-spacing:.42em;
   text-transform:uppercase;color:var(--gold);margin-bottom:24px;
   display:inline-flex;align-items:center;gap:16px;
 }
@@ -70,11 +69,11 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
 }
 .g-stat:last-child{border-right:none;}
 .g-stat .n{font-family:var(--serif-g);font-weight:900;font-size:32px;color:var(--gold);line-height:1;}
-.g-stat .l{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--txt-m);margin-top:8px;}
+.g-stat .l{font-family:'Work Sans',sans-serif;font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--txt-m);margin-top:8px;}
 
 /* ARTICLE GRID */
 .g-wrap{max-width:1200px;margin:0 auto;padding:64px 24px;}
-.g-section-kk{font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);display:inline-flex;align-items:center;gap:14px;margin-bottom:32px;}
+.g-section-kk{font-family:'Work Sans',sans-serif;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);display:inline-flex;align-items:center;gap:14px;margin-bottom:32px;}
 .g-section-kk::before{content:"";width:36px;height:1px;background:var(--gold);}
 
 .article-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--border);}
@@ -97,29 +96,29 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
 /* card visual header */
 .ac-vis{
   height:200px;position:relative;overflow:hidden;
-  background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);
+  background:linear-gradient(135deg,#111 0%,var(--bg-3) 100%);
   display:flex;align-items:flex-end;justify-content:flex-start;
   padding:20px;
 }
 .ac-vis .ac-cat{
-  font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:.28em;
+  font-family:'Work Sans',sans-serif;font-size:9px;letter-spacing:.28em;
   text-transform:uppercase;padding:5px 10px;border:1px solid var(--gold);
-  background:rgba(200,169,107,.1);color:var(--gold);
+  background:rgba(27,23,18,.1);color:var(--gold);
 }
 .ac-vis .ac-num{
   position:absolute;right:16px;top:16px;
   font-family:var(--serif-g);font-weight:900;font-size:64px;line-height:1;
-  color:rgba(200,169,107,.12);letter-spacing:-.02em;font-feature-settings:"lnum";
+  color:rgba(27,23,18,.12);letter-spacing:-.02em;font-feature-settings:"lnum";
 }
 /* different gradient per card */
-.ac-vis.v1{background:linear-gradient(135deg,#0e1414 0%,#1a2424 100%);}
-.ac-vis.v2{background:linear-gradient(135deg,#140e0e 0%,#241a1a 100%);}
-.ac-vis.v3{background:linear-gradient(135deg,#0e100a 0%,#1a1e14 100%);}
-.ac-vis.v4{background:linear-gradient(135deg,#14100e 0%,#241e1a 100%);}
-.ac-vis.v5{background:linear-gradient(135deg,#0e0e14 0%,#1a1a24 100%);}
+.ac-vis.v1{background:linear-gradient(135deg,#ece4d4 0%,#ddd2bc 100%);}
+.ac-vis.v2{background:linear-gradient(135deg,#f0e6d6 0%,#ddd0be 100%);}
+.ac-vis.v3{background:linear-gradient(135deg,#ece6d2 0%,#dcd4bc 100%);}
+.ac-vis.v4{background:linear-gradient(135deg,#efe7d8 0%,#ded2c0 100%);}
+.ac-vis.v5{background:linear-gradient(135deg,#ebe4d6 0%,#dbd2c2 100%);}
 
 .ac-body{padding:22px 22px 20px;flex:1;display:flex;flex-direction:column;gap:10px;}
-.ac-date{font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.2em;color:var(--txt-dim);}
+.ac-date{font-family:'Work Sans',sans-serif;font-size:10px;letter-spacing:.2em;color:var(--txt-dim);}
 .ac-h{
   font-family:var(--tcserif-g);font-weight:700;font-size:18px;
   color:var(--txt);line-height:1.3;
@@ -134,10 +133,10 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
   margin-top:auto;
 }
 .ac-read{
-  font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.2em;
+  font-family:'Work Sans',sans-serif;font-size:10px;letter-spacing:.2em;
   text-transform:uppercase;color:var(--gold);
 }
-.ac-time{font-family:'Montserrat',sans-serif;font-size:10px;color:var(--txt-dim);letter-spacing:.1em;}
+.ac-time{font-family:'Work Sans',sans-serif;font-size:10px;color:var(--txt-dim);letter-spacing:.1em;}
 .art-card:hover .ac-read{color:var(--gold-lt);}
 
 /* FEATURED (first card) */
@@ -151,13 +150,14 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
   display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px;
 }
 .cat-btn{
-  font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.2em;
+  font-family:'Work Sans',sans-serif;font-size:10px;letter-spacing:.2em;
   text-transform:uppercase;padding:6px 14px;border:1px solid var(--border);
   background:transparent;color:var(--txt-m);cursor:pointer;transition:all .15s ease;
 }
 .cat-btn:hover{color:var(--txt);border-color:var(--border-s);}
 .cat-btn.on{background:var(--gold);color:var(--bg);border-color:var(--gold);}
 </style>
+<script>addEventListener('unhandledrejection',function(e){var m=e.reason&&(e.reason.message||String(e.reason));if(m&&m.indexOf('Transition was skipped')!==-1)e.preventDefault();});</script>
 </head>
 <body>
 <nav class="nav"><div class="nav-inner">
@@ -165,18 +165,18 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
   <div class="nav-links">
     <a href="../index.html">全部商品</a>
     <a href="../members.html">會員生態</a>
-    <a href="index.html" style="color:var(--gold)">教學攻略</a>
+    <a href="./" style="color:var(--gold)">教學攻略</a>
     <a href="../about.html">關於我們</a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
   </div>
   <button class="nav-menu-btn" aria-label="選單" onclick="this.nextElementSibling.classList.toggle('show');this.nextElementSibling.setAttribute('aria-hidden',!this.nextElementSibling.classList.contains('show'))">☰</button>
   <div class="mobile-menu" aria-hidden="true">
     <a href="../index.html">全部商品</a>
     <a href="../members.html">會員生態</a>
-    <a href="index.html" class="active">教學攻略</a>
+    <a href="./" class="active">教學攻略</a>
     <a href="../about.html">關於我們</a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
   </div>
 </div></nav>
@@ -291,11 +291,11 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
 </div>
 
 <section style="padding:64px 24px;text-align:center;background:var(--bg-card);border-top:1px solid var(--border);" data-screen-label="03 CTA">
-  <div style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.36em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;">看完想入手？</div>
+  <div style="font-family:'Work Sans',sans-serif;font-size:11px;letter-spacing:.36em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;">看完想入手？</div>
   <h2 style="font-family:var(--serif-g);font-weight:900;font-size:clamp(32px,4.5vw,56px);line-height:.94;color:var(--txt);margin-bottom:12px;">知識到手<br/><span style="font-style:italic;color:var(--gold-lt);font-weight:500;">現在行動.</span></h2>
   <p style="font-family:var(--tcserif-g);font-size:17px;color:var(--txt-m);margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto;">有任何施工問題直接加 LINE 問，我們親自說明。</p>
   <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" class="btn btn-gold">前往蝦皮賣場</a>
+    <a href="../index.html#products" class="btn btn-gold">逛全部商品</a>
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" class="btn btn-outline">LINE 諮詢</a>
   </div>
 </section>
@@ -311,9 +311,9 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
   <div class="footer-links">
     <a href="../index.html">全部商品</a>
     <a href="../members.html">會員生態</a>
-    <a href="index.html">教學攻略</a>
+    <a href="./">教學攻略</a>
     <a href="../about.html">關於我們</a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
   </div>
   <div class="footer-legal" style="margin-bottom:8px">
@@ -327,7 +327,7 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
   <span>本站使用 Cookie 提升瀏覽體驗。繼續瀏覽即表示同意。</span>
   <span><button class="cookie-accept" id="ck-accept">接受</button> <button class="cookie-decline" id="ck-decline">拒絕</button></span>
 </div>
-<script src="../js/main.js" defer></script>
+<script src="../js/main.js"></script>
 <script>
 (function(){
   // category filter

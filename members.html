@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#f4efe3">
 <title>會員生態系｜泡泡怪獸 POP MONSTER</title>
 <meta name="description" content="泡泡怪獸 POP MONSTER 會員制度：儲值禮、迎賓禮、年度禮、推薦感謝金、AI 工具、會員等級。台灣汽美愛好者的長期會員社群。">
 <link rel="canonical" href="https://popmonster.vip/members.html">
@@ -16,7 +16,7 @@
 <meta property="og:image" content="https://popmonster.vip/img/og-default.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Montserrat:wght@400;600;700;800&family=Noto+Serif+TC:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600&family=Noto+Serif+TC:wght@300;400;500;600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WTKLHW33D7"></script>
 <script>
 window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
@@ -24,26 +24,26 @@ gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_pers
 gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_flags':'SameSite=None;Secure'});
 </script>
 <link rel="stylesheet" href="css/main.css">
-<link rel="stylesheet" href="css/patch-p1p2.css">
+<link rel="stylesheet" href="css/store.css">
 <style>
 :root{
-  --serif-m:"Playfair Display","Noto Serif TC",ui-serif,serif;
-  --tcserif-m:"Noto Serif TC","Playfair Display",serif;
+  --serif-m:"Cormorant Garamond","Noto Serif TC",ui-serif,serif;
+  --tcserif-m:"Noto Serif TC","Cormorant Garamond",serif;
 }
 /* mobile menu fix #06 */
-.mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:#0a0a0a;border-bottom:1px solid var(--border);padding:20px;z-index:99;flex-direction:column;gap:16px;}
+.mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:var(--bg);border-bottom:1px solid var(--border);padding:20px;z-index:99;flex-direction:column;gap:16px;}
 .mobile-menu.show{display:flex;}
-.mobile-menu a{color:#e8e2d6;font-size:16px;display:block;padding:8px 0;}
+.mobile-menu a{color:var(--txt);font-size:16px;display:block;padding:8px 0;}
 .mobile-menu a.active{color:var(--gold);}
 
 /* ── COVER ── */
 .mb-cover{
   padding:120px 24px 80px;text-align:center;position:relative;
-  background:radial-gradient(ellipse at 50% 0%,rgba(200,169,107,.07) 0%,transparent 65%);
+  background:radial-gradient(ellipse at 50% 0%,rgba(27,23,18,.07) 0%,transparent 65%);
   overflow:hidden;
 }
 .mb-cover .kicker{
-  font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.42em;
+  font-family:'Work Sans',sans-serif;font-size:11px;letter-spacing:.42em;
   text-transform:uppercase;color:var(--gold);margin-bottom:28px;
   display:inline-flex;align-items:center;gap:16px;
 }
@@ -67,7 +67,7 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
 }
 .pb-cel{padding:24px 22px;border-right:1px solid var(--border);}
 .pb-cel:last-child{border-right:none;}
-.pb-cel .pb-kk{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-dk);margin-bottom:8px;}
+.pb-cel .pb-kk{font-family:'Work Sans',sans-serif;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-dk);margin-bottom:8px;}
 .pb-cel .pb-h{font-family:var(--tcserif-m);font-weight:700;font-size:18px;color:var(--txt);margin-bottom:6px;}
 .pb-cel .pb-p{font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--txt-m);line-height:1.6;}
 @media(max-width:640px){.principles-bar{grid-template-columns:1fr;}.pb-cel{border-right:none;border-bottom:1px solid var(--border);}.pb-cel:last-child{border-bottom:none;}}
@@ -75,7 +75,7 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
 /* ── SECTION CHROME ── */
 .sec{max-width:1100px;margin:0 auto;padding:72px 24px;}
 .sec+.sec{border-top:1px solid var(--border);}
-.sec-kk{font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.36em;text-transform:uppercase;color:var(--gold);display:inline-flex;align-items:center;gap:14px;margin-bottom:18px;}
+.sec-kk{font-family:'Work Sans',sans-serif;font-size:11px;letter-spacing:.36em;text-transform:uppercase;color:var(--gold);display:inline-flex;align-items:center;gap:14px;margin-bottom:18px;}
 .sec-kk::before{content:"";width:36px;height:1px;background:var(--gold);}
 .sec-h{font-family:var(--serif-m);font-weight:900;font-size:clamp(34px,4.5vw,64px);line-height:.94;letter-spacing:-.01em;color:var(--txt);margin-bottom:14px;}
 .sec-h .it{font-style:italic;font-weight:500;color:var(--gold-lt);}
@@ -94,7 +94,7 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
 @media(max-width:560px){.mod{border-right:none;}}
 .mod .accent{position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold);opacity:0;transition:opacity .2s;}
 .mod:hover .accent{opacity:1;}
-.mod .num{font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold-dk);margin-bottom:8px;}
+.mod .num{font-family:'Work Sans',sans-serif;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold-dk);margin-bottom:8px;}
 .mod h3{font-family:var(--tcserif-m);font-weight:700;font-size:20px;color:var(--txt);margin-bottom:10px;}
 .mod .deck{font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--txt-m);line-height:1.7;margin-bottom:14px;}
 .mod .feats{display:flex;flex-direction:column;gap:5px;}
@@ -111,11 +111,11 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
   .tier:nth-child(2){border-right:none;}
   .tier:nth-child(1),.tier:nth-child(2){border-bottom:1px solid var(--border);}
 }
-.tier.gold-tier{background:rgba(200,169,107,.04);}
+.tier.gold-tier{background:rgba(27,23,18,.04);}
 .tier .t-top{height:3px;margin:-28px -20px 18px;background:var(--tier-c,var(--border));}
 .tier .t-name{font-family:var(--serif-m);font-weight:900;font-size:28px;color:var(--txt);margin-bottom:4px;line-height:1;}
-.tier .t-en{font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--txt-dim);margin-bottom:10px;}
-.tier .t-cond{font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.12em;color:var(--tier-c,var(--gold-dk));margin-bottom:16px;padding:4px 8px;border:1px solid var(--tier-c,var(--border));display:inline-block;}
+.tier .t-en{font-family:'Work Sans',sans-serif;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--txt-dim);margin-bottom:10px;}
+.tier .t-cond{font-family:'Work Sans',sans-serif;font-size:10px;letter-spacing:.12em;color:var(--tier-c,var(--gold-dk));margin-bottom:16px;padding:4px 8px;border:1px solid var(--tier-c,var(--border));display:inline-block;}
 .tier ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:5px;}
 .tier ul li{font-family:'Noto Sans TC',sans-serif;font-size:12px;color:var(--txt-m);display:flex;align-items:flex-start;gap:7px;}
 .tier ul li::before{content:"✓";color:var(--tier-c,var(--gold));flex-shrink:0;font-size:10px;margin-top:2px;}
@@ -138,10 +138,10 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
 /* ── NOTICE BOX ── */
 .notice{
   margin-top:40px;padding:28px 32px;
-  border:1px solid rgba(200,169,107,.28);
-  background:rgba(200,169,107,.04);
+  border:1px solid rgba(27,23,18,.28);
+  background:rgba(27,23,18,.04);
 }
-.notice .n-kk{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-dk);margin-bottom:12px;}
+.notice .n-kk{font-family:'Work Sans',sans-serif;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-dk);margin-bottom:12px;}
 .notice h3{font-family:var(--tcserif-m);font-weight:700;font-size:18px;color:var(--gold-lt);margin-bottom:12px;}
 .notice p{font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--txt-m);line-height:1.7;margin-bottom:8px;}
 .notice p:last-child{margin-bottom:0;}
@@ -150,9 +150,9 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
 /* ── STATUS PILL ── */
 .status-pill{
   display:inline-flex;align-items:center;gap:8px;
-  padding:6px 14px;border:1px solid rgba(200,169,107,.3);
-  background:rgba(200,169,107,.06);
-  font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.22em;
+  padding:6px 14px;border:1px solid rgba(27,23,18,.3);
+  background:rgba(27,23,18,.06);
+  font-family:'Work Sans',sans-serif;font-size:10px;letter-spacing:.22em;
   text-transform:uppercase;color:var(--gold-lt);margin-bottom:40px;
 }
 .status-pill .dot{width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 2s ease-in-out infinite;}
@@ -165,6 +165,7 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
 .mb-cta .deck{font-family:var(--tcserif-m);font-size:17px;color:var(--txt-m);margin:0 auto 36px;max-width:560px;}
 .btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
 </style>
+<script>addEventListener('unhandledrejection',function(e){var m=e.reason&&(e.reason.message||String(e.reason));if(m&&m.indexOf('Transition was skipped')!==-1)e.preventDefault();});</script>
 </head>
 <body>
 
@@ -175,7 +176,7 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
     <a href="members.html" style="color:var(--gold)">會員生態</a>
     <a href="guide/">教學攻略</a>
     <a href="about.html">關於我們</a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
   </div>
   <button class="nav-menu-btn" aria-label="選單" onclick="this.nextElementSibling.classList.toggle('show');this.nextElementSibling.setAttribute('aria-hidden',!this.nextElementSibling.classList.contains('show'))">☰</button>
@@ -184,7 +185,7 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
     <a href="members.html" class="active">會員生態</a>
     <a href="guide/">教學攻略</a>
     <a href="about.html">關於我們</a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
   </div>
 </div></nav>
@@ -400,7 +401,7 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
   <h2>準備好<span class="it">了嗎？</span></h2>
   <p class="deck">目前先到蝦皮賣場購買產品，加入 LINE 接收會員生態系正式上線通知。</p>
   <div class="btn-row">
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" class="btn btn-gold">前往蝦皮賣場</a>
+    <a href="index.html#products" class="btn btn-gold">逛全部商品</a>
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" class="btn btn-outline">加入 LINE 接收通知</a>
   </div>
 </section>
@@ -418,7 +419,7 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
     <a href="members.html">會員生態</a>
     <a href="guide/">教學攻略</a>
     <a href="about.html">關於我們</a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    
     <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
     <a href="https://wa.me/886970527037" target="_blank" rel="noopener">WhatsApp</a>
     <a href="https://www.facebook.com/share/1AcLN6W6HU/" target="_blank" rel="noopener">Facebook</a>
@@ -436,6 +437,8 @@ gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_
   <span>本站使用 Cookie 提升瀏覽體驗。繼續瀏覽即表示同意。</span>
   <span><button class="cookie-accept" id="ck-accept">接受</button> <button class="cookie-decline" id="ck-decline">拒絕</button></span>
 </div>
-<script src="js/main.js" defer></script>
+<script src="js/products.js"></script>
+<script src="js/store.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>

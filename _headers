@@ -1,0 +1,25 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+
+/css/*
+  Cache-Control: public, max-age=604800
+
+/js/products.js
+  Cache-Control: public, max-age=3600
+
+/js/main.js
+  Cache-Control: public, max-age=86400
+
+/js/store.js
+  Cache-Control: public, max-age=86400
+
+/js/legacy.js
+  Cache-Control: public, max-age=86400
+
+/js/totem.js
+  Cache-Control: public, max-age=86400
+
+/img/*
+  Cache-Control: public, max-age=2592000

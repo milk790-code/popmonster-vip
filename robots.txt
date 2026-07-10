@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /tools/
+Disallow: /cart.html
 
 Sitemap: https://popmonster.vip/sitemap.xml
