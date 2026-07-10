@@ -20,7 +20,7 @@ _INSECURE_SECRET = "dev-secret"
 # stored here). Rotate by setting OPERATOR_PASSWORD (plaintext) or
 # OPERATOR_PASSWORD_SHA256 in the environment — env always wins.
 _DEFAULT_OPERATOR_PASSWORD_SHA256 = (
-    "74f22e37ca7fe636668b103a95452f039ac247a5f8015caf3377b813e8d6dd37"
+    "4a8199c25bf7f3db287787fb7f47c16c597d427da4e1606c7d9fe2f5f483e90c"
 )
 
 
