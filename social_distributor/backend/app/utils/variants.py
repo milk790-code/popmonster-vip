@@ -197,6 +197,11 @@ def _claude_variant(req: VariantRequest) -> VariantResult:
             "text": (
                 "You rewrite social media captions so each persona speaks in "
                 "its own voice while preserving the source content's meaning. "
+                "HARD RULE — output language: the rewritten title and caption "
+                "MUST be in the same language as the source caption (Traditional "
+                "Chinese source → Traditional Chinese output). The persona style "
+                "profile may be written in English; it describes tone only and "
+                "must NOT switch your output language. "
                 "You never invent facts, never add fake stats, never claim "
                 "endorsements, never introduce numbers that weren't in the source. "
                 "You return strict JSON: "
@@ -217,7 +222,8 @@ def _claude_variant(req: VariantRequest) -> VariantResult:
         f"Platform conventions: {_PLATFORM_HINTS.get(req.platform, '')}\n\n"
         f"Source title: {req.source_title}\n"
         f"Source caption:\n{req.source_caption}\n\n"
-        f"Rewrite for this platform in the persona's voice. "
+        f"Rewrite for this platform in the persona's voice, in the SAME "
+        f"language as the source caption above. "
         f"Keep emoji_density={req.style_profile.get('emoji_density', 'low')}. "
         f'Return JSON: {{"title": "...", "caption": "..."}}'
     )
