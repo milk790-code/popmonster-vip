@@ -120,6 +120,12 @@ class Config:
     twilio_from_number: str | None = field(
         default_factory=lambda: _env("TWILIO_FROM_NUMBER")
     )
+    line_channel_access_token: str | None = field(
+        default_factory=lambda: _env("LINE_CHANNEL_ACCESS_TOKEN")
+    )
+    line_admin_user_id: str | None = field(
+        default_factory=lambda: _env("LINE_ADMIN_USER_ID")
+    )
 
     def platform(self, name: str) -> PlatformCredentials:
         mapping = {

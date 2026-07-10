@@ -58,6 +58,30 @@ def send_failure_sms(*, to: Iterable[str], body: str) -> None:
         log.warning("failed to send twilio sms: %s", exc)
 
 
+def send_failure_line(*, body: str) -> None:
+    token = config.line_channel_access_token
+    admin_user_id = config.line_admin_user_id
+    if not (token and admin_user_id):
+        return
+    try:
+        import requests
+    except ImportError:
+        log.warning("requests not installed; skipping line notification")
+        return
+    try:
+        requests.post(
+            "https://api.line.me/v2/bot/message/push",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            },
+            json={"to": admin_user_id, "messages": [{"type": "text", "text": body[:1000]}]},
+            timeout=10,
+        )
+    except Exception as exc:
+        log.warning("failed to send line push: %s", exc)
+
+
 def notify_publish_failed(
     *,
     user_email: str | None,
@@ -75,3 +99,4 @@ def notify_publish_failed(
     )
     send_failure_email(to=[user_email] if user_email else [], subject=subject, body=body)
     send_failure_sms(to=[user_phone] if user_phone else [], body=f"{subject}: {error[:120]}")
+    send_failure_line(body=f"⚠️ {subject}\n{error[:300]}")
