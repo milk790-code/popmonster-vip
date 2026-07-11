@@ -19,6 +19,10 @@
     "share_success",
   ]);
 
+  const SESSION_STORAGE_KEY = "switchboard_v4_session_hash";
+  const SESSION_HASH_PATTERN = /^[0-9a-f]{64}$/;
+  let memorySessionHash = "";
+
   const SERVICES = Object.freeze([
     Object.freeze({
       slug: "brand-content",
@@ -222,6 +226,63 @@
     return String(bodyEndpoint || metaEndpoint).trim();
   }
 
+  function randomBytes(size) {
+    if (
+      typeof crypto === "undefined" ||
+      typeof crypto.getRandomValues !== "function"
+    ) {
+      return null;
+    }
+    return crypto.getRandomValues(new Uint8Array(size));
+  }
+
+  function bytesToHex(bytes) {
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
+      "",
+    );
+  }
+
+  function eventId() {
+    if (
+      typeof crypto !== "undefined" &&
+      typeof crypto.randomUUID === "function"
+    ) {
+      return crypto.randomUUID();
+    }
+    const bytes = randomBytes(16);
+    if (!bytes) return "";
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = bytesToHex(bytes);
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  }
+
+  function sessionHash() {
+    try {
+      const existing = sessionStorage.getItem(SESSION_STORAGE_KEY) || "";
+      if (SESSION_HASH_PATTERN.test(existing)) {
+        memorySessionHash = existing;
+        return existing;
+      }
+
+      const bytes = SESSION_HASH_PATTERN.test(memorySessionHash)
+        ? null
+        : randomBytes(32);
+      const generated = bytes ? bytesToHex(bytes) : memorySessionHash;
+      if (!SESSION_HASH_PATTERN.test(generated)) return "";
+      memorySessionHash = generated;
+      sessionStorage.setItem(SESSION_STORAGE_KEY, generated);
+      return generated;
+    } catch (_error) {
+      if (SESSION_HASH_PATTERN.test(memorySessionHash)) {
+        return memorySessionHash;
+      }
+      const bytes = randomBytes(32);
+      memorySessionHash = bytes ? bytesToHex(bytes) : "";
+      return memorySessionHash;
+    }
+  }
+
   function sendEvent(eventName, detail) {
     try {
       const endpoint = eventEndpoint();
@@ -241,8 +302,13 @@
           : detail && typeof detail.slug === "string"
             ? detail.slug
             : "";
+      const eventIdentifier = eventId();
+      const anonymousSession = sessionHash();
+      if (!eventIdentifier || !anonymousSession) return false;
       const payload = {
+        event_id: eventIdentifier,
         event: eventName,
+        session_hash: anonymousSession,
         source: parseSource(),
         timestamp: new Date().toISOString(),
       };
@@ -253,7 +319,7 @@
       const json = JSON.stringify(payload);
       const body =
         typeof Blob === "function"
-          ? new Blob([json], { type: "application/json" })
+          ? new Blob([json], { type: "text/plain;charset=UTF-8" })
           : json;
       return navigator.sendBeacon(endpoint, body) === true;
     } catch (_error) {

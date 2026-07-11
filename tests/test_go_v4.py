@@ -2,6 +2,7 @@ from pathlib import Path
 import hashlib
 import re
 import struct
+import subprocess
 import unittest
 
 
@@ -128,8 +129,157 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertIn("navigator.globalPrivacyControl", js)
         self.assertIn("doNotTrack", js)
         self.assertIn("navigator.sendBeacon", js)
+        self.assertIn("crypto.randomUUID", js)
+        self.assertIn("crypto.getRandomValues", js)
+        self.assertIn("sessionStorage", js)
+        self.assertIn("event_id", js)
+        self.assertIn("session_hash", js)
+        self.assertIn('type: "text/plain;charset=UTF-8"', js)
+        self.assertNotIn("localStorage", js)
+        self.assertNotIn("document.cookie", js)
         self.assertRegex(js, r'window\.Switchboard\s*=')
         self.assertIn("const allowVariants = isPreviewMode();", js)
+
+    def test_js_runtime_telemetry_is_private_stable_and_fail_open(self):
+        script = r'''
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const { webcrypto } = require("node:crypto");
+
+(async () => {
+  let endpoint = "";
+  let randomCalls = 0;
+  let storageReads = 0;
+  let storageWrites = 0;
+  let storageBlocked = false;
+  const stored = new Map();
+  const beacons = [];
+
+  Object.defineProperty(globalThis, "crypto", {
+    configurable: true,
+    value: {
+      getRandomValues(target) {
+        randomCalls += 1;
+        return webcrypto.getRandomValues(target);
+      },
+      randomUUID() {
+        randomCalls += 1;
+        return webcrypto.randomUUID();
+      },
+    },
+  });
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    value: {
+      doNotTrack: "0",
+      globalPrivacyControl: false,
+      sendBeacon(url, body) {
+        beacons.push({ body, url });
+        return true;
+      },
+    },
+  });
+  Object.defineProperty(globalThis, "sessionStorage", {
+    configurable: true,
+    value: {
+      getItem(key) {
+        storageReads += 1;
+        if (storageBlocked) throw new Error("storage blocked");
+        return stored.get(key) || null;
+      },
+      setItem(key, value) {
+        storageWrites += 1;
+        if (storageBlocked) throw new Error("storage blocked");
+        stored.set(key, value);
+      },
+    },
+  });
+
+  globalThis.window = globalThis;
+  window.location = { href: "https://popmonster.vip/go", search: "" };
+  const body = { dataset: {} };
+  const meta = { content: "" };
+  globalThis.document = {
+    addEventListener() {},
+    body,
+    documentElement: { dataset: {} },
+    getElementById() { return null; },
+    querySelector(selector) {
+      return selector.includes("switchboard-events") ? meta : null;
+    },
+    querySelectorAll() { return []; },
+    readyState: "loading",
+  };
+
+  const source = fs.readFileSync("js/go.js", "utf8");
+  eval(source);
+
+  assert.equal(window.Switchboard.sendEvent("page_ready"), false);
+  assert.deepEqual(
+    { beacons: beacons.length, randomCalls, storageReads, storageWrites },
+    { beacons: 0, randomCalls: 0, storageReads: 0, storageWrites: 0 },
+  );
+
+  endpoint = "https://events.example.test/events";
+  meta.content = endpoint;
+  storageBlocked = true;
+  assert.equal(
+    window.Switchboard.sendEvent("route_result", { slug: "legal-guidance" }),
+    true,
+  );
+  assert.equal(
+    window.Switchboard.sendEvent("line_start", { slug: "legal-guidance" }),
+    true,
+  );
+  assert.equal(beacons.length, 2);
+  const payloads = await Promise.all(
+    beacons.map(async ({ body: beaconBody, url }) => ({
+      payload: JSON.parse(await beaconBody.text()),
+      type: beaconBody.type,
+      url,
+    })),
+  );
+  assert.equal(payloads[0].url, endpoint);
+  assert.equal(payloads[0].type, "text/plain;charset=utf-8");
+  assert.match(
+    payloads[0].payload.event_id,
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+  );
+  assert.notEqual(payloads[0].payload.event_id, payloads[1].payload.event_id);
+  assert.match(payloads[0].payload.session_hash, /^[0-9a-f]{64}$/);
+  assert.equal(
+    payloads[0].payload.session_hash,
+    payloads[1].payload.session_hash,
+  );
+  assert.equal(payloads[0].payload.slug, "legal-guidance");
+  assert.equal(payloads[1].payload.event, "line_start");
+
+  const countsBeforePrivacy = { beacons: beacons.length, randomCalls, storageReads, storageWrites };
+  navigator.globalPrivacyControl = true;
+  assert.equal(window.Switchboard.sendEvent("page_ready"), false);
+  navigator.globalPrivacyControl = false;
+  navigator.doNotTrack = "1";
+  assert.equal(window.Switchboard.sendEvent("page_ready"), false);
+  navigator.doNotTrack = "0";
+  document.body.dataset.preview = "true";
+  assert.equal(window.Switchboard.sendEvent("page_ready"), false);
+  assert.deepEqual(
+    { beacons: beacons.length, randomCalls, storageReads, storageWrites },
+    countsBeforePrivacy,
+  );
+})().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
+'''
+        result = subprocess.run(
+            ["node", "-e", script],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
     def test_preview_exposes_every_control_and_forces_preview_mode(self):
         preview = self.read_required("go-preview.html")
