@@ -20,6 +20,7 @@
 | v4 主頁 | PR [#41](https://github.com/milk790-code/popmonster-vip/pull/41)，merge `c9ce7a7` |
 | 專用 OG | PR [#42](https://github.com/milk790-code/popmonster-vip/pull/42)，merge `0fba7c2` |
 | QR／社群／印刷資產 | PR [#43](https://github.com/milk790-code/popmonster-vip/pull/43)，merge `32ad094` |
+| Telemetry client／最終證據 | PR [#44](https://github.com/milk790-code/popmonster-vip/pull/44)，endpoint 維持空白 |
 | GitHub Pages | run [29140737782](https://github.com/milk790-code/popmonster-vip/actions/runs/29140737782) 成功 |
 | Pages source | `main /`，HTTPS enforced，API status `built` |
 | Production readback | 19 個核心檔案／資產均 HTTP 200，且與 `origin/main@32ad094` SHA-256 一致 |
