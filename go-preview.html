@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="robots" content="noindex,nofollow">
+  <title>學誼接線台 v4｜預覽控制台</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/go.css">
+  <script src="js/go.js" defer></script>
+</head>
+<body class="preview-page">
+  <a class="skip-link" href="#preview-main">跳到預覽控制台</a>
+
+  <main id="preview-main" class="preview-shell">
+    <header class="preview-header">
+      <p class="eyebrow">LOCAL PREVIEW</p>
+      <h1>學誼接線台 v4 預覽控制台</h1>
+      <p>此頁只更新下方 iframe；預覽頁不送事件，也不允許外部跳轉。</p>
+    </header>
+
+    <form id="preview-form" class="preview-controls" action="go.html" method="get" target="preview-frame">
+      <input type="hidden" name="preview" value="1">
+
+      <fieldset class="control-group">
+        <legend>視覺概念</legend>
+        <label><input type="radio" name="concept" value="signal" checked> 接線台</label>
+        <label><input type="radio" name="concept" value="manual"> 第一步解題手冊</label>
+        <label><input type="radio" name="concept" value="tickets"> 一人公司工單牆</label>
+      </fieldset>
+
+      <fieldset class="control-group">
+        <legend>主鉤子</legend>
+        <label><input type="radio" name="hook" value="offer" checked> 免費第一步</label>
+        <label><input type="radio" name="hook" value="founder"> 創辦人故事</label>
+      </fieldset>
+
+      <fieldset class="control-group">
+        <legend>瀏覽路徑</legend>
+        <label><input type="radio" name="flow" value="guided" checked> 引導分流</label>
+        <label><input type="radio" name="flow" value="all"> 全部展開</label>
+      </fieldset>
+
+      <fieldset class="control-group">
+        <legend>動效</legend>
+        <label><input type="radio" name="motion" value="full" checked> 完整</label>
+        <label><input type="radio" name="motion" value="reduced"> 減少動效</label>
+      </fieldset>
+
+      <button class="button button-primary" type="submit">套用預覽設定</button>
+    </form>
+
+    <div class="preview-frame-wrap">
+      <iframe
+        id="preview-frame"
+        name="preview-frame"
+        class="preview-frame"
+        title="學誼接線台互動預覽"
+        src="go.html?preview=1&amp;concept=signal&amp;hook=offer&amp;flow=guided&amp;motion=full"
+        sandbox="allow-scripts allow-same-origin"
+        referrerpolicy="no-referrer"
+        loading="eager"
+      ></iframe>
+    </div>
+  </main>
+</body>
+</html>
