@@ -1,0 +1,32 @@
+{
+  "qr_version": 4,
+  "error_correction": "Q",
+  "data_modules": 33,
+  "quiet_zone_modules": 4,
+  "matrix_modules": 41,
+  "png_pixels": 1640,
+  "pixels_per_module": 40,
+  "assets": {
+    "business-card": {
+      "url": "https://popmonster.vip/go?src=business-card",
+      "svg": "go-business-card.svg",
+      "png": "go-business-card-1640.png",
+      "svg_sha256": "034262e4461cedf971bf4e0f7ccd3e6cde1ed17bf3efadf40f41a636a0a2c4db",
+      "png_sha256": "c6de3d5a3a24bcfcd9604d2b63bede43cbcd1106236b4cff2152ffdb35999776"
+    },
+    "package-insert": {
+      "url": "https://popmonster.vip/go?src=package-insert",
+      "svg": "go-package-insert.svg",
+      "png": "go-package-insert-1640.png",
+      "svg_sha256": "df4fc90451112455b3f365ea5b8ac737c52b2d468eff4fb2e66eb944379beaa3",
+      "png_sha256": "77d15fb4fc1f777c7fc863ffe1a7ca1ac2ef1e475f451ba1b10346611fb4276b"
+    },
+    "social": {
+      "url": "https://popmonster.vip/go?src=social",
+      "svg": "go-social.svg",
+      "png": "go-social-1640.png",
+      "svg_sha256": "1848479add9ffe567d8d2df39750c235b39f55b478d55bda763ea47406d051f1",
+      "png_sha256": "6aab9e7abf5f06d6cc8a9c9967accdef0d108b9fcb96efef2a8cb8cc40fe932e"
+    }
+  }
+}
