@@ -1,5 +1,7 @@
 from pathlib import Path
+import hashlib
 import re
+import struct
 import unittest
 
 
@@ -70,6 +72,23 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertRegex(html, r'rel=["\'](?:shortcut )?icon["\'][^>]+favicon\.svg')
         self.assertIn('property="og:image"', html)
         self.assertIn('name="twitter:card"', html)
+
+    def test_v4_og_asset_is_scoped_and_not_the_legacy_3q_card(self):
+        html = self.read_required("go.html")
+        relative = "assets/go-v4/go-og-1200x630.png"
+        self.assertIn(f"https://popmonster.vip/{relative}", html)
+
+        asset = ROOT / relative
+        legacy = ROOT / "og-image-1200x630.png"
+        self.assertTrue(asset.is_file(), relative)
+        payload = asset.read_bytes()
+        self.assertEqual(payload[:8], b"\x89PNG\r\n\x1a\n")
+        width, height = struct.unpack(">II", payload[16:24])
+        self.assertEqual((width, height), (1200, 630))
+        self.assertNotEqual(
+            hashlib.sha256(payload).digest(),
+            hashlib.sha256(legacy.read_bytes()).digest(),
+        )
 
     def test_static_html_has_exactly_eight_service_destinations(self):
         html = self.read_required("go.html")
