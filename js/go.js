@@ -142,7 +142,7 @@
       lede: "選一個情境，30 秒帶你到正確入口；每項免費範圍先說清楚。",
     }),
     founder: Object.freeze({
-      eyebrow: "學誼的工作方式",
+      eyebrow: "接線台的工作方式",
       title: "我不先推銷，先陪你找出最該做哪一步。",
       lede: "先把問題說清楚，再決定要不要花錢。",
     }),
@@ -587,7 +587,7 @@
     const url = new URL("https://popmonster.vip/go");
     url.searchParams.set("src", "social");
     const shareData = {
-      title: "學誼接線台",
+      title: "免費接線台",
       text: "你卡住的那件事，我先免費幫你解第一步。",
       url: url.toString(),
     };

@@ -84,7 +84,7 @@ def draw_og_card() -> Path:
     )
 
     draw.text((86, 76), "XUEYI SWITCHBOARD", font=font(22, latin=True), fill=COLORS["gold"])
-    draw.text((86, 112), "學誼接線台", font=font(31), fill=COLORS["text"])
+    draw.text((86, 112), "免費接線台", font=font(31), fill=COLORS["text"])
 
     draw.rounded_rectangle((86, 178, 344, 226), radius=24, fill=COLORS["gold"])
     draw.text((108, 187), "7 個第一次，免費", font=font(24), fill=COLORS["background"])
@@ -216,7 +216,7 @@ def draw_story() -> Path:
     draw.rectangle((0, 0, width, 12), fill=COLORS["gold"])
     draw.rounded_rectangle((48, 52, 1032, 1868), radius=38, fill=COLORS["panel"], outline=COLORS["line"], width=3)
     draw.text((84, 92), "XUEYI SWITCHBOARD", font=font(26, latin=True), fill=COLORS["gold"])
-    draw.text((84, 137), "學誼接線台", font=font(42), fill=COLORS["text"])
+    draw.text((84, 137), "免費接線台", font=font(42), fill=COLORS["text"])
     draw.rounded_rectangle((84, 248, 390, 308), radius=30, fill=COLORS["gold"])
     draw.text((111, 258), "7 個第一次，免費", font=font(29), fill=COLORS["background"])
     draw.text((84, 390), "你卡住的那件事，", font=font(67), fill=COLORS["text"])
@@ -239,7 +239,7 @@ def draw_share_card() -> Path:
     draw.rectangle((0, 0, width, 10), fill=COLORS["gold"])
     draw.rounded_rectangle((52, 52, 1028, 1298), radius=36, fill=COLORS["panel"], outline=COLORS["line"], width=3)
     draw.text((88, 92), "XUEYI SWITCHBOARD", font=font(24, latin=True), fill=COLORS["gold"])
-    draw.text((88, 134), "學誼接線台", font=font(38), fill=COLORS["text"])
+    draw.text((88, 134), "免費接線台", font=font(38), fill=COLORS["text"])
     draw.rounded_rectangle((88, 238, 372, 294), radius=28, fill=COLORS["gold"])
     draw.text((112, 247), "7 個第一次，免費", font=font(27), fill=COLORS["background"])
     draw.text((88, 370), "你卡住的那件事，", font=font(63), fill=COLORS["text"])
@@ -276,7 +276,7 @@ def draw_business_card() -> Path:
 
     left = inset + safe
     draw.text((left, inset + safe), "XUEYI SWITCHBOARD", font=font(18, latin=True), fill=COLORS["gold"])
-    draw.text((left, inset + safe + 30), "學誼接線台", font=font(28), fill=COLORS["text"])
+    draw.text((left, inset + safe + 30), "免費接線台", font=font(28), fill=COLORS["text"])
     draw.text((left, 220), "你卡住的那件事，", font=font(42), fill=COLORS["text"])
     draw.text((left, 282), "先免費幫你解第一步。", font=font(42), fill=COLORS["text"])
     draw.text((left, 385), "掃碼 30 秒找到正確入口", font=font(24), fill=COLORS["muted"])
@@ -309,7 +309,7 @@ def draw_package_insert() -> Path:
 
     left = inset + safe
     draw.text((left, 92), "XUEYI SWITCHBOARD", font=font(25, latin=True), fill=COLORS["gold"])
-    draw.text((left, 136), "學誼接線台", font=font(40), fill=COLORS["text"])
+    draw.text((left, 136), "免費接線台", font=font(40), fill=COLORS["text"])
     draw.rounded_rectangle((left, 238, left + 310, 298), radius=30, fill=COLORS["gold"])
     draw.text((left + 27, 248), "7 個第一次，免費", font=font(29), fill=COLORS["background"])
     draw.text((left, 370), "你卡住的那件事，", font=font(62), fill=COLORS["text"])
