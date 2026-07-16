@@ -114,6 +114,92 @@ class HomepageExtremeContract(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_home_analytics_is_consent_gated_and_parameter_allowlisted(self):
+        analytics_path = ROOT / "js" / "home-analytics.js"
+        self.assertTrue(analytics_path.is_file(), "missing js/home-analytics.js")
+        analytics_tag = '<script src="js/home-analytics.js" defer></script>'
+        home_tag = '<script src="js/home.js" defer></script>'
+        self.assertIn(analytics_tag, self.html)
+        self.assertLess(self.html.index(analytics_tag), self.html.index(home_tag))
+
+        script = r'''
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+
+let consent = "denied";
+const calls = [];
+globalThis.window = globalThis;
+globalThis.localStorage = {
+  getItem(key) {
+    assert.equal(key, "ck_consent");
+    return consent;
+  },
+};
+globalThis.gtag = (...args) => calls.push(args);
+
+const source = fs.readFileSync("js/home-analytics.js", "utf8");
+eval(source);
+
+assert.equal(
+  window.PopMonsterAnalytics.track("hero_cta", { target: "intent" }),
+  false,
+);
+assert.equal(calls.length, 0);
+
+consent = "granted";
+assert.equal(
+  window.PopMonsterAnalytics.track("catalog_search", {
+    category: "cleaning",
+    query_length: 3,
+    result_count: 4,
+    query: "不得送出原文",
+  }),
+  true,
+);
+assert.deepEqual(calls[0], [
+  "event",
+  "catalog_search",
+  { category: "cleaning", query_length: 3, result_count: 4 },
+]);
+assert.equal(window.PopMonsterAnalytics.track("unknown_event", {}), false);
+assert.equal(calls.length, 1);
+
+localStorage.getItem = () => { throw new Error("storage blocked"); };
+assert.equal(
+  window.PopMonsterAnalytics.track("support_click", {
+    channel: "line",
+    placement: "footer",
+  }),
+  false,
+);
+assert.equal(calls.length, 1);
+'''
+        result = subprocess.run(
+            ["node", "-e", script],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+
+    def test_home_conversion_funnel_is_wired_without_raw_search_text(self):
+        self.assertIn('data-home-cta="intent"', self.html)
+        self.assertIn('data-home-cta="catalog"', self.html)
+        for event_name in (
+            "hero_cta",
+            "home_intent_select",
+            "catalog_filter",
+            "catalog_search",
+            "product_select",
+            "support_click",
+        ):
+            with self.subTest(event_name=event_name):
+                self.assertIn("'" + event_name + "'", self.js)
+        self.assertIn('query_length: normalizedQuery.length', self.js)
+        self.assertNotRegex(self.js, r"\bquery\s*:\s*(?:normalizedQuery|searchInput\.value)")
+        self.assertIn("target.closest('[data-pm-add]')", self.js)
+
 
 if __name__ == "__main__":
     unittest.main()

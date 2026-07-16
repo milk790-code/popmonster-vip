@@ -12,6 +12,15 @@
   var activeCategory = 'all';
   var normalizedQuery = '';
 
+  function track(eventName, parameters) {
+    try {
+      if (!window.PopMonsterAnalytics) return false;
+      return window.PopMonsterAnalytics.track(eventName, parameters);
+    } catch (error) {
+      return false;
+    }
+  }
+
   function normalizeText(value) {
     return String(value || '')
       .normalize('NFKC')
@@ -61,7 +70,7 @@
 
   function setCategory(category) {
     activeCategory = category || 'all';
-    applyFilters();
+    return applyFilters();
   }
 
   function scrollToCatalog() {
@@ -73,13 +82,21 @@
 
   filterButtons.forEach(function (button) {
     button.addEventListener('click', function () {
-      setCategory(button.dataset.cat);
+      var visibleCount = setCategory(button.dataset.cat);
+      track('catalog_filter', {
+        category: activeCategory,
+        result_count: visibleCount
+      });
     });
   });
 
   intentButtons.forEach(function (button) {
     button.addEventListener('click', function () {
-      setCategory(button.dataset.homeIntent);
+      var visibleCount = setCategory(button.dataset.homeIntent);
+      track('home_intent_select', {
+        intent: activeCategory,
+        result_count: visibleCount
+      });
       window.requestAnimationFrame(scrollToCatalog);
     });
   });
@@ -88,6 +105,13 @@
     searchInput.addEventListener('input', function () {
       normalizedQuery = normalizeText(searchInput.value);
       applyFilters();
+    });
+    searchInput.addEventListener('change', function () {
+      track('catalog_search', {
+        category: activeCategory,
+        query_length: normalizedQuery.length,
+        result_count: cards.filter(function (card) { return !card.hidden; }).length
+      });
     });
     searchInput.addEventListener('keydown', function (event) {
       if (event.key === 'Escape' && searchInput.value) {
@@ -107,6 +131,39 @@
       searchInput.focus();
     });
   }
+
+  document.addEventListener('click', function (event) {
+    var target = event.target;
+    if (!target || typeof target.closest !== 'function') return;
+
+    var heroCta = target.closest('[data-home-cta]');
+    if (heroCta) {
+      track('hero_cta', { target: heroCta.dataset.homeCta });
+    }
+
+    var productCard = target.closest('#product-grid .card[data-cat]');
+    if (productCard && !target.closest('[data-pm-add]')) {
+      var sku = productCard.querySelector('.card-sku');
+      track('product_select', {
+        sku: sku ? sku.textContent.trim() : '',
+        category: productCard.dataset.cat,
+        source: 'catalog'
+      });
+    }
+
+    var supportLink = target.closest('a[href*="line.me"], a[href*="wa.me"]');
+    if (supportLink) {
+      var href = supportLink.getAttribute('href') || '';
+      var placement = 'content';
+      if (supportLink.closest('.nav')) placement = 'navigation';
+      else if (supportLink.closest('#product-empty')) placement = 'empty_state';
+      else if (supportLink.closest('.footer')) placement = 'footer';
+      track('support_click', {
+        channel: href.indexOf('wa.me') !== -1 ? 'whatsapp' : 'line',
+        placement: placement
+      });
+    }
+  });
 
   function initMobileMenu() {
     var button = document.querySelector('.nav-menu-btn');
