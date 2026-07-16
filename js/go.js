@@ -137,9 +137,9 @@
 
   const HOOK_COPY = Object.freeze({
     offer: Object.freeze({
-      eyebrow: "7 個第一次，免費",
-      title: "你卡住的那件事，我先免費幫你解第一步。",
-      lede: "選一個情境，30 秒帶你到正確入口；每項免費範圍先說清楚。",
+      eyebrow: "花錢前，先避開最貴的錯",
+      title: "有些坑，等踩到才看到就太晚。",
+      lede: "租屋、合約、機票、精品、內容、汽美——先用免費第一步把風險說清楚，再決定要不要花錢。",
     }),
     founder: Object.freeze({
       eyebrow: "接線台的工作方式",
@@ -285,15 +285,19 @@
 
   function sendEvent(eventName, detail) {
     try {
-      const endpoint = eventEndpoint();
       if (
         !EVENT_NAMES.has(eventName) ||
         isPreviewMode() ||
-        privacySignalEnabled() ||
-        !endpoint ||
-        typeof navigator.sendBeacon !== "function"
+        privacySignalEnabled()
       ) {
         return false;
+      }
+
+      const analyticsSent =
+        window.PopMonsterGoAnalytics?.track?.(eventName, detail || {}) === true;
+      const endpoint = eventEndpoint();
+      if (!endpoint || typeof navigator.sendBeacon !== "function") {
+        return analyticsSent;
       }
 
       const slug =
@@ -321,7 +325,7 @@
         typeof Blob === "function"
           ? new Blob([json], { type: "text/plain;charset=UTF-8" })
           : json;
-      return navigator.sendBeacon(endpoint, body) === true;
+      return navigator.sendBeacon(endpoint, body) === true || analyticsSent;
     } catch (_error) {
       return false;
     }
@@ -370,6 +374,9 @@
     appendDetail(details, "免費先做", service.freeScope);
     appendDetail(details, "請準備", service.requiredInput);
     appendDetail(details, "服務邊界", service.boundary);
+    if (service.channel === "line") {
+      appendDetail(details, "LINE ID", service.destination);
+    }
 
     const cta = document.createElement("a");
     cta.className = "button button-primary result-cta";
@@ -513,7 +520,7 @@
           stageTitle.textContent = `${CATEGORY_TITLES[category]}：選最貼近的一項`;
         }
         stageTwo.hidden = false;
-        sendEvent("route_stage_1");
+        sendEvent("route_stage_1", { category: category });
         options.querySelector("button")?.focus();
       });
     });
@@ -550,13 +557,19 @@
           sendEvent(service.channel === "line" ? "line_start" : "site_start", {
             slug: service.slug,
           });
+          // GA4 enhanced measurement otherwise sends the full prefilled LINE URL.
+          event.stopImmediatePropagation();
         }
       },
       true,
     );
 
     document.querySelectorAll('[data-event="hero_cta"]').forEach((cta) => {
-      cta.addEventListener("click", () => sendEvent("hero_cta"));
+      cta.addEventListener("click", () =>
+        sendEvent("hero_cta", {
+          target: cta.dataset.target || cta.dataset.action || cta.id || "router",
+        }),
+      );
     });
 
     const showAll = document.getElementById("show-all");
@@ -585,10 +598,11 @@
     }
 
     const url = new URL("https://popmonster.vip/go");
+    url.searchParams.set("v", "20260716");
     url.searchParams.set("src", "social");
     const shareData = {
-      title: "免費接線台",
-      text: "你卡住的那件事，我先免費幫你解第一步。",
+      title: "免費避雷接線台",
+      text: "有些坑，等踩到才看到就太晚。花錢前先免費問第一步。",
       url: url.toString(),
     };
 
