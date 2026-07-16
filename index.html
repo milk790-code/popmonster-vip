@@ -1,29 +1,30 @@
 <!DOCTYPE html><html lang="zh-Hant-TW"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="theme-color" content="#0a0a0a">
-<title>泡泡怪獸 POP MONSTER｜天使塗層・米速研磨劑・台灣汽美職人首選品牌</title>
-<meta name="description" content="泡泡怪獸 POP MONSTER 全系列 32 款汽車美容產品：天使塗層千倍濃縮、米速研磨劑、RO拋光盤、清潔護理。台灣職人首選品牌。">
-<link rel="canonical" href="https://popmonster.vip/index.html">
-<link rel="alternate" hreflang="zh-Hant-TW" href="https://popmonster.vip/index.html">
-<link rel="alternate" hreflang="x-default" href="https://popmonster.vip/index.html">
+<meta name="theme-color" content="#080908">
+<meta name="color-scheme" content="dark">
+<title>泡泡怪獸 POP MONSTER｜先選施工任務，再選汽美產品</title>
+<meta name="description" content="泡泡怪獸 POP MONSTER 依清潔、研磨、鍍膜、耗材與養護五類施工任務，整理 32 款汽車美容產品與 LINE 選品協助。">
+<link rel="canonical" href="https://popmonster.vip/">
+<link rel="alternate" hreflang="zh-Hant-TW" href="https://popmonster.vip/">
+<link rel="alternate" hreflang="x-default" href="https://popmonster.vip/">
 <meta property="og:type" content="website"><meta property="og:locale" content="zh_TW">
 <meta property="og:site_name" content="泡泡怪獸 POP MONSTER">
-<meta property="og:title" content="泡泡怪獸 POP MONSTER｜台灣汽美職人首選母料店">
-<meta property="og:description" content="泡泡怪獸 POP MONSTER 全系列 32 款汽車美容產品：天使塗層千倍濃縮、米速研磨劑、RO拋光盤、清潔護理。台灣職人首選品牌。">
-<meta property="og:url" content="https://popmonster.vip/index.html">
-<meta property="og:image" content="https://popmonster.vip/img/og-default.svg">
+<meta property="og:title" content="泡泡怪獸 POP MONSTER｜先選施工任務，再選產品">
+<meta property="og:description" content="用清潔、研磨、鍍膜、耗材與養護五條路徑，快速找到適合的汽美產品。">
+<meta property="og:url" content="https://popmonster.vip/">
+<meta property="og:image" content="https://popmonster.vip/og-image-1200x630.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:alt" content="泡泡怪獸 POP MONSTER 汽車美容選品">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://popmonster.vip/img/og-default.svg">
+<meta name="twitter:title" content="泡泡怪獸 POP MONSTER｜先選施工任務，再選產品">
+<meta name="twitter:description" content="32 款汽美產品，依五類施工任務快速選品。">
+<meta name="twitter:image" content="https://popmonster.vip/og-image-1200x630.png">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="apple-touch-icon" href="/favicon.svg">
 <link rel="manifest" href="/manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<!-- Google tag (gtag.js) - GA4 with Consent Mode v2 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-WTKLHW33D7"></script>
+<!-- GA4 loads only after explicit analytics consent. -->
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
@@ -34,49 +35,85 @@ gtag('consent', 'default', {
   'analytics_storage': 'denied',
   'wait_for_update': 500
 });
-gtag('js', new Date());
-gtag('config', 'G-WTKLHW33D7', {
-  'anonymize_ip': true,
-  'cookie_flags': 'SameSite=None;Secure'
-});
+window.loadAnalytics = function () {
+  if (document.querySelector('script[data-pm-analytics]')) return;
+  var script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://www.googletagmanager.com/gtag/js?id=G-WTKLHW33D7';
+  script.dataset.pmAnalytics = 'true';
+  document.head.appendChild(script);
+  gtag('js', new Date());
+  gtag('config', 'G-WTKLHW33D7', {
+    'anonymize_ip': true,
+    'cookie_flags': 'SameSite=None;Secure'
+  });
+};
+try {
+  if (localStorage.getItem('ck_consent') === 'granted') window.loadAnalytics();
+} catch (error) {}
 </script>
 <link rel="stylesheet" href="css/main.css">
-<link rel="stylesheet" href="css/patch-p1p2.css">
-<link rel="stylesheet" href="css/store.css">
-<link rel="stylesheet" href="css/canwu-accents.css">
+<link rel="stylesheet" href="css/patch-p1p2.css" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="css/store.css" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="css/canwu-accents.css" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="css/home-extreme.css">
+<noscript><link rel="stylesheet" href="css/patch-p1p2.css"><link rel="stylesheet" href="css/store.css"><link rel="stylesheet" href="css/canwu-accents.css"></noscript>
 </head>
-<body>
+<body class="home-page">
+<a class="skip-link" href="#main-content">跳到主要內容</a>
 <nav class="nav"><div class="nav-inner">
-  <a href="index.html" class="nav-logo">POP MONSTER<span>泡泡怪獸</span></a>
+  <a href="index.html" class="nav-logo" aria-label="POP MONSTER 泡泡怪獸首頁">
+    <img class="nav-mark" src="favicon.svg" width="36" height="36" alt="">
+    <span class="nav-wordmark"><strong>POP MONSTER</strong><small>泡泡怪獸</small></span>
+  </a>
   <div class="nav-links">
-    <a href="index.html">全部商品</a>
+    <a href="#entry-paths" aria-current="page">選品入口</a>
+    <a href="#products">商品目錄</a>
     <a href="members.html">會員生態</a>
     <a href="guide/">教學攻略</a>
-    <a href="about.html">關於我們</a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
-    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
+    <a href="about.html">關於品牌</a>
+    <a class="nav-line" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 選品</a>
   </div>
-  <button class="nav-menu-btn" aria-label="選單">☰</button>
-  <div class="mobile-menu" aria-hidden="true">
-    <a href="index.html" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">全部商品</a>
-    <a href="members.html" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">會員生態</a>
-    <a href="guide/" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">教學攻略</a>
-    <a href="about.html" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">關於我們</a>
-    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">蝦皮賣場</a>
-    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener" style="color:#e8e2d6;font-size:16px;display:block;padding:8px 0;">LINE 諮詢</a>
+  <button class="nav-menu-btn" type="button" aria-label="MENU 開啟選單" aria-expanded="false" aria-controls="mobile-menu"><span aria-hidden="true">MENU</span></button>
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+    <a href="#entry-paths" aria-current="page">選品入口</a>
+    <a href="#products">商品目錄</a>
+    <a href="members.html">會員生態</a>
+    <a href="guide/">教學攻略</a>
+    <a href="about.html">關於品牌</a>
+    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 選品協助</a>
   </div>
 </div></nav>
-<script>document.querySelector('.nav-menu-btn')&&document.querySelector('.nav-menu-btn').addEventListener('click',function(){var m=this.nextElementSibling;var open=m.classList.toggle('show');m.setAttribute('aria-hidden',!open);})</script>
-<section class="hero">
-<h1>泡泡怪獸<br><em>POP MONSTER</em></h1>
-<p>台灣汽美職人首選品牌｜安全永遠第一｜任何人都能輕鬆上手</p>
-<a href="#products" class="btn btn-gold">逛全部商品 ↓</a>
+<main id="main-content">
+<section class="hero home-hero" aria-labelledby="home-hero-title">
+  <div class="home-hero-inner">
+    <div class="home-hero-copy">
+      <p class="home-eyebrow">TAIWAN CAR CARE / PRODUCT ROUTER</p>
+      <h1 id="home-hero-title"><span>先選對</span><span>施工任務，</span><em>再選產品。</em></h1>
+      <p class="home-hero-lead">不用背 32 個品名。從你現在要處理的車況出發，直接進到清潔、研磨、鍍膜、耗材或養護。</p>
+      <div class="home-hero-actions">
+        <a href="#entry-paths" class="btn btn-gold">依施工任務選</a>
+        <a href="#products" class="home-text-link">直接看 32 款商品 <span aria-hidden="true">↘</span></a>
+      </div>
+      <ul class="home-proof" aria-label="選品服務摘要">
+        <li><strong>32</strong><span>款商品</span></li>
+        <li><strong>5</strong><span>類任務</span></li>
+        <li><strong>LINE</strong><span>真人選品協助</span></li>
+      </ul>
+    </div>
+    <figure class="home-hero-visual">
+      <div class="home-hero-orbit" aria-hidden="true"><span>COAT</span><span>01</span></div>
+      <img class="home-hero-product" src="img/a001-main.jpg" srcset="img/a001-main-480.jpg 480w, img/a001-main.jpg 1000w" sizes="(max-width: 720px) 82vw, 42vw" width="1000" height="1000" fetchpriority="high" decoding="async" alt="天使塗層 Guard 產品實拍">
+      <figcaption><span>A001 / COATING</span><strong>天使塗層 Guard</strong><a href="a001.html">查看產品</a></figcaption>
+    </figure>
+  </div>
 </section>
 
 <div class="divider"></div>
 
 <section class="carousel-section fade-up">
-<h2 class="section-title" style="text-align:center;margin-bottom:20px">主打商品</h2>
+<div class="home-section-head"><span>SELECTED FORMULAS</span><h2 class="section-title">五款快速入口</h2><p>不確定從哪一類開始，可以先看這組代表性產品。</p></div>
 <div class="carousel">
 <div class="carousel-track"><div class="carousel-slide">
 <div class="carousel-slide-img"><img src="img/a001-main.jpg" alt="天使塗層 Guard" width="600" height="600" loading="lazy" decoding="async"></div>
@@ -127,78 +164,65 @@ gtag('config', 'G-WTKLHW33D7', {
 
 <div class="divider"></div>
 
-<section class="brand fade-up" id="entry-paths">
-<h2 class="section-title" style="text-align:center">找到您的路徑</h2>
-<p class="section-sub" style="text-align:center">汽美玩家四大入口，從職人到新手各有專屬路徑</p>
-<div class="brand-grid">
-<a href="#products" class="brand-card glass" style="text-decoration:none">
-<div class="brand-icon">🏆</div>
-<h3>PRO 職人路線</h3>
-<p>專業汽美店家、施工職人。米速研磨劑全系列、RO 訂製拋光盤、商用級重切配方，省時省工提升產能。</p>
-</a>
-<a href="#products" class="brand-card glass" style="text-decoration:none">
-<div class="brand-icon">🔧</div>
-<h3>DIY 自己動手</h3>
-<p>愛好自己保養車的車主。完整教學影片＋步驟拆解＋產品搭配建議，新手也能做出職人級成果。</p>
-</a>
-<a href="#products" class="brand-card glass" style="text-decoration:none">
-<div class="brand-icon">✨</div>
-<h3>NEW 新手入門</h3>
-<p>第一次接觸汽美的新手。關注光澤、撥水、刮痕、輪圈等基本需求，從天使塗層輕鬆入門。</p>
-</a>
-<a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener" class="brand-card glass" style="text-decoration:none">
-<div class="brand-icon">🛒</div>
-<h3>SHOP 直接購買</h3>
-<p>已決定要買的客戶。直達蝦皮賣場一鍵下單，5.0 評分、1,657+ 粉絲的職人母料店。</p>
-</a>
-</div>
+<section class="brand intent-section fade-up" id="entry-paths" aria-labelledby="intent-title">
+  <div class="intent-heading">
+    <p class="home-eyebrow">START WITH THE JOB</p>
+    <h2 class="section-title" id="intent-title">你現在要處理哪件事？</h2>
+    <p class="section-sub">點一條施工任務，目錄會直接保留相關商品。你仍可再搜尋品名或 SKU。</p>
+  </div>
+  <div class="intent-rail" aria-label="依施工任務篩選商品">
+    <button type="button" class="intent-card" data-home-intent="cleaning" aria-pressed="false"><span class="intent-index">01 / PREP</span><strong>洗車與去污</strong><small>預洗、鐵粉、柏油、玻璃油膜</small></button>
+    <button type="button" class="intent-card" data-home-intent="compound" aria-pressed="false"><span class="intent-index">02 / CUT</span><strong>刮痕與研磨</strong><small>重切、中切、鏡面收尾</small></button>
+    <button type="button" class="intent-card" data-home-intent="coating" aria-pressed="false"><span class="intent-index">03 / COAT</span><strong>撥水與光澤</strong><small>車漆與玻璃鍍膜養護</small></button>
+    <button type="button" class="intent-card" data-home-intent="pads" aria-pressed="false"><span class="intent-index">04 / TOOL</span><strong>拋光盤與耗材</strong><small>施工工具與搭配耗材</small></button>
+    <button type="button" class="intent-card" data-home-intent="care" aria-pressed="false"><span class="intent-index">05 / CARE</span><strong>內裝與日常養護</strong><small>皮革、輪胎、塑件與雨天視線</small></button>
+  </div>
 </section>
 
-<section class="brand">
-<h2 class="section-title" style="text-align:center">為什麼選擇泡泡怪獸？</h2>
-<p class="section-sub" style="text-align:center">安全、穩定、好上手——這是我們對每一款產品的堅持</p>
-<div class="brand-grid">
-<div class="brand-card fade-up glass"><div class="brand-icon">🛡️</div><h3>安全是產品底線</h3><p>非硅安全配方、無半衰期、可安全徹底去除。不存在堆疊反應，多次施工效果一致，零不可逆傷害。</p></div>
-<div class="brand-card fade-up glass"><div class="brand-icon">⚡</div><h3>任何人都能輕鬆上手</h3><p>千倍濃縮設計、濕上濕下、免噴免擦。把專業級效果做到新手也能 1 秒完成施工。</p></div>
-<div class="brand-card fade-up glass"><div class="brand-icon">🔬</div><h3>不是聽文案，現場看得出來</h3><p>看水珠集中度、看收水俐落度、看乾淨感。三個重點直接驗證，不靠話術靠實力。</p></div>
-</div>
+<section class="brand method-section fade-up" aria-labelledby="method-title">
+  <div class="method-thesis"><p class="home-eyebrow">LESS GUESSING, MORE DOING</p><h2 class="section-title" id="method-title">選品不用背 32 個品名。</h2><p>首頁只保留三個判斷：你要處理什麼、產品屬於哪一步、遇到不確定時去哪裡問。</p></div>
+  <ol class="method-list">
+    <li><span>01</span><div><strong>先看施工任務</strong><p>從車況與目標開始，不從行銷名稱開始。</p></div></li>
+    <li><span>02</span><div><strong>再縮小產品類別</strong><p>五類篩選可與商品搜尋同時使用。</p></div></li>
+    <li><span>03</span><div><strong>不確定就直接問</strong><p>LINE 選品協助保留在每個關鍵入口。</p></div></li>
+  </ol>
 </section>
 
 <div class="divider"></div>
 
 <section class="featured fade-up">
 <div class="featured-inner">
-<div class="featured-img"><div class="ink-ph" aria-hidden="true"><span class="ink-ph-note">圖片整備中</span><span class="ink-ph-char">鍍</span><span class="ink-ph-seal">泡怪</span></div><span class="featured-badge">主打商品</span></div>
+<div class="featured-img"><img src="img/a001-main.jpg" srcset="img/a001-main-480.jpg 480w, img/a001-main.jpg 1000w" sizes="(max-width: 768px) 90vw, 44vw" width="1000" height="1000" loading="lazy" decoding="async" alt="天使塗層 Guard 產品實拍"><span class="featured-badge">A001 / COATING</span></div>
 <div class="featured-info">
 <h2>天使塗層 Guard</h2>
 <div class="tagline">千倍濃縮 1ml=1L ｜ 免噴免擦 濕上濕下 ｜ 1秒施工</div>
-<p>酯類水基覆膜型頂級養護產品，千倍濃縮 1ml=1L，免噴免擦濕上濕下，1秒施工維護劑</p>
+<p>酯類水基覆膜型養護產品。依商品說明稀釋與施工，適合把撥水與日常光澤維護整合成簡單步驟。</p>
 <div class="featured-stats">
 <div class="stat"><div class="stat-num">1:1000</div><div class="stat-label">超濃縮比例</div></div>
-<div class="stat"><div class="stat-num">30天</div><div class="stat-label">保守防護</div></div>
-<div class="stat"><div class="stat-num">0</div><div class="stat-label">殘留風險</div></div>
+<div class="stat"><div class="stat-num">1ml</div><div class="stat-label">可調配 1L</div></div>
+<div class="stat"><div class="stat-num">WET</div><div class="stat-label">濕上濕下施工</div></div>
 </div>
 <a href="a001.html" class="btn btn-gold">了解天使塗層</a>
 </div></div></section>
 
 <div class="divider"></div>
 
-<section class="social fade-up">
-<h2 class="section-title">蝦皮賣場實績</h2>
+<section class="social fade-up" aria-labelledby="catalog-proof-title">
+<p class="home-eyebrow">CATALOG AT A GLANCE</p>
+<h2 class="section-title" id="catalog-proof-title">一個目錄，三個明確入口</h2>
 <div class="social-badges">
-<div class="social-badge"><div class="num">5.0</div><div class="label">賣場評分</div></div>
-<div class="social-badge"><div class="num">1,657+</div><div class="label">粉絲追蹤</div></div>
-<div class="social-badge"><div class="num">32</div><div class="label">款職人用品</div></div>
+<div class="social-badge"><div class="num">32</div><div class="label">款站內商品</div></div>
+<div class="social-badge"><div class="num">5</div><div class="label">類施工任務</div></div>
+<div class="social-badge"><div class="num">1:1</div><div class="label">LINE 選品協助</div></div>
 </div>
 </section>
 
 <div class="divider"></div>
 
 <section class="section" id="products">
-<h2 class="section-title">全系列產品</h2>
-<p class="section-sub">共 32 款職人級汽車美容用品</p>
-<div class="filter-bar"><button class="filter-btn active" data-cat="all">全部</button><button class="filter-btn" data-cat="coating">鍍膜系列</button><button class="filter-btn" data-cat="compound">研磨系列</button><button class="filter-btn" data-cat="pads">耗材系列</button><button class="filter-btn" data-cat="cleaning">清潔系列</button><button class="filter-btn" data-cat="care">護理系列</button></div>
-<div class="grid"><a href="a001.html" class="card fade-up" data-cat="coating">
+<div class="catalog-head"><div><p class="home-eyebrow">FULL CATALOG</p><h2 class="section-title">全系列產品</h2><p class="section-sub">用關鍵字與分類一起縮小範圍。</p></div><div class="catalog-search"><label for="product-search">搜尋商品或 SKU</label><div class="catalog-search-field"><input id="product-search" type="search" inputmode="search" autocomplete="off" aria-controls="product-grid" placeholder="例如：玻璃、A035、研磨"><button type="button" id="product-search-clear" aria-label="清除商品搜尋" hidden>清除</button></div><span id="product-results" role="status" aria-live="polite">32 款商品</span></div></div>
+<div class="filter-bar" aria-label="商品分類"><button type="button" class="filter-btn active" data-cat="all" aria-pressed="true">全部</button><button type="button" class="filter-btn" data-cat="coating" aria-pressed="false">鍍膜系列</button><button type="button" class="filter-btn" data-cat="compound" aria-pressed="false">研磨系列</button><button type="button" class="filter-btn" data-cat="pads" aria-pressed="false">耗材系列</button><button type="button" class="filter-btn" data-cat="cleaning" aria-pressed="false">清潔系列</button><button type="button" class="filter-btn" data-cat="care" aria-pressed="false">護理系列</button></div>
+<div class="grid" id="product-grid"><a href="a001.html" class="card fade-up" data-cat="coating">
 <div class="card-img"><img src="img/a001-main.jpg" alt="天使塗層 Guard" width="400" height="400" loading="lazy" decoding="async"><span class="badge">A001</span></div>
 <div class="card-body"><div class="card-sku">A001</div><div class="card-name">天使塗層 Guard</div><div class="card-price" data-pm-price="A001"></div><span class="card-cat">鍍膜系列</span><span class="card-btn">查看詳情</span><span class="card-btn--cart" role="button" tabindex="0" data-pm-add="A001">加入購物車</span></div></a>
 <a href="a002.html" class="card fade-up" data-cat="compound">
@@ -295,11 +319,12 @@ gtag('config', 'G-WTKLHW33D7', {
 <div class="card-img"><img src="img/a046-main.jpg" alt="黑曼羅酸性洗車泡沫" width="400" height="400" loading="lazy" decoding="async"><span class="badge">A046</span></div>
 <div class="card-body"><div class="card-sku">A046</div><div class="card-name">黑曼羅酸性洗車泡沫</div><div class="card-price" data-pm-price="A046"></div><span class="card-cat">清潔系列</span><span class="card-btn">查看詳情</span><span class="card-btn--cart" role="button" tabindex="0" data-pm-add="A046">加入購物車</span></div></a>
 </div>
-</div>
+<div class="catalog-empty" id="product-empty" hidden><strong>目前沒有符合的商品</strong><p>換一個關鍵字，或直接用 LINE 告訴我們你想處理的車況。</p><a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">開啟 LINE 選品協助</a></div>
 </section>
+</main>
 <footer class="footer">
   <div class="footer-brand">泡泡怪獸 POP MONSTER × 米速 MISO</div>
-  <div class="footer-sub">安全永遠第一｜任何人都能輕鬆上手｜使用全程零風險</div>
+  <div class="footer-sub">先確認材質與施工條件｜依產品說明操作｜不確定先詢問</div>
   <div class="footer-links">
     <a href="index.html">全部商品</a>
     <a href="members.html">會員生態</a>
@@ -317,10 +342,11 @@ gtag('config', 'G-WTKLHW33D7', {
     <a href="terms.html" style="font-size:12px;color:var(--txt-m)">服務條款</a>
   </div>
   <div class="footer-copy">&copy; 2026 泡泡怪獸 POP MONSTER. All rights reserved.</div>
-</footer><div class="cookie-bar"><span>本站使用 Cookie 提升瀏覽體驗。繼續瀏覽即表示同意。</span><span><button class="cookie-accept" id="ck-accept">接受</button> <button class="cookie-decline" id="ck-decline">拒絕</button></span></div>
+</footer><div class="cookie-bar" role="region" aria-label="Cookie 偏好"><span>你可以選擇是否允許分析用 Cookie；拒絕不影響商品瀏覽與購物車。</span><span><button class="cookie-accept" id="ck-accept">允許分析</button> <button class="cookie-decline" id="ck-decline">拒絕</button></span></div>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "url": "https://popmonster.vip/", "name": "泡泡怪獸 POP MONSTER", "alternateName": ["米速", "丹若", "POP MONSTER"]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "泡泡怪獸 POP MONSTER", "url": "https://popmonster.vip/", "sameAs": ["https://shopee.tw/milk790", "https://www.facebook.com/share/1AcLN6W6HU/", "https://www.instagram.com/ssss4845454"]}</script>
 <script src="js/main.js" defer></script>
 <script src="js/products.js"></script>
 <script src="js/store.js"></script>
+<script src="js/home.js" defer></script>
 </body></html>

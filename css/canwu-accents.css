@@ -3,8 +3,6 @@
    黑金基底上的水墨點綴：墨紙占位塊、朱砂印、飛白字。
    來源：參無 Cānwú Design System（tokens: 紙 #f4efe3 / 墨 #1b1712 / 朱砂 #9e3a2b）
    ============================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
-
 /* ── 墨紙占位塊（商品圖位置：紙上飛白字＋朱砂小印） ── */
 .ink-ph{
   position:relative;
@@ -23,7 +21,7 @@
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.52 0 0 0 0 0.45 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 .ink-ph-char{
-  font-family:'Ma Shan Zheng','Noto Serif TC',serif;
+  font-family:'Noto Serif TC',serif;
   font-size:clamp(72px,42%,150px);
   font-size:min(150px,38cqw,9em);
   line-height:1;color:#1b1712;
@@ -34,7 +32,7 @@
   position:absolute;right:10%;bottom:10%;
   width:34px;height:34px;
   background:#9e3a2b;color:#f4efe3;
-  font-family:'Ma Shan Zheng','Noto Serif TC',serif;
+  font-family:'Noto Serif TC',serif;
   font-size:13px;line-height:1.15;
   display:flex;align-items:center;justify-content:center;
   text-align:center;writing-mode:vertical-rl;
@@ -71,7 +69,7 @@
 .seal-dot{
   display:inline-flex;align-items:center;justify-content:center;
   width:20px;height:20px;background:#9e3a2b;color:#f4efe3;
-  font-family:'Ma Shan Zheng','Noto Serif TC',serif;font-size:12px;
+  font-family:'Noto Serif TC',serif;font-size:12px;
   border-radius:3px;transform:rotate(-2.5deg);vertical-align:middle;
   margin-left:8px;
 }
