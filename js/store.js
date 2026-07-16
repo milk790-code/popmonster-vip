@@ -78,8 +78,8 @@
     if (inner && !$('.nav-cart-btn')) {
       var b = document.createElement('button');
       b.className = 'nav-cart-btn';
-      b.setAttribute('aria-label', '購物車');
-      b.innerHTML = '🛒 <span class="t">購物車</span><span class="nav-cart-badge"></span>';
+      b.setAttribute('aria-label', 'CART 購物車');
+      b.innerHTML = '<span class="t">購物車</span><span class="nav-cart-badge" aria-hidden="true"></span>';
       var menuBtn = $('.nav-menu-btn', inner);
       inner.insertBefore(b, menuBtn || null);
       b.addEventListener('click', function () { openDrawer(); });
@@ -169,7 +169,8 @@
   /* ── 徽章 ── */
   function refreshBadges() {
     var c = count();
-    $all('.nav-cart-badge').forEach(function (b) { b.textContent = c; b.classList.toggle('on', c > 0); });
+    $all('.nav-cart-badge').forEach(function (b) { b.textContent = c > 0 ? c : ''; b.classList.toggle('on', c > 0); });
+    $all('.nav-cart-btn').forEach(function (b) { b.setAttribute('aria-label', 'CART 購物車，' + c + ' 件商品'); });
     var fab = $('.pm-fab');
     if (fab) { fab.classList.toggle('has', c > 0); $('.pm-fab-badge', fab).textContent = c; }
   }

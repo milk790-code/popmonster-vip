@@ -24,3 +24,6 @@ Thumbs.db
 
 # Log
 *.log
+
+# Local browser QA artifacts
+.playwright-cli/

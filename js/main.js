@@ -58,6 +58,7 @@
       'ad_personalization':'granted',
       'analytics_storage':'granted'
     });
+    if(typeof window.loadAnalytics === 'function') window.loadAnalytics();
     return;
   }
   if(existing === 'denied') return;
@@ -74,6 +75,7 @@
         'analytics_storage':'granted'
       });
     }
+    if(typeof window.loadAnalytics === 'function') window.loadAnalytics();
     localStorage.setItem('ck_consent','granted');
     bar.classList.remove('show');
   });
