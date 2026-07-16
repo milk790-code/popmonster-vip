@@ -43,3 +43,5 @@
 3. payload 不得出現輸入文字、URL query 原文或 LINE 預填訊息。
 4. `src=social` 等合法來源應保留；未知來源應降級為 `direct`。
 5. 服務連結只送 allowlist custom event；必須阻斷 GA4 Enhanced Measurement 自動 outbound `click`，避免完整 LINE 預填網址進入 `link_url`。
+
+三渠道實驗與決策規則見 [`go-channel-comparison.md`](go-channel-comparison.md)。
