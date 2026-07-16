@@ -43,16 +43,28 @@ class GoV4ContractTests(unittest.TestCase):
         return path.read_text(encoding="utf-8")
 
     def test_required_release_files_exist(self):
-        for relative in ("go.html", "css/go.css", "js/go.js", "go-preview.html"):
+        for relative in (
+            "go.html",
+            "css/go.css",
+            "js/go-analytics.js",
+            "js/go.js",
+            "go-preview.html",
+            "docs/analytics/go-funnel-baseline.md",
+        ):
             with self.subTest(relative=relative):
                 self.assertTrue((ROOT / relative).is_file(), relative)
 
     def test_hero_copy_and_semantic_sections_are_fixed(self):
         html = self.read_required("go.html")
         for text in (
-            "7 個第一次，免費",
-            "你卡住的那件事，我先免費幫你解第一步。",
-            "選一個情境，30 秒帶你到正確入口；每項免費範圍先說清楚。",
+            "花錢前，先避開最貴的錯",
+            "有些坑，等踩到才看到就太晚。",
+            "租屋、合約、機票、精品、內容、汽美——先用免費第一步把風險說清楚，再決定要不要花錢。",
+            "先問的成本是 0，踩雷的成本不是。",
+            "為什麼免費？",
+            "我在累積真實服務案例，需要實際使用者。",
+            "現在加，等於零成本先卡位。",
+            "看你需要哪一種，直接點連結，或在 LINE 搜尋 ID 加我。",
             "選我的問題",
             "直接看 7 個免費入口",
             "看 POP 汽美本業",
@@ -60,19 +72,45 @@ class GoV4ContractTests(unittest.TestCase):
         ):
             with self.subTest(text=text):
                 self.assertIn(text, html)
-        for element_id in ("main-content", "problem-router", "route-result", "founder", "all-services"):
+        for element_id in (
+            "main-content",
+            "proof",
+            "problem-router",
+            "route-result",
+            "founder",
+            "all-services",
+            "go-analytics-consent",
+        ):
             with self.subTest(element_id=element_id):
                 self.assertRegex(html, rf'id=["\']{re.escape(element_id)}["\']')
+
+    def test_line_destinations_are_searchable_without_clicking(self):
+        html = self.read_required("go.html")
+        for line_id in (
+            "@121lkspe",
+            "@207cpaps",
+            "@772iosnh",
+            "@129vsziy",
+            "@186vktox",
+            "@805udwla",
+        ):
+            with self.subTest(line_id=line_id):
+                self.assertIn(f"LINE ID：<code>{line_id}</code>", html)
 
     def test_html_loads_external_assets_and_complete_metadata(self):
         html = self.read_required("go.html")
         self.assertIn('lang="zh-Hant-TW"', html)
         self.assertIn('href="css/go.css"', html)
+        analytics_tag = '<script src="js/go-analytics.js" defer></script>'
+        app_tag = '<script src="js/go.js" defer></script>'
+        self.assertIn(analytics_tag, html)
+        self.assertLess(html.index(analytics_tag), html.index(app_tag))
         self.assertIn('src="js/go.js"', html)
         self.assertIn('rel="canonical" href="https://popmonster.vip/go"', html)
         self.assertRegex(html, r'rel=["\'](?:shortcut )?icon["\'][^>]+favicon\.svg')
         self.assertIn('property="og:image"', html)
         self.assertIn('name="twitter:card"', html)
+        self.assertNotRegex(html, r'<script[^>]+src="https://www\.googletagmanager\.com')
 
     def test_v4_og_asset_is_scoped_and_not_the_legacy_3q_card(self):
         html = self.read_required("go.html")
@@ -139,6 +177,98 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertNotIn("document.cookie", js)
         self.assertRegex(js, r'window\.Switchboard\s*=')
         self.assertIn("const allowVariants = isPreviewMode();", js)
+        self.assertIn('category: category', js)
+        self.assertIn('target: cta.dataset.target', js)
+        self.assertIn("event.stopImmediatePropagation()", js)
+
+    def test_ga4_funnel_is_explicitly_consented_and_allowlisted(self):
+        analytics = self.read_required("js/go-analytics.js")
+        for event_name in self.expected_events:
+            with self.subTest(event_name=event_name):
+                self.assertIn(event_name, analytics)
+        self.assertIn("ck_consent", analytics)
+        self.assertIn("navigator.globalPrivacyControl", analytics)
+        self.assertIn("doNotTrack", analytics)
+        self.assertNotIn("session_hash", analytics)
+        self.assertNotIn("event_id", analytics)
+
+        script = r'''
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+
+let consent = "denied";
+const calls = [];
+globalThis.window = globalThis;
+globalThis.location = { search: "?src=social" };
+globalThis.navigator = { doNotTrack: "0", globalPrivacyControl: false };
+globalThis.localStorage = {
+  getItem(key) {
+    assert.equal(key, "ck_consent");
+    return consent;
+  },
+  setItem(key, value) {
+    assert.equal(key, "ck_consent");
+    consent = value;
+  },
+};
+globalThis.gtag = (...args) => calls.push(args);
+globalThis.document = {
+  addEventListener() {},
+  getElementById() { return null; },
+  querySelector(selector) {
+    return selector === "script[data-pm-analytics]" ? {} : null;
+  },
+  readyState: "loading",
+};
+
+const source = fs.readFileSync("js/go-analytics.js", "utf8");
+eval(source);
+calls.length = 0;
+
+assert.equal(
+  window.PopMonsterGoAnalytics.track("route_result", {
+    slug: "legal-guidance",
+    raw_text: "不得送出的原始對話",
+  }),
+  false,
+);
+assert.equal(calls.length, 0);
+
+assert.equal(window.PopMonsterGoAnalytics.setConsent("granted"), true);
+assert.deepEqual(calls[calls.length - 1], [
+  "event",
+  "page_ready",
+  { source: "social" },
+]);
+calls.length = 0;
+assert.equal(
+  window.PopMonsterGoAnalytics.track("route_result", {
+    slug: "legal-guidance",
+    raw_text: "不得送出的原始對話",
+  }),
+  true,
+);
+assert.deepEqual(calls[0], [
+  "event",
+  "route_result",
+  { slug: "legal-guidance", source: "social" },
+]);
+
+navigator.globalPrivacyControl = true;
+assert.equal(window.PopMonsterGoAnalytics.track("line_start", { slug: "legal-guidance" }), false);
+assert.equal(calls.length, 1);
+navigator.globalPrivacyControl = false;
+assert.equal(window.PopMonsterGoAnalytics.track("unknown_event", {}), false);
+assert.equal(calls.length, 1);
+'''
+        result = subprocess.run(
+            ["node", "-e", script],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
     def test_js_runtime_telemetry_is_private_stable_and_fail_open(self):
         script = r'''
