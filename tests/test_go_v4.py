@@ -76,7 +76,7 @@ class GoV4ContractTests(unittest.TestCase):
 
     def test_v4_og_asset_is_scoped_and_not_the_legacy_3q_card(self):
         html = self.read_required("go.html")
-        relative = "assets/go-v4/go-og-1200x630.png"
+        relative = "assets/go-v4/go-link-preview-2560x1440.png"
         self.assertIn(f"https://popmonster.vip/{relative}", html)
 
         asset = ROOT / relative
@@ -85,7 +85,7 @@ class GoV4ContractTests(unittest.TestCase):
         payload = asset.read_bytes()
         self.assertEqual(payload[:8], b"\x89PNG\r\n\x1a\n")
         width, height = struct.unpack(">II", payload[16:24])
-        self.assertEqual((width, height), (1200, 630))
+        self.assertEqual((width, height), (2560, 1440))
         self.assertNotEqual(
             hashlib.sha256(payload).digest(),
             hashlib.sha256(legacy.read_bytes()).digest(),
