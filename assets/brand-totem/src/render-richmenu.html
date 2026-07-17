@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<title>渲染正本：LINE 圖文選單背景 2500×1686</title>
+<link rel="stylesheet" href="../../../css/canwu-brand.css">
+<style>
+  /* LINE 大型圖文選單 2500×1686：左 700px 墨面圖騰板＋右 3×2 選單格
+     （格位 600×843，對應 rich-menu-config.draft.json 的 tap 區域）。零動畫。 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1b1712; }
+
+  .menu {
+    position: relative;
+    width: 2500px;
+    height: 1686px;
+    overflow: hidden;
+    display: flex;
+    background-color: var(--paper-raw);
+    background-image: var(--paper-fibre), var(--paper-texture);
+    background-blend-mode: multiply, multiply;
+    color: var(--ink-thick);
+  }
+
+  /* ── 左：墨面圖騰板（tap → 品牌圖騰頁）── */
+  .panel {
+    position: relative;
+    flex: 0 0 700px;
+    background-color: var(--ink-burnt);
+    background-image: var(--paper-fibre);
+    background-blend-mode: screen;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .panel .ghost {
+    position: absolute;
+    right: -60px;
+    bottom: -140px;
+    font-family: var(--font-brush);
+    font-size: 720px;
+    line-height: 1;
+    color: rgba(244, 239, 227, 0.05);
+  }
+  .panel .totem {
+    writing-mode: vertical-rl;
+    white-space: nowrap;
+    font-family: var(--font-brush);
+    font-size: 150px;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    color: var(--paper-raw);
+  }
+  .panel .label {
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(244, 239, 227, 0.4);
+    padding-left: 0.4em;
+  }
+  .panel .seal {
+    position: absolute;
+    bottom: 64px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 96px;
+    height: 96px;
+    background: var(--seal-bright);
+    color: var(--paper-light);
+    font-family: var(--font-brush);
+    font-size: 34px;
+    line-height: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    padding: 11px;
+    border-radius: var(--radius-seal);
+    box-shadow: var(--shadow-inset-seal);
+  }
+
+  /* ── 右：3×2 選單格（600×843）── */
+  .cells {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+  }
+  .cell {
+    position: relative;
+    border-left: 1px solid var(--wash-12);
+    padding: 72px 56px;
+    display: flex;
+    flex-direction: column;
+  }
+  .cell:nth-child(-n+3) { border-bottom: 1px solid var(--wash-12); }
+  .cell .no {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    letter-spacing: 0.1em;
+    color: var(--ink-light);
+    margin-bottom: 40px;
+  }
+  .cell h2 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 84px;
+    line-height: 1.25;
+    color: var(--ink-burnt);
+    margin-bottom: 18px;
+  }
+  .cell .en {
+    font-family: var(--font-sans);
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+  }
+  .cell .arrow {
+    margin-top: auto;
+    font-family: var(--font-serif);
+    font-size: 40px;
+    color: var(--ink-clear);
+  }
+
+  /* 第六格：真人選品（墨底強調格）*/
+  .cell.ask {
+    background-color: var(--ink-burnt);
+    background-image: var(--paper-fibre);
+    background-blend-mode: screen;
+  }
+  .cell.ask h2 { color: var(--paper-light); }
+  .cell.ask .no, .cell.ask .en { color: var(--paper-edge); }
+  .cell.ask .arrow { color: var(--seal-bright); }
+  .cell.ask .mini-seal {
+    position: absolute;
+    top: 64px;
+    right: 56px;
+    width: 72px;
+    height: 72px;
+    background: var(--seal-bright);
+    color: var(--paper-light);
+    font-family: var(--font-brush);
+    font-size: 26px;
+    line-height: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    padding: 8px;
+    border-radius: var(--radius-seal);
+    box-shadow: var(--shadow-inset-seal);
+  }
+</style>
+</head>
+<body>
+
+<section class="menu" id="capture">
+
+  <div class="panel">
+    <div class="ghost">泡</div>
+    <div class="label">POP MONSTER</div>
+    <div class="totem">汽美之道</div>
+    <div class="seal"><span>泡</span><span>怪</span></div>
+  </div>
+
+  <div class="cells">
+    <div class="cell">
+      <div class="no">01</div>
+      <h2>全部商品</h2>
+      <div class="en">Catalog</div>
+      <div class="arrow">→</div>
+    </div>
+    <div class="cell">
+      <div class="no">02</div>
+      <h2>品牌館</h2>
+      <div class="en">Brand Hall</div>
+      <div class="arrow">→</div>
+    </div>
+    <div class="cell">
+      <div class="no">03</div>
+      <h2>教學攻略</h2>
+      <div class="en">Guides</div>
+      <div class="arrow">→</div>
+    </div>
+    <div class="cell">
+      <div class="no">04</div>
+      <h2>蝦皮賣場</h2>
+      <div class="en">Shopee</div>
+      <div class="arrow">→</div>
+    </div>
+    <div class="cell">
+      <div class="no">05</div>
+      <h2>會員生態</h2>
+      <div class="en">Members</div>
+      <div class="arrow">→</div>
+    </div>
+    <div class="cell ask">
+      <div class="mini-seal"><span>泡</span><span>怪</span></div>
+      <div class="no">06</div>
+      <h2>真人選品</h2>
+      <div class="en">Ask Us</div>
+      <div class="arrow">→</div>
+    </div>
+  </div>
+
+</section>
+
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<title>渲染正本：品牌圖騰海報 1080×1920</title>
+<link rel="stylesheet" href="../../../css/canwu-brand.css">
+<style>
+  /* 渲染專用：固定像素、零動畫。畫面正本＝brand-totem.html 的 .poster，
+     所有尺寸取自參無 TotemPoster.dc.html 的絕對值（1080×1920 座標系）。 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1b1712; }
+
+  .poster {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background-color: var(--paper-raw);
+    background-image: var(--paper-fibre), var(--paper-texture);
+    background-blend-mode: multiply, multiply;
+    color: var(--ink-thick);
+  }
+  .poster-frame {
+    position: absolute;
+    inset: 54px;
+    border: 1px solid var(--wash-12);
+  }
+  .poster-ghost {
+    position: absolute;
+    right: -90px;
+    bottom: -180px;
+    font-family: var(--font-brush);
+    font-size: 1180px;
+    line-height: 1;
+    color: rgba(27, 23, 18, 0.035);
+  }
+  .poster-label {
+    position: absolute;
+    top: 120px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.46em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    padding-left: 0.46em;
+  }
+  .poster-totem {
+    position: absolute;
+    top: 175px;
+    left: 0;
+    right: 0;
+    bottom: 660px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .poster-totem h1 {
+    writing-mode: vertical-rl;
+    white-space: nowrap;
+    font-family: var(--font-brush);
+    font-weight: 400;
+    font-size: 200px;
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+    color: var(--ink-burnt);
+  }
+  .poster-couplet {
+    position: absolute;
+    bottom: 360px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 44px;
+  }
+  .poster-couplet span {
+    writing-mode: vertical-rl;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 40px;
+    letter-spacing: 0.28em;
+    line-height: 1;
+  }
+  .poster-couplet .line-heavy { color: var(--ink-heavy); }
+  .poster-couplet .line-light { color: var(--ink-light); }
+  .poster-seal-row {
+    position: absolute;
+    bottom: 168px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+  }
+  .poster-seal {
+    width: 116px;
+    height: 116px;
+    background: var(--seal);
+    color: var(--paper-light);
+    font-family: var(--font-brush);
+    font-size: 42px;
+    line-height: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    padding: 13px;
+    border-radius: var(--radius-seal);
+    box-shadow: var(--shadow-inset-seal);
+  }
+  .poster-footing {
+    position: absolute;
+    bottom: 110px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-serif);
+    font-size: 26px;
+    letter-spacing: 0.2em;
+    color: var(--ink-mid);
+  }
+</style>
+</head>
+<body>
+
+<section class="poster" id="capture">
+  <div class="poster-frame"></div>
+  <div class="poster-ghost">泡</div>
+  <div class="poster-label">泡泡怪獸 · POP MONSTER</div>
+  <div class="poster-totem"><h1>汽美之道</h1></div>
+  <div class="poster-couplet">
+    <span class="line-heavy">先選對施工任務</span>
+    <span class="line-light">再選對汽美產品</span>
+  </div>
+  <div class="poster-seal-row">
+    <div class="poster-seal"><span>泡</span><span>怪</span></div>
+  </div>
+  <div class="poster-footing">安全第一 · 效果當下驗證</div>
+</section>
+
+</body>
+</html>

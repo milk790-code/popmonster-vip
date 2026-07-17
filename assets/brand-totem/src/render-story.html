@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<title>渲染正本：IG 限動模板 1080×1920</title>
+<link rel="stylesheet" href="../../../css/canwu-brand.css">
+<style>
+  /* IG 限時動態模板：上下各留安全區（IG 介面浮層），
+     中左挖「施工照視窗」，圖騰移到右側直排。零動畫。 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1b1712; }
+
+  .story {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background-color: var(--paper-raw);
+    background-image: var(--paper-fibre), var(--paper-texture);
+    background-blend-mode: multiply, multiply;
+    color: var(--ink-thick);
+  }
+  .story-frame {
+    position: absolute;
+    inset: 54px;
+    border: 1px solid var(--wash-12);
+  }
+  .story-ghost {
+    position: absolute;
+    left: -140px;
+    bottom: -220px;
+    font-family: var(--font-brush);
+    font-size: 1080px;
+    line-height: 1;
+    color: rgba(27, 23, 18, 0.03);
+  }
+
+  /* 頂部安全區之下的 label（IG 頂部浮層約 0–200px）*/
+  .story-label {
+    position: absolute;
+    top: 228px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.46em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    padding-left: 0.46em;
+  }
+
+  /* 右側直排圖騰 */
+  .story-totem {
+    position: absolute;
+    top: 330px;
+    right: 96px;
+    writing-mode: vertical-rl;
+    white-space: nowrap;
+    font-family: var(--font-brush);
+    font-size: 128px;
+    line-height: 1.05;
+    letter-spacing: 0.06em;
+    color: var(--ink-burnt);
+  }
+
+  /* 施工照視窗（托裱紙色，等你貼照片/貼圖蓋上去）*/
+  .story-window {
+    position: absolute;
+    top: 384px;
+    left: 96px;
+    width: 700px;
+    height: 875px; /* 4:5 */
+    background: var(--paper-mounted);
+    border: 1px solid var(--wash-20);
+    box-shadow: var(--shadow-well);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+  }
+  .story-window .hint-char {
+    font-family: var(--font-brush);
+    font-size: 130px;
+    line-height: 1;
+    color: rgba(27, 23, 18, 0.10);
+  }
+  .story-window .hint {
+    writing-mode: vertical-rl;
+    font-family: var(--font-serif);
+    font-size: 26px;
+    letter-spacing: 0.3em;
+    color: var(--ink-clear);
+  }
+
+  /* 視窗下的一句話（可留可蓋）*/
+  .story-caption {
+    position: absolute;
+    top: 1320px;
+    left: 96px;
+    width: 700px;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 44px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--ink-thick);
+  }
+  .story-caption em {
+    font-style: normal;
+    color: var(--seal);
+  }
+
+  /* 底部（IG 底部浮層約最後 250px 之上）：鈐印＋帳號 */
+  .story-foot {
+    position: absolute;
+    bottom: 300px;
+    left: 96px;
+    right: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .story-seal {
+    width: 96px;
+    height: 96px;
+    background: var(--seal);
+    color: var(--paper-light);
+    font-family: var(--font-brush);
+    font-size: 34px;
+    line-height: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    padding: 11px;
+    border-radius: var(--radius-seal);
+    box-shadow: var(--shadow-inset-seal);
+  }
+  .story-foot .meta {
+    text-align: right;
+    font-family: var(--font-serif);
+    font-size: 24px;
+    letter-spacing: 0.2em;
+    color: var(--ink-mid);
+    line-height: 1.9;
+  }
+  .story-foot .meta strong {
+    display: block;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: 0.3em;
+    color: var(--ink-heavy);
+  }
+</style>
+</head>
+<body>
+
+<section class="story" id="capture">
+  <div class="story-frame"></div>
+  <div class="story-ghost">泡</div>
+  <div class="story-label">泡泡怪獸 · POP MONSTER</div>
+  <div class="story-totem">汽美之道</div>
+
+  <div class="story-window">
+    <div class="hint-char">泡</div>
+    <div class="hint">施工照 · 成果照 放這裡</div>
+  </div>
+
+  <div class="story-caption">先選對施工任務，<br>再把時間，<em>還給車</em>。</div>
+
+  <div class="story-foot">
+    <div class="story-seal"><span>泡</span><span>怪</span></div>
+    <div class="meta">
+      <strong>LINE @150tiznd</strong>
+      popmonster.vip
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

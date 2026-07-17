@@ -1,0 +1,23 @@
+{
+  "_comment": "泡泡怪獸 @150tiznd 圖文選單草稿 — 對應 line-rich-menu-bg-2500x1686 背景圖格位（左板 700px＋右 3×2 格 600×843）。部署前由老闆確認後用 LINE Messaging API 建立。",
+  "size": { "width": 2500, "height": 1686 },
+  "selected": true,
+  "name": "泡泡怪獸主選單 v1（水墨品牌版）",
+  "chatBarText": "選單",
+  "areas": [
+    { "bounds": { "x": 0, "y": 0, "width": 700, "height": 1686 },
+      "action": { "type": "uri", "uri": "https://popmonster.vip/brand-totem.html" } },
+    { "bounds": { "x": 700, "y": 0, "width": 600, "height": 843 },
+      "action": { "type": "uri", "uri": "https://popmonster.vip/#products" } },
+    { "bounds": { "x": 1300, "y": 0, "width": 600, "height": 843 },
+      "action": { "type": "uri", "uri": "https://popmonster.vip/brand.html" } },
+    { "bounds": { "x": 1900, "y": 0, "width": 600, "height": 843 },
+      "action": { "type": "uri", "uri": "https://popmonster.vip/guide/" } },
+    { "bounds": { "x": 700, "y": 843, "width": 600, "height": 843 },
+      "action": { "type": "uri", "uri": "https://shopee.tw/milk790" } },
+    { "bounds": { "x": 1300, "y": 843, "width": 600, "height": 843 },
+      "action": { "type": "uri", "uri": "https://popmonster.vip/members.html" } },
+    { "bounds": { "x": 1900, "y": 843, "width": 600, "height": 843 },
+      "action": { "type": "message", "text": "我想諮詢選品" } }
+  ]
+}
