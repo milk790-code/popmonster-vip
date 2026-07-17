@@ -30,7 +30,12 @@
 
 只計入明確允許匿名分析的事件：
 
-`page_ready → route_stage_1 → route_result → line_start / site_start`
+混合入口需同時看兩條路徑：
+
+- 直接目錄：`page_ready → line_start / site_start`
+- 協助分流：`page_ready → route_stage_1 → route_result → line_start / site_start`
+
+`line_start`／`site_start` 另以 allowlisted `surface`（`hero`、`directory`、`router_result`、`pop_card`）比較入口位置；不可把沒有走 router 的使用者算成中途流失。
 
 這一層可公平比較「進站之後」的效率，但不能代表全部掃碼者，因為未同意者不會進 GA4。
 
@@ -45,6 +50,7 @@ LINE 預填訊息會保留 `【GO:<slug>:<source>】`。人工對帳只記匿名
 | 合意啟動率 | consented sessions / placement units | 方向性比較渠道拉動；受 consent 影響，不等同真實掃碼率 |
 | 路由完成率 | route result / consented sessions | 落地頁是否把需求說清楚 |
 | LINE 啟動率 | line start / consented sessions | 點擊 LINE 的意願 |
+| 入口啟動率 | starts by surface / consented sessions | 比較首屏、目錄、分流結果與 POP 卡片效率 |
 | 已驗證詢問率 | verified inquiries / consented sessions | 最重要的進站後商業指標 |
 | 付費率 | paid cases / verified inquiries | 詢問品質 |
 | 每百次發放營收 | revenue / placement units × 100 | 比較渠道單位經濟 |
@@ -71,7 +77,7 @@ LINE 預填訊息會保留 `【GO:<slug>:<source>】`。人工對帳只記匿名
 
 1. 發放量是否可信且口徑一致。
 2. 合意漏斗是否完整。
-3. LINE 已驗證詢問是否能對回 source／slug。
+3. LINE 已驗證詢問是否能對回 source／slug，GA4 是否只含 allowlisted surface。
 4. 樣本門檻是否達標。
 5. 再比較 verified inquiry rate 與 revenue per 100 placements。
 

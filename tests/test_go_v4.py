@@ -36,6 +36,7 @@ class GoV4ContractTests(unittest.TestCase):
         "site_start",
         "share_success",
     }
+    expected_surfaces = {"hero", "directory", "router_result", "pop_card"}
 
     def read_required(self, relative: str) -> str:
         path = ROOT / relative
@@ -57,32 +58,56 @@ class GoV4ContractTests(unittest.TestCase):
     def test_hero_copy_and_semantic_sections_are_fixed(self):
         html = self.read_required("go.html")
         for text in (
-            "花錢前，先避開最貴的錯",
-            "有些坑，等踩到才看到就太晚。",
-            "租屋、合約、機票、精品、內容、汽美——先用免費第一步把風險說清楚，再決定要不要花錢。",
-            "先問的成本是 0，踩雷的成本不是。",
-            "為什麼免費？",
-            "我在累積真實服務案例，需要實際使用者。",
-            "現在加，等於零成本先卡位。",
-            "看你需要哪一種，直接點連結，或在 LINE 搜尋 ID 加我。",
-            "選我的問題",
-            "直接看 7 個免費入口",
-            "看 POP 汽美本業",
-            "敏感資料先遮蔽｜需要專業資格時協助轉介",
+            "7 個免費第一步＋1 個 POP 汽美入口",
+            "你先說卡在哪，我幫你把第一步分清楚。",
+            "品牌內容、租屋、合約、機票、精品、住宿、CreatorKit、汽美選品",
+            "直接看 8 個入口",
+            "不知道選哪個？幫我分流",
+            "POP 汽美：看商品／LINE 選品",
+            "我先幫你把問題縮小，不急著推你買東西。",
+            "免費範圍先說",
+            "資料先遮蔽",
+            "需專業資格時停止並協助轉介",
         ):
             with self.subTest(text=text):
                 self.assertIn(text, html)
         for element_id in (
             "main-content",
-            "proof",
+            "route-map",
+            "all-services",
             "problem-router",
             "route-result",
-            "founder",
-            "all-services",
+            "trust",
             "go-analytics-consent",
         ):
             with self.subTest(element_id=element_id):
                 self.assertRegex(html, rf'id=["\']{re.escape(element_id)}["\']')
+
+        self.assertLess(html.index('id="all-services"'), html.index('id="problem-router"'))
+        self.assertNotIn('class="signal-track"', html)
+        self.assertNotIn('id="proof"', html)
+
+    def test_directory_is_complete_visible_and_uses_consistent_card_labels(self):
+        html = self.read_required("go.html")
+        self.assertNotRegex(html, r'<section\s+id="all-services"[^>]+hidden')
+        self.assertEqual(len(re.findall(r'<article\b[^>]*class="[^"]*service-card', html)), 8)
+        for label in ("我先幫你", "你準備", "服務邊界", "前往方式"):
+            with self.subTest(label=label):
+                self.assertGreaterEqual(html.count(label), 8)
+        for category in ("business", "risk", "travel", "auto"):
+            with self.subTest(category=category):
+                self.assertRegex(html, rf'data-route-lane=["\']{category}["\']')
+
+    def test_source_diagnostics_are_preview_only_and_consent_is_inline(self):
+        html = self.read_required("go.html")
+        css = self.read_required("css/go.css").lower()
+        self.assertRegex(html, r'class="[^"]*source-indicator[^"]*preview-only[^"]*"')
+        self.assertGreater(html.index('id="go-analytics-consent"'), html.index('id="trust"'))
+        self.assertLess(html.index('id="go-analytics-consent"'), html.index("</main>"))
+        self.assertNotRegex(
+            css,
+            r"\.analytics-consent\s*\{[^}]*position\s*:\s*fixed",
+        )
 
     def test_line_destinations_are_searchable_without_clicking(self):
         html = self.read_required("go.html")
@@ -93,6 +118,7 @@ class GoV4ContractTests(unittest.TestCase):
             "@129vsziy",
             "@186vktox",
             "@805udwla",
+            "@150tiznd",
         ):
             with self.subTest(line_id=line_id):
                 self.assertIn(f"LINE ID：<code>{line_id}</code>", html)
@@ -133,7 +159,9 @@ class GoV4ContractTests(unittest.TestCase):
         html = self.read_required("go.html")
         slugs = set(re.findall(r'data-service-slug=["\']([^"\']+)', html))
         self.assertEqual(slugs, self.expected_slugs)
-        self.assertGreaterEqual(len(re.findall(r'<a\b[^>]+data-service-slug=', html)), 8)
+        self.assertGreaterEqual(len(re.findall(r'<a\b[^>]+data-service-slug=', html)), 9)
+        self.assertIn("看 32 款商品", html)
+        self.assertIn("LINE 問車況與選品", html)
 
     def test_legacy_overclaims_are_removed(self):
         html = self.read_required("go.html")
@@ -148,7 +176,7 @@ class GoV4ContractTests(unittest.TestCase):
 
     def test_css_encodes_tokens_focus_touch_and_reduced_motion(self):
         css = self.read_required("css/go.css").lower()
-        for token in ("#0a0a0a", "#161616", "#f5f5f5", "#a8a8a8", "#d4af37", "#2a2a2a"):
+        for token in ("#0d0c0a", "#171512", "#f4ebdd", "#b9ad9b", "#c6a15b", "#342f29"):
             with self.subTest(token=token):
                 self.assertIn(token, css)
         self.assertIn(":focus-visible", css)
@@ -156,6 +184,9 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertIn("prefers-reduced-motion", css)
         self.assertIn("grid-template-columns", css)
         self.assertNotIn("min-inline-size: 20rem", css)
+        self.assertIn('"iowan old style"', css)
+        self.assertIn('"songti tc"', css)
+        self.assertIn('"pingfang tc"', css)
 
     def test_js_has_service_source_event_and_privacy_contracts(self):
         js = self.read_required("js/go.js")
@@ -180,6 +211,19 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertIn('category: category', js)
         self.assertIn('target: cta.dataset.target', js)
         self.assertIn("event.stopImmediatePropagation()", js)
+        for field in ("outcome", "requiredInput", "boundary", "destinations", "icon"):
+            with self.subTest(field=field):
+                self.assertIn(field, js)
+        for surface in self.expected_surfaces:
+            with self.subTest(surface=surface):
+                self.assertIn(surface, js)
+        self.assertIn('flow: "hybrid"', js)
+        self.assertIn('new Set(["hybrid", "guided", "all"])', js)
+        self.assertIn("resetRouter", js)
+        self.assertIn("syncFlowControls", js)
+        self.assertIn("開始兩步分流", js)
+        self.assertIn('primary.href = "#problem-router"', js)
+        self.assertIn('primary.href = "#all-services"', js)
 
     def test_ga4_funnel_is_explicitly_consented_and_allowlisted(self):
         analytics = self.read_required("js/go-analytics.js")
@@ -253,12 +297,46 @@ assert.deepEqual(calls[0], [
   "route_result",
   { slug: "legal-guidance", source: "social" },
 ]);
+calls.length = 0;
+assert.equal(
+  window.PopMonsterGoAnalytics.track("line_start", {
+    slug: "legal-guidance",
+    surface: "directory",
+    raw_url: "https://line.me/private-prefill",
+  }),
+  true,
+);
+assert.deepEqual(calls[0], [
+  "event",
+  "line_start",
+  { slug: "legal-guidance", surface: "directory", source: "social" },
+]);
+calls.length = 0;
+assert.equal(
+  window.PopMonsterGoAnalytics.track("site_start", {
+    slug: "creator-kit",
+    surface: "untrusted-query-value",
+  }),
+  true,
+);
+assert.deepEqual(calls[0], [
+  "event",
+  "site_start",
+  { slug: "creator-kit", source: "social" },
+]);
 
 navigator.globalPrivacyControl = true;
 assert.equal(window.PopMonsterGoAnalytics.track("line_start", { slug: "legal-guidance" }), false);
 assert.equal(calls.length, 1);
 navigator.globalPrivacyControl = false;
 assert.equal(window.PopMonsterGoAnalytics.track("unknown_event", {}), false);
+assert.equal(calls.length, 1);
+globalThis.location.search = "?preview=1&src=social";
+assert.equal(window.PopMonsterGoAnalytics.track("line_start", {
+  slug: "legal-guidance",
+  surface: "directory",
+}), false);
+assert.equal(window.PopMonsterGoAnalytics.setConsent("granted"), false);
 assert.equal(calls.length, 1);
 '''
         result = subprocess.run(
@@ -358,7 +436,11 @@ const { webcrypto } = require("node:crypto");
     true,
   );
   assert.equal(
-    window.Switchboard.sendEvent("line_start", { slug: "legal-guidance" }),
+    window.Switchboard.sendEvent("line_start", {
+      slug: "legal-guidance",
+      surface: "router_result",
+      raw_text: "不得傳送",
+    }),
     true,
   );
   assert.equal(beacons.length, 2);
@@ -383,6 +465,8 @@ const { webcrypto } = require("node:crypto");
   );
   assert.equal(payloads[0].payload.slug, "legal-guidance");
   assert.equal(payloads[1].payload.event, "line_start");
+  assert.equal(payloads[1].payload.surface, "router_result");
+  assert.equal(payloads[1].payload.raw_text, undefined);
 
   const countsBeforePrivacy = { beacons: beacons.length, randomCalls, storageReads, storageWrites };
   navigator.globalPrivacyControl = true;
@@ -413,11 +497,13 @@ const { webcrypto } = require("node:crypto");
 
     def test_preview_exposes_every_control_and_forces_preview_mode(self):
         preview = self.read_required("go-preview.html")
-        for value in ("signal", "manual", "tickets", "offer", "founder", "guided", "all", "full", "reduced"):
+        for value in ("signal", "manual", "tickets", "offer", "founder", "hybrid", "guided", "all", "full", "reduced"):
             with self.subTest(value=value):
                 self.assertIn(f'value="{value}"', preview)
         self.assertIn("preview=1", preview)
         self.assertIn('src="js/go.js"', preview)
+        self.assertRegex(preview, r'name="flow"\s+value="hybrid"\s+checked')
+        self.assertIn("flow=hybrid", preview)
 
     def test_preview_founder_hook_has_distinct_copy(self):
         js = self.read_required("js/go.js")
