@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>品牌卷軸｜七幕水墨品牌 Deck｜泡泡怪獸 POP MONSTER</title>
+<meta name="description" content="泡泡怪獸 POP MONSTER 品牌卷軸：七幕全螢幕水墨提案。五類施工任務、代表選品與真實價格、施工順序與 LINE 真人選品協助 — 不靠話術靠實力，效果當下驗證。">
+<link rel="canonical" href="https://popmonster.vip/brand-deck.html">
+<meta name="theme-color" content="#1b1712">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="泡泡怪獸 POP MONSTER">
+<meta property="og:title" content="品牌卷軸｜七幕水墨品牌 Deck｜泡泡怪獸 POP MONSTER">
+<meta property="og:description" content="七幕全螢幕水墨提案：五類施工任務、代表選品真實價格、施工順序與 LINE 選品協助。安全永遠第一，是底線，不是賣點。">
+<meta property="og:url" content="https://popmonster.vip/brand-deck.html">
+<meta property="og:image" content="https://popmonster.vip/og-image-1200x630.png">
+<meta property="og:locale" content="zh_TW">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script>document.documentElement.classList.add("js");</script>
+<link rel="stylesheet" href="css/canwu-brand.css">
+<style>
+/* ============ 基礎 ============ */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body {
+  font-family: var(--font-serif);
+  background: var(--ink-burnt);
+  color: var(--text);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--seal-bright);
+  outline-offset: 3px;
+}
+img { max-width: 100%; }
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--seal); color: var(--paper-light);
+  padding: 12px 20px; z-index: 2000; font-family: var(--font-sans); font-size: 14px;
+}
+.skip-link:focus { left: 0; }
+
+/* ============ 進度條 ============ */
+.progress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+  background: var(--seal-bright); z-index: 1200;
+  transition: width 120ms linear;
+}
+
+/* ============ 頁首（墨地髮絲線）============ */
+.site-head {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1100;
+  display: flex; align-items: center; gap: var(--space-4);
+  padding: 10px clamp(16px, 4vw, 40px);
+  background: rgba(27, 23, 18, 0.86);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(244, 239, 227, 0.12);
+}
+.site-head .logo {
+  display: inline-flex; align-items: baseline; gap: 10px;
+  padding: 10px 0; min-height: 44px; align-items: center;
+}
+.site-head .logo .zh {
+  font-family: var(--font-brush); font-size: 22px; color: var(--paper-raw); line-height: 1;
+}
+.site-head .logo .en {
+  font-family: var(--font-sans); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.28em; text-transform: uppercase; color: rgba(244, 239, 227, 0.62);
+}
+.subnav {
+  display: flex; align-items: center; gap: 2px; margin-left: auto;
+  font-family: var(--font-sans); font-size: 13px;
+}
+.subnav a {
+  padding: 12px 12px; min-height: 44px; display: inline-flex; align-items: center;
+  color: rgba(244, 239, 227, 0.68); letter-spacing: 0.08em;
+  border-bottom: 2px solid transparent;
+  transition: color var(--dur-fast) var(--ease-soft);
+}
+.subnav a:hover { color: var(--paper-light); }
+.subnav a[aria-current="page"] {
+  color: var(--paper-light); border-bottom-color: var(--seal-bright);
+}
+.head-cta {
+  margin-left: var(--space-3);
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 10px 20px;
+  background: var(--seal); color: var(--paper-light);
+  font-family: var(--font-sans); font-size: 13px; font-weight: 600; letter-spacing: 0.12em;
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-inset-seal);
+  transition: background var(--dur-fast) var(--ease-soft);
+}
+.head-cta:hover { background: var(--seal-deep); }
+@media (max-width: 768px) {
+  .site-head { padding: 4px 10px; gap: 2px; }
+  .site-head .logo { gap: 6px; }
+  .site-head .logo .zh { font-size: 17px; }
+  .site-head .logo .en { display: none; }
+  .subnav { margin-left: auto; font-size: 11px; }
+  .subnav a { padding: 12px 5px; letter-spacing: 0.02em; }
+  .head-cta { padding: 8px 9px; margin-left: 2px; font-size: 11px; letter-spacing: 0.04em; }
+}
+@media (max-width: 359px) {
+  .site-head .logo .zh { font-size: 15px; }
+  .subnav a { padding: 12px 3px; }
+}
+
+/* ============ 卷軸容器 ============ */
+.deck {
+  height: 100vh; height: 100svh;
+  overflow-y: auto; overflow-x: hidden;
+  scroll-snap-type: y proximity;
+}
+@media (min-width: 940px) {
+  .deck { scroll-snap-type: y mandatory; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .deck { scroll-behavior: smooth; }
+}
+
+/* ============ 幕（slide）共通 ============ */
+.slide {
+  position: relative;
+  min-height: 100vh; min-height: 100svh;
+  scroll-snap-align: start;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  padding: calc(64px + clamp(20px, 5vh, 56px)) clamp(20px, 6vw, 96px) clamp(28px, 6vh, 72px);
+}
+.slide--ink { background-color: var(--bg); color: var(--text); }
+.ghost {
+  position: absolute; pointer-events: none; user-select: none;
+  font-family: var(--font-brush); line-height: 1; z-index: 0;
+}
+.slide > .inner { position: relative; z-index: 1; width: 100%; }
+
+.label {
+  font-family: var(--font-sans); font-size: clamp(11px, 1.2vw, 13px); font-weight: 600;
+  letter-spacing: var(--tracking-label); text-transform: uppercase;
+  color: var(--text-muted);
+}
+.slide-head { margin-bottom: clamp(24px, 4.5vh, 52px); }
+.slide-title {
+  font-family: var(--font-serif); font-weight: 500;
+  font-size: clamp(28px, 4.4vw, 52px); line-height: var(--leading-tight);
+  color: var(--text-strong); margin: 14px 0 0;
+}
+
+/* 鈐印（泡怪 · 兩字直排）*/
+.seal-stamp {
+  display: grid; grid-template-rows: 1fr 1fr; place-items: center;
+  width: 76px; height: 76px; padding: 9px 0;
+  background: var(--seal); color: var(--paper-light);
+  font-family: var(--font-brush); font-size: 27px; line-height: 1;
+  border-radius: var(--radius-seal); box-shadow: var(--shadow-inset-seal);
+}
+.seal-stamp span { display: block; }
+
+/* 入場動態（進幕才觸發）*/
+@media (prefers-reduced-motion: no-preference) {
+  html.js .rv, html.js .rv-seal { opacity: 0; }
+  .slide.is-in .rv { animation: ink-bleed var(--dur-bleed) var(--ease-out) both; }
+  .slide.is-in .rv-seal { animation: seal-press var(--dur-slow) var(--ease-out) both; animation-delay: 480ms; }
+  .slide.is-in .rv.d1 { animation-delay: 140ms; }
+  .slide.is-in .rv.d2 { animation-delay: 300ms; }
+  .slide.is-in .rv.d3 { animation-delay: 460ms; }
+}
+
+/* ============ 幕 1 封面 ============ */
+#cover { padding-left: 0; padding-right: 0; padding-bottom: 0; }
+#cover .ghost {
+  right: -8vw; bottom: -14vh; font-size: clamp(340px, 58vw, 980px);
+  color: rgba(244, 239, 227, 0.04);
+}
+.cover-grid {
+  position: relative; z-index: 1;
+  flex: 1; display: grid; grid-template-columns: minmax(280px, 480px) 1fr;
+  width: 100%;
+}
+.cover-left {
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: clamp(20px, 5vh, 64px) clamp(20px, 4vw, 56px) clamp(28px, 6vh, 64px);
+  border-right: 1px solid rgba(244, 239, 227, 0.10);
+}
+.cover-wordmark {
+  font-family: var(--font-brush); font-size: clamp(56px, 8.6vw, 112px);
+  color: var(--paper-raw); line-height: 1.06; letter-spacing: 0.04em; margin: 0 0 20px;
+}
+.cover-latin {
+  font-family: var(--font-latin); font-size: clamp(24px, 3vw, 42px); font-weight: 500;
+  color: rgba(244, 239, 227, 0.72); line-height: 1; margin-bottom: 12px;
+}
+.cover-tag {
+  font-family: var(--font-sans); font-size: clamp(11px, 1.3vw, 14px); font-weight: 600;
+  letter-spacing: 0.4em; text-transform: uppercase; color: var(--text-muted);
+}
+.cover-meta .rule { width: 60px; height: 1px; background: rgba(244, 239, 227, 0.22); margin-bottom: 18px; }
+.cover-meta .l1 {
+  font-family: var(--font-sans); font-size: 13px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+.cover-meta .l2 { font-family: var(--font-serif); font-size: 17px; color: var(--text-muted); margin-top: 8px; }
+.cover-right { position: relative; display: flex; align-items: center; justify-content: center; }
+.cover-totem {
+  writing-mode: vertical-rl; font-family: var(--font-brush);
+  font-size: clamp(84px, 17vmin, 210px); color: var(--paper-raw);
+  line-height: 1; letter-spacing: 0.06em; white-space: nowrap;
+}
+.cover-right .seal-stamp { position: absolute; right: clamp(20px, 5vw, 72px); bottom: clamp(20px, 6vh, 72px); }
+@media (max-width: 768px) {
+  .cover-grid { grid-template-columns: 1fr; }
+  .cover-left { border-right: 0; border-bottom: 1px solid rgba(244, 239, 227, 0.10); gap: 28px; }
+  .cover-right { padding: 40px 0 96px; }
+  .cover-totem { font-size: clamp(72px, 19vmin, 130px); }
+  .cover-right .seal-stamp { right: 24px; bottom: 24px; width: 62px; height: 62px; font-size: 22px; }
+}
+
+/* ============ 幕 2 品牌哲學 ============ */
+#philosophy { align-items: center; justify-content: center; text-align: center; }
+#philosophy .corner-label { position: absolute; left: clamp(20px, 5vw, 72px); top: calc(64px + clamp(16px, 4vh, 48px)); }
+.phi-pair { display: flex; gap: clamp(24px, 5vw, 56px); justify-content: center; margin-bottom: clamp(32px, 6vh, 56px); }
+.phi-line {
+  writing-mode: vertical-rl; font-family: var(--font-brush);
+  font-size: clamp(38px, 7vmin, 66px); letter-spacing: 0.18em; line-height: 1;
+  color: var(--paper-raw);
+}
+.phi-line.sub { color: rgba(244, 239, 227, 0.56); }
+.phi-en {
+  font-family: var(--font-latin); font-style: italic;
+  font-size: clamp(17px, 2vw, 26px); color: rgba(244, 239, 227, 0.55);
+  line-height: 1.6; max-width: 60ch; margin: 0 auto;
+}
+.phi-checks {
+  margin-top: clamp(20px, 4vh, 36px);
+  font-family: var(--font-sans); font-size: clamp(11px, 1.3vw, 13px); font-weight: 600;
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted);
+}
+.phi-bottom {
+  margin-top: clamp(26px, 5vh, 44px);
+  font-family: var(--font-serif); font-size: clamp(17px, 2.2vw, 24px);
+  letter-spacing: 0.12em; color: var(--text-muted);
+}
+.phi-bottom strong { color: var(--paper-raw); font-weight: 500; }
+
+/* ============ 幕 3 五類任務（紙底）============ */
+.slide--paper { color: var(--text); }
+.task-grid {
+  flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--line); border: 1px solid var(--line);
+  border-radius: var(--radius-md); overflow: hidden;
+}
+.task-card {
+  background: var(--paper-light); padding: clamp(18px, 2.6vw, 32px);
+  display: flex; flex-direction: column; justify-content: space-between; gap: 16px;
+  transition: background var(--dur-fast) var(--ease-soft);
+}
+a.task-card:hover { background: var(--paper-mounted); }
+.task-card .no { font-family: var(--font-mono); font-size: 12px; color: var(--ink-mid); margin-bottom: 12px; }
+.task-card h3 {
+  font-family: var(--font-serif); font-weight: 500;
+  font-size: clamp(19px, 2.2vw, 26px); color: var(--ink-thick); margin: 0 0 4px;
+}
+.task-card .en {
+  font-family: var(--font-sans); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink-mid);
+}
+.task-card p { font-size: clamp(13px, 1.4vw, 15px); line-height: var(--leading-normal); color: var(--ink-mid); margin: 12px 0 0; }
+.task-card .price {
+  font-family: var(--font-mono); font-size: clamp(14px, 1.6vw, 17px); color: var(--ink-thick);
+  padding-top: 14px; border-top: 1px solid var(--line);
+}
+.task-card .price small { font-family: var(--font-serif); font-size: 0.82em; color: var(--ink-mid); }
+.task-card--ink { background: var(--ink-burnt); }
+a.task-card--ink:hover { background: #241e16; }
+.task-card--ink .no { color: rgba(244, 239, 227, 0.5); }
+.task-card--ink h3 { color: var(--paper-raw); }
+.task-card--ink .en { color: rgba(244, 239, 227, 0.5); }
+.task-card--ink p { color: rgba(244, 239, 227, 0.62); }
+.task-card--ink .price { color: var(--paper-raw); border-top-color: rgba(244, 239, 227, 0.16); }
+.task-card--ink .go {
+  display: inline-block; margin-top: 2px; font-family: var(--font-sans); font-size: 13px; font-weight: 600;
+  letter-spacing: 0.1em; color: #e8b3a8;
+}
+@media (max-width: 940px) { .task-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .task-grid { grid-template-columns: 1fr; } }
+
+/* ============ 幕 4 主打詳情 ============ */
+#feature { padding: 0; }
+.feature-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; }
+.feature-left {
+  padding: calc(64px + clamp(20px, 5vh, 56px)) clamp(20px, 4vw, 64px) clamp(28px, 6vh, 64px) clamp(20px, 6vw, 96px);
+  display: flex; flex-direction: column; justify-content: space-between; gap: 32px;
+}
+.feature-left h2 {
+  font-family: var(--font-serif); font-weight: 500;
+  font-size: clamp(32px, 4.6vw, 60px); line-height: var(--leading-tight);
+  color: var(--ink-thick); margin: 16px 0 24px;
+}
+.feature-left .desc {
+  font-size: clamp(15px, 1.8vw, 20px); line-height: var(--leading-relaxed);
+  color: var(--ink-mid); max-width: 38ch; margin: 0 0 32px;
+}
+.spec-row { display: flex; align-items: baseline; gap: 16px; margin-bottom: 12px; }
+.spec-row .k { font-family: var(--font-mono); font-size: 12px; color: var(--ink-mid); width: 64px; flex: none; }
+.spec-row .v { font-family: var(--font-serif); font-size: clamp(16px, 1.9vw, 21px); color: var(--ink-thick); }
+.feature-price .from {
+  font-family: var(--font-sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.26em; text-transform: uppercase; color: var(--ink-mid); margin-bottom: 10px;
+}
+.feature-price .num {
+  font-family: var(--font-mono); font-size: clamp(40px, 5.4vw, 68px);
+  color: var(--ink-thick); line-height: 1; letter-spacing: -0.02em;
+}
+.feature-price a.more {
+  display: inline-flex; align-items: center; min-height: 44px; margin-top: 18px; padding: 10px 22px;
+  border: var(--border-ink); font-family: var(--font-sans); font-size: 13px; font-weight: 600;
+  letter-spacing: 0.12em; color: var(--ink-burnt); border-radius: var(--radius-sm);
+  transition: background var(--dur-fast) var(--ease-soft), color var(--dur-fast) var(--ease-soft);
+}
+.feature-price a.more:hover { background: var(--ink-burnt); color: var(--paper-raw); }
+.feature-right {
+  position: relative; background: var(--ink-burnt);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  min-height: 320px;
+}
+.feature-right .ghost {
+  font-family: var(--font-latin); font-weight: 500;
+  font-size: clamp(200px, 24vw, 380px); color: rgba(244, 239, 227, 0.08);
+  right: -5%; top: 50%; transform: translateY(-50%);
+}
+.feature-right .vword {
+  writing-mode: vertical-rl; font-family: var(--font-brush);
+  font-size: clamp(72px, 11vw, 140px); color: var(--paper-raw);
+  letter-spacing: 0.12em; line-height: 1; position: relative; z-index: 1;
+}
+@media (max-width: 768px) {
+  .feature-grid { grid-template-columns: 1fr; }
+  .feature-left { padding: calc(64px + 24px) 20px 32px; }
+  .feature-right { min-height: 260px; }
+}
+
+/* ============ 幕 5 施工順序 ============ */
+.steps { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); }
+.step { padding: 0 clamp(16px, 2.4vw, 36px); border-right: 1px solid var(--line); }
+.step:first-child { padding-left: 0; }
+.step:last-child { border-right: 0; padding-right: 0; }
+.step .num {
+  font-family: var(--font-latin); font-weight: 500;
+  font-size: clamp(56px, 7vw, 104px); color: var(--ink-clear); line-height: 1; margin-bottom: clamp(14px, 2.6vh, 28px);
+}
+.step h3 {
+  font-family: var(--font-serif); font-weight: 500;
+  font-size: clamp(20px, 2.3vw, 28px); color: var(--ink-thick); margin: 0 0 12px;
+}
+.step p { font-size: clamp(13px, 1.5vw, 16px); line-height: 1.7; color: var(--ink-mid); margin: 0 0 14px; }
+.step .rep { font-family: var(--font-mono); font-size: 12px; color: var(--ink-mid); }
+.step .rep a { color: var(--seal); border-bottom: 1px solid rgba(158, 58, 43, 0.35); padding: 4px 0; }
+.step .rep a:hover { color: var(--seal-deep); }
+@media (max-width: 940px) {
+  .steps { grid-template-columns: 1fr 1fr; gap: 32px 0; }
+  .step:nth-child(2) { border-right: 0; padding-right: 0; }
+  .step:nth-child(3) { padding-left: 0; }
+}
+@media (max-width: 560px) {
+  .steps { grid-template-columns: 1fr; gap: 24px; }
+  .step { border-right: 0; padding: 0 0 20px; border-bottom: 1px solid var(--line); }
+  .step:last-child { border-bottom: 0; }
+}
+
+/* ============ 幕 6 選品一覽 ============ */
+.price-table { flex: 1; display: flex; flex-direction: column; }
+.pt-head, .pt-row {
+  display: grid; grid-template-columns: 96px 1fr 110px 130px;
+  gap: 12px; align-items: baseline;
+}
+.pt-head { padding-bottom: 14px; border-bottom: 2px solid var(--ink-burnt); }
+.pt-head span {
+  font-family: var(--font-sans); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-mid);
+}
+.pt-head span:nth-child(3), .pt-head span:nth-child(4) { text-align: right; }
+.pt-row { padding: clamp(12px, 1.8vh, 18px) 0; border-bottom: 1px solid var(--line); min-height: 44px; }
+.pt-row:hover { background: rgba(27, 23, 18, 0.03); }
+.pt-row .task { font-family: var(--font-mono); font-size: 13px; color: var(--ink-mid); }
+.pt-row .name { font-family: var(--font-serif); font-weight: 500; font-size: clamp(15px, 1.8vw, 21px); color: var(--ink-thick); }
+.pt-row .name small { font-family: var(--font-mono); font-size: 0.62em; color: var(--ink-mid); font-weight: 400; margin-right: 8px; }
+.pt-row .cat { font-family: var(--font-serif); font-size: 14px; color: var(--ink-mid); text-align: right; }
+.pt-row .price { font-family: var(--font-mono); font-size: clamp(15px, 1.8vw, 20px); color: var(--ink-thick); text-align: right; }
+.pt-row .price small { font-family: var(--font-serif); font-size: 0.75em; color: var(--ink-mid); }
+.pt-note {
+  font-family: var(--font-serif); font-size: clamp(13px, 1.5vw, 16px); color: var(--ink-mid);
+  padding-top: 18px; margin-top: auto; border-top: 1px solid var(--line); line-height: 1.7;
+}
+.pt-note a { color: var(--seal); border-bottom: 1px solid rgba(158, 58, 43, 0.35); }
+@media (max-width: 640px) {
+  .pt-head { display: none; }
+  .pt-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "name price" "task cat";
+    row-gap: 4px;
+  }
+  .pt-row .name { grid-area: name; }
+  .pt-row .price { grid-area: price; }
+  .pt-row .task { grid-area: task; }
+  .pt-row .cat { grid-area: cat; }
+}
+
+/* ============ 幕 7 聯絡 ============ */
+#contact { padding: 0; }
+#contact .ghost {
+  right: -6vw; bottom: -16vh; font-size: clamp(320px, 52vw, 860px);
+  color: rgba(244, 239, 227, 0.04);
+}
+.contact-grid { position: relative; z-index: 1; flex: 1; display: grid; grid-template-columns: 1.15fr 1fr; }
+.contact-left {
+  padding: calc(64px + clamp(20px, 5vh, 56px)) clamp(20px, 4vw, 64px) clamp(28px, 5vh, 56px) clamp(20px, 6vw, 96px);
+  display: flex; flex-direction: column; justify-content: space-between; gap: 40px;
+  border-right: 1px solid rgba(244, 239, 227, 0.10);
+}
+.contact-left h2 {
+  font-family: var(--font-serif); font-weight: 500;
+  font-size: clamp(26px, 3.6vw, 46px); line-height: 1.35;
+  color: var(--paper-raw); margin: 24px 0 clamp(28px, 5vh, 52px);
+}
+.c-row { display: flex; gap: 20px; align-items: baseline; margin-bottom: 6px; }
+.c-row .k {
+  font-family: var(--font-sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-muted);
+  width: 96px; flex: none;
+}
+.c-row a, .c-row .v {
+  font-family: var(--font-serif); font-size: clamp(17px, 2.2vw, 25px); color: var(--paper-raw);
+  display: inline-flex; align-items: center; min-height: 44px;
+  border-bottom: 1px solid transparent;
+  transition: color var(--dur-fast) var(--ease-soft);
+}
+.c-row a:hover { color: #e8b3a8; }
+.contact-copy { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); letter-spacing: 0.06em; }
+.contact-right {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(20px, 4vh, 32px); padding: 48px 24px;
+}
+.contact-right .wordmark {
+  font-family: var(--font-brush); font-size: clamp(64px, 9vw, 130px);
+  color: var(--paper-raw); line-height: 1; letter-spacing: 0.06em; text-align: center;
+}
+.contact-right .tag {
+  font-family: var(--font-sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.4em; text-transform: uppercase; color: var(--text-muted);
+}
+@media (max-width: 768px) {
+  .contact-grid { grid-template-columns: 1fr; }
+  .contact-left { border-right: 0; border-bottom: 1px solid rgba(244, 239, 227, 0.10); padding: calc(64px + 24px) 20px 28px; }
+  .contact-right { padding: 36px 20px 64px; }
+}
+
+/* ============ 頁尾（宣紙）============ */
+.site-foot {
+  scroll-snap-align: end;
+  padding: clamp(32px, 6vh, 56px) clamp(20px, 6vw, 96px);
+  text-align: center;
+  border-top: 1px solid var(--line);
+}
+.site-foot .fb { font-family: var(--font-serif); font-size: 16px; color: var(--ink-thick); margin-bottom: 16px; }
+.foot-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 8px; margin-bottom: 18px; }
+.foot-links a {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 10px 12px;
+  font-family: var(--font-sans); font-size: 13px; color: var(--ink-mid); letter-spacing: 0.06em;
+  transition: color var(--dur-fast) var(--ease-soft);
+}
+.foot-links a:hover { color: var(--seal); }
+.site-foot .copy { font-family: var(--font-mono); font-size: 12px; color: var(--ink-mid); }
+
+/* ============ 幕次指示點 ============ */
+.dots {
+  position: fixed; right: clamp(2px, 1vw, 14px); top: 50%; transform: translateY(-50%);
+  z-index: 1100; display: flex; flex-direction: column;
+}
+.dots a {
+  display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px;
+}
+.dots a::before {
+  content: ""; width: 8px; height: 8px; border-radius: var(--radius-full);
+  background: rgba(147, 138, 120, 0.55); border: 1px solid rgba(147, 138, 120, 0.7);
+  transition: all var(--dur-fast) var(--ease-soft);
+}
+.dots a:hover::before { background: var(--ink-light); }
+.dots a[aria-current="true"]::before {
+  height: 22px; border-radius: 5px; background: var(--seal-bright); border-color: var(--seal-bright);
+}
+
+/* 鍵盤提示 */
+.kbd-hint {
+  position: fixed; left: clamp(16px, 4vw, 40px); bottom: 18px; z-index: 1050;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em;
+  background: rgba(27, 23, 18, 0.72); color: var(--paper-raw);
+  padding: 4px 10px; border-radius: var(--radius-sm); pointer-events: none;
+}
+@media (max-width: 768px), (hover: none) { .kbd-hint { display: none; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#cover">跳到內容</a>
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<header class="site-head" data-ground="ink" style="background: rgba(27,23,18,0.86);">
+  <a class="logo" href="index.html" aria-label="回泡泡怪獸官網首頁">
+    <span class="zh">泡泡怪獸</span>
+    <span class="en">Pop Monster</span>
+  </a>
+  <nav class="subnav" aria-label="品牌館子導覽">
+    <a href="brand.html">品牌之道</a>
+    <a href="brand-deck.html" aria-current="page">品牌卷軸</a>
+    <a href="brand-totem.html">品牌圖騰</a>
+  </nav>
+  <a class="head-cta" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
+</header>
+
+<nav class="dots" aria-label="幕次導覽">
+  <a href="#cover" aria-label="第一幕：封面" aria-current="true"></a>
+  <a href="#philosophy" aria-label="第二幕：品牌哲學"></a>
+  <a href="#tasks" aria-label="第三幕：五類施工任務"></a>
+  <a href="#feature" aria-label="第四幕：主打 天使塗層"></a>
+  <a href="#process" aria-label="第五幕：施工順序"></a>
+  <a href="#pricing" aria-label="第六幕：選品一覽"></a>
+  <a href="#contact" aria-label="第七幕：聯絡"></a>
+</nav>
+
+<main class="deck" id="deck">
+
+  <!-- ══ 幕 1 · 封面（墨底）══ -->
+  <section class="slide slide--ink is-in" id="cover" data-ground="ink" aria-label="封面">
+    <div class="ghost" aria-hidden="true">道</div>
+    <div class="cover-grid">
+      <div class="cover-left">
+        <div class="rv">
+          <h1 class="cover-wordmark">泡泡怪獸</h1>
+          <div class="cover-latin">POP MONSTER</div>
+          <div class="cover-tag">Auto Care · Taiwan</div>
+        </div>
+        <div class="cover-meta rv d2">
+          <div class="rule" aria-hidden="true"></div>
+          <div class="l1">Brand Deck</div>
+          <div class="l2">品牌卷軸 · 2026</div>
+        </div>
+      </div>
+      <div class="cover-right">
+        <div class="cover-totem rv d1" role="img" aria-label="直排書法圖騰：汽美之道">汽美之道</div>
+        <div class="seal-stamp rv-seal" role="img" aria-label="朱砂鈐印：泡怪"><span>泡</span><span>怪</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 幕 2 · 品牌哲學（墨底）══ -->
+  <section class="slide slide--ink" id="philosophy" data-ground="ink" aria-label="品牌哲學">
+    <div class="corner-label label">品牌哲學 · Philosophy</div>
+    <div class="inner" style="margin:auto; text-align:center;">
+      <div class="phi-pair">
+        <div class="phi-line rv" role="text">不靠話術靠實力</div>
+        <div class="phi-line sub rv d1" role="text">效果當下驗證</div>
+      </div>
+      <p class="phi-en rv d2">No sales talk — beading, sheeting, and a clean finish you can verify on the spot.</p>
+      <div class="phi-checks rv d2">水珠集中度 · 收水俐落度 · 乾淨感</div>
+      <p class="phi-bottom rv d3">「<strong>安全永遠第一</strong>，是底線，不是賣點。」</p>
+    </div>
+  </section>
+
+  <!-- ══ 幕 3 · 五類施工任務（紙底）══ -->
+  <section class="slide slide--paper paper-ground" id="tasks" aria-label="五類施工任務總覽">
+    <div class="inner slide-head rv">
+      <div class="label">施工任務 · Five Paths</div>
+      <h2 class="slide-title">五條路徑，一種講究。</h2>
+    </div>
+    <div class="task-grid inner rv d1">
+      <a class="task-card" href="a032.html">
+        <div>
+          <div class="no">任務 01</div>
+          <h3>洗車與去污</h3>
+          <div class="en">Wash &amp; Decon</div>
+          <p>免刷預洗先把髒污泡軟浮起，別讓砂塵跟著海綿走。</p>
+        </div>
+        <div class="price">A032 丹若免刷預洗洗車液 <small>NT$</small>599</div>
+      </a>
+      <a class="task-card" href="a002.html">
+        <div>
+          <div class="no">任務 02</div>
+          <h3>刮痕與研磨</h3>
+          <div class="en">Polish &amp; Correct</div>
+          <p>研磨系列七款，依刮痕深淺與漆況逐級選番。</p>
+        </div>
+        <div class="price">A002 米速研磨劑三件組 <small>NT$</small>2,999</div>
+      </a>
+      <a class="task-card" href="a001.html">
+        <div>
+          <div class="no">任務 03</div>
+          <h3>撥水與光澤</h3>
+          <div class="en">Coating &amp; Gloss</div>
+          <p>千倍濃縮、濕上濕下，一秒完成撥水鍍膜。</p>
+        </div>
+        <div class="price">A001 天使塗層 Guard <small>NT$</small>999</div>
+      </a>
+      <a class="task-card" href="a006.html">
+        <div>
+          <div class="no">任務 04</div>
+          <h3>拋光盤與耗材</h3>
+          <div class="en">Pads &amp; Tools</div>
+          <p>盤材與研磨劑配對正確，手感與效果才穩定。</p>
+        </div>
+        <div class="price">A006 拋光盤系列 <small>NT$</small>599 <small>起</small></div>
+      </a>
+      <a class="task-card" href="a013.html">
+        <div>
+          <div class="no">任務 05</div>
+          <h3>內裝與日常養護</h3>
+          <div class="en">Interior &amp; Care</div>
+          <p>皮革與內裝的日常保養，把乾淨感留在車內。</p>
+        </div>
+        <div class="price">A013 皮革護理 <small>NT$</small>999</div>
+      </a>
+      <a class="task-card task-card--ink" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">
+        <div>
+          <div class="no">任務 ∞</div>
+          <h3>LINE 真人選品協助</h3>
+          <div class="en">Ask a Human</div>
+          <p>不用背 32 個品名。拍下車況傳給我們，真人幫你縮小到一、兩款。</p>
+        </div>
+        <div class="price"><span class="go">開啟 LINE @150tiznd →</span></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══ 幕 4 · 主打詳情（紙底左右分欄）══ -->
+  <section class="slide slide--paper paper-ground" id="feature" aria-label="主打商品：天使塗層 Guard">
+    <div class="feature-grid inner">
+      <div class="feature-left">
+        <div class="rv">
+          <div class="label">任務 03 · Coating</div>
+          <h2>天使塗層 Guard</h2>
+          <p class="desc">千倍濃縮，1ml 兌出 1L；洗完車不用收水，濕上濕下，一秒完成施工。非硅安全配方、無半衰期、可徹底去除。</p>
+          <div class="spec-row"><span class="k">濃縮</span><span class="v">1:1000 千倍濃縮（1ml = 1L）</span></div>
+          <div class="spec-row"><span class="k">施工</span><span class="v">濕上濕下 · 1 秒施工</span></div>
+          <div class="spec-row"><span class="k">配方</span><span class="v">非硅安全 · 無半衰期 · 可徹底去除</span></div>
+        </div>
+        <div class="feature-price rv d2">
+          <div class="from">單瓶定價</div>
+          <div class="num">NT$999</div>
+          <a class="more" href="a001.html">看商品詳情 →</a>
+        </div>
+      </div>
+      <div class="feature-right">
+        <div class="ghost" aria-hidden="true">03</div>
+        <div class="vword rv d1" role="img" aria-label="直排書法：鍍膜">鍍膜</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 幕 5 · 施工順序（紙底四欄）══ -->
+  <section class="slide slide--paper paper-ground" id="process" aria-label="施工順序">
+    <div class="inner slide-head rv">
+      <div class="label">施工順序 · The Order</div>
+      <h2 class="slide-title">快、準、不拖泥帶水。</h2>
+    </div>
+    <div class="steps inner rv d1">
+      <div class="step">
+        <div class="num" aria-hidden="true">壹</div>
+        <h3>預洗去污</h3>
+        <p>免刷預洗先把髒污泡軟浮起，砂塵不上身，後面每一步都輕鬆。</p>
+        <div class="rep">代表 · <a href="a032.html">A032 丹若免刷預洗</a></div>
+      </div>
+      <div class="step">
+        <div class="num" aria-hidden="true">貳</div>
+        <h3>深層清潔</h3>
+        <p>油膜與頑垢退場，漆面與玻璃回到素淨的底。</p>
+        <div class="rep">代表 · <a href="a035.html">A035 無鈰油膜去除膏</a></div>
+      </div>
+      <div class="step">
+        <div class="num" aria-hidden="true">參</div>
+        <h3>研磨修復</h3>
+        <p>依刮痕深淺逐級選番，配對正確的拋光盤，一次到位。</p>
+        <div class="rep">代表 · <a href="a002.html">A002 米速研磨三件組</a></div>
+      </div>
+      <div class="step">
+        <div class="num" aria-hidden="true">肆</div>
+        <h3>鍍膜養護</h3>
+        <p>濕上濕下一秒鍍膜，之後交給日常養護，把效果留住。</p>
+        <div class="rep">代表 · <a href="a001.html">A001 天使塗層 Guard</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 幕 6 · 選品一覽（紙底表格）══ -->
+  <section class="slide slide--paper paper-ground" id="pricing" aria-label="選品一覽">
+    <div class="inner slide-head rv">
+      <div class="label">選品一覽 · Selection</div>
+      <h2 class="slide-title">價格透明，效果當下驗證。</h2>
+    </div>
+    <div class="price-table inner rv d1">
+      <div class="pt-head" aria-hidden="true">
+        <span>任務</span><span>代表商品</span><span>系列</span><span>價格 NT$</span>
+      </div>
+      <a class="pt-row" href="a032.html">
+        <span class="task">任務 01</span>
+        <span class="name"><small>A032</small>丹若免刷預洗洗車液</span>
+        <span class="cat">清潔</span>
+        <span class="price">599</span>
+      </a>
+      <a class="pt-row" href="a035.html">
+        <span class="task">任務 01</span>
+        <span class="name"><small>A035</small>無鈰玻璃油膜去除膏</span>
+        <span class="cat">清潔</span>
+        <span class="price">799</span>
+      </a>
+      <a class="pt-row" href="a002.html">
+        <span class="task">任務 02</span>
+        <span class="name"><small>A002</small>米速研磨劑三件組</span>
+        <span class="cat">研磨</span>
+        <span class="price">2,999</span>
+      </a>
+      <a class="pt-row" href="a001.html">
+        <span class="task">任務 03</span>
+        <span class="name"><small>A001</small>天使塗層 Guard</span>
+        <span class="cat">鍍膜</span>
+        <span class="price">999</span>
+      </a>
+      <a class="pt-row" href="a006.html">
+        <span class="task">任務 04</span>
+        <span class="name"><small>A006</small>拋光盤系列</span>
+        <span class="cat">耗材</span>
+        <span class="price">599 <small>起</small></span>
+      </a>
+      <a class="pt-row" href="a013.html">
+        <span class="task">任務 05</span>
+        <span class="name"><small>A013</small>皮革護理</span>
+        <span class="cat">護理</span>
+        <span class="price">999</span>
+      </a>
+      <p class="pt-note">宅配 120，滿 2000 免運；銀行轉帳，LINE 對帳後出貨。全站 32 款完整選品見 <a href="index.html">官網首頁</a>。</p>
+    </div>
+  </section>
+
+  <!-- ══ 幕 7 · 聯絡（墨底）══ -->
+  <section class="slide slide--ink" id="contact" data-ground="ink" aria-label="聯絡我們">
+    <div class="ghost" aria-hidden="true">泡</div>
+    <div class="contact-grid">
+      <div class="contact-left">
+        <div class="rv">
+          <div class="label">聯絡 · Contact</div>
+          <h2>把車況拍給我們，<br>其他交給泡泡怪獸。</h2>
+          <div class="c-row"><span class="k">Line</span><a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">@150tiznd</a></div>
+          <div class="c-row"><span class="k">Shopee</span><a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">shopee.tw/milk790</a></div>
+          <div class="c-row"><span class="k">WhatsApp</span><a href="https://wa.me/886970527037" target="_blank" rel="noopener">wa.me/886970527037</a></div>
+          <div class="c-row"><span class="k">Web</span><a href="https://popmonster.vip/">popmonster.vip</a></div>
+        </div>
+        <div class="contact-copy rv d2">© 2026 泡泡怪獸 POP MONSTER</div>
+      </div>
+      <div class="contact-right">
+        <div class="wordmark rv d1">泡泡怪獸</div>
+        <div class="tag rv d1">汽美之道 · Pop Monster</div>
+        <div class="seal-stamp rv-seal" role="img" aria-label="朱砂鈐印：泡怪"><span>泡</span><span>怪</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 頁尾（宣紙）══ -->
+  <footer class="site-foot paper-ground">
+    <div class="fb">泡泡怪獸 POP MONSTER × 米速 MISO</div>
+    <nav class="foot-links" aria-label="頁尾連結">
+      <a href="index.html">全部商品</a>
+      <a href="about.html">關於我們</a>
+      <a href="brand.html">品牌之道</a>
+      <a href="brand-totem.html">品牌圖騰</a>
+      <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
+      <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+    </nav>
+    <div class="copy">&copy; 2026 泡泡怪獸 POP MONSTER. All rights reserved.</div>
+  </footer>
+
+</main>
+
+<div class="kbd-hint" aria-hidden="true">↑ ↓ / ← → 換幕</div>
+
+<script>
+(function () {
+  "use strict";
+  var deck = document.getElementById("deck");
+  var slides = Array.prototype.slice.call(deck.querySelectorAll(".slide"));
+  var dots = Array.prototype.slice.call(document.querySelectorAll(".dots a"));
+  var progress = document.getElementById("progress");
+  var current = 0;
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* 進度條 + 目前幕次 + 入場動態（以捲動位置計算，不依賴 IntersectionObserver）*/
+  function update() {
+    var max = deck.scrollHeight - deck.clientHeight;
+    progress.style.width = (max > 0 ? (deck.scrollTop / max) * 100 : 0) + "%";
+
+    var deckTop = deck.getBoundingClientRect().top;
+    var dh = deck.clientHeight;
+    var mid = dh * 0.5;
+    var idx = current;
+    slides.forEach(function (s, i) {
+      var r = s.getBoundingClientRect();
+      var top = r.top - deckTop;
+      /* 目前幕：涵蓋視窗中線的那一幕 */
+      if (top <= mid && top + r.height > mid) idx = i;
+      /* 入場動態：可見面積超過三成即觸發 */
+      var visible = Math.min(r.bottom, deckTop + dh) - Math.max(r.top, deckTop);
+      if (visible > Math.min(r.height, dh) * 0.3) s.classList.add("is-in");
+    });
+    if (idx !== current) {
+      current = idx;
+      dots.forEach(function (d, i) {
+        if (i === idx) d.setAttribute("aria-current", "true");
+        else d.removeAttribute("aria-current");
+      });
+    }
+  }
+  deck.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update);
+  update();
+
+  /* 幕次點：平滑滾動 */
+  dots.forEach(function (dot, i) {
+    dot.addEventListener("click", function (e) {
+      e.preventDefault();
+      goTo(i);
+    });
+  });
+
+  function goTo(i) {
+    if (i < 0) i = 0;
+    if (i > slides.length - 1) i = slides.length - 1;
+    slides[i].scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  }
+
+  /* 鍵盤導覽：左右／上下／PageUp·Down／Home·End */
+  window.addEventListener("keydown", function (e) {
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+    update(); /* 先以實際捲動位置校正目前幕次 */
+    switch (e.key) {
+      case "ArrowDown": case "ArrowRight": case "PageDown":
+        e.preventDefault(); goTo(current + 1); break;
+      case " ":
+        e.preventDefault(); goTo(e.shiftKey ? current - 1 : current + 1); break;
+      case "ArrowUp": case "ArrowLeft": case "PageUp":
+        e.preventDefault(); goTo(current - 1); break;
+      case "Home":
+        e.preventDefault(); goTo(0); break;
+      case "End":
+        e.preventDefault(); goTo(slides.length - 1); break;
+    }
+  });
+})();
+</script>
+</body>
+</html>

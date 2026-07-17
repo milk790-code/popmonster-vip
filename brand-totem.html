@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>品牌圖騰「汽美之道」水墨海報｜泡泡怪獸 POP MONSTER</title>
+<meta name="description" content="泡泡怪獸品牌圖騰 — 9:16 水墨宣紙海報。直排書法「汽美之道」、泡怪朱砂鈐印。先選對施工任務，再選對汽美產品；安全第一，效果當下驗證。">
+<link rel="canonical" href="https://popmonster.vip/brand-totem.html">
+<meta property="og:site_name" content="泡泡怪獸 POP MONSTER">
+<meta property="og:type" content="website">
+<meta property="og:title" content="品牌圖騰「汽美之道」水墨海報｜泡泡怪獸 POP MONSTER">
+<meta property="og:description" content="直排書法「汽美之道」與泡怪朱砂鈐印 — 先選對施工任務，再選對汽美產品。">
+<meta property="og:url" content="https://popmonster.vip/brand-totem.html">
+<meta property="og:image" content="https://popmonster.vip/og-image-1200x630.png">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="css/canwu-brand.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: var(--font-serif);
+    color: var(--text);
+    background-color: var(--bg);
+    background-image: var(--paper-fibre);
+    background-blend-mode: screen;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ---- 頁首導覽（墨地髮絲線）---- */
+  .site-head {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    background-color: var(--bg);
+    border-bottom: var(--rule-hair) solid var(--line);
+    padding: var(--space-2) clamp(16px, 4vw, 40px);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+  }
+  .site-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: var(--tracking-wide);
+    color: var(--text-strong);
+    white-space: nowrap;
+  }
+  .site-logo .logo-seal {
+    width: 26px;
+    height: 26px;
+    flex: none;
+    background: var(--seal);
+    color: var(--paper-light);
+    border-radius: var(--radius-seal);
+    box-shadow: var(--shadow-inset-seal);
+    font-family: var(--font-brush);
+    font-size: 12px;
+    line-height: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    padding: 2px;
+  }
+  .site-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    margin-left: auto;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: var(--tracking-wide);
+  }
+  .site-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-2);
+    color: var(--text-muted);
+    border-bottom: var(--rule-med) solid transparent;
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .site-nav a:hover, .site-nav a:focus-visible { color: var(--text-strong); }
+  .site-nav a[aria-current="page"] {
+    color: var(--text-strong);
+    border-bottom-color: var(--accent);
+  }
+  .nav-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 var(--space-5);
+    background: var(--accent);
+    color: var(--accent-text) !important;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: var(--tracking-wide);
+    box-shadow: var(--shadow-inset-seal);
+    transition: background var(--dur-fast) var(--ease-soft);
+  }
+  .nav-cta:hover, .nav-cta:focus-visible { background: var(--accent-active); }
+
+  /* ---- 墨底畫布 ---- */
+  .canvas {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(16px, 3vh, 28px);
+    padding: clamp(14px, 3.5vw, 40px);
+  }
+
+  /* ---- 海報 · 9:16 宣紙（等比縮放，正本 1080×1920）---- */
+  .poster {
+    position: relative;
+    width: min(100%, calc(92vh * 9 / 16), calc(92svh * 9 / 16));
+    aspect-ratio: 9 / 16;
+    max-height: 92vh;
+    max-height: 92svh;
+    flex: none;
+    overflow: hidden;
+    container-type: inline-size;
+    background-color: var(--paper-raw);
+    background-image: var(--paper-fibre), var(--paper-texture);
+    background-blend-mode: multiply, multiply;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.45);
+    color: var(--ink-thick);
+  }
+
+  /* 髮絲內框（正本 inset 54/1080）*/
+  .poster-frame {
+    position: absolute;
+    inset: 5cqw;
+    border: 1px solid var(--wash-12);
+    pointer-events: none;
+  }
+
+  /* 巨大幽靈字 — 圖騰背後的一口氣（正本 1180px／右 -90 底 -180）*/
+  .poster-ghost {
+    position: absolute;
+    right: -8.33%;
+    bottom: -9.4%;
+    font-family: var(--font-brush);
+    font-size: 109cqw;
+    line-height: 1;
+    color: rgba(27, 23, 18, 0.035);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* 頂部 tracked label（正本 top 120／22px／字距 0.46em）*/
+  .poster-label {
+    position: absolute;
+    top: 6.25%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 2.04cqw;
+    font-weight: 600;
+    letter-spacing: 0.46em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    padding-left: 0.46em;
+    animation-delay: 120ms;
+  }
+
+  /* 中央直排書法圖騰（正本 top 250 / bottom 560 / 248px；
+     正本預留給掃描書法圖，改用真字後微調帶高與字級以免壓到對聯）*/
+  .poster-totem {
+    position: absolute;
+    top: 10%;
+    left: 0;
+    right: 0;
+    bottom: 31%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .poster-totem h1 {
+    writing-mode: vertical-rl;
+    white-space: nowrap;
+    font-family: var(--font-brush);
+    font-weight: 400;
+    font-size: 18.5cqw;
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+    color: var(--ink-burnt);
+    animation-delay: 320ms;
+  }
+
+  /* 對聯（正本 bottom 360／40px／字距 0.28em／間 44）*/
+  .poster-couplet {
+    position: absolute;
+    bottom: 18.75%;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 4.07cqw;
+    animation-delay: 640ms;
+  }
+  .poster-couplet span {
+    writing-mode: vertical-rl;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 3.7cqw;
+    letter-spacing: 0.28em;
+    line-height: 1;
+  }
+  .poster-couplet .line-heavy { color: var(--ink-heavy); }
+  .poster-couplet .line-light { color: var(--ink-light); }
+
+  /* 泡怪鈐印（正本 bottom 168／116×116／字 42）*/
+  .poster-seal-row {
+    position: absolute;
+    bottom: 8.75%;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+  }
+  .poster-seal {
+    width: 10.74cqw;
+    height: 10.74cqw;
+    background: var(--seal);
+    color: var(--paper-light);
+    font-family: var(--font-brush);
+    font-size: 3.89cqw;
+    line-height: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    padding: 1.2cqw;
+    border-radius: var(--radius-seal);
+    box-shadow: var(--shadow-inset-seal);
+    animation-delay: 1000ms;
+  }
+
+  /* 底部小字（正本 bottom 110／26px／字距 0.2em）*/
+  .poster-footing {
+    position: absolute;
+    bottom: 5.7%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-serif);
+    font-size: 2.4cqw;
+    letter-spacing: 0.2em;
+    color: var(--ink-mid);
+    animation-delay: 1180ms;
+  }
+
+  /* ---- 海報下方小導覽（畫布外）---- */
+  .poster-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-5);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: var(--tracking-wide);
+  }
+  .poster-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    color: var(--text-muted);
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .poster-nav a:hover, .poster-nav a:focus-visible { color: var(--text-strong); }
+  .poster-nav .sep {
+    width: 3px;
+    height: 3px;
+    border-radius: var(--radius-full);
+    background: var(--line-strong);
+  }
+  .poster-nav .is-line { color: var(--accent); }
+  .poster-nav .is-line:hover, .poster-nav .is-line:focus-visible { color: var(--accent-active); }
+
+  /* ---- 頁尾（精簡）---- */
+  .site-foot {
+    border-top: var(--rule-hair) solid var(--line);
+    padding: var(--space-5) clamp(16px, 4vw, 40px) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    text-align: center;
+  }
+  .foot-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: var(--tracking-wide);
+  }
+  .foot-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-2);
+    color: var(--text-muted);
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .foot-links a:hover, .foot-links a:focus-visible { color: var(--text-strong); }
+  .foot-copy {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: var(--tracking-wide);
+    color: var(--text-faint);
+  }
+
+  @media (max-width: 480px) {
+    .site-nav { font-size: 12px; gap: 0 var(--space-2); }
+    .nav-cta { padding: 0 var(--space-4); }
+  }
+</style>
+</head>
+<body data-ground="ink">
+
+<header class="site-head">
+  <a class="site-logo" href="index.html" aria-label="回泡泡怪獸官網首頁">
+    <span class="logo-seal" aria-hidden="true"><span>泡</span><span>怪</span></span>
+    泡泡怪獸 POP MONSTER
+  </a>
+  <nav class="site-nav" aria-label="品牌館子導覽">
+    <a href="brand.html">品牌之道</a>
+    <a href="brand-deck.html">品牌卷軸</a>
+    <a href="brand-totem.html" aria-current="page">品牌圖騰</a>
+    <a class="nav-cta" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 選品諮詢</a>
+  </nav>
+</header>
+
+<main class="canvas">
+
+  <!-- 海報 · 9:16 宣紙 -->
+  <section class="poster" aria-label="泡泡怪獸品牌圖騰海報：直排書法「汽美之道」與泡怪朱砂鈐印">
+
+    <div class="poster-frame" aria-hidden="true"></div>
+
+    <!-- 巨大幽靈字 — 圖騰背後的一口氣 -->
+    <div class="poster-ghost" aria-hidden="true">泡</div>
+
+    <!-- 頂部 label -->
+    <div class="poster-label reveal">泡泡怪獸 · POP MONSTER</div>
+
+    <!-- 圖騰 -->
+    <div class="poster-totem">
+      <h1 class="reveal">汽美之道</h1>
+    </div>
+
+    <!-- 對聯 -->
+    <div class="poster-couplet reveal">
+      <span class="line-heavy">先選對施工任務</span>
+      <span class="line-light">再選對汽美產品</span>
+    </div>
+
+    <!-- 泡怪鈐印 -->
+    <div class="poster-seal-row">
+      <div class="poster-seal reveal-seal" role="img" aria-label="朱砂鈐印：泡怪"><span aria-hidden="true">泡</span><span aria-hidden="true">怪</span></div>
+    </div>
+
+    <!-- 底部小字 -->
+    <div class="poster-footing reveal">安全第一 · 效果當下驗證</div>
+
+  </section>
+
+  <!-- 海報下方小導覽 -->
+  <nav class="poster-nav" aria-label="品牌館頁面導覽">
+    <a href="brand.html">回品牌之道</a>
+    <span class="sep" aria-hidden="true"></span>
+    <a href="brand-deck.html">看品牌卷軸</a>
+    <span class="sep" aria-hidden="true"></span>
+    <a class="is-line" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
+  </nav>
+
+</main>
+
+<footer class="site-foot">
+  <div class="foot-links">
+    <a href="index.html">官網首頁</a>
+    <a href="about.html">品牌故事</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE @150tiznd</a>
+    <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+  </div>
+  <div class="foot-copy">&copy; 2026 泡泡怪獸 POP MONSTER. All rights reserved.</div>
+</footer>
+
+</body>
+</html>

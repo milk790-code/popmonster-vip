@@ -1,0 +1,167 @@
+/* ============================================================
+   POP MONSTER 品牌館 — 參無 Cānwú 設計語言 · canwu-brand.css
+   來源：參無 Cānwú Design System（claude.ai/design 8d218a2f）
+   合併 fonts + tokens/colors + tokens/typography + tokens/spacing
+   + tokens/effects，供 brand.html / brand-deck.html /
+   brand-totem.html 三個品牌頁共用。首頁墨地帶用 canwu-accents.css。
+   ============================================================ */
+
+/* ---- FONTS（Google Fonts；書法=Ma Shan Zheng、宋體=Noto Serif TC）*/
+@import url("https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
+
+:root {
+  /* ---- 紙 PAPER ---- */
+  --paper-raw:      #f4efe3;
+  --paper-light:    #faf6ec;
+  --paper-mounted:  #ece4d4;
+  --paper-aged:     #ddd2bc;
+  --paper-edge:     #cabfa4;
+
+  /* ---- 墨 INK（墨分五色）---- */
+  --ink-burnt:   #1b1712;
+  --ink-thick:   #2c261d;
+  --ink-heavy:   #4b4339;
+  --ink-mid:     #6c6353;
+  --ink-light:   #938a78;
+  --ink-clear:   #b8af9c;
+
+  /* ---- 朱 SEAL（朱砂，唯一強調色）---- */
+  --seal:        #9e3a2b;
+  --seal-bright: #b8412f;
+  --seal-deep:   #7c2c20;
+
+  /* ---- 半透明墨 ---- */
+  --wash-12:  rgba(27, 23, 18, 0.12);
+  --wash-08:  rgba(27, 23, 18, 0.08);
+  --wash-20:  rgba(27, 23, 18, 0.20);
+  --wash-40:  rgba(27, 23, 18, 0.40);
+  --paper-wash-16: rgba(244, 239, 227, 0.16);
+
+  /* ---- 語意別名 ---- */
+  --bg:            var(--paper-raw);
+  --surface:       var(--paper-light);
+  --surface-sunk:  var(--paper-mounted);
+  --surface-well:  var(--paper-aged);
+  --text:          var(--ink-thick);
+  --text-strong:   var(--ink-burnt);
+  --text-muted:    var(--ink-mid);
+  --text-faint:    var(--ink-light);
+  --text-disabled: var(--ink-clear);
+  --text-on-ink:   var(--paper-raw);
+  --line:          var(--wash-12);
+  --line-faint:    var(--wash-08);
+  --line-strong:   var(--wash-20);
+  --accent:        var(--seal);
+  --accent-hover:  var(--seal-deep);
+  --accent-active: var(--seal-bright);
+  --accent-text:   var(--paper-light);
+  --ok:    #4f5d3f;
+  --warn:  #8a6a2e;
+  --error: var(--seal);
+
+  /* ---- 字體 ---- */
+  --font-brush: "Ma Shan Zheng", "Noto Serif TC", serif;
+  --font-serif: "Noto Serif TC", "Songti TC", "STSong", serif;
+  --font-latin: "Cormorant Garamond", "Noto Serif TC", serif;
+  --font-sans:  "Work Sans", "Noto Sans TC", system-ui, sans-serif;
+  --font-mono:  "Space Mono", "Noto Sans TC", ui-monospace, monospace;
+
+  --text-totem:  clamp(72px, 12vw, 168px);
+  --text-d1:     clamp(48px, 6vw, 92px);
+  --text-d2:     clamp(38px, 4.4vw, 64px);
+  --leading-tight:   1.12;
+  --leading-snug:    1.28;
+  --leading-normal:  1.55;
+  --leading-relaxed: 1.85;
+  --tracking-totem:   0.18em;
+  --tracking-label:   0.34em;
+  --tracking-wide:    0.08em;
+
+  /* ---- 間距／圓角／髮絲線 ---- */
+  --space-1: 4px;  --space-2: 8px;   --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px;  --space-7: 48px; --space-8: 64px;
+  --space-9: 96px; --space-10: 128px;
+  --measure: 62ch; --measure-narrow: 42ch;
+  --container: 1240px;
+  --radius-0: 0; --radius-sm: 2px; --radius-md: 4px; --radius-lg: 8px;
+  --radius-seal: 3px; --radius-full: 999px;
+  --rule-hair: 1px; --rule-med: 1.5px; --rule-bold: 2px;
+  --z-base: 0; --z-raised: 10; --z-sticky: 100; --z-overlay: 1000;
+
+  /* ---- 陰影／邊框／動態 ---- */
+  --shadow-sm: 0 1px 2px rgba(40, 32, 22, 0.06), 0 2px 6px rgba(40, 32, 22, 0.05);
+  --shadow-md: 0 2px 6px rgba(40, 32, 22, 0.07), 0 8px 24px rgba(40, 32, 22, 0.08);
+  --shadow-lg: 0 6px 16px rgba(40, 32, 22, 0.09), 0 24px 60px rgba(40, 32, 22, 0.12);
+  --shadow-inset-seal: inset 0 1px 2px rgba(124, 44, 32, 0.30);
+  --shadow-well: inset 0 2px 8px rgba(40, 32, 22, 0.10);
+  --border-hair: var(--rule-hair) solid var(--line);
+  --border-med:  var(--rule-med) solid var(--line-strong);
+  --border-ink:  var(--rule-bold) solid var(--ink-burnt);
+  --border-seal: var(--rule-med) solid var(--seal);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-soft: cubic-bezier(0.33, 0, 0.2, 1);
+  --dur-fast: 180ms; --dur: 320ms; --dur-slow: 560ms; --dur-bleed: 900ms;
+
+  /* ---- 宣紙紋理 ---- */
+  --paper-texture:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='0.035'/%3E%3C/svg%3E");
+  --paper-fibre:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.16' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+/* ---- 墨地反轉主題（brand-ink-ground.card.html 的核心機制）---- */
+[data-ground="ink"] {
+  --bg:            var(--ink-burnt);
+  --surface:       #221d16;
+  --surface-sunk:  #18130e;
+  --surface-well:  #110d09;
+  --text:          var(--paper-raw);
+  --text-strong:   #fbf7ee;
+  --text-muted:    #b8af9c;
+  --text-faint:    #8a8170;
+  --text-disabled: #5b5446;
+  --text-on-ink:   var(--paper-raw);
+  --line:          rgba(244, 239, 227, 0.14);
+  --line-faint:    rgba(244, 239, 227, 0.08);
+  --line-strong:   rgba(244, 239, 227, 0.24);
+  --accent:        var(--seal-bright);
+  --accent-hover:  var(--seal);
+  --accent-active: #d04c38;
+  --accent-text:   var(--paper-light);
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+/* ---- 工具類 ---- */
+.paper-ground {
+  background-color: var(--bg);
+  background-image: var(--paper-fibre), var(--paper-texture);
+  background-blend-mode: multiply, multiply;
+}
+.ink-rule {
+  border: 0;
+  height: var(--rule-hair);
+  background: linear-gradient(90deg,
+      transparent, var(--line-strong) 12%, var(--line-strong) 88%, transparent);
+}
+
+/* ---- 動態：墨滲入場／鈐印落章 ---- */
+@keyframes ink-bleed {
+  from { opacity: 0; filter: blur(6px); transform: translateY(8px); }
+  to   { opacity: 1; filter: blur(0);   transform: translateY(0); }
+}
+@keyframes seal-press {
+  0%   { opacity: 0; transform: scale(1.18) rotate(-4deg); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .reveal { animation: ink-bleed var(--dur-bleed) var(--ease-out) both; }
+  .reveal-seal { animation: seal-press var(--dur-slow) var(--ease-out) both; }
+}

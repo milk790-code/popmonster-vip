@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f4efe3">
+<title>品牌之道｜泡泡怪獸 POP MONSTER 品牌館</title>
+<meta name="description" content="泡泡怪獸 POP MONSTER 的品牌之道：水墨宣紙裡的五類施工任務、選品四步與品牌哲學——安全永遠第一，是底線，不是賣點；效果當下驗證。">
+<link rel="canonical" href="https://popmonster.vip/brand.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="泡泡怪獸 POP MONSTER">
+<meta property="og:title" content="品牌之道｜泡泡怪獸 POP MONSTER 品牌館">
+<meta property="og:description" content="先選對施工任務，再選產品。五條路徑、選品四步，安全永遠第一——效果當下驗證。">
+<meta property="og:url" content="https://popmonster.vip/brand.html">
+<meta property="og:image" content="https://popmonster.vip/og-image-1200x630.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="品牌之道｜泡泡怪獸 POP MONSTER 品牌館">
+<meta name="twitter:description" content="先選對施工任務，再選產品。五條路徑、選品四步，效果當下驗證。">
+<meta name="twitter:image" content="https://popmonster.vip/og-image-1200x630.png">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="css/canwu-brand.css">
+<style>
+  :root { --shell: 1180px; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { overflow-x: hidden; color: var(--text); font-family: var(--font-serif); }
+  .wrap { max-width: var(--shell); margin: 0 auto; padding: 0 clamp(20px, 4vw, 40px); }
+  a { cursor: pointer; text-decoration: none; color: inherit; }
+  .skip-link { position: absolute; left: -9999px; top: 0; background: var(--ink-burnt); color: var(--paper-light); padding: 12px 20px; z-index: 2000; font-family: var(--font-serif); }
+  .skip-link:focus { left: 12px; top: 12px; }
+
+  /* 小標 label（設計正本 .label / .eyebrow，頁面自定義）*/
+  .label { font-family: var(--font-sans); font-size: 11px; font-weight: 600; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--text-muted); }
+
+  /* ---------- 鈐印（泡怪 · 兩字直排）---------- */
+  .seal-stamp { width: 60px; height: 60px; flex: none; background: var(--seal-bright); color: var(--paper-light); font-family: var(--font-brush); font-size: 22px; line-height: 1; display: grid; grid-template-rows: 1fr 1fr; place-items: center; padding: 7px; border-radius: var(--radius-seal); box-shadow: var(--shadow-inset-seal); }
+
+  /* ---------- NAV（sticky 髮絲線導覽）---------- */
+  .nav { position: sticky; top: 0; z-index: var(--z-sticky);
+    background: color-mix(in srgb, var(--paper-raw) 86%, transparent);
+    backdrop-filter: blur(10px) saturate(1.1);
+    -webkit-backdrop-filter: blur(10px) saturate(1.1);
+    border-bottom: var(--border-hair); }
+  .nav-in { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 72px; flex-wrap: wrap; padding-top: 6px; padding-bottom: 6px; }
+  .brand-home { display: flex; align-items: center; gap: 16px; min-height: 44px; }
+  .brand-home .mark { font-family: var(--font-brush); font-size: 30px; color: var(--ink-burnt); line-height: 1; letter-spacing: .04em; }
+  .brand-home .latin { font-family: var(--font-sans); font-size: 11px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; color: var(--text-muted); padding-left: 16px; border-left: var(--border-hair); }
+  .nav-links { display: flex; align-items: center; gap: clamp(14px, 3vw, 38px); }
+  .nav-links a { font-family: var(--font-serif); font-size: 16px; color: var(--text); letter-spacing: .04em; padding: 12px 2px; min-height: 44px; display: inline-flex; align-items: center; transition: color var(--dur-fast) var(--ease-soft); }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-links a[aria-current="page"] { color: var(--accent); border-bottom: var(--rule-med) solid var(--accent); }
+  .nav-cta { font-family: var(--font-serif); font-size: 15px; font-weight: 500; color: var(--paper-light); background: var(--ink-burnt); padding: 11px 22px; min-height: 44px; display: inline-flex; align-items: center; border-radius: var(--radius-sm); letter-spacing: .06em; transition: background var(--dur) var(--ease-soft); }
+  .nav-cta:hover { background: var(--seal); }
+
+  /* ---------- HERO（雙欄＋墨色圖騰直排面板）---------- */
+  .hero { position: relative; overflow: hidden; }
+  .hero-in { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; align-items: center; min-height: 600px; padding: clamp(56px, 8vw, 90px) 0 clamp(64px, 9vw, 100px); }
+  .hero .eyebrow { display: block; margin-bottom: 30px; }
+  .hero h1 { font-family: var(--font-serif); font-size: clamp(38px, 5vw, 68px); font-weight: 500; line-height: 1.18; color: var(--text-strong); letter-spacing: -0.01em; margin: 0 0 26px; }
+  .hero h1 .seal-word { color: var(--accent); }
+  .hero p.lede { font-family: var(--font-serif); font-size: 19px; line-height: 1.8; color: var(--text-muted); max-width: 40ch; margin: 0 0 40px; }
+  .hero-actions { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .btn-seal { font-family: var(--font-serif); font-size: 17px; font-weight: 500; color: var(--paper-light); background: var(--seal); padding: 14px 34px; min-height: 44px; display: inline-flex; align-items: center; border-radius: var(--radius-sm); letter-spacing: .06em; box-shadow: var(--shadow-inset-seal); transition: background var(--dur) var(--ease-soft); }
+  .btn-seal:hover { background: var(--seal-deep); }
+  .btn-line { font-family: var(--font-serif); font-size: 17px; color: var(--text-strong); padding: 14px 8px; min-height: 44px; display: inline-flex; align-items: center; letter-spacing: .04em; border-bottom: var(--rule-med) solid var(--line-strong); transition: border-color var(--dur) var(--ease-soft); }
+  .btn-line:hover { border-color: var(--ink-burnt); }
+
+  .hero-panel { position: relative; align-self: stretch; min-height: 460px; border-radius: var(--radius-md); overflow: hidden;
+    background-color: var(--ink-burnt); background-image: var(--paper-fibre); background-blend-mode: screen;
+    display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); }
+  .hero-panel .totem { font-family: var(--font-brush); color: var(--paper-raw); writing-mode: vertical-rl; font-size: clamp(96px, 14vw, 168px); line-height: 1; letter-spacing: .12em; opacity: .97; }
+  .hero-panel .ghost-char { position: absolute; right: -6%; bottom: -10%; font-family: var(--font-brush); font-size: clamp(260px, 40vw, 460px); color: rgba(244,239,227,.05); line-height: 1; pointer-events: none; }
+  .hero-panel .seal-corner { position: absolute; left: 26px; bottom: 26px; }
+
+  /* ---------- SECTION SCAFFOLD ---------- */
+  section.block { padding: clamp(72px, 10vw, 110px) 0; }
+  .sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; margin-bottom: clamp(40px, 6vw, 64px); }
+  .sec-head .label { display: block; margin-bottom: 18px; }
+  .sec-head h2 { font-family: var(--font-serif); font-size: clamp(30px, 3.6vw, 48px); font-weight: 500; color: var(--text-strong); line-height: 1.2; margin: 0; }
+  .sec-head .aside { font-family: var(--font-serif); font-size: 16px; color: var(--text-muted); max-width: 34ch; text-align: right; line-height: 1.7; margin: 0; }
+
+  /* ---------- PHILOSOPHY（對聯哲學區）---------- */
+  .philo { border-top: var(--border-hair); border-bottom: var(--border-hair); }
+  .philo-in { display: grid; grid-template-columns: auto 1fr; gap: clamp(40px, 7vw, 80px); align-items: center; }
+  .couplet { display: flex; gap: 26px; }
+  .couplet .line { writing-mode: vertical-rl; font-family: var(--font-brush); font-size: clamp(40px, 5vw, 56px); color: var(--ink-burnt); letter-spacing: .14em; line-height: 1; }
+  .couplet .line.dim { color: var(--ink-light); }
+  .philo-body h2 { font-family: var(--font-serif); font-size: clamp(23px, 2.6vw, 28px); font-weight: 500; color: var(--text-strong); margin: 18px 0 24px; line-height: 1.4; }
+  .philo-body p { font-family: var(--font-serif); font-size: 18px; line-height: 1.9; color: var(--text-muted); max-width: 52ch; margin: 0 0 20px; }
+  .philo-body .sign { display: flex; align-items: center; gap: 16px; margin-top: 36px; }
+  .philo-body .sign .seal-stamp { width: 52px; height: 52px; font-size: 19px; }
+  .philo-body .sign .by { font-family: var(--font-serif); font-size: 15px; color: var(--text-muted); }
+
+  /* ---------- 五類施工任務（3×2 卡格）---------- */
+  .svc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: var(--border-hair); border-radius: var(--radius-md); overflow: hidden; }
+  .svc { background: var(--surface); padding: 40px 34px; min-height: 280px; display: flex; flex-direction: column; transition: background var(--dur) var(--ease-soft); position: relative; }
+  .svc:hover { background: var(--paper-light); }
+  .svc .no { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); letter-spacing: .1em; margin-bottom: 28px; }
+  .svc h3 { font-family: var(--font-serif); font-size: 26px; font-weight: 500; color: var(--text-strong); margin: 0 0 6px; }
+  .svc .en { font-family: var(--font-sans); font-size: 11px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 18px; }
+  .svc p { font-family: var(--font-serif); font-size: 15.5px; line-height: 1.7; color: var(--text-muted); margin: 0; flex: 1; }
+  .svc .foot { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; margin-top: 26px; padding-top: 18px; border-top: var(--border-hair); }
+  .svc .rep { font-family: var(--font-serif); font-size: 14px; color: var(--text); line-height: 1.5; }
+  .svc .price { font-family: var(--font-mono); font-size: 15px; color: var(--text-strong); white-space: nowrap; }
+  .svc .arrow { font-size: 17px; color: var(--text-muted); transition: transform var(--dur) var(--ease-soft), color var(--dur) var(--ease-soft); margin-left: 8px; }
+  .svc:hover .arrow { transform: translateX(5px); color: var(--accent); }
+  .svc.feature { background: var(--ink-burnt); color: var(--paper-raw); }
+  .svc.feature h3 { color: var(--paper-light); }
+  .svc.feature p { color: var(--ink-clear); }
+  .svc.feature .no, .svc.feature .en { color: var(--ink-clear); }
+  .svc.feature .rep, .svc.feature .price, .svc.feature .arrow { color: var(--paper-light); }
+  .svc.feature .foot { border-color: var(--paper-wash-16); }
+  .svc.feature:hover { background: #241e16; }
+  .svc .tag-flag { position: absolute; top: 22px; right: 22px; }
+  .tag-pill { font-family: var(--font-sans); font-size: 11px; font-weight: 600; letter-spacing: .18em; color: var(--seal-bright); border: 1px solid var(--seal-bright); padding: 3px 10px; border-radius: var(--radius-full); }
+
+  /* ---------- 選品四步（流程帶）---------- */
+  .process { background: var(--paper-mounted); }
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+  .step { padding: 0 28px; border-left: var(--border-hair); }
+  .step:first-child { padding-left: 0; border-left: 0; }
+  .step .n { font-family: var(--font-brush); font-size: 52px; font-weight: 400; color: var(--ink-light); line-height: 1; margin-bottom: 22px; }
+  .step h4 { font-family: var(--font-serif); font-size: 21px; font-weight: 500; color: var(--text-strong); margin: 0 0 10px; }
+  .step p { font-family: var(--font-serif); font-size: 15px; line-height: 1.7; color: var(--text-muted); margin: 0; }
+
+  /* ---------- CTA（墨地）---------- */
+  .cta { background-image: var(--paper-fibre); background-blend-mode: screen; }
+  .cta-in { text-align: center; max-width: 720px; margin: 0 auto; }
+  .cta h2 { font-family: var(--font-serif); font-size: clamp(30px, 4vw, 52px); font-weight: 500; color: var(--text-strong); line-height: 1.3; margin: 18px 0 22px; }
+  .cta .lede { font-family: var(--font-serif); font-size: 18px; line-height: 1.8; color: var(--text-muted); margin: 0 auto 40px; max-width: 40ch; }
+  .cta-actions { display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap; }
+  .btn-ghost { font-family: var(--font-serif); font-size: 17px; color: var(--text-strong); border: var(--rule-hair) solid var(--line-strong); padding: 13px 30px; min-height: 44px; display: inline-flex; align-items: center; border-radius: var(--radius-sm); letter-spacing: .06em; transition: border-color var(--dur) var(--ease-soft), color var(--dur) var(--ease-soft); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .cta-meta { display: flex; align-items: center; justify-content: center; gap: 10px 26px; flex-wrap: wrap; margin-top: 44px; padding-top: 26px; border-top: var(--rule-hair) solid var(--line); font-family: var(--font-serif); font-size: 15px; color: var(--text-muted); letter-spacing: .04em; }
+  .cta-meta .dot { color: var(--accent); }
+  .cta .seal-center { display: flex; justify-content: center; margin-bottom: 8px; }
+
+  /* ---------- FOOTER（宣紙頁尾）---------- */
+  footer { border-top: var(--border-ink); padding: 70px 0 50px; }
+  .foot-in { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
+  .foot-brand .mark { font-family: var(--font-brush); font-size: 40px; color: var(--ink-burnt); line-height: 1; margin-bottom: 16px; }
+  .foot-brand p { font-family: var(--font-serif); font-size: 15px; color: var(--text-muted); max-width: 30ch; line-height: 1.7; margin: 0; }
+  .foot-cols { display: flex; gap: clamp(36px, 6vw, 70px); flex-wrap: wrap; }
+  .foot-col h3 { font-family: var(--font-sans); font-size: 11px; font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 18px; }
+  .foot-col a { display: flex; align-items: center; font-family: var(--font-serif); font-size: 16px; color: var(--text); margin-bottom: 0; min-height: 44px; transition: color var(--dur-fast) var(--ease-soft); }
+  .foot-col a:hover { color: var(--accent); }
+  .foot-base { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 56px; padding-top: 26px; border-top: var(--border-hair); font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); letter-spacing: .04em; }
+
+  /* ---------- RWD ---------- */
+  @media (max-width: 940px) {
+    .hero-in, .philo-in { grid-template-columns: 1fr; }
+    .hero-in { min-height: 0; }
+    .hero-panel { min-height: 380px; }
+    .svc-grid { grid-template-columns: 1fr 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; gap: 40px 0; }
+    .step:nth-child(3) { padding-left: 0; border-left: 0; }
+    .sec-head { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .sec-head .aside { text-align: left; }
+    .nav-links { order: 3; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+    .nav-links a { white-space: nowrap; }
+    .brand-home .latin { display: none; }
+  }
+  @media (max-width: 768px) {
+    .svc-grid { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr; gap: 36px 0; }
+    .step { padding: 0; border-left: 0; }
+    .couplet { gap: 18px; }
+    .foot-in { flex-direction: column; }
+  }
+</style>
+</head>
+<body class="paper-ground">
+<a class="skip-link" href="#main">跳到主要內容</a>
+
+  <!-- NAV：回官網＋品牌館三頁互鏈＋LINE CTA -->
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="brand-home" href="index.html" aria-label="泡泡怪獸 POP MONSTER 回官網首頁">
+        <span class="mark">泡泡怪獸</span>
+        <span class="latin">Pop Monster</span>
+      </a>
+      <nav class="nav-links" aria-label="品牌館子導覽">
+        <a href="brand.html" aria-current="page">品牌之道</a>
+        <a href="brand-deck.html">品牌卷軸</a>
+        <a href="brand-totem.html">品牌圖騰</a>
+        <a href="index.html">回官網</a>
+      </nav>
+      <a class="nav-cta" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 諮詢</a>
+    </div>
+  </header>
+
+<main id="main">
+
+  <!-- HERO：雙欄＋墨色圖騰直排面板 -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap hero-in">
+      <div>
+        <span class="label eyebrow reveal" data-reveal>台灣汽車美容產品品牌 · Auto Care Products</span>
+        <h1 id="hero-title" class="reveal" data-reveal>先選對施工任務，<br>再把時間，<span class="seal-word">還給車</span>。</h1>
+        <p class="lede reveal" data-reveal>泡泡怪獸把 32 款產品整理成五條施工路徑——不用背品名，從你現在的車況出發。千倍濃縮、1 秒施工，效果當下驗證。</p>
+        <div class="hero-actions reveal" data-reveal>
+          <a class="btn-seal" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 選品諮詢</a>
+          <a class="btn-line" href="#tasks">瀏覽五類任務</a>
+        </div>
+      </div>
+      <div class="hero-panel" role="img" aria-label="水墨面板：直排書法「汽美之道」與朱砂鈐印「泡怪」">
+        <span class="ghost-char" aria-hidden="true">泡</span>
+        <div class="totem" aria-hidden="true">汽美之道</div>
+        <div class="seal-corner"><div class="seal-stamp reveal-seal" data-reveal="seal" aria-hidden="true"><span>泡</span><span>怪</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHILOSOPHY：對聯哲學區 -->
+  <section class="philo block" aria-labelledby="philo-title">
+    <div class="wrap philo-in">
+      <div class="couplet" data-reveal aria-label="品牌對聯：安全是底線，不是賣點；效果當下驗證，不靠話術">
+        <div class="line">安全是底線，不是賣點</div>
+        <div class="line dim">效果當下驗證，不靠話術</div>
+      </div>
+      <div class="philo-body">
+        <span class="label">道 · Philosophy</span>
+        <h2 id="philo-title">把汽美專業級效果，做到任何人都能輕鬆上手。</h2>
+        <p>非硅安全配方、無半衰期、可徹底去除——多次施工不堆疊、零不可逆傷害。安全永遠第一，是底線，不是賣點。</p>
+        <p>筆鋒掠過紙面，墨斷而意連。像施工時的手感——快、準、不拖泥帶水。效果不靠話術：水珠集中度、收水俐落度、乾淨感，三個重點，當下驗證。</p>
+        <div class="sign">
+          <div class="seal-stamp" data-reveal="seal" aria-hidden="true"><span>泡</span><span>怪</span></div>
+          <span class="by">泡泡怪獸 × 米速 MISO</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 五類施工任務：3×2 卡格 -->
+  <section class="block" id="tasks" aria-labelledby="tasks-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="label">施工任務 · Five Tasks</span>
+          <h2 id="tasks-title">五條路徑，一種講究。</h2>
+        </div>
+        <p class="aside">不用背 32 個品名。從你要處理的車況出發，每一類都附一款代表商品。</p>
+      </div>
+      <div class="svc-grid">
+        <a class="svc" href="a032.html">
+          <div class="no">任務 01</div>
+          <h3>洗車與去污</h3>
+          <div class="en">Wash &amp; Decontamination</div>
+          <p>每次施工的第一步。丹若免刷預洗，溫和安全配方——改裝車、陽極、電鍍件也能安心下手。</p>
+          <div class="foot"><span class="rep">A032 丹若免刷預洗洗車液</span><span class="price">NT$ 599<span class="arrow" aria-hidden="true">→</span></span></div>
+        </a>
+        <a class="svc" href="a002.html">
+          <div class="no">任務 02</div>
+          <h3>刮痕與研磨</h3>
+          <div class="en">Paint Correction</div>
+          <p>米速 MISO 研磨系列 7 款，從重切到鏡面全覆蓋。三件組一次備齊，職人路線。</p>
+          <div class="foot"><span class="rep">A002 米速研磨劑三件組</span><span class="price">NT$ 2,999<span class="arrow" aria-hidden="true">→</span></span></div>
+        </a>
+        <a class="svc" href="a001.html">
+          <div class="tag-flag"><span class="tag-pill">主打</span></div>
+          <div class="no">任務 03</div>
+          <h3>撥水與光澤</h3>
+          <div class="en">Coating &amp; Gloss</div>
+          <p>天使塗層千倍濃縮，1:1000、1ml=1L。濕上濕下、1 秒施工，撥水與光澤當下驗證。</p>
+          <div class="foot"><span class="rep">A001 天使塗層 Guard</span><span class="price">NT$ 999<span class="arrow" aria-hidden="true">→</span></span></div>
+        </a>
+        <a class="svc" href="a006.html">
+          <div class="no">任務 04</div>
+          <h3>拋光盤與耗材</h3>
+          <div class="en">Pads &amp; Consumables</div>
+          <p>研磨修復的另一半是工具。拋光盤系列依工序選配，耗材備齊，才好動手。</p>
+          <div class="foot"><span class="rep">A006 拋光盤系列</span><span class="price">NT$ 599 起<span class="arrow" aria-hidden="true">→</span></span></div>
+        </a>
+        <a class="svc" href="a013.html">
+          <div class="no">任務 05</div>
+          <h3>內裝與日常養護</h3>
+          <div class="en">Interior &amp; Care</div>
+          <p>車內也講究。皮革護理與日常養護選品，把好狀態留在每一天。</p>
+          <div class="foot"><span class="rep">A013 皮革護理</span><span class="price">NT$ 999<span class="arrow" aria-hidden="true">→</span></span></div>
+        </a>
+        <a class="svc feature" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">
+          <div class="no">任務之外</div>
+          <h3>LINE 真人選品協助</h3>
+          <div class="en">Ask a Human</div>
+          <p>拿不準就把車況拍給我們。真人幫你確認任務與產品，不用背 32 個品名。</p>
+          <div class="foot"><span class="rep">LINE 官方帳號</span><span class="price">@150tiznd<span class="arrow" aria-hidden="true">→</span></span></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 選品四步：流程帶 -->
+  <section class="process block" aria-labelledby="process-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="label">選品流程 · How to Choose</span>
+          <h2 id="process-title">四步，把產品選對。</h2>
+        </div>
+        <p class="aside">從看車況到下單施工，每一次選品都走同樣四步。</p>
+      </div>
+      <div class="steps">
+        <div class="step" data-reveal><div class="n" aria-hidden="true">壹</div><h4>看車況任務</h4><p>先確認你要處理的是清潔、刮痕、撥水、耗材還是養護。</p></div>
+        <div class="step" data-reveal><div class="n" aria-hidden="true">貳</div><h4>縮小類別</h4><p>五類施工任務裡挑一條路徑，不用背 32 個品名。</p></div>
+        <div class="step" data-reveal><div class="n" aria-hidden="true">參</div><h4>LINE 確認</h4><p>拿不準就把車況拍給我們，真人幫你確認選品。</p></div>
+        <div class="step" data-reveal><div class="n" aria-hidden="true">肆</div><h4>下單施工</h4><p>銀行轉帳、LINE 對帳後出貨。依產品說明施工，效果當下驗證。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA：墨地反轉 -->
+  <section class="cta block" data-ground="ink" aria-labelledby="cta-title">
+    <div class="wrap cta-in">
+      <div class="seal-center"><div class="seal-stamp" data-reveal="seal" aria-hidden="true"><span>泡</span><span>怪</span></div></div>
+      <span class="label">開始選品 · Start Here</span>
+      <h2 id="cta-title">把車況拍給我們，<br>其他交給泡泡怪獸。</h2>
+      <p class="lede">不填表單、不留資料——直接用 LINE 談，真人回覆。想自己逛，五條路徑與 32 款產品都在官網。</p>
+      <div class="cta-actions">
+        <a class="btn-seal" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE 選品諮詢</a>
+        <a class="btn-ghost" href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">逛蝦皮賣場</a>
+        <a class="btn-ghost" href="index.html">看全部 32 款</a>
+      </div>
+      <div class="cta-meta">
+        <span>宅配 120</span><span class="dot" aria-hidden="true">·</span>
+        <span>滿 2,000 免運</span><span class="dot" aria-hidden="true">·</span>
+        <span>銀行轉帳，LINE 對帳後出貨</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+  <!-- FOOTER：宣紙頁尾（精簡版，全部真實連結）-->
+  <footer aria-label="頁尾">
+    <div class="wrap">
+      <div class="foot-in">
+        <div class="foot-brand">
+          <div class="mark" aria-hidden="true">泡泡怪獸</div>
+          <p>台灣汽車美容產品品牌。安全永遠第一，是底線，不是賣點。</p>
+        </div>
+        <div class="foot-cols">
+          <div class="foot-col">
+            <h3>站內</h3>
+            <a href="index.html">全部商品</a>
+            <a href="about.html">關於我們</a>
+            <a href="brand-deck.html">品牌卷軸</a>
+            <a href="brand-totem.html">品牌圖騰</a>
+          </div>
+          <div class="foot-col">
+            <h3>聯繫</h3>
+            <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE @150tiznd</a>
+            <a href="https://shopee.tw/milk790" target="_blank" rel="nofollow sponsored noopener">蝦皮賣場</a>
+            <a href="https://wa.me/886970527037" target="_blank" rel="noopener">WhatsApp</a>
+            <a href="https://www.facebook.com/share/1AcLN6W6HU/" target="_blank" rel="noopener">Facebook</a>
+            <a href="https://www.instagram.com/ssss4845454" target="_blank" rel="noopener">Instagram</a>
+          </div>
+        </div>
+      </div>
+      <div class="foot-base">
+        <span>© 2026 泡泡怪獸 POP MONSTER</span>
+        <span>POPMONSTER.VIP · TAIWAN</span>
+      </div>
+    </div>
+  </footer>
+
+<script>
+  // 進場動態：墨滲（.reveal）與鈐印落章（.reveal-seal），捲動到可視範圍才觸發
+  (function () {
+    var items = document.querySelectorAll('[data-reveal]');
+    if (!('IntersectionObserver' in window)) {
+      items.forEach ? items.forEach(function (el) { el.classList.add(el.dataset.reveal === 'seal' ? 'reveal-seal' : 'reveal'); }) : null;
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var el = entry.target;
+          el.classList.add(el.dataset.reveal === 'seal' ? 'reveal-seal' : 'reveal');
+          io.unobserve(el);
+        }
+      });
+    }, { threshold: 0.15 });
+    items.forEach(function (el) { io.observe(el); });
+  })();
+</script>
+</body>
+</html>
