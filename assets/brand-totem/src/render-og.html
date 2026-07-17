@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<title>渲染正本：品牌館分享卡 1200×630</title>
+<link rel="stylesheet" href="../../../css/canwu-brand.css">
+<style>
+  /* 渲染專用：固定像素、零動畫。品牌館三頁專用 og:image（全站正卡不動）。 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; }
+
+  .og {
+    position: relative;
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    background-color: var(--ink-burnt);
+    background-image: var(--paper-fibre);
+    background-blend-mode: screen;
+    color: var(--paper-raw);
+  }
+  .og-frame {
+    position: absolute;
+    inset: 26px;
+    border: 1px solid rgba(244, 239, 227, 0.16);
+  }
+  .og-ghost {
+    position: absolute;
+    right: -70px;
+    bottom: -170px;
+    font-family: var(--font-brush);
+    font-size: 560px;
+    line-height: 1;
+    color: rgba(244, 239, 227, 0.045);
+  }
+  .og-left {
+    position: absolute;
+    left: 84px;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 26px;
+    max-width: 640px;
+  }
+  .og-label {
+    font-family: var(--font-sans);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: rgba(244, 239, 227, 0.42);
+  }
+  .og-title {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 72px;
+    line-height: 1.22;
+    color: #fbf7ee;
+    white-space: nowrap;
+  }
+  .og-sub {
+    font-family: var(--font-serif);
+    font-size: 26px;
+    line-height: 1.6;
+    color: #b8af9c;
+    white-space: nowrap;
+  }
+  .og-url {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    color: rgba(244, 239, 227, 0.55);
+    margin-top: 10px;
+  }
+  .og-totem {
+    position: absolute;
+    right: 150px;
+    top: 50%;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    font-family: var(--font-brush);
+    font-size: 128px;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    color: var(--paper-raw);
+  }
+  .og-seal {
+    position: absolute;
+    right: 66px;
+    bottom: 62px;
+    width: 84px;
+    height: 84px;
+    background: var(--seal-bright);
+    color: var(--paper-light);
+    font-family: var(--font-brush);
+    font-size: 30px;
+    line-height: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    padding: 9px;
+    border-radius: var(--radius-seal);
+    box-shadow: var(--shadow-inset-seal);
+  }
+</style>
+</head>
+<body>
+  <div class="og" id="capture">
+    <div class="og-frame"></div>
+    <div class="og-ghost">泡</div>
+    <div class="og-left">
+      <div class="og-label">POP MONSTER · 品牌館</div>
+      <div class="og-title">先選對施工任務，<br>再把光還給車。</div>
+      <div class="og-sub">泡泡怪獸 × 米速 MISO ｜ 安全第一 · 效果當下驗證</div>
+      <div class="og-url">popmonster.vip</div>
+    </div>
+    <div class="og-totem">汽美之道</div>
+    <div class="og-seal"><span>泡</span><span>怪</span></div>
+  </div>
+</body>
+</html>

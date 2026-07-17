@@ -12,6 +12,7 @@ JOBS = [
     ("render-poster.html",   "totem-poster",        1080, 1920, [1, 2, 4]),
     ("render-story.html",    "ig-story-template",   1080, 1920, [1, 2]),
     ("render-richmenu.html", "line-rich-menu-bg",   2500, 1686, [1]),
+    ("render-og.html",       "og-brand",            1200,  630, [1]),
 ]
 
 with sync_playwright() as p:

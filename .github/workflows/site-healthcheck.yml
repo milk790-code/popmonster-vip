@@ -1,0 +1,34 @@
+name: site-healthcheck
+
+# 每日巡檢正式站：關鍵頁 200 ＋ 首頁內容指紋。掛掉時 job 轉紅、GitHub 寄通知。
+on:
+  schedule:
+    - cron: "30 23 * * *"   # 07:30 台北時間
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 關鍵頁健康掃描（popmonster.vip）
+        run: |
+          set -u
+          fail=0
+          for p in "" "brand.html" "brand-deck.html" "brand-totem.html" \
+                   "about.html" "members.html" "guide/" "a001.html" \
+                   "sitemap.xml" "assets/brand-totem/og-brand-1200x630.png"; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "https://popmonster.vip/$p")
+            echo "/$p → $code"
+            [ "$code" = "200" ] || fail=1
+          done
+          exit $fail
+      - name: 首頁內容指紋（墨地帶＋商品網格）
+        run: |
+          html=$(curl -s --max-time 15 https://popmonster.vip/)
+          echo "$html" | grep -q "ink-band"      || { echo "缺墨地帶 ink-band"; exit 1; }
+          echo "$html" | grep -q "product-grid"  || { echo "缺商品網格 product-grid"; exit 1; }
+          echo "指紋 OK"
