@@ -33,15 +33,18 @@
       slug: "brand-content",
       category: "business",
       title: "品牌內容",
+      hook: "先看改完，再決定要不要做。",
+      freeDeliverable: "首屏重寫、單張主標改版、短片前 5 秒重剪，三選一免費樣張。",
+      freeScope: "每人一次、一次聚焦一項。",
       outcome: "看一個首屏、單張或短片，指出第一個最該改善的地方。",
       requiredInput: "頁面、單張或短片＋目標。",
-      boundary: "一次聚焦一項，不含完整製作。",
+      boundary: "先提供一版可比較樣張，不含完整製作與無限修改。",
       destinations: Object.freeze([
         Object.freeze({
           kind: "line",
-          label: "把素材傳到品牌內容 LINE",
+          label: "把素材傳來，先看一版",
           value: "@121lkspe",
-          prefill: "你好，我想先做品牌內容免費第一步。我目前卡在：",
+          prefill: "你好，我想領品牌內容免費樣張。我附上素材與目標，目前卡在：",
         }),
       ]),
       icon: "message",
@@ -50,13 +53,16 @@
       slug: "creator-kit",
       category: "business",
       title: "CreatorKit",
+      hook: "別再盯著空白頁，16 個 AI 工具直接免費用。",
+      freeDeliverable: "文案、腳本或逐字稿第一版，不用先註冊。",
+      freeScope: "不用先註冊；實際可用次數與服務狀態以工具當下頁面為準。",
       outcome: "直接使用 16 個文案、腳本與逐字稿工具。",
       requiredInput: "不用先註冊。",
       boundary: "工具成果仍需自行檢查與調整。",
       destinations: Object.freeze([
         Object.freeze({
           kind: "site",
-          label: "開啟 CreatorKit",
+          label: "免費開工具，現在做第一版",
           value: "https://creatorkit.milk790.workers.dev/",
         }),
       ]),
@@ -66,15 +72,18 @@
       slug: "rental-check",
       category: "risk",
       title: "租屋風險",
+      hook: "簽約前先查一次，比入住後才後悔便宜。",
+      freeDeliverable: "地址公開資訊摘要＋簽約前風險快篩卡。",
+      freeScope: "每人一次、一個地址或物件。",
       outcome: "整理公開資訊與簽約前風險清單。",
       requiredInput: "地址、物件頁、遮蔽個資的合約。",
       boundary: "公開資訊整理，非權利認證。",
       destinations: Object.freeze([
         Object.freeze({
           kind: "line",
-          label: "把物件傳到租屋風險 LINE",
+          label: "傳地址，免費領快篩卡",
           value: "@207cpaps",
-          prefill: "你好，我想先做租屋風險免費第一步。我目前卡在：",
+          prefill: "你好，我想領租屋地段與簽約風險快篩卡。地址／物件頁是：",
         }),
       ]),
       icon: "home",
@@ -83,15 +92,18 @@
       slug: "legal-guidance",
       category: "risk",
       title: "合約事件",
+      hook: "事情再亂，我先幫你排成一條看得懂的時間線。",
+      freeDeliverable: "事件時間線＋證據缺口＋下一步清單。",
+      freeScope: "每人一次、一件事件；先整理現有資料。",
       outcome: "整理事實、證據與下一步；非法律意見。",
       requiredInput: "時間線、遮蔽個資的文件或對話。",
       boundary: "不代替律師判斷或正式代理；需要資格時協助轉介。",
       destinations: Object.freeze([
         Object.freeze({
           kind: "line",
-          label: "把事件傳到合約事件 LINE",
+          label: "把事件傳來，先整理局面",
           value: "@772iosnh",
-          prefill: "你好，我想先做合約事件免費第一步。我目前卡在：",
+          prefill: "你好，我想領事件時間線與證據缺口清單。我會先遮蔽個資，事情經過是：",
         }),
       ]),
       icon: "contract",
@@ -100,15 +112,18 @@
       slug: "luxury-check",
       category: "risk",
       title: "精品初篩",
+      hook: "先別急著匯款，照片裡可能已經有紅旗。",
+      freeDeliverable: "款式、來源、價格、行情四項初篩卡。",
+      freeScope: "每人一次、一件商品；以收到的照片與資料初篩。",
       outcome: "做款式、來源、價格與行情初篩；非正式鑑定。",
       requiredInput: "來源、價格與清楚照片。",
       boundary: "初步整理，不提供真偽保證。",
       destinations: Object.freeze([
         Object.freeze({
           kind: "line",
-          label: "把資料傳到精品初篩 LINE",
+          label: "傳照片與價格，先看紅旗",
           value: "@186vktox",
-          prefill: "你好，我想先做精品初篩免費第一步。我目前卡在：",
+          prefill: "你好，我想領精品四項初篩卡。來源、價格與清楚照片如下：",
         }),
       ]),
       icon: "bag",
@@ -117,15 +132,18 @@
       slug: "flight-plan",
       category: "travel",
       title: "機票比較",
+      hook: "同一趟旅程，不要只看一個價格。",
+      freeDeliverable: "偏省錢、偏省時間、偏少轉機三種取向比較。",
+      freeScope: "每人一次、一組來回條件；依查詢當下資訊整理。",
       outcome: "整理一組路線與日期比較。",
       requiredInput: "出發地、目的地、日期彈性、人數。",
       boundary: "不保留票價、不代替平台出票。",
       destinations: Object.freeze([
         Object.freeze({
           kind: "line",
-          label: "把需求傳到機票比較 LINE",
+          label: "傳日期，免費拿三種取向比較",
           value: "@129vsziy",
-          prefill: "你好，我想先做機票比較免費第一步。我目前卡在：",
+          prefill: "你好，我想領三種取向機票比較。出發地、目的地、日期彈性與人數是：",
         }),
       ]),
       icon: "plane",
@@ -134,15 +152,18 @@
       slug: "travel-stay",
       category: "travel",
       title: "旅遊住宿",
+      hook: "不用再看 100 間，先把本次查詢縮成較符合條件的 3 間。",
+      freeDeliverable: "本次查詢中較符合預算、交通與偏好的三間住宿清單。",
+      freeScope: "每人一次、一個地點與日期區間。",
       outcome: "整理一組住宿與行程比較。",
       requiredInput: "地點、日期、人數、預算、偏好。",
       boundary: "不保留房況、不代替平台訂房。",
       destinations: Object.freeze([
         Object.freeze({
           kind: "line",
-          label: "把需求傳到旅遊住宿 LINE",
+          label: "傳條件，幫我縮成 3 間",
           value: "@805udwla",
-          prefill: "你好，我想先做旅遊住宿免費第一步。我目前卡在：",
+          prefill: "你好，我想領三間住宿精選清單。地點、日期、人數、預算與偏好是：",
         }),
       ]),
       icon: "stay",
@@ -151,6 +172,9 @@
       slug: "auto-care",
       category: "auto",
       title: "POP 汽美",
+      hook: "先別亂買藥劑，傳車況再決定買什麼。",
+      freeDeliverable: "「該買／先不用買／怎麼搭配」車況選品清單。",
+      freeScope: "每人一次、一台車或一項施工目標。",
       outcome: "依車況與施工目標導向商品或選品協助。",
       requiredInput: "車況、目標、手邊工具或藥劑。",
       boundary: "規格、庫存與適用方式以 POP 官網當下資訊為準。",
@@ -162,9 +186,9 @@
         }),
         Object.freeze({
           kind: "line",
-          label: "LINE 問車況與選品",
+          label: "傳車況，先避開買錯",
           value: "@150tiznd",
-          prefill: "你好，我想詢問 POP 汽美商品與選品。我目前的車況／目標是：",
+          prefill: "你好，我想領 POP 車況選品清單。車況、目標與手邊工具／藥劑是：",
         }),
       ]),
       icon: "car",
@@ -176,6 +200,17 @@
     risk: "簽約與購買避雷",
     travel: "旅行規劃",
     auto: "汽美與耗材",
+  });
+
+  const ICON_PATHS = Object.freeze({
+    message: Object.freeze(["M8 11h32v22H22l-8 6v-6H8z", "M15 18h18", "M15 25h12"]),
+    document: Object.freeze(["M9 10h30v28H9z", "M16 18h16", "M16 24h10", "M16 30h13"]),
+    home: Object.freeze(["M7 23 24 9l17 14", "M12 21v18h24V21", "M20 39V28h8v11"]),
+    contract: Object.freeze(["M14 7h16l7 7v27H14z", "M30 7v8h7", "M20 23h11", "M20 30h11"]),
+    bag: Object.freeze(["M10 18h28l-5 21H15z", "M16 18a8 8 0 0 1 16 0", "M19 28l3 3 7-8"]),
+    plane: Object.freeze(["m7 27 14-3 10-14 5 1-5 13 10 5-2 4-12-2-7 8-4-1 3-9-10 2z"]),
+    stay: Object.freeze(["M7 37h34", "M10 37V18h28v19", "M15 26h18", "M16 18v-7h16v7"]),
+    car: Object.freeze(["M8 29h32l-3-10H14z", "M11 29v8h4", "M37 29v8h-4", "M15 33h4", "M29 33h4", "M18 19l3-7h6l3 7"]),
   });
 
   const QUERY_CHOICES = Object.freeze({
@@ -419,6 +454,128 @@
     container.append(row);
   }
 
+  function createServiceIcon(iconName) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.classList.add("service-icon");
+    svg.setAttribute("viewBox", "0 0 48 48");
+    svg.setAttribute("aria-hidden", "true");
+    (ICON_PATHS[iconName] || ICON_PATHS.message).forEach((pathData) => {
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", pathData);
+      svg.append(path);
+    });
+    return svg;
+  }
+
+  function createServiceTicket(service) {
+    const ticket = document.createElement("div");
+    ticket.className = "service-ticket";
+    const top = document.createElement("div");
+    top.className = "ticket-topline";
+    const label = document.createElement("span");
+    label.className = "ticket-label";
+    label.textContent = "免費拿到";
+    const stamp = document.createElement("span");
+    stamp.className = "ticket-stamp";
+    stamp.textContent = "FREE RESULT";
+    const deliverable = document.createElement("p");
+    deliverable.className = "ticket-deliverable";
+    deliverable.textContent = service.freeDeliverable;
+    top.append(label, stamp);
+    ticket.append(top, deliverable);
+    return ticket;
+  }
+
+  function createDestinationLink(service, destination, index, surface) {
+    const link = document.createElement("a");
+    link.className = index === 0
+      ? "service-link"
+      : "service-link service-link-secondary";
+    link.href = destinationFor(service, parseSource(), destination.kind);
+    link.dataset.serviceSlug = service.slug;
+    link.dataset.destinationKind = destination.kind;
+    link.dataset.channel = destination.kind;
+    link.dataset.surface = surface;
+    link.rel = "noopener";
+    if (destination.kind === "line" || service.slug === "creator-kit") {
+      link.target = "_blank";
+    }
+    link.textContent = destination.label;
+    return link;
+  }
+
+  function appendCardDetail(list, label, value) {
+    const row = document.createElement("div");
+    const term = document.createElement("dt");
+    const detail = document.createElement("dd");
+    term.textContent = label;
+    detail.textContent = value;
+    row.append(term, detail);
+    list.append(row);
+    return detail;
+  }
+
+  function createServiceCard(service, index) {
+    const card = document.createElement("article");
+    card.className = service.slug === "auto-care"
+      ? "service-card service-card-pop"
+      : "service-card";
+    card.dataset.cardSlug = service.slug;
+
+    const header = document.createElement("header");
+    header.className = "service-card-header";
+    const heading = document.createElement("div");
+    const serviceIndex = document.createElement("p");
+    serviceIndex.className = "service-index";
+    serviceIndex.textContent = `${String(index + 1).padStart(2, "0")} / CLAIM TICKET`;
+    const title = document.createElement("h4");
+    title.textContent = service.title;
+    heading.append(serviceIndex, title);
+    header.append(createServiceIcon(service.icon), heading);
+
+    const hook = document.createElement("p");
+    hook.className = "service-hook";
+    hook.textContent = service.hook;
+
+    const details = document.createElement("dl");
+    appendCardDetail(details, "你準備", service.requiredInput);
+    appendCardDetail(details, "免費範圍", service.freeScope);
+    appendCardDetail(details, "服務邊界", service.boundary);
+    const actionDetail = appendCardDetail(details, "前往方式", "");
+    actionDetail.replaceChildren();
+    const lineDestination = service.destinations.find((destination) => destination.kind === "line");
+    if (lineDestination) {
+      const lineId = document.createElement("span");
+      lineId.className = "line-id";
+      lineId.append("LINE ID：");
+      const code = document.createElement("code");
+      code.textContent = lineDestination.value;
+      lineId.append(code);
+      actionDetail.append(lineId);
+    }
+    const actions = document.createElement("span");
+    actions.className = "service-actions";
+    const surface = service.slug === "auto-care" ? "pop_card" : "directory";
+    service.destinations.forEach((destination, destinationIndex) => {
+      actions.append(createDestinationLink(service, destination, destinationIndex, surface));
+    });
+    actionDetail.append(actions);
+
+    card.append(header, hook, createServiceTicket(service), details);
+    return card;
+  }
+
+  function renderDirectory() {
+    document.querySelectorAll("[data-service-grid]").forEach((grid) => {
+      const category = grid.dataset.serviceGrid;
+      const cards = SERVICES
+        .map((service, index) => ({ service, index }))
+        .filter((entry) => entry.service.category === category)
+        .map((entry) => createServiceCard(entry.service, entry.index));
+      grid.replaceChildren(...cards);
+    });
+  }
+
   function renderService(serviceOrSlug) {
     const service =
       typeof serviceOrSlug === "string"
@@ -439,15 +596,19 @@
     const title = document.createElement("h2");
     title.className = "result-title";
     title.textContent = service.title;
+    const hook = document.createElement("p");
+    hook.className = "service-hook result-hook";
+    hook.textContent = service.hook;
     const sourceCode = document.createElement("code");
     sourceCode.className = "result-source";
     sourceCode.textContent = `【GO:${service.slug}:${parseSource()}】`;
-    summary.append(kicker, title, sourceCode);
+    summary.append(kicker, title, hook, sourceCode);
 
     const details = document.createElement("div");
     details.className = "result-details";
-    appendDetail(details, "我先幫你", service.outcome);
+    details.append(createServiceTicket(service));
     appendDetail(details, "你準備", service.requiredInput);
+    appendDetail(details, "免費範圍", service.freeScope);
     appendDetail(details, "服務邊界", service.boundary);
 
     const actions = document.createElement("div");
@@ -457,16 +618,17 @@
       cta.className = index === 0
         ? "button button-primary result-cta"
         : "button button-secondary result-cta";
-      cta.href = destinationFor(service, parseSource(), destination.kind);
-      cta.dataset.serviceSlug = service.slug;
-      cta.dataset.destinationKind = destination.kind;
-      cta.dataset.channel = destination.kind;
-      cta.dataset.surface = "router_result";
-      cta.rel = "noopener";
-      if (destination.kind === "line" || service.slug === "creator-kit") {
-        cta.target = "_blank";
-      }
-      cta.textContent = destination.label;
+      const sharedLink = createDestinationLink(
+        service,
+        destination,
+        index,
+        "router_result",
+      );
+      cta.href = sharedLink.href;
+      Object.assign(cta.dataset, sharedLink.dataset);
+      cta.rel = sharedLink.rel;
+      cta.target = sharedLink.target;
+      cta.textContent = sharedLink.textContent;
       actions.append(cta);
     });
     details.append(actions);
@@ -639,7 +801,11 @@
           option.className = "service-option";
           option.dataset.routeService = service.slug;
           option.setAttribute("aria-pressed", "false");
-          option.textContent = service.title;
+          const optionTitle = document.createElement("strong");
+          optionTitle.textContent = service.title;
+          const optionHook = document.createElement("small");
+          optionHook.textContent = service.hook;
+          option.append(optionTitle, optionHook);
           option.addEventListener("click", () => renderService(service.slug));
           options.append(option);
         });
@@ -762,6 +928,7 @@
   function init() {
     const params = queryParams();
     applyExperience(params);
+    renderDirectory();
     updateSourceUI(parseSource(params.get("src")));
     resetRouter({ focus: false });
     installRouter();
