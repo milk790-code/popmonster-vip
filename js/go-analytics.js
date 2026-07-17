@@ -54,10 +54,14 @@
     }
   }
 
+  var FB_MATRIX_PATTERN = /^fb-[0-9a-f]{6}$/;
+
   function sourceValue() {
     try {
       var source = new URLSearchParams(global.location.search).get("src");
-      return ALLOWED_SOURCES.has(source) ? source : "direct";
+      if (ALLOWED_SOURCES.has(source)) return source;
+      if (FB_MATRIX_PATTERN.test(source)) return source;
+      return "direct";
     } catch (_error) {
       return "direct";
     }

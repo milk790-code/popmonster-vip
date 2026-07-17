@@ -156,9 +156,14 @@
     }
   }
 
+  // FB 60 專矩陣來源：fb- + 6 碼小寫十六進位。嚴格 pattern，不可能注入。
+  const FB_MATRIX_PATTERN = /^fb-[0-9a-f]{6}$/;
+
   function parseSource(value) {
     const candidate = typeof value === "string" ? value : queryParams().get("src");
-    return ALLOWED_SOURCES.has(candidate) ? candidate : "direct";
+    if (ALLOWED_SOURCES.has(candidate)) return candidate;
+    if (FB_MATRIX_PATTERN.test(candidate)) return candidate;
+    return "direct";
   }
 
   function serviceBySlug(slug) {
