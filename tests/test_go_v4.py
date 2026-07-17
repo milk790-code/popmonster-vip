@@ -87,16 +87,16 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertNotIn('class="signal-track"', html)
         self.assertNotIn('id="proof"', html)
 
-    def test_directory_is_complete_visible_and_uses_consistent_card_labels(self):
+    def test_directory_is_complete_visible_and_registry_rendered(self):
         html = self.read_required("go.html")
         self.assertNotRegex(html, r'<section\s+id="all-services"[^>]+hidden')
-        self.assertEqual(len(re.findall(r'<article\b[^>]*class="[^"]*service-card', html)), 8)
-        for label in ("我先幫你", "你準備", "服務邊界", "前往方式"):
-            with self.subTest(label=label):
-                self.assertGreaterEqual(html.count(label), 8)
+        self.assertEqual(len(re.findall(r'data-service-grid', html)), 4)
+        self.assertNotRegex(html, r'<article\b[^>]*class="[^"]*service-card')
+        self.assertIn("免費拿到", html)
         for category in ("business", "risk", "travel", "auto"):
             with self.subTest(category=category):
                 self.assertRegex(html, rf'data-route-lane=["\']{category}["\']')
+                self.assertRegex(html, rf'data-service-grid=["\']{category}["\']')
 
     def test_source_diagnostics_are_preview_only_and_consent_is_inline(self):
         html = self.read_required("go.html")
@@ -109,8 +109,8 @@ class GoV4ContractTests(unittest.TestCase):
             r"\.analytics-consent\s*\{[^}]*position\s*:\s*fixed",
         )
 
-    def test_line_destinations_are_searchable_without_clicking(self):
-        html = self.read_required("go.html")
+    def test_line_destinations_are_searchable_in_registry(self):
+        js = self.read_required("js/go.js")
         for line_id in (
             "@121lkspe",
             "@207cpaps",
@@ -121,7 +121,7 @@ class GoV4ContractTests(unittest.TestCase):
             "@150tiznd",
         ):
             with self.subTest(line_id=line_id):
-                self.assertIn(f"LINE ID：<code>{line_id}</code>", html)
+                self.assertIn(f'value: "{line_id}"', js)
 
     def test_html_loads_external_assets_and_complete_metadata(self):
         html = self.read_required("go.html")
@@ -155,17 +155,70 @@ class GoV4ContractTests(unittest.TestCase):
             hashlib.sha256(legacy.read_bytes()).digest(),
         )
 
-    def test_static_html_has_exactly_eight_service_destinations(self):
+    def test_one_registry_powers_directory_and_router_destinations(self):
+        js = self.read_required("js/go.js")
+        self.assertEqual(
+            set(re.findall(r'slug:\s*"([a-z-]+)"', js)),
+            self.expected_slugs,
+        )
+        self.assertIn("function renderDirectory()", js)
+        self.assertIn("function createServiceTicket(service)", js)
+        self.assertGreaterEqual(js.count("createServiceTicket(service)"), 3)
+        self.assertIn("renderDirectory();", js)
+        self.assertIn('label: "看 32 款商品"', js)
+        self.assertIn('label: "傳車況，先避開買錯"', js)
+
+    def test_all_eight_services_have_strong_truth_bounded_hooks(self):
+        js = self.read_required("js/go.js")
+        hooks = (
+            "先看改完，再決定要不要做。",
+            "別再盯著空白頁，16 個 AI 工具直接免費用。",
+            "簽約前先查一次，比入住後才後悔便宜。",
+            "事情再亂，我先幫你排成一條看得懂的時間線。",
+            "先別急著匯款，照片裡可能已經有紅旗。",
+            "同一趟旅程，不要只看一個價格。",
+            "不用再看 100 間，先把本次查詢縮成較符合條件的 3 間。",
+            "先別亂買藥劑，傳車況再決定買什麼。",
+        )
+        for hook in hooks:
+            with self.subTest(hook=hook):
+                self.assertEqual(js.count(hook), 1)
+        self.assertEqual(js.count("freeDeliverable:"), 8)
+        self.assertEqual(js.count("freeScope:"), 8)
+
+    def test_noscript_fallback_keeps_all_eight_entries_usable(self):
         html = self.read_required("go.html")
-        slugs = set(re.findall(r'data-service-slug=["\']([^"\']+)', html))
-        self.assertEqual(slugs, self.expected_slugs)
-        self.assertGreaterEqual(len(re.findall(r'<a\b[^>]+data-service-slug=', html)), 9)
-        self.assertIn("看 32 款商品", html)
-        self.assertIn("LINE 問車況與選品", html)
+        match = re.search(r"<noscript>(.*?)</noscript>", html, re.S)
+        self.assertIsNotNone(match)
+        fallback = match.group(1)
+        for title in (
+            "品牌內容",
+            "CreatorKit",
+            "租屋風險",
+            "合約事件",
+            "精品初篩",
+            "機票比較",
+            "旅遊住宿",
+            "POP 汽美",
+        ):
+            with self.subTest(title=title):
+                self.assertIn(title, fallback)
+        self.assertGreaterEqual(len(re.findall(r"<a\b", fallback)), 9)
+        self.assertIn("https://creatorkit.milk790.workers.dev/", fallback)
+        self.assertIn("https://popmonster.vip/", fallback)
 
     def test_legacy_overclaims_are_removed(self):
         html = self.read_required("go.html")
-        for phrase in ("房東是否本人", "討債指導", "省好幾千", "超低價", "價差差一半"):
+        for phrase in (
+            "房東是否本人",
+            "討債指導",
+            "省好幾千",
+            "超低價",
+            "價差差一半",
+            "最省錢、最省時間、最少轉機",
+            "最適合的 3 間",
+            "工具不限次使用",
+        ):
             with self.subTest(phrase=phrase):
                 self.assertNotIn(phrase, html)
 
@@ -187,6 +240,10 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertIn('"iowan old style"', css)
         self.assertIn('"songti tc"', css)
         self.assertIn('"pingfang tc"', css)
+        for selector in (".service-hook", ".service-ticket", ".ticket-label", ".ticket-stamp"):
+            with self.subTest(selector=selector):
+                self.assertIn(selector, css)
+        self.assertRegex(css, r"\.service-ticket\s*\{[^}]*border[^;]*dashed")
 
     def test_js_has_service_source_event_and_privacy_contracts(self):
         js = self.read_required("js/go.js")
@@ -211,7 +268,16 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertIn('category: category', js)
         self.assertIn('target: cta.dataset.target', js)
         self.assertIn("event.stopImmediatePropagation()", js)
-        for field in ("outcome", "requiredInput", "boundary", "destinations", "icon"):
+        for field in (
+            "hook",
+            "freeDeliverable",
+            "freeScope",
+            "outcome",
+            "requiredInput",
+            "boundary",
+            "destinations",
+            "icon",
+        ):
             with self.subTest(field=field):
                 self.assertIn(field, js)
         for surface in self.expected_surfaces:

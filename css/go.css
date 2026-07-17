@@ -654,7 +654,7 @@ body[data-preview="true"] .preview-only {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  margin-block-end: var(--space-4);
+  margin-block-end: var(--space-3);
 }
 
 .service-icon {
@@ -677,6 +677,88 @@ body[data-preview="true"] .preview-only {
   color: var(--gold-bright);
   font-size: 0.75rem;
   letter-spacing: 0.08em;
+}
+
+.service-hook {
+  max-inline-size: 25ch;
+  margin-block-end: var(--space-4);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: clamp(1.22rem, 1.12rem + 0.42vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  line-height: 1.25;
+}
+
+.service-ticket {
+  position: relative;
+  margin-block-end: var(--space-4);
+  padding: 0.9rem 1rem 1rem;
+  overflow: hidden;
+  border: 1px dashed rgba(13, 12, 10, 0.46);
+  border-radius: 0.22rem;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 0.45rem 1.2rem rgba(0, 0, 0, 0.14);
+}
+
+.service-ticket::before,
+.service-ticket::after {
+  position: absolute;
+  inset-block-start: 50%;
+  inline-size: 0.9rem;
+  block-size: 0.9rem;
+  border-radius: 50%;
+  background: var(--panel-raised);
+  content: "";
+  transform: translateY(-50%);
+}
+
+.service-ticket::before {
+  inset-inline-start: -0.48rem;
+}
+
+.service-ticket::after {
+  inset-inline-end: -0.48rem;
+}
+
+.ticket-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-block-end: 0.55rem;
+  padding-block-end: 0.5rem;
+  border-block-end: 1px dashed rgba(13, 12, 10, 0.28);
+}
+
+.ticket-label {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.ticket-stamp {
+  padding: 0.18rem 0.35rem;
+  border: 1px solid rgba(13, 12, 10, 0.42);
+  border-radius: 0.15rem;
+  color: rgba(13, 12, 10, 0.68);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  transform: rotate(-2deg);
+}
+
+.ticket-deliverable {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.04rem;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .service-card dl {
@@ -721,7 +803,7 @@ body[data-preview="true"] .preview-only {
 
 .service-actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
   gap: var(--space-2);
 }
 
@@ -758,6 +840,40 @@ body[data-preview="true"] .preview-only {
   border: 1px solid var(--line);
   color: var(--muted);
   font-size: 0.8rem;
+}
+
+.noscript-note > p {
+  margin-block-end: var(--space-3);
+}
+
+.noscript-directory {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.noscript-entry {
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.noscript-entry h4 {
+  font-size: 1.2rem;
+}
+
+.noscript-entry p {
+  margin-block-end: var(--space-2);
+}
+
+.noscript-entry a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;
+  min-inline-size: 44px;
+  margin-inline-end: var(--space-2);
+  color: var(--gold-bright);
+  font-weight: 700;
 }
 
 .router-intro {
@@ -836,6 +952,8 @@ body[data-preview="true"] .preview-only {
 }
 
 .service-option {
+  display: grid;
+  gap: 0.35rem;
   min-block-size: 52px;
   padding: 0.75rem 0.9rem;
   border: 1px solid var(--line);
@@ -845,6 +963,18 @@ body[data-preview="true"] .preview-only {
   font-weight: 700;
   text-align: start;
   cursor: pointer;
+}
+
+.service-option > strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.service-option > small {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 .service-option[aria-pressed="true"],
@@ -875,6 +1005,12 @@ body[data-preview="true"] .preview-only {
   letter-spacing: 0.08em;
 }
 
+.result-hook {
+  max-inline-size: 20ch;
+  margin-block-end: var(--space-4);
+  font-size: clamp(1.35rem, 1.18rem + 0.7vw, 1.9rem);
+}
+
 .result-source {
   display: inline-block;
   padding: 0.25rem 0.4rem;
@@ -884,6 +1020,11 @@ body[data-preview="true"] .preview-only {
 .result-details {
   display: grid;
   gap: var(--space-3);
+}
+
+.result-details .service-ticket {
+  max-inline-size: 38rem;
+  margin-block-end: var(--space-2);
 }
 
 .result-details > p {
@@ -1269,6 +1410,7 @@ html[data-flow="all"] .route-result {
   .category-grid,
   .service-options,
   .service-actions,
+  .noscript-directory,
   .analytics-consent-actions {
     grid-template-columns: minmax(0, 1fr);
   }

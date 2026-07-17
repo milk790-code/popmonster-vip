@@ -42,6 +42,7 @@
 
 - 部署前資料沿用舊版漏斗，不回填 `surface`，也不與新版分母混算。
 - 發布時記錄 production `go.html`、`css/go.css`、`js/go.js`、`js/go-analytics.js` hash 與 UTC 時間，作為新版資料起點。
+- 2026-07-17 強鉤子成果票券版仍沿用相同 event 與 allowlist；比較時以發布 hash／UTC 為切點，不能把文案改版前後混成同一母體。
 - 新版需累積 7 個完整日且至少 30 個合意工作階段後，才比較各 `surface` 的啟動率；未達門檻只看原始量。
 
 ### QA 排除條件
