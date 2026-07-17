@@ -8,7 +8,12 @@
     "social",
     "legacy-worker",
   ]);
-
+  const ALLOWED_SURFACES = new Set([
+    "hero",
+    "directory",
+    "router_result",
+    "pop_card",
+  ]);
   const EVENT_NAMES = new Set([
     "page_ready",
     "hero_cta",
@@ -18,9 +23,9 @@
     "site_start",
     "share_success",
   ]);
-
-  const SESSION_STORAGE_KEY = "switchboard_v4_session_hash";
+  const SESSION_STORAGE_KEY = "switchboard_v5_session_hash";
   const SESSION_HASH_PATTERN = /^[0-9a-f]{64}$/;
+  const FB_MATRIX_PATTERN = /^fb-[0-9a-f]{6}$/;
   let memorySessionHash = "";
 
   const SERVICES = Object.freeze([
@@ -28,123 +33,173 @@
       slug: "brand-content",
       category: "business",
       title: "品牌內容",
-      freeScope: "一個首屏、單張或短片段的診斷與一項優先改善。",
-      requiredInput: "目前頁面、單張或短片段，以及你最想改善的目標。",
-      boundary: "一次聚焦一項優先改善，不含完整成品製作。",
-      channel: "line",
-      destination: "@121lkspe",
-      prefill: "你好，我想先做品牌內容免費第一步。我目前卡在：",
-    }),
-    Object.freeze({
-      slug: "rental-check",
-      category: "risk",
-      title: "租屋風險",
-      freeScope: "公開資訊與簽約風險清單，不保證屋主身分或權利狀態。",
-      requiredInput: "地址、物件頁與遮蔽個資後的合約草稿。",
-      boundary: "僅整理公開資訊與風險，不作權利認證。",
-      channel: "line",
-      destination: "@207cpaps",
-      prefill: "你好，我想先做租屋風險免費第一步。我目前卡在：",
-    }),
-    Object.freeze({
-      slug: "legal-guidance",
-      category: "risk",
-      title: "合約事件",
-      freeScope: "事實、證據與下一步整理；非法律意見。",
-      requiredInput: "事件時間線，以及遮蔽個資後的合約或對話。",
-      boundary: "不代替律師判斷或正式代理；需要資格時協助轉介。",
-      channel: "line",
-      destination: "@772iosnh",
-      prefill: "你好，我想先做合約事件免費第一步。我目前卡在：",
-    }),
-    Object.freeze({
-      slug: "flight-plan",
-      category: "travel",
-      title: "機票比較",
-      freeScope: "一組路線／日期區間比較，價格以平台當下為準。",
-      requiredInput: "出發地、目的地、日期彈性與人數。",
-      boundary: "不保留票價，也不代替售票平台出票。",
-      channel: "line",
-      destination: "@129vsziy",
-      prefill: "你好，我想先做機票比較免費第一步。我目前卡在：",
-    }),
-    Object.freeze({
-      slug: "luxury-check",
-      category: "risk",
-      title: "精品初篩",
-      freeScope: "款式、來源與行情初篩；不等同真偽證書。",
-      requiredInput: "款式、來源、價格與清楚照片，敏感資料請先遮蔽。",
-      boundary: "只做初步整理，不作正式鑑定或真偽保證。",
-      channel: "line",
-      destination: "@186vktox",
-      prefill: "你好，我想先做精品初篩免費第一步。我目前卡在：",
-    }),
-    Object.freeze({
-      slug: "travel-stay",
-      category: "travel",
-      title: "旅遊住宿",
-      freeScope: "一組行程／住宿比較，實際條件由訂房平台決定。",
-      requiredInput: "地點、日期、人數、預算與住宿偏好。",
-      boundary: "不保留房況，也不代替訂房平台完成交易。",
-      channel: "line",
-      destination: "@805udwla",
-      prefill: "你好，我想先做旅遊住宿免費第一步。我目前卡在：",
+      outcome: "看一個首屏、單張或短片，指出第一個最該改善的地方。",
+      requiredInput: "頁面、單張或短片＋目標。",
+      boundary: "一次聚焦一項，不含完整製作。",
+      destinations: Object.freeze([
+        Object.freeze({
+          kind: "line",
+          label: "把素材傳到品牌內容 LINE",
+          value: "@121lkspe",
+          prefill: "你好，我想先做品牌內容免費第一步。我目前卡在：",
+        }),
+      ]),
+      icon: "message",
     }),
     Object.freeze({
       slug: "creator-kit",
       category: "business",
       title: "CreatorKit",
-      freeScope: "16 個自媒體工具免費使用，不用先註冊。",
-      requiredInput: "準備要處理的文案、腳本、圖片、音訊或影片。",
-      boundary: "工具成果仍需自行檢查與調整；代工服務另行確認。",
-      channel: "site",
-      destination: "https://creatorkit.milk790.workers.dev/",
-      prefill: "",
+      outcome: "直接使用 16 個文案、腳本與逐字稿工具。",
+      requiredInput: "不用先註冊。",
+      boundary: "工具成果仍需自行檢查與調整。",
+      destinations: Object.freeze([
+        Object.freeze({
+          kind: "site",
+          label: "開啟 CreatorKit",
+          value: "https://creatorkit.milk790.workers.dev/",
+        }),
+      ]),
+      icon: "document",
+    }),
+    Object.freeze({
+      slug: "rental-check",
+      category: "risk",
+      title: "租屋風險",
+      outcome: "整理公開資訊與簽約前風險清單。",
+      requiredInput: "地址、物件頁、遮蔽個資的合約。",
+      boundary: "公開資訊整理，非權利認證。",
+      destinations: Object.freeze([
+        Object.freeze({
+          kind: "line",
+          label: "把物件傳到租屋風險 LINE",
+          value: "@207cpaps",
+          prefill: "你好，我想先做租屋風險免費第一步。我目前卡在：",
+        }),
+      ]),
+      icon: "home",
+    }),
+    Object.freeze({
+      slug: "legal-guidance",
+      category: "risk",
+      title: "合約事件",
+      outcome: "整理事實、證據與下一步；非法律意見。",
+      requiredInput: "時間線、遮蔽個資的文件或對話。",
+      boundary: "不代替律師判斷或正式代理；需要資格時協助轉介。",
+      destinations: Object.freeze([
+        Object.freeze({
+          kind: "line",
+          label: "把事件傳到合約事件 LINE",
+          value: "@772iosnh",
+          prefill: "你好，我想先做合約事件免費第一步。我目前卡在：",
+        }),
+      ]),
+      icon: "contract",
+    }),
+    Object.freeze({
+      slug: "luxury-check",
+      category: "risk",
+      title: "精品初篩",
+      outcome: "做款式、來源、價格與行情初篩；非正式鑑定。",
+      requiredInput: "來源、價格與清楚照片。",
+      boundary: "初步整理，不提供真偽保證。",
+      destinations: Object.freeze([
+        Object.freeze({
+          kind: "line",
+          label: "把資料傳到精品初篩 LINE",
+          value: "@186vktox",
+          prefill: "你好，我想先做精品初篩免費第一步。我目前卡在：",
+        }),
+      ]),
+      icon: "bag",
+    }),
+    Object.freeze({
+      slug: "flight-plan",
+      category: "travel",
+      title: "機票比較",
+      outcome: "整理一組路線與日期比較。",
+      requiredInput: "出發地、目的地、日期彈性、人數。",
+      boundary: "不保留票價、不代替平台出票。",
+      destinations: Object.freeze([
+        Object.freeze({
+          kind: "line",
+          label: "把需求傳到機票比較 LINE",
+          value: "@129vsziy",
+          prefill: "你好，我想先做機票比較免費第一步。我目前卡在：",
+        }),
+      ]),
+      icon: "plane",
+    }),
+    Object.freeze({
+      slug: "travel-stay",
+      category: "travel",
+      title: "旅遊住宿",
+      outcome: "整理一組住宿與行程比較。",
+      requiredInput: "地點、日期、人數、預算、偏好。",
+      boundary: "不保留房況、不代替平台訂房。",
+      destinations: Object.freeze([
+        Object.freeze({
+          kind: "line",
+          label: "把需求傳到旅遊住宿 LINE",
+          value: "@805udwla",
+          prefill: "你好，我想先做旅遊住宿免費第一步。我目前卡在：",
+        }),
+      ]),
+      icon: "stay",
     }),
     Object.freeze({
       slug: "auto-care",
       category: "auto",
-      title: "POP 汽美本業",
-      freeScope: "查看現有汽美用品、選品資訊與使用路線。",
-      requiredInput: "車況、施工目標，以及目前使用的工具或藥劑。",
-      boundary: "商品規格、庫存與適用方式以 POP 官網當下資訊為準。",
-      channel: "site",
-      destination: "https://popmonster.vip/",
-      prefill: "",
+      title: "POP 汽美",
+      outcome: "依車況與施工目標導向商品或選品協助。",
+      requiredInput: "車況、目標、手邊工具或藥劑。",
+      boundary: "規格、庫存與適用方式以 POP 官網當下資訊為準。",
+      destinations: Object.freeze([
+        Object.freeze({
+          kind: "site",
+          label: "看 32 款商品",
+          value: "https://popmonster.vip/",
+        }),
+        Object.freeze({
+          kind: "line",
+          label: "LINE 問車況與選品",
+          value: "@150tiznd",
+          prefill: "你好，我想詢問 POP 汽美商品與選品。我目前的車況／目標是：",
+        }),
+      ]),
+      icon: "car",
     }),
   ]);
 
   const CATEGORY_TITLES = Object.freeze({
-    business: "生意／內容",
-    risk: "怕踩雷／有糾紛",
-    travel: "準備出國",
-    auto: "汽美／耗材",
+    business: "生意與內容",
+    risk: "簽約與購買避雷",
+    travel: "旅行規劃",
+    auto: "汽美與耗材",
   });
 
   const QUERY_CHOICES = Object.freeze({
     concept: new Set(["signal", "manual", "tickets"]),
     hook: new Set(["offer", "founder"]),
-    flow: new Set(["guided", "all"]),
+    flow: new Set(["hybrid", "guided", "all"]),
     motion: new Set(["full", "reduced"]),
   });
-
   const QUERY_DEFAULTS = Object.freeze({
     concept: "signal",
     hook: "offer",
-    flow: "guided",
+    flow: "hybrid",
     motion: "full",
   });
-
   const HOOK_COPY = Object.freeze({
     offer: Object.freeze({
-      eyebrow: "花錢前，先避開最貴的錯",
-      title: "有些坑，等踩到才看到就太晚。",
-      lede: "租屋、合約、機票、精品、內容、汽美——先用免費第一步把風險說清楚，再決定要不要花錢。",
+      eyebrow: "7 個免費第一步＋1 個 POP 汽美入口",
+      title: "你先說卡在哪，我幫你把第一步分清楚。",
+      lede: "品牌內容、租屋、合約、機票、精品、住宿、CreatorKit、汽美選品，都先交代我能幫你的成果、你要準備的資料與服務邊界。",
     }),
     founder: Object.freeze({
       eyebrow: "接線台的工作方式",
       title: "我不先推銷，先陪你找出最該做哪一步。",
-      lede: "先把問題說清楚，再決定要不要花錢。",
+      lede: "先看清全部入口；不確定時，我再幫你把問題接到正確第一步。",
     }),
   });
 
@@ -156,9 +211,6 @@
     }
   }
 
-  // FB 60 專矩陣來源：fb- + 6 碼小寫十六進位。嚴格 pattern，不可能注入。
-  const FB_MATRIX_PATTERN = /^fb-[0-9a-f]{6}$/;
-
   function parseSource(value) {
     const candidate = typeof value === "string" ? value : queryParams().get("src");
     if (ALLOWED_SOURCES.has(candidate)) return candidate;
@@ -166,8 +218,20 @@
     return "direct";
   }
 
+  function parseSurface(value) {
+    return ALLOWED_SURFACES.has(value) ? value : "";
+  }
+
   function serviceBySlug(slug) {
     return SERVICES.find((service) => service.slug === slug) || null;
+  }
+
+  function destinationByKind(service, kind) {
+    return (
+      service?.destinations.find((destination) => destination.kind === kind) ||
+      service?.destinations[0] ||
+      null
+    );
   }
 
   function buildLineUrl(lineId, prefill, slug, source) {
@@ -186,16 +250,18 @@
     }
   }
 
-  function destinationFor(service, source) {
-    if (service.channel === "line") {
+  function destinationFor(service, source, kind) {
+    const destination = destinationByKind(service, kind);
+    if (!destination) return "#";
+    if (destination.kind === "line") {
       return buildLineUrl(
-        service.destination,
-        service.prefill,
+        destination.value,
+        destination.prefill,
         service.slug,
         source,
       );
     }
-    return buildSiteUrl(service.destination, source);
+    return buildSiteUrl(destination.value, source);
   }
 
   function isPreviewMode() {
@@ -242,9 +308,7 @@
   }
 
   function bytesToHex(bytes) {
-    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
-      "",
-    );
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
   }
 
   function eventId() {
@@ -269,7 +333,6 @@
         memorySessionHash = existing;
         return existing;
       }
-
       const bytes = SESSION_HASH_PATTERN.test(memorySessionHash)
         ? null
         : randomBytes(32);
@@ -279,9 +342,7 @@
       sessionStorage.setItem(SESSION_STORAGE_KEY, generated);
       return generated;
     } catch (_error) {
-      if (SESSION_HASH_PATTERN.test(memorySessionHash)) {
-        return memorySessionHash;
-      }
+      if (SESSION_HASH_PATTERN.test(memorySessionHash)) return memorySessionHash;
       const bytes = randomBytes(32);
       memorySessionHash = bytes ? bytesToHex(bytes) : "";
       return memorySessionHash;
@@ -298,19 +359,35 @@
         return false;
       }
 
-      const analyticsSent =
-        window.PopMonsterGoAnalytics?.track?.(eventName, detail || {}) === true;
-      const endpoint = eventEndpoint();
-      if (!endpoint || typeof navigator.sendBeacon !== "function") {
-        return analyticsSent;
-      }
-
+      const safeDetail = {};
       const slug =
         typeof detail === "string"
           ? detail
           : detail && typeof detail.slug === "string"
             ? detail.slug
             : "";
+      const surface = parseSurface(detail?.surface);
+      if (serviceBySlug(slug)) safeDetail.slug = slug;
+      if (
+        surface &&
+        (eventName === "line_start" || eventName === "site_start")
+      ) {
+        safeDetail.surface = surface;
+      }
+      if (eventName === "route_stage_1" && CATEGORY_TITLES[detail?.category]) {
+        safeDetail.category = detail.category;
+      }
+      if (eventName === "hero_cta" && typeof detail?.target === "string") {
+        safeDetail.target = detail.target.slice(0, 32);
+      }
+
+      const analyticsSent =
+        window.PopMonsterGoAnalytics?.track?.(eventName, safeDetail) === true;
+      const endpoint = eventEndpoint();
+      if (!endpoint || typeof navigator.sendBeacon !== "function") {
+        return analyticsSent;
+      }
+
       const eventIdentifier = eventId();
       const anonymousSession = sessionHash();
       if (!eventIdentifier || !anonymousSession) return false;
@@ -321,9 +398,7 @@
         source: parseSource(),
         timestamp: new Date().toISOString(),
       };
-      if (serviceBySlug(slug)) {
-        payload.slug = slug;
-      }
+      Object.assign(payload, safeDetail);
 
       const json = JSON.stringify(payload);
       const body =
@@ -350,9 +425,7 @@
         ? serviceBySlug(serviceOrSlug)
         : serviceBySlug(serviceOrSlug?.slug);
     const result = document.getElementById("route-result");
-    if (!service || !result) {
-      return null;
-    }
+    if (!service || !result) return null;
 
     const card = document.createElement("article");
     card.className = "result-card";
@@ -360,15 +433,12 @@
 
     const summary = document.createElement("div");
     summary.className = "result-summary";
-
     const kicker = document.createElement("p");
     kicker.className = "result-kicker";
-    kicker.textContent = "你的第一步";
-
+    kicker.textContent = "你的接線結果";
     const title = document.createElement("h2");
     title.className = "result-title";
     title.textContent = service.title;
-
     const sourceCode = document.createElement("code");
     sourceCode.className = "result-source";
     sourceCode.textContent = `【GO:${service.slug}:${parseSource()}】`;
@@ -376,29 +446,30 @@
 
     const details = document.createElement("div");
     details.className = "result-details";
-    appendDetail(details, "免費先做", service.freeScope);
-    appendDetail(details, "請準備", service.requiredInput);
+    appendDetail(details, "我先幫你", service.outcome);
+    appendDetail(details, "你準備", service.requiredInput);
     appendDetail(details, "服務邊界", service.boundary);
-    if (service.channel === "line") {
-      appendDetail(details, "LINE ID", service.destination);
-    }
 
-    const cta = document.createElement("a");
-    cta.className = "button button-primary result-cta";
-    cta.href = destinationFor(service, parseSource());
-    cta.dataset.serviceSlug = service.slug;
-    cta.dataset.channel = service.channel;
-    cta.rel = "noopener";
-    if (service.channel === "line" || service.slug === "creator-kit") {
-      cta.target = "_blank";
-    }
-    cta.textContent =
-      service.channel === "line"
-        ? "開啟 LINE，帶入第一則訊息"
-        : service.slug === "creator-kit"
-          ? "開啟 CreatorKit 16 工具"
-          : "前往 POP 汽美本業";
-    details.append(cta);
+    const actions = document.createElement("div");
+    actions.className = "result-actions";
+    service.destinations.forEach((destination, index) => {
+      const cta = document.createElement("a");
+      cta.className = index === 0
+        ? "button button-primary result-cta"
+        : "button button-secondary result-cta";
+      cta.href = destinationFor(service, parseSource(), destination.kind);
+      cta.dataset.serviceSlug = service.slug;
+      cta.dataset.destinationKind = destination.kind;
+      cta.dataset.channel = destination.kind;
+      cta.dataset.surface = "router_result";
+      cta.rel = "noopener";
+      if (destination.kind === "line" || service.slug === "creator-kit") {
+        cta.target = "_blank";
+      }
+      cta.textContent = destination.label;
+      actions.append(cta);
+    });
+    details.append(actions);
 
     card.append(summary, details);
     result.replaceChildren(card);
@@ -410,10 +481,12 @@
       button.classList.toggle("is-selected", selected);
       button.setAttribute("aria-pressed", String(selected));
     });
+    const reset = document.getElementById("router-reset");
+    if (reset) reset.hidden = false;
 
     sendEvent("route_result", { slug: service.slug });
     result.focus({ preventScroll: true });
-    result.scrollIntoView({ behavior: "smooth", block: "start" });
+    result.scrollIntoView({ behavior: motionBehavior(), block: "start" });
     return service;
   }
 
@@ -425,6 +498,31 @@
     if (eyebrow) eyebrow.textContent = copy.eyebrow;
     if (title) title.textContent = copy.title;
     if (lede) lede.textContent = copy.lede;
+  }
+
+  function motionBehavior() {
+    return document.documentElement.dataset.motion === "reduced" ? "auto" : "smooth";
+  }
+
+  function syncFlowControls(flow) {
+    const primary = document.getElementById("hero-cta");
+    const secondary = document.querySelector(
+      '.hero-actions .button-secondary[data-target="router"]',
+    );
+    if (primary) {
+      if (flow === "guided") {
+        primary.href = "#problem-router";
+        primary.dataset.target = "router";
+        primary.textContent = "開始兩步分流";
+      } else {
+        primary.href = "#all-services";
+        primary.dataset.target = "directory";
+        primary.textContent = "直接看 8 個入口";
+      }
+    }
+    if (secondary) {
+      secondary.hidden = flow !== "hybrid";
+    }
   }
 
   function applyExperience(params) {
@@ -439,10 +537,7 @@
     });
 
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-    if (reducedMotion?.matches) {
-      settings.motion = "reduced";
-    }
-
+    if (reducedMotion?.matches) settings.motion = "reduced";
     applyHookCopy(settings.hook);
 
     const source = parseSource(params.get("src"));
@@ -453,12 +548,14 @@
       element.dataset.flow = settings.flow;
       element.dataset.motion = settings.motion;
       element.dataset.source = source;
+      element.dataset.preview = String(isPreviewMode());
     });
 
     const allServices = document.getElementById("all-services");
     const router = document.getElementById("problem-router");
-    if (allServices) allServices.hidden = settings.flow !== "all";
+    if (allServices) allServices.hidden = settings.flow === "guided";
     if (router) router.hidden = settings.flow === "all";
+    syncFlowControls(settings.flow);
 
     const syncMotion = (event) => {
       const requested = allowVariants
@@ -483,11 +580,36 @@
 
     document.querySelectorAll("a[data-service-slug]").forEach((anchor) => {
       const service = serviceBySlug(anchor.dataset.serviceSlug);
-      if (service) {
-        anchor.href = destinationFor(service, source);
-        anchor.dataset.channel = service.channel;
-      }
+      const kind = anchor.dataset.destinationKind || anchor.dataset.channel;
+      const destination = destinationByKind(service, kind);
+      if (!service || !destination) return;
+      anchor.href = destinationFor(service, source, destination.kind);
+      anchor.dataset.channel = destination.kind;
     });
+  }
+
+  function resetRouter(options) {
+    const settings = options || {};
+    const stageTwo = document.getElementById("router-stage-2");
+    const optionsContainer = document.getElementById("service-options");
+    const result = document.getElementById("route-result");
+    const reset = document.getElementById("router-reset");
+    document.querySelectorAll("button.category-button[data-category]").forEach((button) => {
+      button.classList.remove("is-selected");
+      button.setAttribute("aria-pressed", "false");
+      button.setAttribute("aria-expanded", "false");
+    });
+    if (stageTwo) stageTwo.hidden = true;
+    if (optionsContainer) optionsContainer.replaceChildren();
+    if (result) {
+      result.hidden = true;
+      result.replaceChildren();
+      delete result.dataset.selectedService;
+    }
+    if (reset) reset.hidden = true;
+    if (settings.focus !== false) {
+      document.querySelector("button.category-button[data-category]")?.focus();
+    }
   }
 
   function installRouter() {
@@ -497,6 +619,7 @@
     if (!stageTwo || !options) return;
 
     document.querySelectorAll("button.category-button[data-category]").forEach((button) => {
+      button.setAttribute("aria-pressed", "false");
       button.addEventListener("click", () => {
         const category = button.dataset.category;
         const matches = SERVICES.filter((service) => service.category === category);
@@ -520,7 +643,6 @@
           option.addEventListener("click", () => renderService(service.slug));
           options.append(option);
         });
-
         if (stageTitle) {
           stageTitle.textContent = `${CATEGORY_TITLES[category]}：選最貼近的一項`;
         }
@@ -528,6 +650,9 @@
         sendEvent("route_stage_1", { category: category });
         options.querySelector("button")?.focus();
       });
+    });
+    document.getElementById("router-reset")?.addEventListener("click", () => {
+      resetRouter();
     });
   }
 
@@ -558,11 +683,13 @@
         const destination = event.target.closest?.("a[data-service-slug]");
         if (!destination) return;
         const service = serviceBySlug(destination.dataset.serviceSlug);
-        if (service) {
-          sendEvent(service.channel === "line" ? "line_start" : "site_start", {
+        const channel = destination.dataset.channel;
+        if (service && (channel === "line" || channel === "site")) {
+          sendEvent(channel === "line" ? "line_start" : "site_start", {
             slug: service.slug,
+            surface: parseSurface(destination.dataset.surface),
           });
-          // GA4 enhanced measurement otherwise sends the full prefilled LINE URL.
+          // 阻斷 GA4 Enhanced Measurement 傳送完整 LINE 預填網址。
           event.stopImmediatePropagation();
         }
       },
@@ -576,24 +703,6 @@
         }),
       );
     });
-
-    const showAll = document.getElementById("show-all");
-    showAll?.addEventListener("click", (event) => {
-      const allServices = document.getElementById("all-services");
-      if (!allServices) return;
-      event.preventDefault();
-      allServices.hidden = false;
-      allServices.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-
-    document.querySelectorAll("[data-target]").forEach((cta) => {
-      cta.addEventListener("click", (event) => {
-        const service = serviceBySlug(cta.dataset.target);
-        if (!service) return;
-        event.preventDefault();
-        renderService(service.slug);
-      });
-    });
   }
 
   async function shareSwitchboard() {
@@ -601,16 +710,14 @@
       showPreviewNotice();
       return false;
     }
-
     const url = new URL("https://popmonster.vip/go");
-    url.searchParams.set("v", "20260716");
+    url.searchParams.set("v", "20260717");
     url.searchParams.set("src", "social");
     const shareData = {
-      title: "免費避雷接線台",
-      text: "有些坑，等踩到才看到就太晚。花錢前先免費問第一步。",
+      title: "POP 免費接線台",
+      text: "你先說卡在哪，我幫你把第一步分清楚。7 個免費第一步＋1 個 POP 汽美入口。",
       url: url.toString(),
     };
-
     try {
       if (typeof navigator.share === "function") {
         await navigator.share(shareData);
@@ -637,7 +744,6 @@
     const form = document.getElementById("preview-form");
     const frame = document.getElementById("preview-frame");
     if (!form || !frame) return;
-
     const updateFrame = (event) => {
       event?.preventDefault();
       const values = new FormData(form);
@@ -649,7 +755,6 @@
       });
       frame.src = `go.html?${params.toString()}`;
     };
-
     form.addEventListener("change", updateFrame);
     form.addEventListener("submit", updateFrame);
   }
@@ -658,6 +763,7 @@
     const params = queryParams();
     applyExperience(params);
     updateSourceUI(parseSource(params.get("src")));
+    resetRouter({ focus: false });
     installRouter();
     installClickHandling();
     installShare();
@@ -669,9 +775,11 @@
   window.Switchboard = {
     SERVICES,
     parseSource,
+    parseSurface,
     buildLineUrl,
     sendEvent,
     renderService,
+    resetRouter,
   };
 
   if (document.readyState === "loading") {

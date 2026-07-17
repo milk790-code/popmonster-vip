@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0a0a0a">
   <meta name="robots" content="noindex,nofollow">
-  <title>免費接線台 v4｜預覽控制台</title>
+  <title>POP 免費接線台 v5｜預覽控制台</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/go.css">
   <script src="js/go.js" defer></script>
@@ -16,7 +16,7 @@
   <main id="preview-main" class="preview-shell">
     <header class="preview-header">
       <p class="eyebrow">LOCAL PREVIEW</p>
-      <h1>免費接線台 v4 預覽控制台</h1>
+      <h1>POP 免費接線台 v5 預覽控制台</h1>
       <p>此頁只更新下方 iframe；預覽頁不送事件，也不允許外部跳轉。</p>
     </header>
 
@@ -38,7 +38,8 @@
 
       <fieldset class="control-group">
         <legend>瀏覽路徑</legend>
-        <label><input type="radio" name="flow" value="guided" checked> 引導分流</label>
+        <label><input type="radio" name="flow" value="hybrid" checked> 全目錄＋需要時分流</label>
+        <label><input type="radio" name="flow" value="guided"> 僅引導分流</label>
         <label><input type="radio" name="flow" value="all"> 全部展開</label>
       </fieldset>
 
@@ -57,7 +58,7 @@
         name="preview-frame"
         class="preview-frame"
         title="免費接線台互動預覽"
-        src="go.html?preview=1&amp;concept=signal&amp;hook=offer&amp;flow=guided&amp;motion=full"
+        src="go.html?preview=1&amp;concept=signal&amp;hook=offer&amp;flow=hybrid&amp;motion=full"
         sandbox="allow-scripts allow-same-origin"
         referrerpolicy="no-referrer"
         loading="eager"

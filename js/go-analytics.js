@@ -10,13 +10,19 @@
     "social",
     "legacy-worker",
   ]);
+  var ALLOWED_SURFACES = new Set([
+    "hero",
+    "directory",
+    "router_result",
+    "pop_card",
+  ]);
   var EVENT_PARAMETERS = Object.freeze({
     page_ready: [],
     hero_cta: ["target"],
     route_stage_1: ["category"],
     route_result: ["slug"],
-    line_start: ["slug"],
-    site_start: ["slug"],
+    line_start: ["slug", "surface"],
+    site_start: ["slug", "surface"],
     share_success: [],
   });
 
@@ -44,6 +50,18 @@
       dnt === "1" ||
       String(dnt).toLowerCase() === "yes"
     );
+  }
+
+  function isPreviewMode() {
+    try {
+      return (
+        new URLSearchParams(global.location.search).get("preview") === "1" ||
+        document.body?.dataset.preview === "true" ||
+        Boolean(document.getElementById("preview-form"))
+      );
+    } catch (_error) {
+      return false;
+    }
   }
 
   function consentValue() {
@@ -77,11 +95,18 @@
     return undefined;
   }
 
+  function cleanParameter(key, value) {
+    if (key === "surface") {
+      return ALLOWED_SURFACES.has(value) ? value : undefined;
+    }
+    return cleanValue(value);
+  }
+
   function allowedParameters(eventName, parameters) {
     var clean = { source: sourceValue() };
     var source = parameters || {};
     EVENT_PARAMETERS[eventName].forEach(function (key) {
-      var value = cleanValue(source[key]);
+      var value = cleanParameter(key, source[key]);
       if (value !== undefined) clean[key] = value;
     });
     return clean;
@@ -89,7 +114,9 @@
 
   function loadAnalytics() {
     try {
-      if (privacySignalEnabled() || consentValue() !== "granted") return false;
+      if (isPreviewMode() || privacySignalEnabled() || consentValue() !== "granted") {
+        return false;
+      }
       if (document.querySelector('script[data-pm-analytics]')) return true;
       var script = document.createElement("script");
       script.async = true;
@@ -112,7 +139,9 @@
     if (!Object.prototype.hasOwnProperty.call(EVENT_PARAMETERS, eventName)) {
       return false;
     }
-    if (privacySignalEnabled() || consentValue() !== "granted") return false;
+    if (isPreviewMode() || privacySignalEnabled() || consentValue() !== "granted") {
+      return false;
+    }
     if (!loadAnalytics() || typeof global.gtag !== "function") return false;
     try {
       global.gtag("event", eventName, allowedParameters(eventName, parameters));
@@ -123,6 +152,7 @@
   }
 
   function setConsent(value) {
+    if (isPreviewMode()) return false;
     var granted = value === "granted";
     try {
       global.localStorage.setItem(CONSENT_KEY, granted ? "granted" : "denied");
@@ -139,7 +169,7 @@
   function initConsentControls() {
     var panel = document.getElementById("go-analytics-consent");
     if (!panel) return;
-    if (privacySignalEnabled()) {
+    if (isPreviewMode() || privacySignalEnabled()) {
       panel.hidden = true;
       return;
     }
