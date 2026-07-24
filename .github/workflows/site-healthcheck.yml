@@ -18,7 +18,7 @@ jobs:
         run: |
           set -u
           fail=0
-          for p in "" "brand.html" "brand-deck.html" "brand-totem.html" \
+          for p in "" "systems.html" "brand.html" "brand-deck.html" "brand-totem.html" \
                    "about.html" "members.html" "guide/" "a001.html" \
                    "sitemap.xml" "assets/brand-totem/og-brand-1200x630.png"; do
             code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "https://popmonster.vip/$p")

@@ -7,7 +7,8 @@
     catalog_filter: ['category', 'result_count'],
     catalog_search: ['category', 'query_length', 'result_count'],
     product_select: ['sku', 'category', 'source'],
-    support_click: ['channel', 'placement']
+    support_click: ['channel', 'placement'],
+    system_entry: ['target']
   };
 
   function hasAnalyticsConsent() {

@@ -138,7 +138,13 @@
 
     var heroCta = target.closest('[data-home-cta]');
     if (heroCta) {
-      track('hero_cta', { target: heroCta.dataset.homeCta });
+      if (heroCta.dataset.homeCta === 'system') {
+        track('system_entry', {
+          target: heroCta.dataset.homeSystemTarget || 'hub'
+        });
+      } else {
+        track('hero_cta', { target: heroCta.dataset.homeCta });
+      }
     }
 
     var productCard = target.closest('#product-grid .card[data-cat]');
