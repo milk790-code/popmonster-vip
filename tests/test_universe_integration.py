@@ -67,8 +67,19 @@ class PopMonsterUniverseContract(unittest.TestCase):
         )
         self.assertIn('href="systems.html"', self.go)
         self.assertIn(POPCARD_STORY, self.go)
+        self.assertLess(
+            self.go.index('id="shop-system-bridge"'),
+            self.go.index('id="all-services"'),
+        )
+        go_javascript = (ROOT / "js" / "go.js").read_text(encoding="utf-8")
+        services = re.search(
+            r"const SERVICES = Object\.freeze\(\[(.*?)\]\);",
+            go_javascript,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(services, "missing canonical SERVICES registry")
         self.assertEqual(
-            len(re.findall(r'<article\b[^>]*class="[^"]*service-card', self.go)),
+            len(re.findall(r'^\s+slug:\s+"[^"]+"', services.group(1), re.MULTILINE)),
             8,
         )
 
