@@ -30,6 +30,24 @@ class PopMonsterUniverseContract(unittest.TestCase):
         self.assertIn("不共用登入、Cookie、會員資料、購物車或付款狀態", html)
         self.assertNotIn("<iframe", html.lower())
 
+    def test_all_public_popcard_links_use_only_the_canonical_preview_routes(self):
+        allowed = {POPCARD_STORY, POPCARD_MEMBER}
+        pages = {
+            "index.html": self.home,
+            "go.html": self.go,
+            "systems.html": (ROOT / "systems.html").read_text(encoding="utf-8"),
+        }
+        for name, html in pages.items():
+            with self.subTest(page=name):
+                links = {
+                    href
+                    for href in re.findall(r'href="([^"]+)"', html)
+                    if "popcard" in href.lower()
+                }
+                self.assertTrue(links, f"{name} has no POP CARD link")
+                self.assertTrue(links <= allowed, f"{name} has unexpected links: {links}")
+                self.assertNotIn("popcard-saaspreview.", html)
+
     def test_homepage_has_a_role_based_universe_entry(self):
         self.assertRegex(
             self.home,
@@ -61,6 +79,8 @@ class PopMonsterUniverseContract(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("https://popmonster.vip/systems.html", sitemap)
         self.assertIn('"systems.html"', healthcheck)
+        self.assertIn("https://popmonster.vip/systems.html", healthcheck)
+        self.assertIn(POPCARD_STORY, healthcheck)
 
     def test_private_loop_artifacts_are_not_published_with_github_pages(self):
         gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")

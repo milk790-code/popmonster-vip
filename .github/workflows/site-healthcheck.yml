@@ -32,3 +32,9 @@ jobs:
           echo "$html" | grep -q "ink-band"      || { echo "缺墨地帶 ink-band"; exit 1; }
           echo "$html" | grep -q "product-grid"  || { echo "缺商品網格 product-grid"; exit 1; }
           echo "指紋 OK"
+      - name: 店家系統內容指紋（canonical＋POP CARD）
+        run: |
+          html=$(curl -s --max-time 15 https://popmonster.vip/systems.html)
+          echo "$html" | grep -q 'https://popmonster.vip/systems.html' || { echo "systems canonical 錯誤"; exit 1; }
+          echo "$html" | grep -q 'https://popcard-saas-preview.milk790.workers.dev/s/jilin#story' || { echo "POP CARD 入口錯誤"; exit 1; }
+          echo "店家系統指紋 OK"
