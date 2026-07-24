@@ -1462,3 +1462,61 @@ html[data-motion="reduced"] .route-map::after {
   animation: none;
   opacity: 0;
 }
+
+/* POP CARD shop-system bridge: outside the tested eight-service directory. */
+.shop-system-bridge {
+  display: grid;
+  grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr);
+  inline-size: min(100%, var(--content));
+  gap: clamp(2rem, 7vw, 7rem);
+  margin-inline: auto;
+  padding: clamp(2.5rem, 6vw, 5rem) clamp(1rem, 4vw, 2.75rem);
+  border-block-start: 1px solid var(--line);
+  border-block-end: 1px solid rgba(88, 215, 225, .3);
+  background:
+    radial-gradient(circle at 88% 18%, rgba(88, 215, 225, .1), transparent 23rem),
+    linear-gradient(120deg, rgba(88, 215, 225, .035), transparent 48%);
+}
+.shop-system-bridge h2 {
+  max-inline-size: 15ch;
+  margin: 0;
+}
+.shop-system-copy {
+  align-self: end;
+}
+.shop-system-copy > p:first-child {
+  max-inline-size: 44rem;
+  margin-block-end: var(--space-5);
+  color: var(--paper-dim);
+  font-size: clamp(1rem, .95rem + .26vw, 1.15rem);
+}
+.shop-system-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.shop-system-actions .button-primary {
+  border-color: #58d7e1;
+  background: #58d7e1;
+}
+.shop-system-note {
+  margin: var(--space-3) 0 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: .74rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 50rem) {
+  .shop-system-bridge { grid-template-columns: minmax(0, 1fr); }
+  .shop-system-bridge h2 { max-inline-size: 18ch; }
+}
+
+@media (max-width: 37.5rem) {
+  .shop-system-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .shop-system-actions .button { width: 100%; }
+}

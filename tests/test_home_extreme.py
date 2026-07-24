@@ -148,6 +148,19 @@ assert.equal(calls.length, 0);
 
 consent = "granted";
 assert.equal(
+  window.PopMonsterAnalytics.track("system_entry", {
+    target: "story",
+    raw_href: "不得送出的完整網址",
+  }),
+  true,
+);
+assert.deepEqual(calls[0], [
+  "event",
+  "system_entry",
+  { target: "story" },
+]);
+calls.length = 0;
+assert.equal(
   window.PopMonsterAnalytics.track("catalog_search", {
     category: "cleaning",
     query_length: 3,
