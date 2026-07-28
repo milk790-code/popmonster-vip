@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>連線中…</title>
+</head>
+<body style="background:#0a0a0a;color:#e8d9a8;font-family:system-ui,-apple-system,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0">
+  <p role="status">正在開啟服務…</p>
+  <noscript>
+    <p>瀏覽器未啟用 JavaScript，請前往 <a href="/go" style="color:#e8d9a8">免費接線台</a> 選擇服務。</p>
+  </noscript>
+  <script>
+  (function () {
+    "use strict";
+
+    var COLLECT_URL = "https://pop-r-redirect.milk790.workers.dev/collect";
+    var DEFAULT_ROUTE = "brand-content";
+    var ROUTES = Object.freeze({
+      "brand-content": Object.freeze({ channel: "line", destination: "@121lkspe", label: "品牌內容" }),
+      "rental-check": Object.freeze({ channel: "line", destination: "@207cpaps", label: "租屋風險" }),
+      "legal-guidance": Object.freeze({ channel: "line", destination: "@772iosnh", label: "合約事件" }),
+      "flight-plan": Object.freeze({ channel: "line", destination: "@129vsziy", label: "機票比較" }),
+      "luxury-check": Object.freeze({ channel: "line", destination: "@186vktox", label: "精品初篩" }),
+      "travel-stay": Object.freeze({ channel: "line", destination: "@805udwla", label: "旅遊住宿" }),
+      "creator-kit": Object.freeze({ channel: "site", destination: "https://creatorkit.milk790.workers.dev/" }),
+      "auto-care": Object.freeze({ channel: "site", destination: "https://popmonster.vip/" })
+    });
+    var ALIASES = Object.freeze({
+      creatorkit: "creator-kit",
+      pop: "auto-care"
+    });
+
+    function cleanSource(value) {
+      return (
+        String(value || "direct")
+          .replace(/[^A-Za-z0-9_-]/g, "")
+          .slice(0, 32) || "direct"
+      );
+    }
+
+    function shortCorrelationId() {
+      try {
+        if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+          return crypto.randomUUID().replace(/-/g, "").slice(0, 8).toLowerCase();
+        }
+        if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+          var bytes = crypto.getRandomValues(new Uint8Array(4));
+          return Array.prototype.map.call(bytes, function (byte) {
+            return byte.toString(16).padStart(2, "0");
+          }).join("");
+        }
+      } catch (_error) {}
+      return Math.random().toString(16).slice(2, 10).padEnd(8, "0");
+    }
+
+    function privacySignalEnabled() {
+      var dnt =
+        navigator.doNotTrack ||
+        window.doNotTrack ||
+        navigator.msDoNotTrack ||
+        "";
+      return (
+        navigator.globalPrivacyControl === true ||
+        dnt === "1" ||
+        String(dnt).toLowerCase() === "yes"
+      );
+    }
+
+    function canonicalRoute(value) {
+      if (Object.prototype.hasOwnProperty.call(ROUTES, value)) return value;
+      if (Object.prototype.hasOwnProperty.call(ALIASES, value)) return ALIASES[value];
+      return DEFAULT_ROUTE;
+    }
+
+    function destinationFor(route, to, src, cid) {
+      if (route.channel === "site") {
+        var siteUrl = new URL(route.destination);
+        siteUrl.searchParams.set("src", src);
+        return siteUrl.toString();
+      }
+      var message = "你好，我想先做" + route.label + "免費第一步。\n【GO:" + to + ":" + src + ":" + cid + "】";
+      return "https://line.me/R/oaMessage/" + encodeURIComponent(route.destination) + "/?" + encodeURIComponent(message);
+    }
+
+    var params = new URLSearchParams(location.search);
+    var to = canonicalRoute(params.get("to") || "");
+    var src = cleanSource(params.get("src"));
+    var cid = shortCorrelationId();
+    var destination = destinationFor(ROUTES[to], to, src, cid);
+
+    try {
+      if (!privacySignalEnabled() && typeof navigator.sendBeacon === "function") {
+        navigator.sendBeacon(
+          COLLECT_URL,
+          new Blob(
+            [JSON.stringify({ cid: cid, to: to, src: src })],
+            { type: "text/plain;charset=UTF-8" }
+          )
+        );
+      }
+    } catch (_error) {}
+
+    window.setTimeout(function () {
+      location.replace(destination);
+    }, 250);
+  })();
+  </script>
+</body>
+</html>
