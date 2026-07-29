@@ -186,7 +186,12 @@
 
     var current = consentValue();
     panel.hidden = current === "granted" || current === "denied";
-    if (current === "granted") loadAnalytics();
+    if (current === "granted") {
+      global.gtag("consent", "update", {
+        analytics_storage: "granted",
+      });
+      loadAnalytics();
+    }
 
     panel.querySelectorAll("[data-analytics-consent]").forEach(function (button) {
       button.addEventListener("click", function () {

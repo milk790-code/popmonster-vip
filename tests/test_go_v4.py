@@ -534,6 +534,64 @@ assert.equal(calls.length, 1);
         )
         self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
+    def test_ga4_restores_persisted_consent_before_loading_analytics(self):
+        script = r'''
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+
+const calls = [];
+globalThis.window = globalThis;
+globalThis.location = { search: "?src=facebook-free-first" };
+globalThis.navigator = { doNotTrack: "0", globalPrivacyControl: false };
+globalThis.localStorage = {
+  getItem(key) {
+    assert.equal(key, "ck_consent");
+    return "granted";
+  },
+};
+globalThis.gtag = (...args) => calls.push(args);
+globalThis.document = {
+  getElementById(id) {
+    assert.equal(id, "go-analytics-consent");
+    return {
+      hidden: false,
+      querySelectorAll() { return []; },
+    };
+  },
+  querySelector(selector) {
+    return selector === "script[data-pm-analytics]" ? {} : null;
+  },
+  readyState: "complete",
+};
+
+const source = fs.readFileSync("js/go-analytics.js", "utf8");
+eval(source);
+
+assert.deepEqual(calls[0], [
+  "consent",
+  "default",
+  {
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+    analytics_storage: "denied",
+  },
+]);
+assert.deepEqual(calls[1], [
+  "consent",
+  "update",
+  { analytics_storage: "granted" },
+]);
+'''
+        result = subprocess.run(
+            ["node", "-e", script],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+
     def test_js_runtime_telemetry_is_private_stable_and_fail_open(self):
         script = r'''
 const assert = require("node:assert/strict");
