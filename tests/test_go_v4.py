@@ -143,10 +143,23 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertIn('name="twitter:card"', html)
         self.assertNotRegex(html, r'<script[^>]+src="https://www\.googletagmanager\.com')
 
-    def test_v4_og_asset_is_scoped_and_not_the_legacy_3q_card(self):
+    def test_v4_og_asset_is_social_safe_scoped_and_not_the_legacy_3q_card(self):
         html = self.read_required("go.html")
-        relative = "assets/go-v4/go-link-preview-2560x1440.png"
+        relative = "assets/go-v4/go-link-preview-1200x630-20260729.png"
         self.assertIn(f"https://popmonster.vip/{relative}", html)
+        self.assertIn(
+            'property="og:title" content="你卡住的那件事，第一步先別急著花錢。"',
+            html,
+        )
+        self.assertIn(
+            'property="og:description" content="生意、網站、風險、出國、汽美，10 個免費入口幫你把下一步分清楚。"',
+            html,
+        )
+        self.assertIn('property="og:image:width" content="1200"', html)
+        self.assertIn('property="og:image:height" content="630"', html)
+        self.assertNotIn("1.1億", html)
+        self.assertNotIn("1.8億", html)
+        self.assertNotIn("110,000,000", html)
 
         asset = ROOT / relative
         legacy = ROOT / "og-image-1200x630.png"
@@ -154,7 +167,7 @@ class GoV4ContractTests(unittest.TestCase):
         payload = asset.read_bytes()
         self.assertEqual(payload[:8], b"\x89PNG\r\n\x1a\n")
         width, height = struct.unpack(">II", payload[16:24])
-        self.assertEqual((width, height), (2560, 1440))
+        self.assertEqual((width, height), (1200, 630))
         self.assertNotEqual(
             hashlib.sha256(payload).digest(),
             hashlib.sha256(legacy.read_bytes()).digest(),
