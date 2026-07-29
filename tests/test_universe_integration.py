@@ -6,6 +6,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 POPCARD_STORY = "https://popcard-saas-preview.milk790.workers.dev/s/jilin#story"
 POPCARD_MEMBER = "https://popcard-saas-preview.milk790.workers.dev/s/jilin#member"
+CREATORKIT = "https://creatorkit.milk790.workers.dev/?src=th3"
 
 
 class PopMonsterUniverseContract(unittest.TestCase):
@@ -93,6 +94,18 @@ class PopMonsterUniverseContract(unittest.TestCase):
         self.assertIn('"systems.html"', healthcheck)
         self.assertIn("https://popmonster.vip/systems.html", healthcheck)
         self.assertIn(POPCARD_STORY, healthcheck)
+
+    def test_system_hub_has_a_self_guided_creatorkit_route(self):
+        html = (ROOT / "systems.html").read_text(encoding="utf-8")
+        self.assertIn('href="#creator-tools"', html)
+        self.assertRegex(
+            html,
+            r'<section[^>]+id="creator-tools"[^>]+aria-labelledby="creator-tools-title"',
+        )
+        self.assertIn(CREATORKIT, html)
+        self.assertIn("22 個創作者工具", html)
+        self.assertIn("不用註冊", html)
+        self.assertIn("自己逛 CreatorKit", html)
 
     def test_private_loop_artifacts_are_not_published_with_github_pages(self):
         gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")

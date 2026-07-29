@@ -7,7 +7,7 @@
 | 路徑 | 用途 |
 |---|---|
 | `index.html` | 施工任務、32 款商品與 LINE 選品 |
-| `systems.html` | 泡泡怪獸店家系統館與 POP CARD 公開展示入口 |
+| `systems.html` | 泡泡怪獸店家系統館、POP CARD 公開展示與 CreatorKit 自助工具入口 |
 | `go.html` | POP 免費接線台的八個既有服務入口 |
 | `brand.html` | 水墨品牌館 |
 | `members.html` | 官網車主會員生態 |
