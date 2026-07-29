@@ -19,6 +19,9 @@ class GoV4ContractTests(unittest.TestCase):
         "travel-stay",
         "creator-kit",
         "auto-care",
+        "popcard-demo",
+        "site-launch",
+        "grant-check",
     }
     expected_sources = {
         "direct",
@@ -50,6 +53,7 @@ class GoV4ContractTests(unittest.TestCase):
             "js/go-analytics.js",
             "js/go.js",
             "go-preview.html",
+            "privacy.html",
             "docs/analytics/go-funnel-baseline.md",
         ):
             with self.subTest(relative=relative):
@@ -58,10 +62,10 @@ class GoV4ContractTests(unittest.TestCase):
     def test_hero_copy_and_semantic_sections_are_fixed(self):
         html = self.read_required("go.html")
         for text in (
-            "7 個免費第一步＋1 個 POP 汽美入口",
+            "10 個免費第一步＋1 個 POP 汽美入口",
             "你先說卡在哪，我幫你把第一步分清楚。",
-            "品牌內容、租屋、合約、機票、精品、住宿、CreatorKit、汽美選品",
-            "直接看 8 個入口",
+            "品牌內容、CreatorKit、店家系統、免費官網、補助快篩、租屋、合約、精品、機票、住宿、汽美選品",
+            "直接看 11 個入口",
             "不知道選哪個？幫我分流",
             "POP 汽美：看商品／LINE 選品",
             "我先幫你把問題縮小，不急著推你買東西。",
@@ -79,6 +83,7 @@ class GoV4ContractTests(unittest.TestCase):
             "route-result",
             "trust",
             "go-analytics-consent",
+            "analytics-preferences",
         ):
             with self.subTest(element_id=element_id):
                 self.assertRegex(html, rf'id=["\']{re.escape(element_id)}["\']')
@@ -90,10 +95,10 @@ class GoV4ContractTests(unittest.TestCase):
     def test_directory_is_complete_visible_and_registry_rendered(self):
         html = self.read_required("go.html")
         self.assertNotRegex(html, r'<section\s+id="all-services"[^>]+hidden')
-        self.assertEqual(len(re.findall(r'data-service-grid', html)), 4)
+        self.assertEqual(len(re.findall(r'data-service-grid', html)), 5)
         self.assertNotRegex(html, r'<article\b[^>]*class="[^"]*service-card')
         self.assertIn("免費拿到", html)
-        for category in ("business", "risk", "travel", "auto"):
+        for category in ("business", "risk", "travel", "auto", "shop"):
             with self.subTest(category=category):
                 self.assertRegex(html, rf'data-route-lane=["\']{category}["\']')
                 self.assertRegex(html, rf'data-service-grid=["\']{category}["\']')
@@ -128,10 +133,10 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertIn('lang="zh-Hant-TW"', html)
         self.assertIn('href="css/go.css"', html)
         analytics_tag = '<script src="js/go-analytics.js" defer></script>'
-        app_tag = '<script src="js/go.js" defer></script>'
+        app_tag = '<script src="js/go.js?v=20260729" defer></script>'
         self.assertIn(analytics_tag, html)
         self.assertLess(html.index(analytics_tag), html.index(app_tag))
-        self.assertIn('src="js/go.js"', html)
+        self.assertIn(app_tag, html)
         self.assertIn('rel="canonical" href="https://popmonster.vip/go"', html)
         self.assertRegex(html, r'rel=["\'](?:shortcut )?icon["\'][^>]+favicon\.svg')
         self.assertIn('property="og:image"', html)
@@ -168,25 +173,28 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertIn('label: "看 32 款商品"', js)
         self.assertIn('label: "傳車況，先避開買錯"', js)
 
-    def test_all_eight_services_have_strong_truth_bounded_hooks(self):
+    def test_all_eleven_services_have_strong_truth_bounded_hooks(self):
         js = self.read_required("js/go.js")
         hooks = (
             "先看改完，再決定要不要做。",
-            "別再盯著空白頁，16 個 AI 工具直接免費用。",
+            "別再盯著空白頁，21 個 AI 工具直接免費用。",
             "簽約前先查一次，比入住後才後悔便宜。",
             "事情再亂，我先幫你排成一條看得懂的時間線。",
             "先別急著匯款，照片裡可能已經有紅旗。",
             "同一趟旅程，不要只看一個價格。",
             "不用再看 100 間，先把本次查詢縮成較符合條件的 3 間。",
             "先別亂買藥劑，傳車況再決定買什麼。",
+            "讓客人自己想回來，先看公開展示再決定。",
+            "建置費 0 元，先用滿意再談月費。",
+            "3 分鐘看你的店符合哪些政府補助。",
         )
         for hook in hooks:
             with self.subTest(hook=hook):
                 self.assertEqual(js.count(hook), 1)
-        self.assertEqual(js.count("freeDeliverable:"), 8)
-        self.assertEqual(js.count("freeScope:"), 8)
+        self.assertEqual(js.count("freeDeliverable:"), 11)
+        self.assertEqual(js.count("freeScope:"), 11)
 
-    def test_noscript_fallback_keeps_all_eight_entries_usable(self):
+    def test_noscript_fallback_keeps_all_eleven_entries_usable(self):
         html = self.read_required("go.html")
         match = re.search(r"<noscript>(.*?)</noscript>", html, re.S)
         self.assertIsNotNone(match)
@@ -199,11 +207,14 @@ class GoV4ContractTests(unittest.TestCase):
             "精品初篩",
             "機票比較",
             "旅遊住宿",
+            "POP CARD 店家系統",
+            "掘計畫 · 免費建官網",
+            "政府補助快篩",
             "POP 汽美",
         ):
             with self.subTest(title=title):
                 self.assertIn(title, fallback)
-        self.assertGreaterEqual(len(re.findall(r"<a\b", fallback)), 9)
+        self.assertGreaterEqual(len(re.findall(r"<a\b", fallback)), 12)
         self.assertIn("https://creatorkit.milk790.workers.dev/", fallback)
         self.assertIn("https://popmonster.vip/", fallback)
 
@@ -222,10 +233,10 @@ class GoV4ContractTests(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertNotIn(phrase, html)
 
-    def test_four_router_categories_exist(self):
+    def test_five_router_categories_exist(self):
         html = self.read_required("go.html")
         categories = set(re.findall(r'data-category=["\']([^"\']+)', html))
-        self.assertEqual(categories, {"business", "risk", "travel", "auto"})
+        self.assertEqual(categories, {"business", "risk", "travel", "auto", "shop"})
 
     def test_css_encodes_tokens_focus_touch_and_reduced_motion(self):
         css = self.read_required("css/go.css").lower()
@@ -261,7 +272,7 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertIn("event_id", js)
         self.assertIn("session_hash", js)
         self.assertIn('type: "text/plain;charset=UTF-8"', js)
-        self.assertNotIn("localStorage", js)
+        self.assertIn('localStorage.getItem("ck_consent") === "granted"', js)
         self.assertNotIn("document.cookie", js)
         self.assertRegex(js, r'window\.Switchboard\s*=')
         self.assertIn("const allowVariants = isPreviewMode();", js)
@@ -465,6 +476,15 @@ const { webcrypto } = require("node:crypto");
         storageWrites += 1;
         if (storageBlocked) throw new Error("storage blocked");
         stored.set(key, value);
+      },
+    },
+  });
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: {
+      getItem(key) {
+        assert.equal(key, "ck_consent");
+        return "granted";
       },
     },
   });

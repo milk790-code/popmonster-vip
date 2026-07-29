@@ -60,7 +60,7 @@ class PopMonsterUniverseContract(unittest.TestCase):
         self.assertIn('data-home-cta="system"', self.home)
         self.assertNotIn("popcard-saaspreview.", self.home)
 
-    def test_go_keeps_eight_services_and_adds_a_separate_shop_system_bridge(self):
+    def test_go_keeps_the_shop_bridge_and_expands_the_registry_to_eleven_services(self):
         self.assertRegex(
             self.go,
             r'<section[^>]+id="shop-system-bridge"[^>]+aria-labelledby="shop-system-title"',
@@ -78,10 +78,11 @@ class PopMonsterUniverseContract(unittest.TestCase):
             re.DOTALL,
         )
         self.assertIsNotNone(services, "missing canonical SERVICES registry")
-        self.assertEqual(
-            len(re.findall(r'^\s+slug:\s+"[^"]+"', services.group(1), re.MULTILINE)),
-            8,
+        slugs = set(
+            re.findall(r'^\s+slug:\s+"([^"]+)"', services.group(1), re.MULTILINE)
         )
+        self.assertEqual(len(slugs), 11)
+        self.assertTrue({"popcard-demo", "site-launch", "grant-check"} <= slugs)
 
     def test_system_route_is_in_sitemap_and_production_healthcheck(self):
         sitemap = (ROOT / "sitemap.xml").read_text(encoding="utf-8")

@@ -53,10 +53,10 @@
       slug: "creator-kit",
       category: "business",
       title: "CreatorKit",
-      hook: "別再盯著空白頁，16 個 AI 工具直接免費用。",
+      hook: "別再盯著空白頁，21 個 AI 工具直接免費用。",
       freeDeliverable: "文案、腳本或逐字稿第一版，不用先註冊。",
       freeScope: "不用先註冊；實際可用次數與服務狀態以工具當下頁面為準。",
-      outcome: "直接使用 16 個文案、腳本與逐字稿工具。",
+      outcome: "直接使用 21 個文案、腳本與逐字稿工具。",
       requiredInput: "不用先註冊。",
       boundary: "工具成果仍需自行檢查與調整。",
       destinations: Object.freeze([
@@ -193,13 +193,73 @@
       ]),
       icon: "car",
     }),
+    Object.freeze({
+      slug: "popcard-demo",
+      category: "shop",
+      title: "POP CARD 店家系統",
+      hook: "讓客人自己想回來，先看公開展示再決定。",
+      freeDeliverable: "服務菜單、會員履歷、透明帳本與預約流程的互動展示，打開就能看。",
+      freeScope: "公開展示使用去識別示範資料；不用留任何資料。",
+      outcome: "看懂汽美店的會員與回訪系統長什麼樣，再評估要不要導入。",
+      requiredInput: "不用準備，直接看。",
+      boundary: "展示系統獨立運作，不讀取你的官網會員、購物車或付款資料。",
+      destinations: Object.freeze([
+        Object.freeze({
+          kind: "site",
+          label: "開啟 POP CARD 公開展示",
+          value: "https://popcard-saas-preview.milk790.workers.dev/s/jilin#story",
+        }),
+      ]),
+      icon: "car",
+    }),
+    Object.freeze({
+      slug: "site-launch",
+      category: "shop",
+      title: "掘計畫 · 免費建官網",
+      hook: "建置費 0 元，先用滿意再談月費。",
+      freeDeliverable: "為你的店建一個正式官網，建置費 NT$0，先用滿意再付。",
+      freeScope: "名額有限、每行業只收一名；席次與條件以掘計畫頁面當下公告為準。",
+      outcome: "看完方案說明與剩餘席次，直接在頁上申請。",
+      requiredInput: "店名、行業與想放上官網的內容方向。",
+      boundary: "方案細節以掘計畫頁面為準，不在此頁另做承諾。",
+      destinations: Object.freeze([
+        Object.freeze({
+          kind: "site",
+          label: "看掘計畫方案與剩餘席次",
+          value: "https://3q-art-portfolio.milk790.workers.dev/launch-plan",
+        }),
+      ]),
+      icon: "home",
+    }),
+    Object.freeze({
+      slug: "grant-check",
+      category: "shop",
+      title: "政府補助快篩",
+      hook: "3 分鐘看你的店符合哪些政府補助。",
+      freeDeliverable: "選幾個條件，立即比對 10 個政府補助／貸款計畫的符合度。",
+      freeScope: "免登入、不留個資；規則庫資料時點以頁面標示為準。",
+      outcome: "拿到「符合／待確認／不符」排序清單，再決定要不要深入申請。",
+      requiredInput: "公司所在地、成立年數與行業等基本條件。",
+      boundary: "快篩是初步比對，不是政府核定結果；申請前以各計畫公告為準。",
+      destinations: Object.freeze([
+        Object.freeze({
+          kind: "site",
+          label: "開始 3 分鐘補助快篩",
+          value: "https://3q-site.milk790.workers.dev/assess.html",
+        }),
+      ]),
+      icon: "contract",
+    }),
   ]);
+
+  const EXTERNAL_TOOL_SLUGS = new Set(["creator-kit", "popcard-demo", "site-launch", "grant-check"]);
 
   const CATEGORY_TITLES = Object.freeze({
     business: "生意與內容",
     risk: "簽約與購買避雷",
     travel: "旅行規劃",
     auto: "汽美與耗材",
+    shop: "店家與品牌",
   });
 
   const ICON_PATHS = Object.freeze({
@@ -227,9 +287,9 @@
   });
   const HOOK_COPY = Object.freeze({
     offer: Object.freeze({
-      eyebrow: "7 個免費第一步＋1 個 POP 汽美入口",
+      eyebrow: "10 個免費第一步＋1 個 POP 汽美入口",
       title: "你先說卡在哪，我幫你把第一步分清楚。",
-      lede: "品牌內容、租屋、合約、機票、精品、住宿、CreatorKit、汽美選品，都先交代我能幫你的成果、你要準備的資料與服務邊界。",
+      lede: "品牌內容、CreatorKit、店家系統、免費官網、補助快篩、租屋、合約、精品、機票、住宿、汽美選品，都先交代我能幫你的成果、你要準備的資料與服務邊界。",
     }),
     founder: Object.freeze({
       eyebrow: "接線台的工作方式",
@@ -320,6 +380,14 @@
     );
   }
 
+  function analyticsConsentGranted() {
+    try {
+      return localStorage.getItem("ck_consent") === "granted";
+    } catch (_error) {
+      return false;
+    }
+  }
+
   function eventEndpoint() {
     const bodyEndpoint =
       document.body?.dataset.eventEndpoint ||
@@ -384,12 +452,13 @@
     }
   }
 
-  function sendEvent(eventName, detail) {
+  function sendEvent(eventName, detail, options = {}) {
     try {
       if (
         !EVENT_NAMES.has(eventName) ||
         isPreviewMode() ||
-        privacySignalEnabled()
+        privacySignalEnabled() ||
+        !analyticsConsentGranted()
       ) {
         return false;
       }
@@ -417,7 +486,9 @@
       }
 
       const analyticsSent =
-        window.PopMonsterGoAnalytics?.track?.(eventName, safeDetail) === true;
+        options.analytics === false
+          ? false
+          : window.PopMonsterGoAnalytics?.track?.(eventName, safeDetail) === true;
       const endpoint = eventEndpoint();
       if (!endpoint || typeof navigator.sendBeacon !== "function") {
         return analyticsSent;
@@ -497,7 +568,7 @@
     link.dataset.channel = destination.kind;
     link.dataset.surface = surface;
     link.rel = "noopener";
-    if (destination.kind === "line" || service.slug === "creator-kit") {
+    if (destination.kind === "line" || EXTERNAL_TOOL_SLUGS.has(service.slug)) {
       link.target = "_blank";
     }
     link.textContent = destination.label;
@@ -679,7 +750,7 @@
       } else {
         primary.href = "#all-services";
         primary.dataset.target = "directory";
-        primary.textContent = "直接看 8 個入口";
+        primary.textContent = "直接看 11 個入口";
       }
     }
     if (secondary) {
@@ -877,11 +948,11 @@
       return false;
     }
     const url = new URL("https://popmonster.vip/go");
-    url.searchParams.set("v", "20260717");
+    url.searchParams.set("v", "20260729");
     url.searchParams.set("src", "social");
     const shareData = {
       title: "POP 免費接線台",
-      text: "你先說卡在哪，我幫你把第一步分清楚。7 個免費第一步＋1 個 POP 汽美入口。",
+      text: "你先說卡在哪，我幫你把第一步分清楚。10 個免費第一步＋1 個 POP 汽美入口。",
       url: url.toString(),
     };
     try {
@@ -904,6 +975,31 @@
 
   function installShare() {
     document.getElementById("share-button")?.addEventListener("click", shareSwitchboard);
+  }
+
+  function installConsentBridge() {
+    document
+      .querySelectorAll('[data-analytics-consent="granted"]')
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          queueMicrotask(() => sendEvent("page_ready", null, { analytics: false }));
+        });
+      });
+  }
+
+  function installConsentPreferences() {
+    const button = document.getElementById("analytics-preferences");
+    const panel = document.getElementById("go-analytics-consent");
+    if (!button || !panel) return;
+    button.addEventListener("click", () => {
+      if (isPreviewMode()) {
+        showPreviewNotice();
+        return;
+      }
+      panel.hidden = false;
+      panel.setAttribute("tabindex", "-1");
+      panel.focus();
+    });
   }
 
   function installPreviewControls() {
@@ -934,6 +1030,8 @@
     installRouter();
     installClickHandling();
     installShare();
+    installConsentBridge();
+    installConsentPreferences();
     installPreviewControls();
     if (isPreviewMode()) showPreviewNotice();
     sendEvent("page_ready");
