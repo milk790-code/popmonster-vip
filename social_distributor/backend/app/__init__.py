@@ -19,6 +19,12 @@ from .extensions import cors, db, migrate
 log = logging.getLogger(__name__)
 
 
+def _worker_health_payload():
+    from .api.system import read_worker_heartbeat
+
+    return read_worker_heartbeat()
+
+
 def create_app() -> Flask:
     from .utils.telemetry import init_telemetry
     init_telemetry(component="api")
@@ -189,6 +195,16 @@ def create_app() -> Flask:
         for Redis/S3/Meta would slow down every k8s readiness poll.
         """
         return jsonify(config.readiness())
+
+    @app.get("/healthz/worker")
+    def healthz_worker():
+        payload, status_code = _worker_health_payload()
+        public_fields = {
+            key: payload[key]
+            for key in ("component", "status", "fresh", "age_seconds", "release")
+            if key in payload
+        }
+        return jsonify(public_fields), status_code
 
     @app.errorhandler(404)
     def not_found(_):

@@ -34,6 +34,34 @@ def test_worker_heartbeat_endpoint_requires_login(client):
     assert client.get("/api/system/worker-heartbeat").status_code == 401
 
 
+def test_public_worker_health_exposes_only_sanitized_fields(client, monkeypatch):
+    from app import _worker_health_payload
+
+    monkeypatch.setattr(
+        "app._worker_health_payload",
+        lambda: ({
+            "component": "worker",
+            "status": "ok",
+            "fresh": True,
+            "age_seconds": 8,
+            "release": "036af0b",
+            "observed_at": "must-not-leak",
+            "redis_key": "must-not-leak",
+        }, 200),
+    )
+
+    response = client.get("/healthz/worker")
+
+    assert response.status_code == 200
+    assert response.get_json() == {
+        "component": "worker",
+        "status": "ok",
+        "fresh": True,
+        "age_seconds": 8,
+        "release": "036af0b",
+    }
+
+
 def test_worker_heartbeat_endpoint_reports_fresh_private_state(client, monkeypatch):
     from app.api import system as system_api
 
