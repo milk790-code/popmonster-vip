@@ -5,7 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 import qrcode
 from qrcode.constants import ERROR_CORRECT_Q
 
@@ -71,64 +71,161 @@ def sha256(path: Path) -> str:
 
 def draw_og_card() -> Path:
     width, height = 1200, 630
-    image = Image.new("RGB", (width, height), COLORS["background"])
+    palette = {
+        "ink": "#071426",
+        "ink_soft": "#0D2442",
+        "paper": "#F7F1E7",
+        "paper_muted": "#C9D3DE",
+        "cobalt": "#2C67FF",
+        "coral": "#FF5A43",
+        "gold": "#F4C969",
+        "green": "#4ED3A8",
+        "line": "#274A70",
+    }
+
+    image = Image.new("RGB", (width, height), palette["ink"])
+    pixels = image.load()
+    for y in range(height):
+        for x in range(width):
+            cobalt_weight = max(0.0, (x / width + y / height - 1.08)) * 0.28
+            glow_weight = max(0.0, 1 - (((x - 1090) / 430) ** 2 + ((y - 70) / 360) ** 2)) * 0.12
+            pixels[x, y] = (
+                round(7 + 30 * cobalt_weight + 90 * glow_weight),
+                round(20 + 48 * cobalt_weight + 32 * glow_weight),
+                round(38 + 85 * cobalt_weight + 15 * glow_weight),
+            )
+
     draw = ImageDraw.Draw(image)
 
-    draw.rectangle((0, 0, width, 8), fill=COLORS["gold"])
+    for x in range(0, width, 48):
+        draw.line((x, 0, x, height), fill="#0E2848", width=1)
+    for y in range(0, height, 48):
+        draw.line((0, y, width, y), fill="#0E2848", width=1)
+
+    glow = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    glow_draw = ImageDraw.Draw(glow)
+    glow_draw.ellipse((965, -120, 1305, 220), fill=(255, 90, 67, 105))
+    glow = glow.filter(ImageFilter.GaussianBlur(74))
+    image = Image.alpha_composite(image.convert("RGBA"), glow)
+    draw = ImageDraw.Draw(image)
+
+    shadow = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    shadow_draw = ImageDraw.Draw(shadow)
+    shadow_draw.rounded_rectangle((824, 62, 1162, 576), radius=34, fill=(0, 0, 0, 150))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(22))
+    image = Image.alpha_composite(image, shadow)
+    draw = ImageDraw.Draw(image)
+
     draw.rounded_rectangle(
-        (54, 45, 1146, 585),
-        radius=30,
-        fill=COLORS["panel"],
-        outline=COLORS["line"],
+        (46, 42, 788, 588),
+        radius=34,
+        fill=(7, 20, 38, 228),
+        outline=palette["line"],
         width=2,
     )
 
-    draw.text((86, 76), "XUEYI SWITCHBOARD", font=font(22, latin=True), fill=COLORS["gold"])
-    draw.text((86, 112), "免費接線台", font=font(31), fill=COLORS["text"])
-
-    draw.rounded_rectangle((86, 178, 344, 226), radius=24, fill=COLORS["gold"])
-    draw.text((108, 187), "7 個第一次，免費", font=font(24), fill=COLORS["background"])
-
-    draw.text((86, 258), "你卡住的那件事，", font=font(54), fill=COLORS["text"])
-    draw.text((86, 334), "我先免費幫你解第一步。", font=font(54), fill=COLORS["text"])
+    draw.rounded_rectangle((70, 68, 114, 112), radius=12, fill=palette["coral"])
+    draw.text((82, 72), "P", font=font(24, latin=True), fill=palette["paper"])
+    draw.text((130, 68), "POP 免費接線台", font=font(26), fill=palette["paper"])
     draw.text(
-        (88, 426),
-        "選一個情境，30 秒帶你到正確入口。",
-        font=font(26),
-        fill=COLORS["muted"],
+        (130, 100),
+        "FREE FIRST-STEP SWITCHBOARD",
+        font=font(12, latin=True),
+        fill=palette["paper_muted"],
     )
 
-    draw.text((86, 514), "popmonster.vip/go", font=font(25, latin=True), fill=COLORS["gold"])
-    draw.text((395, 515), "7 項免費服務  +  POP 汽美本業", font=font(23), fill=COLORS["muted"])
-
-    track_x = 1072
-    track_top = 144
-    track_bottom = 480
-    draw.line((track_x, track_top, track_x, track_bottom), fill=COLORS["line"], width=4)
-    node_specs = (
-        (track_top, "01"),
-        ((track_top + track_bottom) // 2, "02"),
-        (track_bottom, "03"),
+    draw.rounded_rectangle(
+        (70, 140, 370, 184),
+        radius=22,
+        fill=(44, 103, 255, 52),
+        outline=palette["cobalt"],
+        width=2,
     )
-    for index, (y, label) in enumerate(node_specs):
-        radius = 17 if index == 0 else 13
-        fill = COLORS["gold"] if index == 0 else COLORS["background"]
-        draw.ellipse(
-            (track_x - radius, y - radius, track_x + radius, y + radius),
-            fill=fill,
-            outline=COLORS["gold"],
-            width=3,
-        )
-        label_box = draw.textbbox((0, 0), label, font=font(12, latin=True))
-        label_width = label_box[2] - label_box[0]
-        draw.text(
-            (track_x - label_width / 2, y - 7),
-            label,
-            font=font(12, latin=True),
-            fill=COLORS["background"] if index == 0 else COLORS["gold"],
-        )
+    draw.text((92, 148), "10 個免費第一步＋汽美選品", font=font(20), fill=palette["paper"])
 
-    return save_png(image, OUTPUT / "go-og-1200x630.png")
+    draw.text((70, 214), "你卡住的那件事，", font=font(51), fill=palette["paper"])
+    draw.text((70, 280), "第一步先別急著花錢。", font=font(51), fill=palette["paper"])
+    draw.rounded_rectangle((70, 347, 438, 353), radius=3, fill=palette["coral"])
+    draw.text(
+        (70, 376),
+        "先把問題分清楚，再決定怎麼做。",
+        font=font(27),
+        fill=palette["paper_muted"],
+    )
+
+    chip_specs = (
+        ("生意", palette["cobalt"]),
+        ("網站", palette["green"]),
+        ("避雷", palette["gold"]),
+        ("出國", "#9E80FF"),
+        ("汽美", palette["coral"]),
+    )
+    chip_x = 70
+    chip_font = font(18)
+    for label, color in chip_specs:
+        draw.rounded_rectangle(
+            (chip_x, 436, chip_x + 90, 476),
+            radius=20,
+            fill=(7, 20, 38, 204),
+            outline=color,
+            width=2,
+        )
+        draw.text((chip_x + 26, 444), label, font=chip_font, fill=palette["paper"])
+        chip_x += 104
+
+    draw.rounded_rectangle((70, 510, 282, 558), radius=24, fill=palette["paper"])
+    draw.text((92, 520), "打開接線台  →", font=font(21), fill=palette["ink"])
+    draw.text(
+        (308, 522),
+        "popmonster.vip/go",
+        font=font(20, latin=True),
+        fill=palette["gold"],
+    )
+
+    panel = (806, 42, 1160, 588)
+    draw.rounded_rectangle(
+        panel,
+        radius=34,
+        fill=palette["paper"],
+        outline="#FFFFFF",
+        width=2,
+    )
+    draw.rounded_rectangle((836, 70, 1130, 122), radius=18, fill=palette["ink_soft"])
+    draw.text((856, 80), "SWITCHBOARD", font=font(19, latin=True), fill=palette["paper"])
+    draw.text((1070, 82), "05", font=font(18, latin=True), fill=palette["gold"])
+    draw.text((838, 142), "把問題接到正確入口", font=font(22), fill=palette["ink"])
+
+    routes = (
+        ("01", "生意與內容", palette["cobalt"]),
+        ("02", "店家與網站", palette["green"]),
+        ("03", "簽約與避雷", palette["gold"]),
+        ("04", "旅行規劃", "#9E80FF"),
+        ("05", "汽美與耗材", palette["coral"]),
+    )
+    for index, (number, label, color) in enumerate(routes):
+        y = 206 + index * 62
+        draw.line((838, y + 22, 1118, y + 22), fill="#D7DEE5", width=2)
+        draw.rounded_rectangle((838, y, 886, y + 44), radius=14, fill=palette["ink"])
+        draw.text((851, y + 10), number, font=font(15, latin=True), fill=color)
+        draw.text((906, y + 8), label, font=font(20), fill=palette["ink"])
+        draw.ellipse((1094, y + 10, 1118, y + 34), fill=color, outline=palette["ink"], width=3)
+        draw.ellipse((1102, y + 18, 1110, y + 26), fill=palette["paper"])
+
+    draw.rounded_rectangle((838, 528, 1130, 558), radius=15, fill="#E7EAF0")
+    draw.text(
+        (857, 533),
+        "免費範圍先說清楚 · 資料先遮蔽",
+        font=font(14),
+        fill=palette["ink_soft"],
+    )
+
+    draw.arc((728, 142, 852, 258), start=265, end=92, fill=palette["cobalt"], width=8)
+    draw.arc((742, 246, 856, 358), start=258, end=98, fill=palette["gold"], width=8)
+    draw.arc((728, 350, 860, 482), start=263, end=94, fill=palette["coral"], width=8)
+    for y, color in ((196, palette["cobalt"]), (300, palette["gold"]), (404, palette["coral"])):
+        draw.ellipse((770, y, 792, y + 22), fill=color, outline=palette["paper"], width=3)
+
+    return save_png(image, OUTPUT / "go-link-preview-1200x630-20260729.png")
 
 
 def draw_qr_assets() -> dict[str, dict[str, str]]:

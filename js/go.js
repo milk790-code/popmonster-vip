@@ -7,6 +7,15 @@
     "package-insert",
     "social",
     "legacy-worker",
+    "facebook-free-first",
+    "facebook-dont-pay",
+    "facebook-connect",
+    "line-free-first",
+    "line-dont-pay",
+    "line-connect",
+    "threads-free-first",
+    "threads-dont-pay",
+    "threads-connect",
   ]);
   const ALLOWED_SURFACES = new Set([
     "hero",
@@ -19,6 +28,7 @@
     "hero_cta",
     "route_stage_1",
     "route_result",
+    "service_select",
     "line_start",
     "site_start",
     "share_success",
@@ -474,7 +484,9 @@
       if (serviceBySlug(slug)) safeDetail.slug = slug;
       if (
         surface &&
-        (eventName === "line_start" || eventName === "site_start")
+        (eventName === "service_select" ||
+          eventName === "line_start" ||
+          eventName === "site_start")
       ) {
         safeDetail.surface = surface;
       }
@@ -922,9 +934,14 @@
         const service = serviceBySlug(destination.dataset.serviceSlug);
         const channel = destination.dataset.channel;
         if (service && (channel === "line" || channel === "site")) {
+          const surface = parseSurface(destination.dataset.surface);
+          sendEvent("service_select", {
+            slug: service.slug,
+            surface,
+          });
           sendEvent(channel === "line" ? "line_start" : "site_start", {
             slug: service.slug,
-            surface: parseSurface(destination.dataset.surface),
+            surface,
           });
           // 阻斷 GA4 Enhanced Measurement 傳送完整 LINE 預填網址。
           event.stopImmediatePropagation();

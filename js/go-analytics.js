@@ -9,6 +9,15 @@
     "package-insert",
     "social",
     "legacy-worker",
+    "facebook-free-first",
+    "facebook-dont-pay",
+    "facebook-connect",
+    "line-free-first",
+    "line-dont-pay",
+    "line-connect",
+    "threads-free-first",
+    "threads-dont-pay",
+    "threads-connect",
   ]);
   var ALLOWED_SURFACES = new Set([
     "hero",
@@ -21,6 +30,7 @@
     hero_cta: ["target"],
     route_stage_1: ["category"],
     route_result: ["slug"],
+    service_select: ["slug", "surface"],
     line_start: ["slug", "surface"],
     site_start: ["slug", "surface"],
     share_success: [],
