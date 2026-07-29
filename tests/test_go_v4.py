@@ -155,6 +155,21 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertIn('name="twitter:card"', html)
         self.assertNotRegex(html, r'<script[^>]+src="https://www\.googletagmanager\.com')
 
+    def test_brand_home_link_accessible_name_includes_visible_label(self):
+        html = self.read_required("go.html")
+        link = re.search(
+            r'<a class="brand-mark"[^>]*aria-label="([^"]+)"[^>]*>(.*?)</a>',
+            html,
+            re.S,
+        )
+        self.assertIsNotNone(link)
+        accessible_name, contents = link.groups()
+        visible_text = " ".join(re.sub(r"<[^>]+>", " ", contents).split())
+        for word in visible_text.split():
+            with self.subTest(word=word):
+                self.assertIn(word, accessible_name)
+        self.assertIn("返回 POP MONSTER 首頁", accessible_name)
+
     def test_v4_og_asset_is_social_safe_scoped_and_not_the_legacy_3q_card(self):
         html = self.read_required("go.html")
         relative = "assets/go-v4/go-link-preview-1200x630-20260729.png"
