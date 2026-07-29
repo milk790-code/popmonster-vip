@@ -152,6 +152,7 @@ def create_app() -> Flask:
         transfers_bp,
         uploads_bp,
     )
+    from .api.system import bp as system_bp
     from .api.login import bp as login_bp
 
     # 96號 指令2: read-only alerts endpoint for token monitor results.
@@ -174,6 +175,7 @@ def create_app() -> Flask:
     app.register_blueprint(transfers_bp)
     app.register_blueprint(uploads_bp)
     app.register_blueprint(alerts_bp)
+    app.register_blueprint(system_bp)
 
     @app.get("/healthz")
     def healthz():
