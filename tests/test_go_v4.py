@@ -240,6 +240,7 @@ class GoV4ContractTests(unittest.TestCase):
                 self.assertIn('property="og:image:height" content="630"', wrapper)
                 self.assertIn(expected_destination, wrapper)
                 self.assertIn("location.replace", wrapper)
+                self.assertNotIn('http-equiv="refresh"', wrapper)
                 self.assertNotRegex(wrapper, r"1\.1億|1\.8億|110,000,000")
                 seen_wrappers.add(entry["wrapper"])
 

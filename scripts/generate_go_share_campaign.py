@@ -187,7 +187,6 @@ def wrapper_html(entry: dict[str, object]) -> str:
   <meta name="twitter:title" content="{title}">
   <meta name="twitter:description" content="{description}">
   <meta name="twitter:image" content="{image_url}">
-  <meta http-equiv="refresh" content="0;url={destination}">
 </head>
 <body>
   <p>正在前往 <a href="{destination}">POP 免費接線台</a>…</p>
