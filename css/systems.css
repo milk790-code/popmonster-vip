@@ -30,6 +30,7 @@
 .systems-proof,
 .systems-boundary,
 .systems-demo,
+.systems-tools,
 .systems-final {
   inline-size: min(100%, var(--content));
   margin-inline: auto;
@@ -190,6 +191,7 @@
 .systems-proof,
 .systems-boundary,
 .systems-demo,
+.systems-tools,
 .systems-final {
   padding-block: var(--space-7);
   border-block-start: 1px solid var(--line);
@@ -316,6 +318,80 @@
   color: var(--muted);
 }
 
+.systems-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(18rem, .9fr);
+  align-items: center;
+  gap: clamp(2rem, 7vw, 7rem);
+}
+
+.systems-tools > div:first-child > p:last-of-type {
+  color: var(--muted);
+}
+
+.systems-tools ul {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  color: var(--paper-dim);
+  list-style: none;
+}
+
+.systems-tools li {
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--line);
+}
+
+.systems-tools li::before {
+  margin-inline-end: .65rem;
+  color: var(--cyan-bright);
+  content: "↗";
+}
+
+.systems-tools-action {
+  display: grid;
+  gap: var(--space-3);
+  padding: clamp(1.35rem, 3.5vw, 2.5rem);
+  border: 1px solid var(--cyan-line);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 85% 7%, rgba(88, 215, 225, .13), transparent 17rem),
+    rgba(17, 25, 29, .88);
+}
+
+.systems-tools-action > p {
+  margin: 0;
+  color: var(--cyan-bright);
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  letter-spacing: .1em;
+}
+
+.systems-tools-action strong {
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: clamp(1.65rem, 1.35rem + 1vw, 2.35rem);
+}
+
+.systems-tools-action span,
+.systems-tools-action small {
+  color: var(--muted);
+}
+
+.systems-tools-action .button {
+  min-block-size: 48px;
+  margin-block-start: var(--space-2);
+  border-color: var(--cyan);
+  background: var(--cyan);
+}
+
+.systems-tools-action small {
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  line-height: 1.65;
+}
+
 .systems-final {
   text-align: center;
 }
@@ -349,7 +425,8 @@
 @media (max-width: 50rem) {
   .systems-proof-grid,
   .boundary-grid,
-  .systems-demo {
+  .systems-demo,
+  .systems-tools {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -383,6 +460,10 @@
   }
 
   .systems-signal {
+    padding: 1rem;
+  }
+
+  .systems-tools-action {
     padding: 1rem;
   }
 }
