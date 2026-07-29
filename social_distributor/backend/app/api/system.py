@@ -20,6 +20,11 @@ def _redis():
 
 @bp.get("/worker-heartbeat")
 def worker_heartbeat():
+    payload, status_code = read_worker_heartbeat()
+    return jsonify(payload), status_code
+
+
+def read_worker_heartbeat():
     try:
         raw = _redis().get(HEARTBEAT_KEY)
         payload = json.loads(raw) if raw else None
@@ -30,11 +35,11 @@ def worker_heartbeat():
             0, int((datetime.now(timezone.utc) - observed_at).total_seconds())
         )
     except (KeyError, TypeError, ValueError, json.JSONDecodeError, redis.RedisError):
-        return jsonify({
+        return {
             "component": "worker",
             "status": "unavailable",
             "fresh": False,
-        }), 503
+        }, 503
 
     fresh = payload.get("status") == "ok" and age_seconds <= MAX_HEARTBEAT_AGE_SECONDS
     response = {
@@ -45,4 +50,4 @@ def worker_heartbeat():
         "age_seconds": age_seconds,
         "release": payload.get("release", "unknown"),
     }
-    return jsonify(response), 200 if fresh else 503
+    return response, 200 if fresh else 503
