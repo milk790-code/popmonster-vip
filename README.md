@@ -19,6 +19,9 @@
 - POP CARD 負責店家的服務菜單、預約、會員、車輛、施工與帳本。
 - 兩邊只共享公開品牌語言與導流，不共用登入、Cookie、會員資料、付款狀態或資料庫。
 - POP CARD 目前從 `systems.html` 導向獨立公開展示；公開展示不等於正式商家系統切換。
+- `systems.html` 的 CreatorKit `src=th3` 候選漏斗包含首屏三個精選工具、
+  session-scoped CTA A/B 與 consent-gated 匿名事件；完整契約與部署順序見
+  `docs/analytics/systems-creatorkit-th3-funnel.md`。
 
 架構圖與決策見 [`docs/architecture/popmonster-universe.md`](docs/architecture/popmonster-universe.md)。
 

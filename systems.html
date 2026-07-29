@@ -6,12 +6,14 @@
   <meta name="theme-color" content="#0d0c0a">
   <meta name="color-scheme" content="dark">
   <meta name="robots" content="index,follow">
+  <meta name="systems-events" content="https://go-events.milk790.workers.dev/e">
   <title>店家系統｜POP MONSTER × POP CARD</title>
   <meta name="description" content="泡泡怪獸店家系統館：了解 POP MONSTER 與 POP CARD 如何把車主選品、服務菜單、預約、會員、車況與帳本接成清楚且資料分離的流程。">
   <link rel="canonical" href="https://popmonster.vip/systems.html">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/go.css">
   <link rel="stylesheet" href="css/systems.css">
+  <script src="js/systems-funnel.js" defer></script>
 
   <meta property="og:type" content="website">
   <meta property="og:locale" content="zh_TW">
@@ -56,8 +58,26 @@
         </div>
         <p class="systems-disclosure">目前連結的是獨立公開展示，不是正式店家後台，也不讀取官網的會員、購物車或付款資料。</p>
       </div>
-      <aside class="systems-signal" aria-label="泡泡怪獸宇宙的兩條路">
-        <p>UNIVERSE MAP / 02 PATHS</p>
+      <aside class="systems-signal" aria-label="CreatorKit 精選工具與泡泡怪獸宇宙的兩條路">
+        <div class="creator-sprint" aria-labelledby="creator-sprint-title">
+          <div class="creator-sprint-heading">
+            <p>CREATOR SPRINT / START HERE</p>
+            <h2 id="creator-sprint-title">今天先做一支。</h2>
+          </div>
+          <div class="creator-sprint-tools">
+            <a href="https://creatorkit.milk790.workers.dev/?src=th3&amp;tool=viral-breakdown" rel="external" data-creator-tool data-tool-slug="viral-breakdown" data-surface="systems_hero">
+              <span>01</span><strong>爆款拆解</strong><small>找出內容為什麼有效</small>
+            </a>
+            <a href="https://creatorkit.milk790.workers.dev/?src=th3&amp;tool=ai-script" rel="external" data-creator-tool data-tool-slug="ai-script" data-surface="systems_hero">
+              <span>02</span><strong>短影音腳本</strong><small>把主題變成完整口播</small>
+            </a>
+            <a href="https://creatorkit.milk790.workers.dev/?src=th3&amp;tool=rewrite" rel="external" data-creator-tool data-tool-slug="rewrite" data-surface="systems_hero">
+              <span>03</span><strong>多平台改寫</strong><small>同一內容切成各平台版本</small>
+            </a>
+          </div>
+          <a class="creator-sprint-all" href="https://creatorkit.milk790.workers.dev/?src=th3" rel="external" data-creator-entry data-surface="systems_hero" data-creator-cta data-cta-a="先逛 22 個免費工具" data-cta-b="今天先做一支內容">先逛 22 個免費工具</a>
+        </div>
+        <p class="systems-map-label">UNIVERSE MAP / 02 PATHS</p>
         <ol>
           <li><span>01</span><div><strong>車主現場</strong><small>車況 → 施工任務 → 商品／教學／LINE</small></div></li>
           <li><span>02</span><div><strong>店家現場</strong><small>服務菜單 → 預約 → 會員 → 車況與帳本</small></div></li>
@@ -154,10 +174,21 @@
         <p>CREATORKIT / 22 TOOLS</p>
         <strong>免費自媒體工具箱</strong>
         <span>從選題到發布規劃，依照自己的節奏自由探索。</span>
-        <a class="button button-primary" href="https://creatorkit.milk790.workers.dev/?src=th3" rel="external">自己逛 CreatorKit</a>
+        <a class="button button-primary" href="https://creatorkit.milk790.workers.dev/?src=th3" rel="external" data-creator-entry data-surface="systems_section" data-creator-cta data-cta-a="打開 CreatorKit 工具箱" data-cta-b="直接開始做內容">自己逛 CreatorKit</a>
         <small>外部公開工具頁；不會共用本站會員、購物車或付款資料。</small>
       </div>
     </section>
+
+    <aside id="systems-analytics-consent" class="systems-consent" aria-label="匿名成效分析偏好" hidden>
+      <div>
+        <strong>是否允許匿名成效分析？</strong>
+        <span>只記錄 CTA 版本、入口位置與開啟的工具；不收姓名、IP、Cookie 或輸入內容，分頁關閉後匿名 session 即失效。</span>
+      </div>
+      <div class="systems-consent-actions">
+        <button type="button" data-systems-consent="granted">允許匿名分析</button>
+        <button type="button" data-systems-consent="denied">不要記錄</button>
+      </div>
+    </aside>
 
     <section class="systems-final" aria-labelledby="final-title">
       <p class="eyebrow">NEXT / OWNER REVIEW</p>
