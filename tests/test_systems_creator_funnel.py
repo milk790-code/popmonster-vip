@@ -44,6 +44,7 @@ const beacons = [];
 const listeners = {};
 const nodes = [
   {
+    href: "https://creatorkit.milk790.workers.dev/?src=th3",
     dataset: {
       creatorEntry: "",
       surface: "systems_hero",
@@ -55,6 +56,7 @@ const nodes = [
     setAttribute() {},
   },
   {
+    href: "https://creatorkit.milk790.workers.dev/?src=th3&tool=viral-breakdown",
     dataset: {
       creatorTool: "",
       toolSlug: "viral-breakdown",
@@ -142,6 +144,9 @@ assert.equal(beacons[1].body.target, "cta_a");
 assert.equal(beacons[2].body.event, "creator_tool_start");
 assert.equal(beacons[2].body.slug, "viral-breakdown");
 assert.equal(beacons[2].body.surface, "systems_hero");
+assert.equal(beacons[2].body.target, "cta_a");
+assert.equal(new URL(nodes[0].href).searchParams.get("cta"), "cta_a");
+assert.equal(new URL(nodes[1].href).searchParams.get("cta"), "cta_a");
 
 assert.equal(window.PopMonsterSystemsFunnel.track("unknown", {}), false);
 navigator.globalPrivacyControl = true;
