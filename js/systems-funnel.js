@@ -9,7 +9,7 @@
   var EVENT_FIELDS = Object.freeze({
     creator_impression: ["target"],
     creator_entry_click: ["surface", "target"],
-    creator_tool_start: ["slug", "surface"],
+    creator_tool_start: ["slug", "surface", "target"],
   });
   var SURFACES = new Set([
     "systems_header",
@@ -175,6 +175,17 @@
     if (document.documentElement) {
       document.documentElement.dataset.creatorCtaVariant = current;
     }
+    document
+      .querySelectorAll("[data-creator-entry], [data-creator-tool]")
+      .forEach(function (link) {
+        try {
+          var destination = new URL(link.href);
+          destination.searchParams.set("cta", "cta_" + current);
+          link.href = destination.toString();
+        } catch (_error) {
+          // Invalid destinations remain untouched and still fail closed in tracking.
+        }
+      });
   }
 
   function installClicks() {
@@ -186,6 +197,7 @@
             track("creator_tool_start", {
               slug: link.dataset.toolSlug,
               surface: link.dataset.surface,
+              target: "cta_" + variant(),
             });
             return;
           }
