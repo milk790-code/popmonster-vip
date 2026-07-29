@@ -6,7 +6,8 @@
 
 - wrapper 提供平台與文案版本專屬的 `og:title`、`og:description`、`og:image`。
 - `rel=canonical` 一律指向正式 `/go`，wrapper 設為 `noindex,follow`。
-- 真人開啟 wrapper 後，用 `location.replace` 前往 `/go?src=<platform>-<variant>`。
+- 真人開啟 wrapper 後，用 JavaScript `location.replace` 前往 `/go?src=<platform>-<variant>`；未啟用 JavaScript 時保留可點連結。
+- 不使用 `<meta http-equiv=refresh>`，避免社群 crawler 跟隨後改讀 `/go` 的通用 OG 卡。
 - `/go` 仍是唯一正式內容入口；wrapper 不保存輸入、不執行服務邏輯。
 
 完整機器可讀對照在 `assets/go-v4/experiments/manifest.json`，可用
