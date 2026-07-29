@@ -24,7 +24,11 @@ def make_celery(flask_app=None) -> Celery:
         broker=config.celery_broker_url,
         backend=config.celery_result_backend,
         # 96號 指令2: token_monitor module added
-        include=["app.scheduler.tasks", "app.scheduler.token_monitor"],
+        include=[
+            "app.scheduler.tasks",
+            "app.scheduler.token_monitor",
+            "app.scheduler.worker_heartbeat",
+        ],
     )
     app.conf.update(
         task_acks_late=True,
@@ -41,6 +45,10 @@ def make_celery(flask_app=None) -> Celery:
             },
             "sweep-due-targets": {
                 "task": "app.scheduler.tasks.sweep_due_targets",
+                "schedule": crontab(minute="*"),
+            },
+            "worker-private-heartbeat": {
+                "task": "app.scheduler.worker_heartbeat.emit",
                 "schedule": crontab(minute="*"),
             },
             "refresh-oauth-tokens": {

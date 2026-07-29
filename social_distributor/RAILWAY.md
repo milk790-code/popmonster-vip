@@ -27,6 +27,13 @@ For each service, choose **"Deploy from GitHub repo"** → pick `popmonster-vip`
 | Custom Start Command | `celery -A celery_worker.celery worker -B -l info` |
 | Public Networking | _disabled_ |
 
+The worker emits a private heartbeat to the shared Redis key
+`social_distributor:worker:heartbeat` at startup and every minute. The value
+expires after 180 seconds, so a stopped worker fails closed without a public
+worker domain. An authenticated operator can read the sanitized state at
+`GET /api/system/worker-heartbeat`; Redis credentials and raw keys are never
+returned.
+
 ### 3. `frontend` (web, public)
 
 | Field | Value |
