@@ -1,5 +1,6 @@
 from pathlib import Path
 import hashlib
+import json
 import re
 import struct
 import subprocess
@@ -29,12 +30,22 @@ class GoV4ContractTests(unittest.TestCase):
         "package-insert",
         "social",
         "legacy-worker",
+        "facebook-free-first",
+        "facebook-dont-pay",
+        "facebook-connect",
+        "line-free-first",
+        "line-dont-pay",
+        "line-connect",
+        "threads-free-first",
+        "threads-dont-pay",
+        "threads-connect",
     }
     expected_events = {
         "page_ready",
         "hero_cta",
         "route_stage_1",
         "route_result",
+        "service_select",
         "line_start",
         "site_start",
         "share_success",
@@ -55,6 +66,7 @@ class GoV4ContractTests(unittest.TestCase):
             "go-preview.html",
             "privacy.html",
             "docs/analytics/go-funnel-baseline.md",
+            "docs/analytics/go-share-preview-experiment.md",
         ):
             with self.subTest(relative=relative):
                 self.assertTrue((ROOT / relative).is_file(), relative)
@@ -172,6 +184,74 @@ class GoV4ContractTests(unittest.TestCase):
             hashlib.sha256(payload).digest(),
             hashlib.sha256(legacy.read_bytes()).digest(),
         )
+
+    def test_share_experiment_has_nine_platform_cards_and_safe_redirect_wrappers(self):
+        manifest_path = ROOT / "assets/go-v4/experiments/manifest.json"
+        self.assertTrue(manifest_path.is_file(), "missing share experiment manifest")
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        entries = manifest["entries"]
+        self.assertEqual(len(entries), 9)
+        self.assertEqual(
+            {(entry["platform"], entry["variant"]) for entry in entries},
+            {
+                (platform, variant)
+                for platform in ("facebook", "line", "threads")
+                for variant in ("free-first", "dont-pay", "connect")
+            },
+        )
+
+        seen_images = set()
+        seen_wrappers = set()
+        seen_sources = set()
+        for entry in entries:
+            with self.subTest(source=entry["source"]):
+                source = entry["source"]
+                expected_destination = f"https://popmonster.vip/go?src={source}"
+                self.assertEqual(source, f'{entry["platform"]}-{entry["variant"]}')
+                self.assertEqual(entry["destination"], expected_destination)
+                self.assertEqual(entry["width"], 1200)
+                self.assertEqual(entry["height"], 630)
+                self.assertNotIn(source, seen_sources)
+                seen_sources.add(source)
+
+                image_path = ROOT / entry["image"]
+                self.assertTrue(image_path.is_file(), entry["image"])
+                image_payload = image_path.read_bytes()
+                self.assertEqual(image_payload[:8], b"\x89PNG\r\n\x1a\n")
+                self.assertEqual(struct.unpack(">II", image_payload[16:24]), (1200, 630))
+                seen_images.add(hashlib.sha256(image_payload).hexdigest())
+
+                wrapper_path = ROOT / entry["wrapper"]
+                self.assertTrue(wrapper_path.is_file(), entry["wrapper"])
+                wrapper = wrapper_path.read_text(encoding="utf-8")
+                self.assertIn('rel="canonical" href="https://popmonster.vip/go"', wrapper)
+                self.assertIn('name="robots" content="noindex,follow"', wrapper)
+                self.assertIn(f'property="og:url" content="{entry["url"]}"', wrapper)
+                self.assertIn(
+                    f'property="og:image" content="https://popmonster.vip/{entry["image"]}"',
+                    wrapper,
+                )
+                self.assertIn(f'property="og:title" content="{entry["title"]}"', wrapper)
+                self.assertIn(
+                    f'property="og:description" content="{entry["description"]}"',
+                    wrapper,
+                )
+                self.assertIn('property="og:image:width" content="1200"', wrapper)
+                self.assertIn('property="og:image:height" content="630"', wrapper)
+                self.assertIn(expected_destination, wrapper)
+                self.assertIn("location.replace", wrapper)
+                self.assertNotRegex(wrapper, r"1\.1億|1\.8億|110,000,000")
+                seen_wrappers.add(entry["wrapper"])
+
+        self.assertEqual(len(seen_images), 9)
+        self.assertEqual(len(seen_wrappers), 9)
+        self.assertEqual(seen_sources, self.expected_sources - {
+            "direct",
+            "business-card",
+            "package-insert",
+            "social",
+            "legacy-worker",
+        })
 
     def test_one_registry_powers_directory_and_router_destinations(self):
         js = self.read_required("js/go.js")
@@ -291,6 +371,7 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertIn("const allowVariants = isPreviewMode();", js)
         self.assertIn('category: category', js)
         self.assertIn('target: cta.dataset.target', js)
+        self.assertIn('sendEvent("service_select"', js)
         self.assertIn("event.stopImmediatePropagation()", js)
         for field in (
             "hook",
@@ -399,6 +480,20 @@ assert.equal(
 assert.deepEqual(calls[0], [
   "event",
   "line_start",
+  { slug: "legal-guidance", surface: "directory", source: "social" },
+]);
+calls.length = 0;
+assert.equal(
+  window.PopMonsterGoAnalytics.track("service_select", {
+    slug: "legal-guidance",
+    surface: "directory",
+    raw_text: "不得送出的原始對話",
+  }),
+  true,
+);
+assert.deepEqual(calls[0], [
+  "event",
+  "service_select",
   { slug: "legal-guidance", surface: "directory", source: "social" },
 ]);
 calls.length = 0;
@@ -542,7 +637,15 @@ const { webcrypto } = require("node:crypto");
     }),
     true,
   );
-  assert.equal(beacons.length, 2);
+  assert.equal(
+    window.Switchboard.sendEvent("service_select", {
+      slug: "legal-guidance",
+      surface: "router_result",
+      raw_text: "不得傳送",
+    }),
+    true,
+  );
+  assert.equal(beacons.length, 3);
   const payloads = await Promise.all(
     beacons.map(async ({ body: beaconBody, url }) => ({
       payload: JSON.parse(await beaconBody.text()),
@@ -566,6 +669,10 @@ const { webcrypto } = require("node:crypto");
   assert.equal(payloads[1].payload.event, "line_start");
   assert.equal(payloads[1].payload.surface, "router_result");
   assert.equal(payloads[1].payload.raw_text, undefined);
+  assert.equal(payloads[2].payload.event, "service_select");
+  assert.equal(payloads[2].payload.slug, "legal-guidance");
+  assert.equal(payloads[2].payload.surface, "router_result");
+  assert.equal(payloads[2].payload.raw_text, undefined);
 
   const countsBeforePrivacy = { beacons: beacons.length, randomCalls, storageReads, storageWrites };
   navigator.globalPrivacyControl = true;

@@ -1,0 +1,123 @@
+{
+  "version": "2026-07-29",
+  "canonical": "https://popmonster.vip/go",
+  "entries": [
+    {
+      "platform": "facebook",
+      "variant": "free-first",
+      "source": "facebook-free-first",
+      "title": "先拿一個免費第一步，再決定要不要往下做。",
+      "description": "10 個免費入口＋POP 汽美選品，先看清楚能拿到什麼。",
+      "image": "assets/go-v4/experiments/go-facebook-free-first-1200x630.png",
+      "wrapper": "share/go-facebook-free-first.html",
+      "url": "https://popmonster.vip/share/go-facebook-free-first.html",
+      "destination": "https://popmonster.vip/go?src=facebook-free-first",
+      "width": 1200,
+      "height": 630
+    },
+    {
+      "platform": "facebook",
+      "variant": "dont-pay",
+      "source": "facebook-dont-pay",
+      "title": "你卡住的那件事，第一步先別急著花錢。",
+      "description": "10 個免費入口＋POP 汽美選品，先看清楚能拿到什麼。",
+      "image": "assets/go-v4/experiments/go-facebook-dont-pay-1200x630.png",
+      "wrapper": "share/go-facebook-dont-pay.html",
+      "url": "https://popmonster.vip/share/go-facebook-dont-pay.html",
+      "destination": "https://popmonster.vip/go?src=facebook-dont-pay",
+      "width": 1200,
+      "height": 630
+    },
+    {
+      "platform": "facebook",
+      "variant": "connect",
+      "source": "facebook-connect",
+      "title": "你先說卡在哪，我幫你接到正確第一步。",
+      "description": "10 個免費入口＋POP 汽美選品，先看清楚能拿到什麼。",
+      "image": "assets/go-v4/experiments/go-facebook-connect-1200x630.png",
+      "wrapper": "share/go-facebook-connect.html",
+      "url": "https://popmonster.vip/share/go-facebook-connect.html",
+      "destination": "https://popmonster.vip/go?src=facebook-connect",
+      "width": 1200,
+      "height": 630
+    },
+    {
+      "platform": "line",
+      "variant": "free-first",
+      "source": "line-free-first",
+      "title": "先拿一個免費第一步，再決定要不要往下做。",
+      "description": "回一句你卡在哪，我幫你找到免費第一步。",
+      "image": "assets/go-v4/experiments/go-line-free-first-1200x630.png",
+      "wrapper": "share/go-line-free-first.html",
+      "url": "https://popmonster.vip/share/go-line-free-first.html",
+      "destination": "https://popmonster.vip/go?src=line-free-first",
+      "width": 1200,
+      "height": 630
+    },
+    {
+      "platform": "line",
+      "variant": "dont-pay",
+      "source": "line-dont-pay",
+      "title": "你卡住的那件事，第一步先別急著花錢。",
+      "description": "回一句你卡在哪，我幫你找到免費第一步。",
+      "image": "assets/go-v4/experiments/go-line-dont-pay-1200x630.png",
+      "wrapper": "share/go-line-dont-pay.html",
+      "url": "https://popmonster.vip/share/go-line-dont-pay.html",
+      "destination": "https://popmonster.vip/go?src=line-dont-pay",
+      "width": 1200,
+      "height": 630
+    },
+    {
+      "platform": "line",
+      "variant": "connect",
+      "source": "line-connect",
+      "title": "你先說卡在哪，我幫你接到正確第一步。",
+      "description": "回一句你卡在哪，我幫你找到免費第一步。",
+      "image": "assets/go-v4/experiments/go-line-connect-1200x630.png",
+      "wrapper": "share/go-line-connect.html",
+      "url": "https://popmonster.vip/share/go-line-connect.html",
+      "destination": "https://popmonster.vip/go?src=line-connect",
+      "width": 1200,
+      "height": 630
+    },
+    {
+      "platform": "threads",
+      "variant": "free-first",
+      "source": "threads-free-first",
+      "title": "先拿一個免費第一步，再決定要不要往下做。",
+      "description": "不急著推銷，先聊你現在卡住的那一步。",
+      "image": "assets/go-v4/experiments/go-threads-free-first-1200x630.png",
+      "wrapper": "share/go-threads-free-first.html",
+      "url": "https://popmonster.vip/share/go-threads-free-first.html",
+      "destination": "https://popmonster.vip/go?src=threads-free-first",
+      "width": 1200,
+      "height": 630
+    },
+    {
+      "platform": "threads",
+      "variant": "dont-pay",
+      "source": "threads-dont-pay",
+      "title": "你卡住的那件事，第一步先別急著花錢。",
+      "description": "不急著推銷，先聊你現在卡住的那一步。",
+      "image": "assets/go-v4/experiments/go-threads-dont-pay-1200x630.png",
+      "wrapper": "share/go-threads-dont-pay.html",
+      "url": "https://popmonster.vip/share/go-threads-dont-pay.html",
+      "destination": "https://popmonster.vip/go?src=threads-dont-pay",
+      "width": 1200,
+      "height": 630
+    },
+    {
+      "platform": "threads",
+      "variant": "connect",
+      "source": "threads-connect",
+      "title": "你先說卡在哪，我幫你接到正確第一步。",
+      "description": "不急著推銷，先聊你現在卡住的那一步。",
+      "image": "assets/go-v4/experiments/go-threads-connect-1200x630.png",
+      "wrapper": "share/go-threads-connect.html",
+      "url": "https://popmonster.vip/share/go-threads-connect.html",
+      "destination": "https://popmonster.vip/go?src=threads-connect",
+      "width": 1200,
+      "height": 630
+    }
+  ]
+}
