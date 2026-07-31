@@ -14,6 +14,8 @@ from app.extensions import db
 from app.models import MediaAsset, Platform, Post, PostTarget, SocialAccount, User
 from app.utils.storage import derivative_key, fresh_media_url
 
+from .conftest import login_as
+
 EXPIRED = "https://r2.example/videos/a.mov?X-Amz-Date=20260101&X-Amz-Signature=old"
 FRESH = "https://r2.example/videos/a.mov?X-Amz-Date=20260801&X-Amz-Signature=new"
 
@@ -114,3 +116,35 @@ def test_publish_request_carries_a_freshly_signed_url(app, target):
         with patch("app.utils.storage.presign_get", return_value=FRESH):
             req = publisher_request_from(row.post, row)
     assert req.media_url == FRESH, "發文時必須重新簽名，不能沿用上傳當下那條"
+
+
+def test_media_library_returns_a_freshly_signed_url(client, app):
+    """The library's own thumbnails break after 7 days for the same reason
+    dispatch did — the stored URL is presigned. Sign on read."""
+    from app.utils.crypto import cipher  # noqa: F401 - keeps import parity
+
+    with app.app_context():
+        user = User(email="lib@example.com", display_name="l")
+        db.session.add(user)
+        db.session.flush()
+        db.session.add(MediaAsset(
+            user_id=user.id, kind="image", storage_url=EXPIRED,
+            mime_type="image/jpeg",
+            compliance_report={"s3_bucket": "b", "s3_key": "users/1/image/a.jpg"},
+        ))
+        db.session.add(MediaAsset(
+            user_id=user.id, kind="image", storage_url="https://cdn.example/ext.jpg",
+            mime_type="image/jpeg", compliance_report={},
+        ))
+        db.session.commit()
+        user_id = user.id
+
+    login_as(client, user_id)
+    with patch("app.utils.storage.presign_get", return_value=FRESH):
+        body = client.get("/api/uploads").get_json()
+
+    by_url = {i["storage_url"]: i for i in body["items"]}
+    assert FRESH in by_url, "自家素材必須回傳重新簽名的連結"
+    assert by_url[FRESH]["resignable"] is True
+    external = by_url["https://cdn.example/ext.jpg"]
+    assert external["resignable"] is False, "外部素材簽不了，要誠實標示"

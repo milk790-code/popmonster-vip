@@ -84,10 +84,21 @@ def list_uploads():
 
 
 def _serialize_asset(m: MediaAsset) -> dict:
+    from ..utils.storage import fresh_media_url
+
+    report = m.compliance_report or {}
+    # Same expiry bug as the dispatcher had: the stored URL is presigned and
+    # dies after 7 days, so the media library's own thumbnails break for
+    # anything older than a week. Sign on read instead of replaying.
+    # ``resignable`` says whether we hold a durable bucket+key for this asset
+    # — assets without one (external/imported media) can only ever return
+    # whatever URL they arrived with.
+    resignable = bool(report.get("s3_bucket") and report.get("s3_key"))
     return {
         "id": m.id,
         "kind": m.kind,
-        "storage_url": m.storage_url,
+        "storage_url": fresh_media_url(m) or m.storage_url,
+        "resignable": resignable,
         "mime_type": m.mime_type,
         "width": m.width,
         "height": m.height,
