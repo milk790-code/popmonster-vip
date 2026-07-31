@@ -161,6 +161,7 @@ def create_app() -> Flask:
     from .api.system import bp as system_bp
     from .api.login import bp as login_bp
     from .api.communities import bp as communities_bp
+    from .api.graph_permissions import bp as graph_permissions_bp
 
     # 96號 指令2: read-only alerts endpoint for token monitor results.
     from .api.alerts import bp as alerts_bp
@@ -183,6 +184,7 @@ def create_app() -> Flask:
     app.register_blueprint(uploads_bp)
     app.register_blueprint(alerts_bp)
     app.register_blueprint(communities_bp)
+    app.register_blueprint(graph_permissions_bp)
     app.register_blueprint(system_bp)
 
     @app.get("/healthz")
