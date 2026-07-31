@@ -76,28 +76,58 @@ def list_communities():
     )
 
 
-def _plan_for_account(account, *, link_url: str, now: datetime) -> dict:
+def last_shared_by_url(accounts) -> dict[str, tuple[datetime, str]]:
+    """每個社團最後一次被分享的時間，跨所有帳號取最新的一筆。
+
+    節奏煞車必須看整個社團，不能只看單一帳號。同一個社團常常掛在同業務線
+    的好幾個粉專底下——如果各算各的，17 個粉專配 14 天間隔，那個社團最快
+    可以每天被灌一次，煞車等於不存在。社團裡的人看到的是「又是這家」，
+    不會去分辨是哪一個粉專發的。
+    """
+    latest: dict[str, tuple[datetime, str]] = {}
+    for account in accounts:
+        for community in read_profile(account)["communities"]:
+            stamp = _parse_iso(community.get("last_shared_at"))
+            url = community.get("url")
+            if not stamp or not url:
+                continue
+            if url not in latest or stamp > latest[url][0]:
+                latest[url] = (stamp, account.handle)
+    return latest
+
+
+def _plan_for_account(account, *, link_url: str, now: datetime,
+                      shared_elsewhere: dict[str, tuple[datetime, str]] | None = None) -> dict:
     profile = read_profile(account)
+    shared_elsewhere = shared_elsewhere or {}
     due, holding = [], []
 
     for community in profile["communities"]:
         if not community.get("active", True):
             continue
 
-        last = _parse_iso(community.get("last_shared_at"))
+        own = _parse_iso(community.get("last_shared_at"))
+        other = shared_elsewhere.get(community.get("url"))
+        last, by = own, account.handle
+        if other and (last is None or other[0] > last):
+            last, by = other
         cadence = int(community.get("cadence_days") or 14)
         if last is not None:
             next_ok = last + timedelta(days=cadence)
             if next_ok > now:
+                same_account = by == account.handle
                 holding.append(
                     {
                         "name": community["name"],
                         "url": community["url"],
                         "next_eligible_at": next_ok.isoformat(),
+                        "last_shared_by": by,
                         "days_remaining": max(
                             1, (next_ok - now).days + (1 if (next_ok - now).seconds else 0)
                         ),
-                        "reason": f"上次分享後還沒滿 {cadence} 天",
+                        "reason": f"上次分享後還沒滿 {cadence} 天"
+                        if same_account
+                        else f"「{by}」剛分享過，還沒滿 {cadence} 天",
                     }
                 )
                 continue
@@ -183,8 +213,13 @@ def plan_shares():
             if wanted is None or account.id in set(wanted):
                 accounts.append(account)
 
+    # 煞車要看整個社團的分享史，所以基準要從「所有帳號」算，
+    # 不能只從這次挑到的那幾個帳號算——否則單選一個粉專時，
+    # 別的粉專昨天才分享過的社團會被誤判成可以分享。
+    shared_elsewhere = last_shared_by_url(_owned_accounts())
     plans = [
-        _plan_for_account(a, link_url=link_url, now=now)
+        _plan_for_account(a, link_url=link_url, now=now,
+                          shared_elsewhere=shared_elsewhere)
         for a in accounts
     ]
     plans = [p for p in plans if p["due"] or p["holding"]]

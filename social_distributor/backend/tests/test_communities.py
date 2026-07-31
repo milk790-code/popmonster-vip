@@ -227,3 +227,62 @@ def test_list_communities_skips_accounts_with_none(client, app):
     body = client.get("/api/communities").get_json()
     assert body["total_communities"] == 1
     assert [a["handle"] for a in body["accounts"]] == ["@popmonster"]
+
+
+def _seed_two_accounts_same_community(app):
+    """同一個社團掛在兩個粉專底下——這是實際會發生的常態。"""
+    with app.app_context():
+        user = User(email="two@example.com", display_name="t")
+        db.session.add(user)
+        db.session.flush()
+        ids = []
+        for i, handle in enumerate(("A粉專", "B粉專")):
+            account = SocialAccount(
+                user_id=user.id,
+                platform=Platform.FACEBOOK,
+                external_account_id=f"page-{i}",
+                handle=handle,
+                access_token_enc=b"a",
+            )
+            db.session.add(account)
+            db.session.flush()
+            write_profile(account, validate_profile({"communities": [GROUP_A]}))
+            ids.append(account.id)
+        db.session.commit()
+        return user.id, ids
+
+
+def test_one_page_sharing_holds_the_community_for_every_other_page(client, app):
+    """煞車必須看整個社團。各算各的話，17 個粉專配 14 天間隔，
+    那個社團最快可以每天被灌一次——社團裡的人只會覺得「又是這家」。"""
+    user_id, (a_id, b_id) = _seed_two_accounts_same_community(app)
+    login_as(client, user_id)
+
+    both = client.post("/api/communities/plan", json={}).get_json()
+    assert both["due_count"] == 2  # 兩個粉專都還沒分享過
+
+    res = client.post("/api/communities/mark-shared",
+                      json={"account_id": a_id, "urls": [GROUP_A["url"]]})
+    assert res.status_code == 200
+
+    after = client.post("/api/communities/plan", json={}).get_json()
+    assert after["due_count"] == 0, "A 分享完，B 不該還被列為可分享"
+    assert after["holding_count"] == 2
+
+    held = [h for p in after["accounts"] for h in p["holding"]]
+    borrowed = [h for h in held if h["last_shared_by"] == "A粉專"]
+    assert len(borrowed) == 2
+    assert any("A粉專" in h["reason"] for h in held if h["last_shared_by"] == "A粉專")
+
+
+def test_selecting_one_account_still_sees_other_accounts_history(client, app):
+    """只挑 B 粉專來算時，也要看得到 A 昨天分享過——否則單選就繞過了煞車。"""
+    user_id, (a_id, b_id) = _seed_two_accounts_same_community(app)
+    login_as(client, user_id)
+    client.post("/api/communities/mark-shared",
+                json={"account_id": a_id, "urls": [GROUP_A["url"]]})
+
+    only_b = client.post("/api/communities/plan",
+                         json={"account_ids": [b_id]}).get_json()
+    assert only_b["due_count"] == 0
+    assert only_b["accounts"][0]["holding"][0]["last_shared_by"] == "A粉專"
