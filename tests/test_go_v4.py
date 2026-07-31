@@ -418,6 +418,33 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertIn('primary.href = "#problem-router"', js)
         self.assertIn('primary.href = "#all-services"', js)
 
+    def test_both_analytics_files_share_one_source_allowlist(self):
+        """go.html 載入 go.js 與 go-analytics.js 兩支，各自維護一份來源碼白名單，
+        但送去不同的地方（go.js → go-events Worker；go-analytics.js → GA4）。
+
+        兩份漂移的後果是沉默的：白名單外的 src 會被靜默改判成 "direct"，
+        所以同一批流量在 Worker 記對、在 GA 記錯，而且不會有任何錯誤訊息。
+        2026-08-01 實際發生過——PWA 那批（pwa/homescreen/profile-bio）只加進
+        go.js，go-analytics.js 漏了，GA 那邊整批算成 direct。
+        """
+        pattern = r"ALLOWED_%s\s*=\s*new Set\(\[(.*?)\]\)"
+
+        def allowlist(relative: str, name: str) -> set:
+            body = re.search(pattern % name, self.read_required(relative), re.S)
+            self.assertIsNotNone(
+                body, f"{relative} 找不到 ALLOWED_{name} 定義"
+            )
+            return set(re.findall(r'"([^"]+)"', body.group(1)))
+
+        for name in ("SOURCES", "SURFACES"):
+            with self.subTest(allowlist=name):
+                self.assertEqual(
+                    allowlist("js/go.js", name),
+                    allowlist("js/go-analytics.js", name),
+                    f"js/go.js 與 js/go-analytics.js 的 ALLOWED_{name} 不一致——"
+                    "兩份都要改，否則其中一邊的追蹤會靜默併成 direct",
+                )
+
     def test_ga4_funnel_is_explicitly_consented_and_allowlisted(self):
         analytics = self.read_required("js/go-analytics.js")
         for event_name in self.expected_events:
