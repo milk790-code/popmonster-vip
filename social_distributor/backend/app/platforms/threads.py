@@ -43,17 +43,41 @@ REDIRECT   = os.getenv("THREADS_REDIRECT_URI", "") or (
 
 
 def _raise(resp: requests.Response, context: str) -> None:
+    """Raise with everything Meta told us, not just ``message``.
+
+    Meta's top-level ``message`` is often just "Invalid parameter", which is
+    useless on its own — a Threads post failed nightly for over ten days with
+    exactly that string and no way to tell which parameter. The detail lives
+    in ``error_subcode``, ``error_user_title``/``error_user_msg`` (the
+    human-readable pair) and ``fbtrace_id`` (what Meta support asks for).
+    Dropping them turns a diagnosable failure into a guess.
+    """
+    subcode = user_msg = trace = None
     try:
         err = resp.json().get("error", {})
         msg = err.get("message", resp.text)
         code = str(err.get("code", resp.status_code))
+        subcode = err.get("error_subcode")
+        user_msg = " / ".join(
+            p for p in (err.get("error_user_title"), err.get("error_user_msg")) if p
+        ) or None
+        trace = err.get("fbtrace_id")
     except Exception:
         msg = resp.text or "unknown error"
         code = str(resp.status_code)
-    retryable = resp.status_code >= 500
+
+    parts = [f"Threads {context}: {msg}"]
+    if user_msg:
+        parts.append(f"（{user_msg}）")
+    extras = ", ".join(
+        f"{k}={v}" for k, v in (("subcode", subcode), ("fbtrace_id", trace)) if v
+    )
+    if extras:
+        parts.append(f"[{extras}]")
+
     raise PlatformError(
-        f"Threads {context}: {msg}",
-        retryable=retryable,
+        " ".join(parts),
+        retryable=resp.status_code >= 500,
         status_code=resp.status_code,
         platform_code=code,
     )
