@@ -24,7 +24,19 @@ body {
   border-bottom: 1px solid #23272e;
 }
 .topbar h1 { font-size: 18px; margin: 0; color: var(--accent); }
-.topbar nav { display: flex; gap: 8px; flex: 1; }
+/* Horizontal scroll instead of squeeze: with 15 tabs the flex children were
+   compressed until Chinese labels wrapped to one character per line. */
+.topbar nav {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  overflow-x: auto;
+  /* Keep the overflow affordance quiet: a bright default scrollbar sitting
+     under the tab row reads as a broken layout rather than a hint. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.topbar nav::-webkit-scrollbar { height: 0; }
 .topbar nav button {
   background: transparent;
   color: var(--text);
@@ -32,6 +44,8 @@ body {
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 .topbar nav button.active,
 .topbar nav button:hover {
@@ -286,3 +300,155 @@ th { color: var(--muted); font-weight: 500; }
 }
 .hint { color: var(--muted); font-size: 13px; }
 footer { color: var(--muted); padding: 24px; font-size: 12px; max-width: 1100px; margin: 0 auto; }
+
+/* --- 帳號中控 ------------------------------------------------------- */
+/* Asymmetric split on purpose: the account list is a scanning column, the
+   editor is a reading column, so they don't deserve equal width. */
+.console-split {
+  display: grid;
+  grid-template-columns: 17rem minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 14px;
+}
+.console-lede { line-height: 1.75; max-width: 56ch; }
+.console-note { line-height: 1.75; margin: 2px 0 0; }
+.console-list { position: sticky; top: 16px; }
+.console-list input[type="search"] { width: 100%; }
+.console-accounts {
+  margin-top: 8px;
+  max-height: 30rem;
+  overflow-y: auto;
+  border: 1px solid #23272e;
+  border-radius: 8px;
+}
+.console-accounts .console-line {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+  color: var(--text);
+  padding: 9px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.6;
+  transition: background .35s cubic-bezier(.2, .7, .3, 1);
+}
+.console-accounts .console-line:last-child { border-bottom: none; }
+.console-accounts .console-line:hover { background: rgba(200, 169, 107, .07); }
+.console-accounts .console-line.selected {
+  background: rgba(200, 169, 107, .13);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.console-line .console-line-sub {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .04em;
+}
+.console-line .dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  background: #3a3f48;
+}
+.console-line .dot.on { background: var(--accent); }
+
+.console-detail fieldset { margin-bottom: 14px; }
+.console-detail .grid { max-width: 100%; }
+.console-empty { color: var(--muted); padding: 40px 4px; font-size: 14px; }
+.console-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+}
+.console-handle { font-size: 19px; color: var(--accent); }
+.console-meta { display: block; color: var(--muted); font-size: 12px; letter-spacing: .06em; }
+.console-head button {
+  background: var(--accent);
+  color: #0f1115;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.console-msg { min-height: 18px; font-size: 13px; color: var(--muted); line-height: 1.7; }
+.console-msg.ok { color: var(--success); }
+.console-msg.bad { color: var(--danger); }
+button.ghost {
+  background: transparent;
+  color: var(--accent);
+  border: 1px dashed rgba(200, 169, 107, .5);
+  border-radius: 6px;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 13px;
+}
+button.ghost:hover { border-style: solid; }
+
+.community-rows { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+.community-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1.6fr 5rem 4.5rem auto;
+  gap: 8px;
+  align-items: end;
+}
+.community-row label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
+.community-row .row-why { grid-column: 1 / -1; }
+.community-row .flags { display: flex; gap: 12px; align-items: center; font-size: 12px; color: var(--muted); }
+.community-row .flags label { flex-direction: row; align-items: center; gap: 4px; }
+.community-row button.drop {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid rgba(229, 115, 115, .4);
+  border-radius: 6px;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.console-rule { border: none; border-top: 1px solid rgba(255, 255, 255, .1); margin: 28px 0 18px; }
+.console-plan-bar { display: flex; gap: 12px; align-items: flex-end; margin: 10px 0 14px; }
+.console-plan-bar label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+.console-plan-bar button {
+  background: var(--accent); color: #0f1115; border: none;
+  border-radius: 6px; padding: 8px 16px; cursor: pointer; font-weight: 600;
+}
+.plan-account { border: 1px solid #23272e; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; }
+.plan-account h4 { margin: 0 0 8px; font-size: 14px; color: var(--accent); }
+.plan-due { display: flex; flex-direction: column; gap: 8px; }
+.plan-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px 0; border-top: 1px solid rgba(255, 255, 255, .06);
+  font-size: 13px; line-height: 1.7;
+}
+.plan-item:first-child { border-top: none; }
+.plan-item a { color: var(--accent); }
+.plan-item .why { color: var(--muted); font-size: 12px; display: block; }
+.plan-item .nolink { color: var(--danger); font-size: 12px; display: block; }
+.plan-item button {
+  margin-left: auto; white-space: nowrap;
+  background: transparent; color: var(--text);
+  border: 1px solid #2a2f38; border-radius: 6px;
+  padding: 5px 10px; cursor: pointer; font-size: 12px;
+}
+.plan-item button:hover { border-color: var(--accent); }
+.plan-holding { color: var(--muted); font-size: 12px; line-height: 1.8; margin-top: 8px; }
+
+@media (max-width: 720px) {
+  .console-split { grid-template-columns: 1fr; }
+  .console-list { position: static; }
+  .console-accounts { max-height: 15rem; }
+  .community-row { grid-template-columns: 1fr 1fr; }
+  .console-head { flex-direction: column; align-items: stretch; }
+}

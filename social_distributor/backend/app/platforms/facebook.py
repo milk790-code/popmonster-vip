@@ -164,14 +164,17 @@ class FacebookPublisher(Publisher):
     def _post_first_comment(self, token, post_id, req: PublishRequest) -> None:
         """Post a first comment on the page's own post right after publishing.
 
-        Content resolution order:
-          1. request.first_comment  (per-post, if the API/UI supplies it)
-          2. FB_FIRST_COMMENT env var  (deployment-wide default)
+        ``req.first_comment`` is resolved upstream by
+        ``compliance.engine.resolve_first_comment`` (per-post override, then
+        per-account profile, then brand-line default, then the
+        ``FB_FIRST_COMMENT`` environment variable). The env var is checked
+        here too so a directly-constructed request still honours it.
+
         The text supports an optional ``{link}`` placeholder, filled with
         request.link_url. This never raises -- a failed comment must not
         fail an already-succeeded post.
         """
-        template = (getattr(req, "first_comment", None)
+        template = (getattr(req, "first_comment", "")
                     or os.environ.get("FB_FIRST_COMMENT", "")).strip()
         if not template or not post_id:
             return

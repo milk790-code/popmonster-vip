@@ -29,6 +29,9 @@ class PublishRequest:
     link_url: str | None = None
     media_url: str | None = None
     media_kind: str | None = None  # "video" | "image" | None
+    # Text posted as a comment on our own post immediately after publishing.
+    # Empty means "don't comment". Supports a ``{link}`` placeholder.
+    first_comment: str = ""
     overrides: dict[str, Any] = field(default_factory=dict)
 
 

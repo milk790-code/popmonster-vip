@@ -182,6 +182,46 @@ def target_media_asset(post: Post, target: PostTarget):
     return media
 
 
+def resolve_first_comment(target: PostTarget) -> str:
+    """Pick the first-comment text for one delivery, most specific wins.
+
+    1. this post on this account   (``target.overrides``)
+    2. this account, always        (``account.extra.profile.first_comment``)
+    3. this brand line, always     (``group.style_profile.first_comment``)
+    4. deployment-wide fallback    (``FB_FIRST_COMMENT``)
+
+    Levels 1-3 come from the database, so they work in the Celery worker.
+    Level 4 only ever applied in whichever process happened to have the
+    variable set, which is why it is now the last resort rather than the
+    only source.
+    """
+    import os
+
+    from ..utils.account_profile import read_profile
+
+    override = (target.overrides or {}).get("first_comment")
+    if isinstance(override, str) and override.strip():
+        return override.strip()
+
+    if target.account is not None:
+        text = read_profile(target.account).get("first_comment") or ""
+        if text.strip():
+            return text.strip()
+
+    # PostTarget holds group_id but has no ``group`` relationship, so this
+    # level needs an explicit load. Skipping it would fail silently.
+    if target.group_id:
+        from ..models import AccountGroup
+
+        group = db.session.get(AccountGroup, target.group_id)
+        if group is not None:
+            text = (group.style_profile or {}).get("first_comment") or ""
+            if isinstance(text, str) and text.strip():
+                return text.strip()
+
+    return os.environ.get("FB_FIRST_COMMENT", "").strip()
+
+
 def publisher_request_from(post: Post, target: PostTarget):
     """Build a PublishRequest from ORM rows. Defined here to avoid a cycle."""
     from ..platforms.base import PublishRequest
@@ -190,6 +230,7 @@ def publisher_request_from(post: Post, target: PostTarget):
     caption = overrides.pop("caption", post.caption)
     title = overrides.pop("title", post.title)
     overrides.pop("_media_id", None)
+    overrides.pop("first_comment", None)
     media = target_media_asset(post, target)
     media_url = media.storage_url if media else None
     media_kind = media.kind if media else None
@@ -199,5 +240,6 @@ def publisher_request_from(post: Post, target: PostTarget):
         link_url=post.link_url,
         media_url=media_url,
         media_kind=media_kind,
+        first_comment=resolve_first_comment(target),
         overrides=overrides,
     )

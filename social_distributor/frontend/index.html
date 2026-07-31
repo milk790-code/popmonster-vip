@@ -40,6 +40,7 @@
       <button data-tab="compose">Compose</button>
       <button data-tab="distribute">Distribute</button>
       <button data-tab="groups">人設群組</button>
+      <button data-tab="console">帳號中控</button>
       <button data-tab="schedule">Schedule</button>
       <button data-tab="status">Status board</button>
       <button data-tab="accounts">Accounts</button>
@@ -412,6 +413,139 @@
         </thead>
         <tbody></tbody>
       </table>
+    </section>
+
+    <section id="tab-console" class="tab console">
+      <h2>帳號中控</h2>
+      <p class="hint console-lede">
+        每個帳號的定位、首則留言、來源碼、簡介草稿與精選社團，都存在這裡，不用切帳號。
+        左邊挑一個帳號，右邊改完按儲存。
+      </p>
+
+      <div class="console-split">
+        <aside class="console-list">
+          <input id="consoleFilter" type="search" placeholder="搜尋帳號或粉專名稱" />
+          <div id="consoleAccounts" class="console-accounts"><p class="hint">載入中⋯</p></div>
+        </aside>
+
+        <div class="console-detail">
+          <div id="consoleEmpty" class="console-empty">
+            <p>左邊選一個帳號開始。</p>
+          </div>
+
+          <form id="consoleForm" hidden>
+            <div class="console-head">
+              <div>
+                <span id="consoleHandle" class="console-handle"></span>
+                <span id="consoleMeta" class="console-meta"></span>
+              </div>
+              <button type="submit">儲存這個帳號</button>
+            </div>
+
+            <fieldset>
+              <legend>這個帳號是幹嘛的</legend>
+              <div class="grid">
+                <label>定位備註（只有你看得到）
+                  <textarea name="note" rows="2" placeholder="例：泡泡怪獸主力粉專，發成品照與教學"></textarea>
+                </label>
+                <label>人設語氣（餵給文案變體引擎）
+                  <textarea name="persona" rows="2" placeholder="例：老師傅口吻，講實話不吹噓，會直接說哪款不適合"></textarea>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>發文時自動帶的東西</legend>
+              <div class="grid">
+                <label>首則留言（發完文自動貼在自己貼文下）
+                  <textarea name="first_comment" rows="2"
+                    placeholder="例：完整選型對照表在這 👉 {link}"></textarea>
+                </label>
+                <p class="hint console-note">
+                  <code>{link}</code> 會換成這則貼文的連結。留空＝不留言。
+                  連結放留言而不是內文，是為了不讓預覽卡被吃掉。
+                </p>
+                <label>
+                  <!-- The label is a column flex container, so a bare <code>
+                       would become its own flex line and split the sentence. -->
+                  <span>引流來源碼（<code>?src=</code> 後面那串）</span>
+                  <input name="link_src" placeholder="例：fb-a1b2c3" />
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>帳號門面（草稿）</legend>
+              <div class="grid">
+                <label>個人介紹／簡介
+                  <textarea name="bio" rows="3"></textarea>
+                </label>
+                <label>行動呼籲按鈕文字
+                  <input name="cta" placeholder="例：傳送訊息" />
+                </label>
+                <label>封面素材位置
+                  <input name="cover_asset" placeholder="Drive 路徑或圖片網址" />
+                </label>
+                <label>大頭貼素材位置
+                  <input name="avatar_asset" placeholder="Drive 路徑或圖片網址" />
+                </label>
+                <p class="hint console-note" id="consoleBioNote"></p>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>精選社團</legend>
+              <p class="hint console-note">
+                手挑的社團名單。<strong>間隔天數</strong>是防止同一個社團被重複洗版的煞車——
+                沒到期的不會出現在分享清單裡。
+              </p>
+              <div id="consoleCommunities" class="community-rows"></div>
+              <button type="button" id="consoleAddCommunity" class="ghost">＋ 加一個社團</button>
+            </fieldset>
+
+            <fieldset>
+              <legend>跨帳號互助</legend>
+              <div class="grid">
+                <label>這個帳號的角色
+                  <select name="interaction_role">
+                    <option value="off">不參與（預設）</option>
+                    <option value="leader">主帳號－原始貼文發這裡</option>
+                    <option value="supporter">應援－可以在主帳號貼文下留有內容的留言</option>
+                  </select>
+                </label>
+                <label>每天最多互動幾次
+                  <input name="interaction_max" type="number" min="0" max="5" value="1" />
+                </label>
+                <label>留言素材池（一行一則，每則至少 8 個字）
+                  <textarea name="comment_pool" rows="4"
+                    placeholder="這款我們自己車庫也在用，冬天低溫比較不會結塊。&#10;上一批客人問最多的就是這個問題。"></textarea>
+                </label>
+                <p class="hint console-note">
+                  只寫「推」「+1」這種會被擋下來——那是洗互動的特徵，也是最容易被檢舉的行為。
+                  留言要有實質內容才存得進去。
+                </p>
+              </div>
+            </fieldset>
+
+            <p id="consoleMsg" class="console-msg"></p>
+          </form>
+        </div>
+      </div>
+
+      <hr class="console-rule" />
+
+      <h3>今天可以分享到哪些社團</h3>
+      <p class="hint console-note">
+        官方 API 不能代發到 Facebook 社團，所以這裡算好「該去哪、講什麼、哪些還沒到期」，
+        你點開貼上就好。貼完按「記一筆」，間隔天數才會開始算。
+      </p>
+      <div class="console-plan-bar">
+        <label>用哪一則貼文算
+          <input id="planPostId" type="number" min="1" placeholder="貼文 ID（可留空）" />
+        </label>
+        <button type="button" id="planRefresh">算給我看</button>
+      </div>
+      <div id="consolePlan"></div>
     </section>
 
     <section id="tab-media" class="tab">

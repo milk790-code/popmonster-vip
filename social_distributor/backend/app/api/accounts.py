@@ -8,10 +8,26 @@ from flask import Blueprint, jsonify, request
 from ..extensions import db
 from ..models import Platform, SocialAccount, User
 from ..platforms import all_platforms
+from ..utils.account_profile import (
+    ProfileError,
+    read_profile,
+    validate_profile,
+    write_profile,
+)
 from ..utils.audit import record as audit
 from ..utils.auth import current_user_id
 
 bp = Blueprint("accounts", __name__, url_prefix="/api/accounts")
+
+
+def _load_owned_account(account_id: int):
+    """Return (account, error_response). Exactly one is None."""
+    account = db.session.get(SocialAccount, account_id)
+    if not account:
+        return None, (jsonify({"error": "not found"}), 404)
+    if account.user_id != current_user_id():
+        return None, (jsonify({"error": "forbidden"}), 403)
+    return account, None
 
 
 @bp.get("")
@@ -75,6 +91,78 @@ def request_erasure(user_id: int):
     audit("user.erasure_requested", "user", user.id, actor_user_id=user.id)
     db.session.commit()
     return jsonify({"queued": user.id})
+
+
+@bp.get("/profiles")
+def list_profiles():
+    """Every account's operating profile in one response.
+
+    The fleet is 60+ accounts across six brand lines. Reading them one at a
+    time is what forces the operator to "switch accounts" mentally, which is
+    exactly the friction this endpoint removes.
+    """
+    rows = (
+        db.session.query(SocialAccount)
+        .filter_by(user_id=current_user_id())
+        .filter(SocialAccount.revoked_at.is_(None))
+        .order_by(SocialAccount.platform, SocialAccount.handle)
+        .all()
+    )
+    return jsonify(
+        [
+            {
+                "id": a.id,
+                "platform": a.platform.value,
+                "handle": a.handle,
+                "external_account_id": a.external_account_id,
+                "groups": [{"id": g.id, "name": g.name} for g in a.groups],
+                "profile": read_profile(a),
+            }
+            for a in rows
+        ]
+    )
+
+
+@bp.get("/<int:account_id>/profile")
+def get_profile(account_id: int):
+    account, err = _load_owned_account(account_id)
+    if err:
+        return err
+    return jsonify({"id": account.id, "handle": account.handle,
+                    "profile": read_profile(account)})
+
+
+@bp.put("/<int:account_id>/profile")
+def put_profile(account_id: int):
+    """Replace an account's operating profile.
+
+    Full replace rather than merge: a partial PATCH makes "clear the
+    community list" impossible to express, and silently keeping a stale
+    first_comment after an edit is worse than making the caller resend it.
+    """
+    account, err = _load_owned_account(account_id)
+    if err:
+        return err
+    body = request.get_json(silent=True) or {}
+    try:
+        profile = validate_profile(body.get("profile", body))
+    except ProfileError as exc:
+        return jsonify({"error": "invalid profile", "details": exc.errors}), 400
+
+    write_profile(account, profile)
+    audit(
+        "account.profile_updated",
+        "social_account",
+        account.id,
+        actor_user_id=account.user_id,
+        detail={
+            "communities": len(profile["communities"]),
+            "first_comment_set": bool(profile["first_comment"]),
+            "interaction_role": profile["interaction"]["role"],
+        },
+    )
+    db.session.commit()
+    return jsonify({"id": account.id, "profile": profile})
 
 
 @bp.patch("/<int:account_id>/proxy")
