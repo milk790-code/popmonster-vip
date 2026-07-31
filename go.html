@@ -12,14 +12,21 @@
 
   <link rel="canonical" href="https://popmonster.vip/go">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="POP 宇宙">
   <link rel="stylesheet" href="css/go.css">
+  <link rel="stylesheet" href="css/go-app.css">
 
   <meta property="og:type" content="website">
   <meta property="og:locale" content="zh_TW">
   <meta property="og:site_name" content="POP 免費接線台">
   <meta property="og:title" content="你卡住的那件事，第一步先別急著花錢。">
   <meta property="og:description" content="生意、網站、風險、出國、汽美，10 個免費入口幫你把下一步分清楚。">
-  <meta property="og:url" content="https://popmonster.vip/go?v=20260729">
+  <meta property="og:url" content="https://popmonster.vip/go?v=20260801">
   <meta property="og:image" content="https://popmonster.vip/assets/go-v4/go-link-preview-1200x630-20260729.png">
   <meta property="og:image:secure_url" content="https://popmonster.vip/assets/go-v4/go-link-preview-1200x630-20260729.png">
   <meta property="og:image:type" content="image/png">
@@ -34,7 +41,8 @@
   <meta name="twitter:image:alt" content="POP 免費接線台：10 個免費第一步，先把問題分清楚再決定怎麼做">
 
   <script src="js/go-analytics.js" defer></script>
-  <script src="js/go.js?v=20260729" defer></script>
+  <script src="js/go.js?v=20260801" defer></script>
+  <script src="js/go-app.js?v=20260801" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">跳到主要內容</a>
@@ -313,5 +321,51 @@
     </nav>
     <p class="footer-note">LINE 點擊只代表開啟入口，不代表訊息已送出。</p>
   </footer>
+
+  <!-- App 層：安裝橫幅（預設隱藏，由 go-app.js 依環境決定顯示） -->
+  <aside id="app-install-bar" class="app-install-bar" aria-label="把 POP 宇宙加入主畫面" hidden>
+    <span class="app-install-icon" aria-hidden="true"><img src="assets/app/icon-192.png" alt=""></span>
+    <span class="app-install-copy">
+      <strong>把 POP 宇宙裝進手機</strong>
+      <small>免下載、不佔空間，主畫面點開就用</small>
+    </span>
+    <span class="app-install-actions">
+      <button id="app-install-cta" class="app-install-cta" type="button">安裝</button>
+      <button id="app-install-dismiss" class="app-install-dismiss" type="button" aria-label="暫時關閉">×</button>
+    </span>
+  </aside>
+
+  <!-- App 層：安裝教學（iOS／站內瀏覽器情境） -->
+  <div id="app-install-sheet" class="app-install-sheet" role="dialog" aria-modal="true" aria-labelledby="app-sheet-title" hidden>
+    <div class="app-sheet-card">
+      <h3 id="app-sheet-title">把 POP 宇宙裝進手機</h3>
+      <p id="app-sheet-lede">不用下載、不佔空間，裝好跟 App 一樣從主畫面點開。</p>
+      <ol id="app-sheet-steps" class="app-sheet-steps"></ol>
+      <div class="app-sheet-actions">
+        <a id="app-sheet-external" class="app-install-cta" href="#" rel="noopener" hidden>用瀏覽器開啟</a>
+        <button id="app-sheet-close" class="app-sheet-close" type="button">我知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App 殼：加入主畫面後（standalone）才顯示的底部導覽 -->
+  <nav class="app-tabbar" aria-label="App 導覽">
+    <a href="/go?src=pwa" data-path="/go">
+      <svg class="tab-glyph" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><ellipse cx="12" cy="12" rx="10" ry="4.6" transform="rotate(-18 12 12)"/></svg>
+      <span>宇宙</span>
+    </a>
+    <a href="/go?src=pwa#problem-router" data-path="/go#problem-router">
+      <svg class="tab-glyph" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M12 9c0 3-7 4-7 9"/><path d="M12 9c0 3 7 4 7 9"/><circle cx="5" cy="20" r="1.6"/><circle cx="19" cy="20" r="1.6"/><circle cx="12" cy="3" r="1.6"/></svg>
+      <span>幫我分流</span>
+    </a>
+    <a href="/?src=pwa" data-path="/">
+      <svg class="tab-glyph" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l1.6-4.4A2 2 0 0 1 7.5 7h9a2 2 0 0 1 1.9 1.6L20 13"/><path d="M3.5 13h17a1 1 0 0 1 1 1v3h-2.3M4.8 17H2.5v-3a1 1 0 0 1 1-1"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>
+      <span>汽美商品</span>
+    </a>
+    <a href="/systems.html?src=pwa" data-path="/systems.html">
+      <svg class="tab-glyph" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l1-5h14l1 5"/><path d="M4 10a2.4 2.4 0 0 0 4.8 0A2.4 2.4 0 0 0 13.6 10a2.4 2.4 0 0 0 4.8 0"/><path d="M5 12v8h14v-8"/><path d="M9.5 20v-5h5v5"/></svg>
+      <span>店家系統</span>
+    </a>
+  </nav>
 </body>
 </html>

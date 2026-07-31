@@ -1,0 +1,286 @@
+{
+  "$schema_note": "POP 宇宙全頁面記錄檔。給 AI 客服／自動化調用：回覆客人時可直接引用 url（一律含 https:// 才有預覽卡）＋ desc。",
+  "version": "20260801",
+  "canonical_entry": "https://popmonster.vip/go",
+  "link_policy": {
+    "rule": "對外引流一律用 https://popmonster.vip/go?v=20260801&src=<來源碼>；連結必須含 https:// 才會有 FB/LINE 預覽卡",
+    "allowed_src": [
+      "direct",
+      "business-card",
+      "package-insert",
+      "social",
+      "pwa",
+      "homescreen",
+      "profile-bio",
+      "facebook-free-first",
+      "facebook-dont-pay",
+      "facebook-connect",
+      "line-free-first",
+      "line-dont-pay",
+      "line-connect",
+      "threads-free-first",
+      "threads-dont-pay",
+      "threads-connect",
+      "fb-xxxxxx（FB 矩陣 6 碼 hex）"
+    ],
+    "og_image": "https://popmonster.vip/assets/go-v4/go-link-preview-1200x630-20260729.png"
+  },
+  "app": {
+    "install_url": "https://popmonster.vip/go?src=homescreen",
+    "manifest": "https://popmonster.vip/manifest.webmanifest",
+    "how_to_pitch": "跟客人說「可以把 POP 宇宙裝到手機主畫面，跟 App 一樣點開就用」；LINE 站內瀏覽器要先跳外部瀏覽器（連結加 openExternalBrowser=1）"
+  },
+  "lanes": [
+    {
+      "id": "business",
+      "no": "01",
+      "name": "生意與內容"
+    },
+    {
+      "id": "risk",
+      "no": "02",
+      "name": "簽約與購買避雷"
+    },
+    {
+      "id": "travel",
+      "no": "03",
+      "name": "旅行規劃"
+    },
+    {
+      "id": "auto",
+      "no": "04",
+      "name": "汽美與耗材"
+    },
+    {
+      "id": "shop",
+      "no": "05",
+      "name": "店家與品牌"
+    }
+  ],
+  "entries": [
+    {
+      "id": "brand-content",
+      "lane": "business",
+      "name": "品牌內容",
+      "kind": "line",
+      "url": "https://line.me/R/oaMessage/%40121lkspe/",
+      "line_id": "@121lkspe",
+      "desc": "免費拿三選一樣張（貼文圖卡／短影音腳本／菜單文案），每人一次、一次一項",
+      "audience": "小店家、個人品牌、想開始做內容的人",
+      "keywords": [
+        "貼文",
+        "圖卡",
+        "短影音",
+        "文案",
+        "品牌",
+        "內容代做"
+      ]
+    },
+    {
+      "id": "creatorkit",
+      "lane": "business",
+      "name": "CreatorKit 自媒體工具箱",
+      "kind": "site",
+      "url": "https://creatorkit.milk790.workers.dev/",
+      "desc": "免註冊直接用的自媒體工具箱：AI 文案、腳本、最佳發文時段等 22 支工具",
+      "audience": "自媒體經營者、創作者、小編",
+      "keywords": [
+        "AI 文案",
+        "腳本",
+        "發文時段",
+        "自媒體",
+        "工具"
+      ],
+      "ai_notes": "推廣深層連結只用安全落地：?tool=ai-caption / ai-script / besttime。不要用 video-info（要 Email 驗證）與 stt（是對麥克風不是影片轉逐字稿）。帶 src 時用 s4/f4/s5a（th*/fb*/line* 開頭的 OG 圖 404 破圖）"
+    },
+    {
+      "id": "rent-risk",
+      "lane": "risk",
+      "name": "租屋風險快篩",
+      "kind": "line",
+      "url": "https://line.me/R/oaMessage/%40207cpaps/",
+      "line_id": "@207cpaps",
+      "desc": "免費拿地址公開資訊摘要與簽約前風險快篩卡",
+      "audience": "準備租屋、簽約前想避雷的人",
+      "keywords": [
+        "租屋",
+        "簽約",
+        "凶宅",
+        "風險",
+        "房東"
+      ]
+    },
+    {
+      "id": "contract-event",
+      "lane": "risk",
+      "name": "合約事件整理",
+      "kind": "line",
+      "url": "https://line.me/R/oaMessage/%40772iosnh/",
+      "line_id": "@772iosnh",
+      "desc": "免費拿事件時間線、證據缺口與下一步清單；非法律意見，需要專業資格時協助轉介",
+      "audience": "遇到合約糾紛、需要整理證據的人",
+      "keywords": [
+        "合約",
+        "糾紛",
+        "證據",
+        "存證信函",
+        "時間線"
+      ]
+    },
+    {
+      "id": "luxury-screen",
+      "lane": "risk",
+      "name": "精品初篩",
+      "kind": "line",
+      "url": "https://line.me/R/oaMessage/%40186vktox/",
+      "line_id": "@186vktox",
+      "desc": "免費拿款式、來源、價格與行情初篩卡；非正式鑑定",
+      "audience": "想買二手精品、怕買到假貨的人",
+      "keywords": [
+        "精品",
+        "名牌",
+        "包",
+        "錶",
+        "鑑定",
+        "行情"
+      ]
+    },
+    {
+      "id": "flight-compare",
+      "lane": "travel",
+      "name": "機票比較",
+      "kind": "line",
+      "url": "https://line.me/R/oaMessage/%40129vsziy/",
+      "line_id": "@129vsziy",
+      "desc": "免費拿偏省錢、偏省時間、偏少轉機三種取向的機票比較",
+      "audience": "要出國、被比價網淹沒的人",
+      "keywords": [
+        "機票",
+        "出國",
+        "比價",
+        "轉機",
+        "航班"
+      ]
+    },
+    {
+      "id": "stay-shortlist",
+      "lane": "travel",
+      "name": "旅遊住宿三選",
+      "kind": "line",
+      "url": "https://line.me/R/oaMessage/%40805udwla/",
+      "line_id": "@805udwla",
+      "desc": "免費拿本次查詢中較符合條件的三間住宿清單",
+      "audience": "訂房選擇困難、想快速縮小範圍的人",
+      "keywords": [
+        "住宿",
+        "飯店",
+        "民宿",
+        "訂房",
+        "旅遊"
+      ]
+    },
+    {
+      "id": "auto-care",
+      "lane": "auto",
+      "name": "POP 汽美選品",
+      "kind": "site+line",
+      "url": "https://popmonster.vip/",
+      "line_id": "@150tiznd",
+      "line_url": "https://line.me/R/oaMessage/%40150tiznd/",
+      "desc": "看 32 款汽美商品，或 LINE 免費拿車況選品清單——先看車況，再買真正需要的",
+      "audience": "車主、DIY 洗車鍍膜的人",
+      "keywords": [
+        "汽車美容",
+        "鍍膜",
+        "洗車",
+        "蠟",
+        "泡泡怪獸",
+        "耗材"
+      ]
+    },
+    {
+      "id": "popcard-demo",
+      "lane": "shop",
+      "name": "POP CARD 店家系統",
+      "kind": "site",
+      "url": "https://popcard-saas-preview.milk790.workers.dev/s/jilin#story",
+      "desc": "汽美店家的服務菜單、預約、會員、車況與帳本系統——公開展示可直接看",
+      "audience": "汽美店家老闆",
+      "keywords": [
+        "店家系統",
+        "預約",
+        "會員",
+        "帳本",
+        "POP CARD",
+        "SaaS"
+      ],
+      "ai_notes": "只傳這條 preview 網址；不要傳 qa-ui-v4 開頭的 QA 舊版網址"
+    },
+    {
+      "id": "systems-hall",
+      "lane": "shop",
+      "name": "泡泡怪獸店家系統館",
+      "kind": "site",
+      "url": "https://popmonster.vip/systems.html",
+      "desc": "店家看系統展示的總入口：POP CARD 是什麼、能幫店裡接住哪些流程",
+      "audience": "汽美店家、B2B 潛在客戶",
+      "keywords": [
+        "系統館",
+        "店家",
+        "導入",
+        "展示"
+      ]
+    },
+    {
+      "id": "free-website",
+      "lane": "shop",
+      "name": "掘計畫 · 免費建官網",
+      "kind": "site",
+      "url": "https://3q-art-portfolio.milk790.workers.dev/launch-plan",
+      "desc": "建置費 NT$0 幫店家建官網；名額與條件以頁面公告為準",
+      "audience": "還沒有官網的小店家",
+      "keywords": [
+        "官網",
+        "免費",
+        "建站",
+        "掘計畫"
+      ]
+    },
+    {
+      "id": "subsidy-screen",
+      "lane": "shop",
+      "name": "政府補助快篩",
+      "kind": "site",
+      "url": "https://3q-site.milk790.workers.dev/assess.html",
+      "desc": "免登入 3 分鐘比對 10 個政府補助／貸款計畫",
+      "audience": "想申請補助、貸款的創業者與店家",
+      "keywords": [
+        "補助",
+        "貸款",
+        "政府",
+        "青創",
+        "快篩"
+      ]
+    }
+  ],
+  "brand_sites": [
+    {
+      "id": "popmonster-home",
+      "name": "POP MONSTER 官網",
+      "url": "https://popmonster.vip/",
+      "desc": "泡泡怪獸品牌正本：32 款汽美商品、品牌故事、店家系統館入口",
+      "ai_notes": "只傳 popmonster.vip 主網域；不要擴散 pages.dev 鏡像網址"
+    },
+    {
+      "id": "3q-hatchery",
+      "name": "3Q 貢丸孵化所",
+      "url": "https://milk790-code.github.io/3q-hatchery-line-oa/",
+      "desc": "3Q 品牌站"
+    }
+  ],
+  "support": {
+    "privacy": "https://popmonster.vip/privacy.html",
+    "terms": "https://popmonster.vip/terms.html",
+    "trust_promise": "免費範圍先說清楚；資料先遮蔽；需要專業資格時停止並協助轉介"
+  }
+}

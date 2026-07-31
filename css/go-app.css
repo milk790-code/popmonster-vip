@@ -1,0 +1,233 @@
+/* go-app.css — /go 宇宙 App 層（安裝引導＋App 殼）。只加不改，不動 go.css。 */
+
+/* ---------- 安裝橫幅（底部固定，可關閉） ---------- */
+.app-install-bar {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(18, 16, 13, 0.96);
+  border: 1px solid rgba(200, 169, 107, 0.45);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transform: translateY(140%);
+  transition: transform 0.35s cubic-bezier(0.22, 0.9, 0.3, 1);
+}
+.app-install-bar.is-visible { transform: translateY(0); }
+.app-install-bar[hidden] { display: none; }
+
+.app-install-icon {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  overflow: hidden;
+}
+.app-install-icon img { width: 100%; height: 100%; display: block; }
+
+.app-install-copy { flex: 1 1 auto; min-width: 0; }
+.app-install-copy strong {
+  display: block;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  color: #f3ead8;
+  letter-spacing: 0.02em;
+}
+.app-install-copy small {
+  display: block;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: rgba(243, 234, 216, 0.62);
+}
+
+.app-install-actions { flex: none; display: flex; align-items: center; gap: 6px; }
+.app-install-cta {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #171310;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: linear-gradient(140deg, #e6c987, #c8a96b 60%, #a5834a);
+  white-space: nowrap;
+}
+.app-install-cta:active { transform: scale(0.97); }
+.app-install-dismiss {
+  appearance: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: rgba(243, 234, 216, 0.5);
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 8px;
+}
+
+/* ---------- 安裝教學遮罩（iOS／站內瀏覽器） ---------- */
+.app-install-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(8, 7, 5, 0.72);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.app-install-sheet[hidden] { display: none; }
+
+.app-sheet-card {
+  width: 100%;
+  max-width: 480px;
+  margin: 0;
+  padding: 22px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  border-radius: 22px 22px 0 0;
+  background: #14110d;
+  border: 1px solid rgba(200, 169, 107, 0.35);
+  border-bottom: 0;
+}
+.app-sheet-card h3 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  color: #f3ead8;
+}
+.app-sheet-card > p {
+  margin: 0 0 14px;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: rgba(243, 234, 216, 0.66);
+}
+.app-sheet-steps {
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+.app-sheet-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: rgba(200, 169, 107, 0.08);
+  border: 1px solid rgba(200, 169, 107, 0.18);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #ece2cd;
+}
+.app-sheet-steps li b { color: #e6c987; font-weight: 700; }
+.app-sheet-steps .step-no {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #171310;
+  background: linear-gradient(140deg, #e6c987, #a5834a);
+  margin-top: 1px;
+}
+.app-sheet-actions { display: flex; gap: 10px; }
+.app-sheet-actions .app-install-cta { flex: 1; text-align: center; text-decoration: none; display: block; }
+.app-sheet-close {
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 9px 16px;
+  border-radius: 999px;
+  color: rgba(243, 234, 216, 0.72);
+  background: none;
+  border: 1px solid rgba(243, 234, 216, 0.25);
+}
+
+/* ---------- App 殼：獨立視窗（已加入主畫面）時的底部導覽 ---------- */
+.app-tabbar { display: none; }
+
+@media (display-mode: standalone) {
+  body { padding-bottom: 76px; }
+  .app-tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 55;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+    background: rgba(14, 12, 9, 0.97);
+    border-top: 1px solid rgba(200, 169, 107, 0.28);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .app-tabbar a {
+    display: grid;
+    justify-items: center;
+    gap: 3px;
+    padding: 6px 2px;
+    text-decoration: none;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: rgba(243, 234, 216, 0.6);
+    border-radius: 10px;
+  }
+  .app-tabbar a .tab-glyph { width: 21px; height: 21px; }
+  .app-tabbar a.is-active { color: #e6c987; }
+  /* 已在 App 內就不再勸安裝 */
+  .app-install-bar { display: none !important; }
+}
+
+/* iOS 舊版 standalone（navigator.standalone）由 JS 加 body class 支援 */
+body.is-standalone { padding-bottom: 76px; }
+body.is-standalone .app-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 55;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  background: rgba(14, 12, 9, 0.97);
+  border-top: 1px solid rgba(200, 169, 107, 0.28);
+}
+body.is-standalone .app-tabbar a {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 6px 2px;
+  text-decoration: none;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: rgba(243, 234, 216, 0.6);
+}
+body.is-standalone .app-tabbar a .tab-glyph { width: 21px; height: 21px; }
+body.is-standalone .app-tabbar a.is-active { color: #e6c987; }
+body.is-standalone .app-install-bar { display: none !important; }
+
+@media (min-width: 720px) {
+  .app-install-bar { left: auto; right: 24px; max-width: 380px; }
+  .app-install-sheet { align-items: center; }
+  .app-sheet-card { border-radius: 22px; border-bottom: 1px solid rgba(200, 169, 107, 0.35); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-install-bar { transition: none; }
+}

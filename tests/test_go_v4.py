@@ -29,6 +29,9 @@ class GoV4ContractTests(unittest.TestCase):
         "business-card",
         "package-insert",
         "social",
+        "pwa",
+        "homescreen",
+        "profile-bio",
         "legacy-worker",
         "facebook-free-first",
         "facebook-dont-pay",
@@ -145,7 +148,7 @@ class GoV4ContractTests(unittest.TestCase):
         self.assertIn('lang="zh-Hant-TW"', html)
         self.assertIn('href="css/go.css"', html)
         analytics_tag = '<script src="js/go-analytics.js" defer></script>'
-        app_tag = '<script src="js/go.js?v=20260729" defer></script>'
+        app_tag = '<script src="js/go.js?v=20260801" defer></script>'
         self.assertIn(analytics_tag, html)
         self.assertLess(html.index(analytics_tag), html.index(app_tag))
         self.assertIn(app_tag, html)
@@ -266,6 +269,9 @@ class GoV4ContractTests(unittest.TestCase):
             "business-card",
             "package-insert",
             "social",
+            "pwa",
+            "homescreen",
+            "profile-bio",
             "legacy-worker",
         })
 

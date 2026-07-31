@@ -1,0 +1,43 @@
+{
+  "name": "POP 宇宙｜免費接線台",
+  "short_name": "POP 宇宙",
+  "description": "生意、網站、風險、出國、汽美——11 個免費入口，先把第一步分清楚。加入主畫面，隨時一鍵進宇宙。",
+  "id": "/go?src=pwa",
+  "start_url": "/go?src=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0c0a",
+  "theme_color": "#0d0c0a",
+  "lang": "zh-Hant-TW",
+  "dir": "ltr",
+  "categories": ["business", "lifestyle", "shopping"],
+  "icons": [
+    { "src": "assets/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/app/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "幫我分流",
+      "short_name": "分流",
+      "description": "不知道選哪個？兩步幫你接線",
+      "url": "/go?src=pwa#problem-router",
+      "icons": [{ "src": "assets/app/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "POP 汽美商品",
+      "short_name": "汽美",
+      "description": "看 32 款商品與車況選品",
+      "url": "/?src=pwa",
+      "icons": [{ "src": "assets/app/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "店家系統館",
+      "short_name": "店家",
+      "description": "POP CARD 店家系統展示",
+      "url": "/systems.html?src=pwa",
+      "icons": [{ "src": "assets/app/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
