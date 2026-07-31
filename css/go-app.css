@@ -13,8 +13,7 @@
   padding: 12px 14px;
   border-radius: 16px;
   background: rgba(18, 16, 13, 0.96);
-  border: 1px solid rgba(200, 169, 107, 0.45);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 1px 0 rgba(200, 169, 107, 0.45) inset, 0 10px 32px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transform: translateY(140%);

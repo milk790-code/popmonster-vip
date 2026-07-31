@@ -264,10 +264,9 @@ h4 {
 
 .brand-mark > span:first-child,
 .source-indicator,
-.route-map-kicker,
-.route-number,
+.section-meta,
+.timeline-marker,
 .service-index,
-.lane-header > span,
 .route-step {
   font-family: var(--font-mono);
 }
@@ -308,42 +307,37 @@ body[data-preview="true"] .preview-only {
 }
 
 .hero {
-  display: grid;
-  align-items: center;
-  min-block-size: min(46rem, calc(100svh - 4.75rem));
-  padding-block: clamp(2.5rem, 6vw, 5.5rem);
-}
-
-.hero-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(31rem, 1.05fr);
-  align-items: center;
-  gap: clamp(2rem, 5vw, 5.5rem);
+  padding-block: clamp(2.5rem, 6vw, 5.5rem) clamp(2rem, 5vw, 3.5rem);
+  border-block-end: 1px solid var(--line);
 }
 
 .hero-copy {
   position: relative;
   z-index: 2;
+  max-inline-size: 46rem;
 }
 
+/* .section-meta：報頭式資料行——放在標題「之後」，不再是標題正上方的膠囊 kicker。
+   .eyebrow 沿用同一視覺，但保留原 class 名給 js/go.js 的 hook-copy 實驗讀寫（.hero-copy > .eyebrow）。 */
+.section-meta,
 .eyebrow {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.7rem;
-  margin-block-end: var(--space-4);
-  color: var(--gold-bright);
-  font-family: var(--font-mono);
-  font-size: clamp(0.75rem, 0.72rem + 0.12vw, 0.82rem);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  line-height: 1.45;
-  text-transform: uppercase;
+  gap: 0.65rem;
+  margin: var(--space-4) 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
 }
 
+.section-meta::before,
 .eyebrow::before {
-  inline-size: 2.4rem;
+  flex: 0 0 auto;
+  inline-size: 1.5rem;
   block-size: 1px;
-  background: var(--gold);
+  background: var(--line-gold);
   content: "";
 }
 
@@ -428,112 +422,10 @@ body[data-preview="true"] .preview-only {
   font-weight: 700;
 }
 
-.route-map {
-  position: relative;
-  isolation: isolate;
-  padding: clamp(1.25rem, 3vw, 2.25rem);
-  overflow: hidden;
-  border: 1px solid var(--line-gold);
-  border-radius: var(--radius-lg);
-  background:
-    linear-gradient(rgba(244, 235, 221, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(244, 235, 221, 0.025) 1px, transparent 1px),
-    var(--panel);
-  background-size: 1.5rem 1.5rem;
-  box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.24);
-}
-
-.route-map::after {
-  position: absolute;
-  z-index: -1;
-  inset-inline-start: 0;
-  inset-block-start: 0;
-  inline-size: 42%;
-  block-size: 1px;
-  background: var(--gold-bright);
-  content: "";
-  animation: route-trace 3.8s var(--ease-out) infinite;
-}
-
-@keyframes route-trace {
-  0%, 18% { transform: translateX(-100%); opacity: 0; }
-  35%, 72% { transform: translateX(80%); opacity: 1; }
-  100% { transform: translateX(250%); opacity: 0; }
-}
-
-.route-map-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-4);
-  margin-block-end: var(--space-5);
-}
-
-.route-map-heading h2 {
-  margin: 0;
-  font-size: clamp(1.8rem, 3vw, 2.7rem);
-}
-
-.route-map-kicker {
-  margin: 0;
-  color: var(--gold-bright);
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-}
-
-.route-map-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin: 0;
-  padding: 0;
-  border-block-start: 1px solid var(--line);
-  border-inline-start: 1px solid var(--line);
-  list-style: none;
-}
-
-.route-map-line {
-  position: relative;
-  display: grid;
-  align-content: center;
-  min-block-size: 8.25rem;
-  padding: 1rem 1rem 1rem 1.3rem;
-  border-block-end: 1px solid var(--line);
-  border-inline-end: 1px solid var(--line);
-}
-
-.route-map-line::before {
-  position: absolute;
-  inset-inline-start: -0.28rem;
-  inset-block-start: 50%;
-  inline-size: 0.52rem;
-  block-size: 0.52rem;
-  border: 1px solid var(--gold);
-  border-radius: 50%;
-  background: var(--panel);
-  content: "";
-}
-
-.route-map-line strong {
-  color: var(--paper);
-  font-family: var(--font-display);
-  font-size: 1.22rem;
-  font-weight: 650;
-}
-
-.route-map-line small {
-  color: var(--muted);
-  font-size: 0.76rem;
-}
-
-.route-number {
-  color: var(--gold-bright);
-  font-size: 0.75rem;
-}
-
 .hand-note {
   width: max-content;
   max-inline-size: 100%;
-  margin: 1.35rem 0 0 auto;
+  margin: var(--space-5) 0 0 auto;
   color: var(--paper-dim);
   font-family: "Kaiti TC", "STKaiti", cursive;
   font-size: 0.92rem;
@@ -563,71 +455,78 @@ body[data-preview="true"] .preview-only {
   align-items: end;
   max-inline-size: none;
   gap: clamp(1.5rem, 6vw, 6rem);
-  margin-block-end: var(--space-6);
+  margin-block-end: var(--space-7);
 }
 
 .directory-heading h2 {
   margin: 0;
 }
 
-.directory-wall {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: var(--space-4);
+/* 08-timeline-v：垂直時間軸，左邊一條金線串起五段路徑，數字節點縫在線上。
+   數字用來標記路徑順序，不是懸在標題正上方的膠囊——所以不算 kicker。 */
+.timeline {
+  --spine-offset: clamp(1.6rem, 4vw, 2.35rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.5rem, 6vw, 4rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .directory-lane {
-  padding: clamp(1rem, 2.5vw, 1.6rem);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: rgba(23, 21, 18, 0.72);
-}
-
-.directory-lane-wide {
-  grid-row: span 2;
+  position: relative;
+  padding-inline-start: calc(var(--spine-offset) + var(--space-4));
+  border-inline-start: 2px solid var(--line-gold);
 }
 
 .directory-lane-pop {
-  border-color: var(--line-gold);
-  background: linear-gradient(145deg, rgba(198, 161, 91, 0.09), transparent 45%), var(--panel);
+  border-inline-start-color: var(--gold);
+}
+
+.timeline-marker {
+  position: absolute;
+  inset-inline-start: calc(-1 * (var(--spine-offset) / 2) - 1px);
+  inset-block-start: 0.1rem;
+  display: grid;
+  place-items: center;
+  inline-size: var(--spine-offset);
+  block-size: var(--spine-offset);
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--gold-bright);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.directory-lane-pop .timeline-marker {
+  border-color: var(--gold-bright);
+  background: var(--gold);
+  color: var(--ink);
 }
 
 .lane-header {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: start;
-  gap: 0 var(--space-3);
   margin-block-end: var(--space-4);
   padding-block-end: var(--space-3);
   border-block-end: 1px solid var(--line);
 }
 
-.lane-header > span {
-  grid-column: 1;
-  grid-row: 1 / span 2;
-  color: var(--gold-bright);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  writing-mode: vertical-rl;
-}
-
 .lane-header h3 {
-  grid-column: 2;
-  grid-row: 1;
-  margin: 0;
+  margin: 0 0 0.3rem;
 }
 
 .lane-header p {
-  grid-column: 2;
-  grid-row: 2;
   margin: 0;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 .lane-cards {
   display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16.5rem), 23rem));
+  justify-content: start;
+  align-items: start;
   gap: var(--space-3);
 }
 
@@ -699,7 +598,6 @@ body[data-preview="true"] .preview-only {
   border-radius: 0.22rem;
   background: var(--paper);
   color: var(--ink);
-  box-shadow: 0 0.45rem 1.2rem rgba(0, 0, 0, 0.14);
 }
 
 .service-ticket::before,
@@ -1472,10 +1370,10 @@ html[data-motion="reduced"] .route-map::after {
   margin-inline: auto;
   padding: clamp(2.5rem, 6vw, 5rem) clamp(1rem, 4vw, 2.75rem);
   border-block-start: 1px solid var(--line);
-  border-block-end: 1px solid rgba(88, 215, 225, .3);
+  border-block-end: 1px solid var(--line-gold);
   background:
-    radial-gradient(circle at 88% 18%, rgba(88, 215, 225, .1), transparent 23rem),
-    linear-gradient(120deg, rgba(88, 215, 225, .035), transparent 48%);
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E"),
+    var(--panel-raised);
 }
 .shop-system-bridge h2 {
   max-inline-size: 15ch;
@@ -1496,15 +1394,11 @@ html[data-motion="reduced"] .route-map::after {
   flex-wrap: wrap;
   gap: var(--space-3);
 }
-.shop-system-actions .button-primary {
-  border-color: #58d7e1;
-  background: #58d7e1;
-}
 .shop-system-note {
   margin: var(--space-3) 0 0;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: .74rem;
+  font-size: .875rem;
   line-height: 1.6;
 }
 
