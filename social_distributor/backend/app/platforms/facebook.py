@@ -6,6 +6,7 @@ Reference:
 """
 from __future__ import annotations
 
+import logging
 import os
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
@@ -22,6 +23,8 @@ from .base import (
     TokenBundle,
 )
 
+log = logging.getLogger(__name__)
+
 GRAPH_BASE = "https://graph.facebook.com/v20.0"
 GRAPH_VIDEO_BASE = "https://graph-video.facebook.com/v20.0"
 DIALOG_BASE = "https://www.facebook.com/v20.0/dialog/oauth"
@@ -30,9 +33,27 @@ DEFAULT_SCOPES = [
     "pages_show_list",
     "pages_read_engagement",
     "pages_manage_posts",
+    # Required to comment as a Page (the auto first comment) and to like
+    # another Page's post. Without it every comment attempt returns a
+    # permission error. Adding it here only affects the classic-login
+    # fallback -- when META_LOGIN_CONFIG_ID is set, Facebook Login for
+    # Business takes the scope list from the login config on Meta's side,
+    # so the config must be updated there too and every Page re-authorised.
+    "pages_manage_engagement",
     "instagram_basic",
     "instagram_content_publish",
 ]
+
+# Deliberately NOT requested by default -- each needs its own App Review and
+# would force all connected Pages through OAuth again, so they are opt-in:
+#   pages_manage_metadata  -> edit a Page's about/description
+#   business_management    -> replace a Page's cover photo (also needs
+#                             business verification)
+# There is no scope that enables posting into a Facebook Group: Meta removed
+# the Groups API and publish_to_groups from all versions on 2024-04-22, and
+# the Graph API cannot publish shares of an existing post either. Sharing a
+# post into a community is a manual action; see api/communities.py.
+OPTIONAL_SCOPES = ["pages_manage_metadata", "business_management"]
 
 
 class MetaOAuth(OAuthProvider):
@@ -186,9 +207,19 @@ class FacebookPublisher(Publisher):
                 data={"message": message, "access_token": token},
                 timeout=30,
             )
-        except Exception:
-            # Intentionally swallowed: the main post already succeeded.
-            pass
+        except Exception as exc:
+            # Still swallowed -- the post itself succeeded and must not be
+            # reported as failed. But swallowing *silently* meant a comment
+            # that never once worked looked identical to one working fine.
+            # Commenting as a Page needs pages_manage_engagement, which is
+            # not in DEFAULT_SCOPES, so the likely steady state here is
+            # "permission denied on every post, forever, with no signal".
+            log.warning(
+                "first comment failed post_id=%s err=%s "
+                "(commenting as a Page requires the pages_manage_engagement "
+                "permission; check the account's granted scopes)",
+                post_id, exc,
+            )
 
     def _publish_text(self, token, page_id, req: PublishRequest) -> PublishResult:
         body = {"message": req.caption, "access_token": token}
