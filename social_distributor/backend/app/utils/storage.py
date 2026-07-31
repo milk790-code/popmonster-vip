@@ -83,3 +83,45 @@ def upload_file(path: str, bucket: str, key: str, content_type: str) -> None:
     _client().upload_file(
         path, bucket, key, ExtraArgs={"ContentType": content_type}
     )
+
+
+def derivative_key(base_key: str, aspect: str) -> str:
+    """Deterministic object key for a transcoded variant.
+
+    Shared so the transcoder and the dispatcher cannot drift: the dispatcher
+    has to rebuild this key to re-sign a derivative at send time, and a
+    mismatch would silently fall back to the expired URL.
+    """
+    return f"{base_key.rsplit('.', 1)[0]}__{aspect.replace(':', 'x')}.mp4"
+
+
+def fresh_media_url(media, aspect: str | None = None) -> str | None:
+    """A presigned URL valid *now* for this asset, or None if we can't sign one.
+
+    ``MediaAsset.storage_url`` and every entry in ``MediaAsset.derivatives``
+    hold presigned URLs, which SigV4 caps at 7 days. Storing them and reusing
+    them later is the bug this exists to fix: any post scheduled more than a
+    week out fetches a dead URL and fails with a 403 that looks like a
+    permissions problem. The durable reference (bucket + key) is already kept
+    in ``compliance_report``, so we re-sign instead of replaying.
+
+    Falls back to the stored URL when there is no bucket/key — media can also
+    arrive as an external URL (rebroadcast candidates), and those are not ours
+    to sign.
+    """
+    if media is None:
+        return None
+    report = media.compliance_report or {}
+    bucket, key = report.get("s3_bucket"), report.get("s3_key")
+    stored = (media.derivatives or {}).get(aspect) if aspect else media.storage_url
+    if not (bucket and key):
+        return stored
+    if aspect:
+        # Only re-sign a derivative we know was actually produced.
+        if not (media.derivatives or {}).get(aspect):
+            return None
+        key = derivative_key(key, aspect)
+    try:
+        return presign_get(bucket, key)
+    except Exception:  # noqa: BLE001 - signing must never break a dispatch
+        return stored

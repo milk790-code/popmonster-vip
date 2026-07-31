@@ -319,11 +319,18 @@ def sweep_due_targets() -> None:
 
 
 def _swap_in_preferred_derivative(request, media: MediaAsset | None, platform: str) -> None:
-    """If the media has a transcoded variant for this platform, use it."""
+    """If the media has a transcoded variant for this platform, use it.
+
+    Re-signs rather than replaying the stored URL — derivatives are presigned
+    the same way the original is, so a schedule more than 7 days out would
+    otherwise swap a working link for an expired one.
+    """
+    from ..utils.storage import fresh_media_url
+
     if not media or media.kind != "video" or not media.derivatives:
         return
     aspect = _PREFERRED_ASPECT.get(platform)
-    if aspect and (url := media.derivatives.get(aspect)):
+    if aspect and (url := fresh_media_url(media, aspect)):
         request.media_url = url
 
 
@@ -355,7 +362,7 @@ def transcode_media(media_id: int) -> None:
             for aspect in ffmpeg_utils.ASPECT_PRESETS:
                 out_path = os.path.join(tmpdir, f"out_{aspect.replace(':', 'x')}.mp4")
                 ffmpeg_utils.transcode(src, out_path, aspect)
-                derived_key = f"{key.rsplit('.', 1)[0]}__{aspect.replace(':', 'x')}.mp4"
+                derived_key = storage.derivative_key(key, aspect)
                 storage.upload_file(out_path, bucket, derived_key, "video/mp4")
                 derivatives[aspect] = storage.presign_get(bucket, derived_key)
     except Exception as exc:

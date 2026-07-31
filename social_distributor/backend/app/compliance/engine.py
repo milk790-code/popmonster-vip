@@ -231,8 +231,13 @@ def publisher_request_from(post: Post, target: PostTarget):
     title = overrides.pop("title", post.title)
     overrides.pop("_media_id", None)
     overrides.pop("first_comment", None)
+    from ..utils.storage import fresh_media_url
+
     media = target_media_asset(post, target)
-    media_url = media.storage_url if media else None
+    # Sign at send time, not at upload time. storage_url is a presigned URL
+    # capped at 7 days, so anything scheduled further out than that fetches a
+    # dead link and fails with a 403 that reads like a permissions problem.
+    media_url = fresh_media_url(media) if media else None
     media_kind = media.kind if media else None
     return PublishRequest(
         caption=caption,
