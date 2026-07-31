@@ -183,6 +183,7 @@ document.querySelectorAll(".topbar nav button").forEach((btn) => {
     if (btn.dataset.tab === "transfers") loadTransfers();
     if (btn.dataset.tab === "rebroadcast") { loadRbDeps().then(loadRbCandidates); }
     if (btn.dataset.tab === "browser") renderBrowserTier();
+    if (btn.dataset.tab === "console") loadConsole();
   });
 });
 
@@ -1917,3 +1918,311 @@ document.getElementById("bpDownload")?.addEventListener("click", () => {
   a.click();
   URL.revokeObjectURL(a.href);
 });
+
+// --- 帳號中控 ---------------------------------------------------------
+// One place to hold every account's operating detail: what it is for, the
+// first comment it auto-posts, its traffic source code, its bio/cover
+// drafts, its hand-picked communities, and its role when several accounts
+// support one launch. All of it is stored server-side on the account, so
+// the Celery worker reads the same values at publish time.
+let _consoleRows = [];
+let _consoleSelected = null;
+
+async function loadConsole() {
+  const box = document.getElementById("consoleAccounts");
+  box.innerHTML = '<p class="hint">載入中⋯</p>';
+  try {
+    _consoleRows = await api("/api/accounts/profiles");
+  } catch (err) {
+    box.innerHTML = `<p class="hint">讀不到帳號：${err.message}</p>`;
+    return;
+  }
+  renderConsoleList();
+  if (_consoleSelected != null) selectConsoleAccount(_consoleSelected);
+}
+
+function renderConsoleList() {
+  const box = document.getElementById("consoleAccounts");
+  const needle = (document.getElementById("consoleFilter").value || "")
+    .trim().toLowerCase();
+  const rows = needle
+    ? _consoleRows.filter((r) =>
+        `${r.handle} ${r.platform} ${(r.groups || []).map((g) => g.name).join(" ")}`
+          .toLowerCase().includes(needle))
+    : _consoleRows;
+
+  if (!rows.length) {
+    box.innerHTML = '<p class="hint" style="padding:12px;">沒有符合的帳號。</p>';
+    return;
+  }
+  box.innerHTML = "";
+  rows.forEach((row) => {
+    const p = row.profile || {};
+    // A filled dot means this account already carries settings worth keeping.
+    const configured = !!(p.first_comment || (p.communities || []).length || p.note);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "console-line" + (row.id === _consoleSelected ? " selected" : "");
+    btn.dataset.id = row.id;
+    const lines = (p.communities || []).length;
+    const groups = (row.groups || []).map((g) => g.name).join("、") || "未分組";
+    btn.innerHTML =
+      `<span class="dot${configured ? " on" : ""}"></span>${escapeHtml(row.handle)}` +
+      `<span class="console-line-sub">${escapeHtml(row.platform)}　${escapeHtml(groups)}` +
+      (lines ? `　社團 ${lines}` : "") + `</span>`;
+    btn.addEventListener("click", () => selectConsoleAccount(row.id));
+    box.appendChild(btn);
+  });
+}
+
+function selectConsoleAccount(id) {
+  _consoleSelected = id;
+  const row = _consoleRows.find((r) => r.id === id);
+  if (!row) return;
+  renderConsoleList();
+
+  document.getElementById("consoleEmpty").hidden = true;
+  const form = document.getElementById("consoleForm");
+  form.hidden = false;
+
+  const p = row.profile || {};
+  document.getElementById("consoleHandle").textContent = row.handle;
+  document.getElementById("consoleMeta").textContent =
+    `${row.platform} · ${row.external_account_id} · ` +
+    ((row.groups || []).map((g) => g.name).join("、") || "未分組");
+
+  form.note.value = p.note || "";
+  form.persona.value = p.persona || "";
+  form.first_comment.value = p.first_comment || "";
+  form.link_src.value = p.link_src || "";
+  form.bio.value = p.bio || "";
+  form.cta.value = p.cta || "";
+  form.cover_asset.value = p.cover_asset || "";
+  form.avatar_asset.value = p.avatar_asset || "";
+  form.interaction_role.value = (p.interaction || {}).role || "off";
+  form.interaction_max.value = (p.interaction || {}).max_per_day ?? 1;
+  form.comment_pool.value = ((p.interaction || {}).comment_pool || []).join("\n");
+
+  document.getElementById("consoleBioNote").textContent =
+    row.platform === "facebook"
+      ? "目前存草稿。粉專簡介與封面要用 API 直接改，需要多授權 pages_manage_metadata，"
+        + "那要你本人重跑一次 OAuth。"
+      : "目前存草稿，供你複製貼上到後台。";
+
+  renderCommunityRows(p.communities || []);
+  setConsoleMsg("");
+}
+
+function communityRow(entry = {}) {
+  const wrap = document.createElement("div");
+  wrap.className = "community-row";
+  wrap.innerHTML = `
+    <label>社團名稱<input class="c-name" value="${escapeHtml(entry.name || "")}" /></label>
+    <label>社團連結<input class="c-url" placeholder="https://facebook.com/groups/…"
+      value="${escapeHtml(entry.url || "")}" /></label>
+    <label>間隔天數<input class="c-cadence" type="number" min="1" max="365"
+      value="${entry.cadence_days ?? 14}" /></label>
+    <label>優先度<input class="c-priority" type="number" min="1" max="5"
+      value="${entry.priority ?? 3}" /></label>
+    <button type="button" class="drop">移除</button>
+    <div class="row-why">
+      <label>為什麼挑這個社團
+        <input class="c-why" value="${escapeHtml(entry.why || "")}"
+          placeholder="例：問拋光問題的人最多，成交過 3 個" /></label>
+      <div class="flags">
+        <label><input type="checkbox" class="c-links" ${entry.allows_links === false ? "" : "checked"} /> 可以放連結</label>
+        <label><input type="checkbox" class="c-active" ${entry.active === false ? "" : "checked"} /> 啟用</label>
+        <span class="c-last">${entry.last_shared_at ? "上次分享 " + entry.last_shared_at.slice(0, 10) : "還沒分享過"}</span>
+      </div>
+    </div>`;
+  wrap.querySelector(".drop").addEventListener("click", () => wrap.remove());
+  wrap.dataset.lastShared = entry.last_shared_at || "";
+  return wrap;
+}
+
+function renderCommunityRows(list) {
+  const box = document.getElementById("consoleCommunities");
+  box.innerHTML = "";
+  list.forEach((entry) => box.appendChild(communityRow(entry)));
+}
+
+function collectCommunityRows() {
+  return [...document.querySelectorAll("#consoleCommunities .community-row")]
+    .map((row) => {
+      const val = (sel) => row.querySelector(sel).value.trim();
+      const entry = {
+        name: val(".c-name"),
+        url: val(".c-url"),
+        why: val(".c-why"),
+        cadence_days: Number(val(".c-cadence")) || 14,
+        priority: Number(val(".c-priority")) || 3,
+        allows_links: row.querySelector(".c-links").checked,
+        active: row.querySelector(".c-active").checked,
+      };
+      // Preserve the share timestamp; dropping it would silently reset the
+      // cadence guard and let a community be posted into again immediately.
+      if (row.dataset.lastShared) entry.last_shared_at = row.dataset.lastShared;
+      return entry;
+    })
+    .filter((e) => e.name || e.url);
+}
+
+// api() throws Error("400 BAD REQUEST: {json}"), so the validator's sentences
+// are buried in the message string. Dig them out and say them in Chinese --
+// dumping raw JSON at the operator is the same as saying nothing.
+const _PROFILE_ERROR_ZH = [
+  [/comment_pool\[(\d+)\] is too short/, (m) =>
+    `留言素材第 ${Number(m[1]) + 1} 則太短了，要有實際內容（至少 8 個字），只寫「推」「+1」會被當成洗互動`],
+  [/communities\[(\d+)\]\.url must start with https/, (m) =>
+    `第 ${Number(m[1]) + 1} 個社團的連結要用 https:// 開頭`],
+  [/communities\[(\d+)\]\.url is required/, (m) => `第 ${Number(m[1]) + 1} 個社團少了連結`],
+  [/communities\[(\d+)\]\.name is required/, (m) => `第 ${Number(m[1]) + 1} 個社團少了名稱`],
+  [/communities\[(\d+)\]\.url is a duplicate/, (m) =>
+    `第 ${Number(m[1]) + 1} 個社團的連結跟前面重複了`],
+  [/max_per_day must be between (\d+) and (\d+)/, (m) =>
+    `每天互動次數要在 ${m[1]}–${m[2]} 之間`],
+  [/interaction\.role must be one of/, () => "互動角色的值不對"],
+];
+
+function explainProfileError(err) {
+  const raw = String(err && err.message ? err.message : err);
+  let details = null;
+  const brace = raw.indexOf("{");
+  if (brace >= 0) {
+    try { details = JSON.parse(raw.slice(brace)).details; } catch (_) { /* not JSON */ }
+  }
+  if (!Array.isArray(details) || !details.length) return raw;
+  return details
+    .map((d) => {
+      for (const [re, say] of _PROFILE_ERROR_ZH) {
+        const m = d.match(re);
+        if (m) return say(m);
+      }
+      return d;
+    })
+    .join("；");
+}
+
+function setConsoleMsg(text, kind = "") {
+  const el = document.getElementById("consoleMsg");
+  el.textContent = text;
+  el.className = "console-msg" + (kind ? " " + kind : "");
+}
+
+document.getElementById("consoleFilter")?.addEventListener("input", renderConsoleList);
+document.getElementById("consoleAddCommunity")?.addEventListener("click", () => {
+  document.getElementById("consoleCommunities").appendChild(communityRow());
+});
+
+document.getElementById("consoleForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (_consoleSelected == null) return;
+  const form = e.target;
+  const profile = {
+    note: form.note.value.trim(),
+    persona: form.persona.value.trim(),
+    first_comment: form.first_comment.value.trim(),
+    link_src: form.link_src.value.trim(),
+    bio: form.bio.value.trim(),
+    cta: form.cta.value.trim(),
+    cover_asset: form.cover_asset.value.trim(),
+    avatar_asset: form.avatar_asset.value.trim(),
+    communities: collectCommunityRows(),
+    interaction: {
+      role: form.interaction_role.value,
+      max_per_day: Number(form.interaction_max.value) || 0,
+      comment_pool: form.comment_pool.value
+        .split("\n").map((s) => s.trim()).filter(Boolean),
+    },
+  };
+  setConsoleMsg("儲存中⋯");
+  try {
+    const saved = await api(`/api/accounts/${_consoleSelected}/profile`, {
+      method: "PUT",
+      body: JSON.stringify({ profile }),
+    });
+    const row = _consoleRows.find((r) => r.id === _consoleSelected);
+    if (row) row.profile = saved.profile;
+    renderConsoleList();
+    setConsoleMsg("已儲存。下次這個帳號發文就會照這些設定跑。", "ok");
+  } catch (err) {
+    setConsoleMsg("存不進去：" + explainProfileError(err), "bad");
+  }
+});
+
+// --- 社團分享清單 -----------------------------------------------------
+document.getElementById("planRefresh")?.addEventListener("click", loadCommunityPlan);
+
+// Three states, not two. "This community bans links" and "you didn't give me
+// a link to carry" both left include_link false, and rendering them the same
+// made a perfectly link-friendly community look like it forbade links.
+function renderLinkLine(c) {
+  if (c.include_link) return `<span class="why">帶連結：${escapeHtml(c.link_url)}</span>`;
+  if (c.allows_links === false)
+    return `<span class="nolink">${escapeHtml(c.link_note || "這個社團禁止外連")}</span>`;
+  return '<span class="why">這次沒有指定貼文，所以沒帶連結</span>';
+}
+
+async function loadCommunityPlan() {
+  const box = document.getElementById("consolePlan");
+  const postId = document.getElementById("planPostId").value.trim();
+  box.innerHTML = '<p class="hint">計算中⋯</p>';
+  const body = postId ? { post_id: Number(postId) } : {};
+  let plan;
+  try {
+    plan = await api("/api/communities/plan", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    box.innerHTML = `<p class="hint">算不出來：${escapeHtml(err.message)}</p>`;
+    return;
+  }
+  if (!plan.accounts.length) {
+    box.innerHTML =
+      '<p class="hint">還沒有任何帳號設過精選社團。先在上面挑一個帳號加社團。</p>';
+    return;
+  }
+  box.innerHTML = "";
+  plan.accounts.forEach((acct) => {
+    const card = document.createElement("div");
+    card.className = "plan-account";
+    const due = acct.due.map((c) => `
+      <div class="plan-item">
+        <div>
+          <a href="${escapeHtml(c.url)}" target="_blank" rel="noopener">${escapeHtml(c.name)}</a>
+          ${c.why ? `<span class="why">${escapeHtml(c.why)}</span>` : ""}
+          ${renderLinkLine(c)}
+        </div>
+        <button type="button" data-account="${acct.account_id}" data-url="${escapeHtml(c.url)}">記一筆</button>
+      </div>`).join("");
+    const holding = acct.holding.length
+      ? `<p class="plan-holding">還沒到期：${acct.holding
+          .map((h) => `${escapeHtml(h.name)}（再 ${h.days_remaining} 天）`).join("、")}</p>`
+      : "";
+    card.innerHTML =
+      `<h4>${escapeHtml(acct.handle)}　可分享 ${acct.due.length}　等待 ${acct.holding.length}</h4>` +
+      `<div class="plan-due">${due || '<p class="hint">目前沒有到期的社團。</p>'}</div>` +
+      holding;
+    box.appendChild(card);
+  });
+
+  box.querySelectorAll("button[data-url]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      try {
+        await api("/api/communities/mark-shared", {
+          method: "POST",
+          body: JSON.stringify({
+            account_id: Number(btn.dataset.account),
+            urls: [btn.dataset.url],
+          }),
+        });
+        btn.textContent = "已記錄";
+      } catch (err) {
+        btn.disabled = false;
+        _showToast("記不起來：" + err.message);
+      }
+    });
+  });
+}

@@ -237,9 +237,20 @@ def _persist_accounts(provider: str, user_id: int, bundle):
         existing.refresh_token_enc = c.encrypt(refresh_token) if refresh_token else None
         existing.token_expires_at = expires_at
         existing.scopes = ",".join(bundle.scopes or [])
-        merged_extra = dict(extra or {})
+        # Start from what is already stored, then overlay what the platform
+        # just told us. Building this dict from ``extra`` alone -- which is
+        # what it used to do, despite the name -- wiped every operator-owned
+        # key on re-auth: the egress proxy URL and the account's operating
+        # profile (first comment, curated communities, cross-account role).
+        # Re-auth is a routine action here (the login URL sends
+        # ``auth_type=reauthorize`` so new Pages can be picked up), so this
+        # was silent data loss on a normal path, not an edge case.
+        merged_extra = dict(existing.extra or {})
+        merged_extra.update(extra or {})
         if unaudited:
             merged_extra["unaudited"] = True
+        else:
+            merged_extra.pop("unaudited", None)
         existing.extra = merged_extra
         existing.revoked_at = None
         db.session.flush()

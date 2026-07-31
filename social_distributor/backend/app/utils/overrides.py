@@ -16,7 +16,9 @@ from typing import Any
 _COMMON_FIELDS = {"caption": str, "title": str}
 
 _PLATFORM_FIELDS: dict[str, dict[str, type | tuple]] = {
-    "facebook": {**_COMMON_FIELDS},
+    # first_comment: text posted as a comment on our own post right after it
+    # publishes. Overrides the account's stored profile for this post only.
+    "facebook": {**_COMMON_FIELDS, "first_comment": str},
     "instagram": {
         **_COMMON_FIELDS,
         "as_reel": bool,
