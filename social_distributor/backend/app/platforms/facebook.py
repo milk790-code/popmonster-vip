@@ -179,10 +179,11 @@ class FacebookPublisher(Publisher):
 
         # Phase D: auto first comment. Seeds engagement on new accounts
         # (no comment -> 0 reach) and carries the brand site for traffic.
-        self._post_first_comment(page_token, result.external_post_id, request)
+        self._post_first_comment(page_token, result, request)
         return result
 
-    def _post_first_comment(self, token, post_id, req: PublishRequest) -> None:
+    def _post_first_comment(self, token, result: PublishResult,
+                            req: PublishRequest) -> None:
         """Post a first comment on the page's own post right after publishing.
 
         ``req.first_comment`` is resolved upstream by
@@ -193,21 +194,25 @@ class FacebookPublisher(Publisher):
 
         The text supports an optional ``{link}`` placeholder, filled with
         request.link_url. This never raises -- a failed comment must not
-        fail an already-succeeded post.
+        fail an already-succeeded post -- but the outcome is written back
+        onto ``result`` so the caller can record it.
         """
+        post_id = result.external_post_id
         template = (getattr(req, "first_comment", "")
                     or os.environ.get("FB_FIRST_COMMENT", "")).strip()
         if not template or not post_id:
             return
         try:
             message = template.replace("{link}", req.link_url or "")
-            request_json(
+            data = request_json(
                 "POST",
                 f"{GRAPH_BASE}/{post_id}/comments",
                 data={"message": message, "access_token": token},
                 timeout=30,
             )
+            result.first_comment_id = str(data.get("id", ""))
         except Exception as exc:
+            result.first_comment_error = str(exc)[:500]
             # Still swallowed -- the post itself succeeded and must not be
             # reported as failed. But swallowing *silently* meant a comment
             # that never once worked looked identical to one working fine.

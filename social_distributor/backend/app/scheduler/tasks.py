@@ -232,6 +232,21 @@ def _dispatch_body(self, target: PostTarget) -> None:
             "permalink": result.permalink,
         },
     )
+    # The first comment is where the funnel link lives, so "did it post?"
+    # has to be answerable without reading worker logs. Only recorded when
+    # a comment was actually attempted.
+    if result.first_comment_id or result.first_comment_error:
+        audit(
+            "post.first_comment" if result.first_comment_id
+            else "post.first_comment_failed",
+            "post_target",
+            target.id,
+            actor_user_id=target.post.user_id,
+            detail={
+                "comment_id": result.first_comment_id,
+                "error": result.first_comment_error,
+            },
+        )
     db.session.commit()
     publish_event(
         target.post.user_id,

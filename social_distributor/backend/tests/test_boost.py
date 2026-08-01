@@ -412,3 +412,50 @@ def test_preview_refuses_another_users_target(app, client):
         other_id = other.id
     login_as(client, other_id)
     assert client.get(f"/api/boost/preview?target_id={target_id}").status_code == 404
+
+
+# --- the first comment on our own post (where the funnel link lives) -----
+
+
+def test_first_comment_outcome_is_reported_not_swallowed(monkeypatch):
+    """A comment that has never once worked used to look exactly like one
+    working fine. The post must still succeed, but the outcome has to come
+    back so the caller can record it."""
+    from app.platforms import facebook
+    from app.platforms.base import PublishRequest, PublishResult
+
+    pub = facebook.FacebookPublisher()
+    req = PublishRequest(caption="x", first_comment="先看這頁 {link}",
+                         link_url="https://popmonster.vip/go?src=fb-000001")
+
+    calls = {}
+
+    def fake_request(*args, **kwargs):
+        calls["data"] = kwargs.get("data")
+        return {"id": "c-9"}
+
+    monkeypatch.setattr(facebook, "request_json", fake_request)
+    ok = PublishResult(external_post_id="p1")
+    pub._post_first_comment("tok", ok, req)
+    assert ok.first_comment_id == "c-9"
+    assert ok.first_comment_error == ""
+    assert calls["data"]["message"] == "先看這頁 https://popmonster.vip/go?src=fb-000001"
+
+    def boom(*a, **k):
+        raise RuntimeError("(#200) pages_manage_engagement required")
+    monkeypatch.setattr(facebook, "request_json", boom)
+    bad = PublishResult(external_post_id="p2")
+    pub._post_first_comment("tok", bad, req)  # must not raise
+    assert bad.first_comment_id == ""
+    assert "pages_manage_engagement" in bad.first_comment_error
+
+
+def test_no_first_comment_configured_reports_nothing(monkeypatch):
+    from app.platforms import facebook
+    from app.platforms.base import PublishRequest, PublishResult
+
+    monkeypatch.delenv("FB_FIRST_COMMENT", raising=False)
+    pub = facebook.FacebookPublisher()
+    result = PublishResult(external_post_id="p3")
+    pub._post_first_comment("tok", result, PublishRequest(caption="x"))
+    assert result.first_comment_id == "" and result.first_comment_error == ""

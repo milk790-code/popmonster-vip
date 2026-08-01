@@ -40,6 +40,14 @@ class PublishResult:
     external_post_id: str
     permalink: str | None = None
     raw: dict[str, Any] = field(default_factory=dict)
+    # The auto first comment (the one carrying the funnel link) is posted as
+    # part of publishing, and its failure must never fail the post. That is
+    # why it went unnoticed for months: swallowed silently, a comment that
+    # had never once worked looked exactly like one working fine. Reporting
+    # the outcome here lets the caller record it without the platform layer
+    # reaching into the database.
+    first_comment_id: str = ""
+    first_comment_error: str = ""
 
 
 @dataclass
