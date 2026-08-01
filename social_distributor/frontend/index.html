@@ -546,6 +546,23 @@
         <button type="button" id="planRefresh">算給我看</button>
       </div>
       <div id="consolePlan"></div>
+
+      <hr class="console-rule" />
+
+      <h3>跨帳號互助：誰會出來按讚＋留言</h3>
+      <p class="hint console-note">
+        設成「應援」的粉專，會在自己這邊按讚，並且留一則自己的話，後面帶自己的
+        <code>/go?src=</code> 連結——所以帶進來的人算得出是哪一個粉專的功勞。
+        角色設了但素材池是空的，那個粉專永遠不會開口，下面會標出來。
+      </p>
+      <div id="boostStatus" class="boost-status"><p class="hint">載入中⋯</p></div>
+      <div class="console-plan-bar">
+        <label>拿哪一則已發出的貼文試算
+          <input id="boostTargetId" type="number" min="1" placeholder="target ID" />
+        </label>
+        <button type="button" id="boostPreview">試算（只看不發）</button>
+      </div>
+      <div id="boostPlan"></div>
     </section>
 
     <section id="tab-media" class="tab">

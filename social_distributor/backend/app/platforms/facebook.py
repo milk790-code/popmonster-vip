@@ -221,6 +221,44 @@ class FacebookPublisher(Publisher):
                 post_id, exc,
             )
 
+    # ---- Engagement as a Page (used by the cross-account boost) ----------
+    #
+    # Both calls need pages_manage_engagement on the *acting* Page's token.
+    # Unlike the first comment above these DO raise: a boost that silently
+    # never happens is indistinguishable from one that works, which is how
+    # the auto first comment went unnoticed for months.
+
+    def like_as_page(self, token: TokenBundle, object_id: str) -> None:
+        """Like a post as the Page that owns ``token``.
+
+        Write-only by design on Meta's side: the read side (who liked this)
+        was retired on 2020-11-02, so we record our own action rather than
+        trying to verify it by reading the like list back.
+        """
+        page_token = token.extra.get("page_access_token", token.access_token)
+        request_json(
+            "POST",
+            f"{GRAPH_BASE}/{object_id}/likes",
+            data={"access_token": page_token},
+            timeout=30,
+        )
+
+    def comment_as_page(self, token: TokenBundle, object_id: str, message: str) -> str:
+        """Comment on ``object_id`` as the Page that owns ``token``.
+
+        Returns the new comment id so the action is auditable after the
+        fact (there is no way to pin it -- the Graph API has no pin field
+        on the comment node at all).
+        """
+        page_token = token.extra.get("page_access_token", token.access_token)
+        data = request_json(
+            "POST",
+            f"{GRAPH_BASE}/{object_id}/comments",
+            data={"message": message, "access_token": page_token},
+            timeout=30,
+        )
+        return str(data.get("id", ""))
+
     def _publish_text(self, token, page_id, req: PublishRequest) -> PublishResult:
         body = {"message": req.caption, "access_token": token}
         if req.link_url:

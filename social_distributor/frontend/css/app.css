@@ -445,6 +445,29 @@ button.ghost:hover { border-style: solid; }
 .plan-item button:hover { border-color: var(--accent); }
 .plan-holding { color: var(--muted); font-size: 12px; line-height: 1.8; margin-top: 8px; }
 
+/* 跨帳號互助 */
+.boost-switch { font-size: 13px; line-height: 1.9; margin: 0 0 4px; }
+/* A grid, not a flex row: the Page names differ in length, and on flex the
+   "每天最多 N 次" column drifted left and right down the list, which made
+   four identical rows look like four different things. */
+.boost-row {
+  display: grid; align-items: baseline; gap: 4px 16px;
+  grid-template-columns: 10px minmax(8rem, 13rem) max-content 1fr;
+  padding: 9px 2px; border-top: 1px solid #23272e;
+}
+.boost-row .nolink { grid-column: 3 / -1; }
+.boost-row .why:last-of-type { word-break: break-all; }
+.boost-row .why { color: var(--muted); font-size: 12px; }
+.boost-row .nolink { color: var(--danger); font-size: 12px; }
+.boost-row.stuck strong { color: var(--danger); }
+.boost-msg {
+  display: block; margin-top: 6px; padding: 8px 10px;
+  border-left: 2px solid var(--accent); background: #16191d;
+  color: var(--text); font-size: 13px; line-height: 1.8;
+  white-space: pre-wrap; word-break: break-word;
+}
+.boost-skipped { margin: 4px 0 0 18px; color: var(--muted); font-size: 12px; line-height: 1.9; }
+
 @media (max-width: 720px) {
   .console-split { grid-template-columns: 1fr; }
   .console-list { position: static; }

@@ -1939,6 +1939,7 @@ async function loadConsole() {
   }
   renderConsoleList();
   if (_consoleSelected != null) selectConsoleAccount(_consoleSelected);
+  loadBoostStatus();
 }
 
 function renderConsoleList() {
@@ -2225,4 +2226,87 @@ async function loadCommunityPlan() {
       }
     });
   });
+}
+
+// --- 跨帳號互助（按讚＋自己的留言＋自己的引流連結）---------------------
+//
+// Read-only in the dashboard on purpose. The switch that lets these run for
+// real is an environment variable on the worker, not a button here: turning
+// on writes-to-Facebook-on-our-behalf should be a deliberate act, not a
+// stray click on a settings page.
+
+document.getElementById("boostPreview")?.addEventListener("click", previewBoost);
+
+function boostRoleLabel(role) {
+  return { supporter: "應援", leader: "主帳號", off: "不參與" }[role] || role;
+}
+
+async function loadBoostStatus() {
+  const box = document.getElementById("boostStatus");
+  if (!box) return;
+  let data;
+  try {
+    data = await api("/api/boost/settings");
+  } catch (err) {
+    box.innerHTML = `<p class="hint">讀不到互助設定：${escapeHtml(err.message)}</p>`;
+    return;
+  }
+  const supporters = data.accounts.filter((a) => a.role === "supporter");
+  // The two numbers that actually matter, and they are not the same number:
+  // "set to supporter" vs "can actually say something".
+  const stuck = supporters.filter((a) => !a.ready);
+  const rows = supporters.map((a) => `
+    <div class="boost-row${a.ready ? "" : " stuck"}">
+      <span class="dot${a.ready ? " on" : ""}"></span>
+      <strong>${escapeHtml(a.handle)}</strong>
+      <span class="why">每天最多 ${a.max_per_day} 次　素材 ${a.comment_pool_size} 句</span>
+      <span class="why">${escapeHtml(a.link)}</span>
+      ${a.ready ? "" : '<span class="nolink">素材池是空的，這個粉專永遠不會開口</span>'}
+    </div>`).join("");
+
+  box.innerHTML = `
+    <p class="boost-switch">
+      總開關：<strong>${data.enabled ? "開（會真的按讚與留言）" : "關（只做設定，不會動 Facebook）"}</strong>
+      　每則貼文最多 ${data.max_supporters_per_post} 個粉專
+      　時間打散在發文後 ${data.min_delay_minutes}–${data.window_minutes} 分鐘
+    </p>
+    <p class="hint">
+      設成應援的有 ${supporters.length} 個，其中 ${data.supporters_ready} 個真的講得出話。
+      ${stuck.length ? `${stuck.length} 個缺素材。` : ""}
+    </p>
+    ${rows || '<p class="hint">還沒有任何粉專設成「應援」。上面挑一個帳號改角色。</p>'}`;
+}
+
+async function previewBoost() {
+  const box = document.getElementById("boostPlan");
+  const targetId = document.getElementById("boostTargetId").value.trim();
+  if (!targetId) {
+    box.innerHTML = '<p class="hint">先填一個已經發出去的 target ID（狀態板上看得到）。</p>';
+    return;
+  }
+  box.innerHTML = '<p class="hint">試算中⋯</p>';
+  let plan;
+  try {
+    plan = await api(`/api/boost/preview?target_id=${encodeURIComponent(targetId)}`);
+  } catch (err) {
+    box.innerHTML = `<p class="hint">算不出來：${escapeHtml(err.message)}</p>`;
+    return;
+  }
+  const actions = (plan.actions || []).map((a) => `
+    <div class="plan-item">
+      <div>
+        <strong>${escapeHtml(a.handle)}</strong>
+        <span class="why">發文後 ${a.delay_minutes} 分鐘　按讚＋留言</span>
+        <span class="boost-msg">${escapeHtml(a.message)}</span>
+      </div>
+    </div>`).join("");
+  const skipped = (plan.skipped || []).map((s) =>
+    `<li>${escapeHtml(s.handle)}－${escapeHtml(s.reason)}</li>`).join("");
+  box.innerHTML = `
+    <div class="plan-account">
+      <h4>${escapeHtml(plan.leader)} 這則貼文</h4>
+      ${actions || '<p class="hint">沒有粉專會出來互動。</p>'}
+      ${skipped ? `<p class="plan-holding">沒排到的：</p><ul class="boost-skipped">${skipped}</ul>` : ""}
+      ${plan.enabled ? "" : '<p class="plan-holding">總開關是關的，上面這些現在不會真的發生。</p>'}
+    </div>`;
 }

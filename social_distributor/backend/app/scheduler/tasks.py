@@ -13,12 +13,13 @@ from ..compliance import ComplianceEngine
 from ..compliance.engine import publisher_request_from, target_media_asset
 from ..extensions import db
 from ..models import (
-    JobStatus, MediaAsset, Platform, PostMetric, PostTarget, SocialAccount,
-    TokenExpiryAlert, User,
+    AuditLog, JobStatus, MediaAsset, Platform, PostMetric, PostTarget,
+    SocialAccount, TokenExpiryAlert, User,
 )
 from ..platforms import get_oauth_provider, get_publisher
 from ..platforms._http import clear_proxy, set_proxy
 from ..platforms.base import PlatformError, TokenBundle
+from ..utils import boost as boost_rules
 from ..utils.events import publish_event
 from ..utils.telemetry import add_breadcrumb, trace_dispatch
 from ..utils.audit import record as audit
@@ -244,6 +245,200 @@ def _dispatch_body(self, target: PostTarget) -> None:
             "permalink": result.permalink,
         },
     )
+    _queue_boost(target)
+
+
+# ---------------------------------------------------------------------------
+# Cross-account boost: our other Pages like AND comment on this post.
+# ---------------------------------------------------------------------------
+
+
+def _queue_boost(target: PostTarget) -> None:
+    """Hand a freshly published Facebook post to the boost planner.
+
+    Never raises: the post already succeeded, and a boost that cannot be
+    scheduled must not turn a published post into a failed one.
+    """
+    try:
+        if not boost_rules.enabled():
+            return
+        if target.account.platform != Platform.FACEBOOK:
+            return
+        if not target.external_post_id:
+            return
+        schedule_boost.delay(target.id)
+    except Exception:  # noqa: BLE001 - boost is strictly best-effort
+        log.warning("could not queue boost for target_id=%s", target.id, exc_info=True)
+
+
+def _boost_spend_today(account_ids: list[int]) -> dict[int, int]:
+    """How many posts each Page has already boosted since UTC midnight.
+
+    Counted from the audit log rather than a counter column so the number
+    can always be reconciled against what actually happened.
+    """
+    if not account_ids:
+        return {}
+    since = datetime.now(timezone.utc).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    rows = (
+        db.session.query(AuditLog.resource_id)
+        .filter(
+            AuditLog.action == "boost.performed",
+            AuditLog.resource_type == "social_account",
+            AuditLog.created_at >= since,
+            AuditLog.resource_id.in_([str(i) for i in account_ids]),
+        )
+        .all()
+    )
+    spent: dict[int, int] = {}
+    for (resource_id,) in rows:
+        try:
+            key = int(resource_id)
+        except (TypeError, ValueError):
+            continue
+        spent[key] = spent.get(key, 0) + 1
+    return spent
+
+
+def build_boost_plan(target: PostTarget) -> boost_rules.BoostPlan:
+    """Resolve which of the owner's other Pages will support ``target``.
+
+    Split out from the task so the dashboard can show the same plan the
+    worker would run, without running it.
+    """
+    candidates = (
+        db.session.query(SocialAccount)
+        .filter(
+            SocialAccount.user_id == target.post.user_id,
+            SocialAccount.platform == Platform.FACEBOOK,
+            SocialAccount.id != target.account_id,
+        )
+        .all()
+    )
+    # Stay inside the brand line. A meatball Page commenting under a
+    # car-polish post is not a supportive neighbour, it is the shape of a
+    # network -- unrelated assets moving together is precisely what gets
+    # read as coordinated. Pages share a line when they share a group.
+    if not boost_rules.cross_line_allowed():
+        leader_groups = {g.id for g in (target.account.groups or [])}
+        if leader_groups:
+            candidates = [
+                a for a in candidates
+                if leader_groups & {g.id for g in (a.groups or [])}
+            ]
+    spent = _boost_spend_today([a.id for a in candidates])
+    return boost_rules.plan_boost(
+        post_key=f"target:{target.id}",
+        leader_account_id=target.account_id,
+        supporters=candidates,
+        spent_today=spent,
+    )
+
+
+@celery_app.task
+def schedule_boost(target_id: int) -> dict:
+    """Plan the boost for one published post and queue each Page's turn."""
+    target = db.session.get(PostTarget, target_id)
+    if target is None or not target.external_post_id:
+        return {"scheduled": 0, "reason": "target missing or never published"}
+    if not boost_rules.enabled():
+        return {"scheduled": 0, "reason": "boost disabled"}
+
+    plan = build_boost_plan(target)
+    for action in plan.actions:
+        perform_boost.apply_async(
+            args=[target.id, action.account_id, action.message],
+            countdown=action.delay_seconds,
+        )
+    audit(
+        "boost.scheduled",
+        "post_target",
+        target.id,
+        actor_user_id=target.post.user_id,
+        detail={
+            "external_post_id": target.external_post_id,
+            "supporters": [a.handle for a in plan.actions],
+            "skipped": plan.skipped,
+        },
+    )
+    db.session.commit()
+    log.info(
+        "boost scheduled target_id=%s supporters=%s skipped=%s",
+        target.id, len(plan.actions), len(plan.skipped),
+    )
+    return {"scheduled": len(plan.actions), "skipped": len(plan.skipped)}
+
+
+@celery_app.task(bind=True, max_retries=3)
+def perform_boost(self, target_id: int, account_id: int, message: str) -> dict:
+    """One supporting Page likes the post, then leaves its comment.
+
+    The like comes first because it is the cheaper call: if the token or
+    permission is broken we find out before writing a comment, and a like
+    on its own is a harmless partial state.
+    """
+    target = db.session.get(PostTarget, target_id)
+    account = db.session.get(SocialAccount, account_id)
+    if target is None or account is None or not target.external_post_id:
+        return {"ok": False, "reason": "target or account gone"}
+    if account.revoked_at:
+        return {"ok": False, "reason": "account revoked"}
+    if not boost_rules.enabled():
+        # The switch can be turned off between scheduling and firing; the
+        # later check is the one that counts.
+        return {"ok": False, "reason": "boost disabled"}
+
+    publisher = get_publisher(account.platform)
+    set_proxy((account.extra or {}).get("proxy_url"))
+    liked = False
+    comment_id = ""
+    try:
+        token = _decrypt_token(account)
+        publisher.like_as_page(token, target.external_post_id)
+        liked = True
+        comment_id = publisher.comment_as_page(
+            token, target.external_post_id, message
+        )
+    except PlatformError as exc:
+        audit(
+            "boost.failed",
+            "social_account",
+            account.id,
+            actor_user_id=target.post.user_id,
+            detail={
+                "target_id": target.id,
+                "liked": liked,
+                "error": str(exc)[:500],
+            },
+        )
+        db.session.commit()
+        if exc.retryable and self.request.retries < self.max_retries:
+            raise self.retry(exc=exc, countdown=backoff_seconds(self.request.retries))
+        log.warning(
+            "boost failed account=%s target=%s liked=%s err=%s "
+            "(liking/commenting as a Page needs pages_manage_engagement)",
+            account.handle, target.id, liked, exc,
+        )
+        return {"ok": False, "liked": liked, "reason": str(exc)[:200]}
+    finally:
+        clear_proxy()
+
+    audit(
+        "boost.performed",
+        "social_account",
+        account.id,
+        actor_user_id=target.post.user_id,
+        detail={
+            "target_id": target.id,
+            "external_post_id": target.external_post_id,
+            "comment_id": comment_id,
+            "message": message,
+        },
+    )
+    db.session.commit()
+    return {"ok": True, "liked": True, "comment_id": comment_id}
 
 
 @celery_app.task
