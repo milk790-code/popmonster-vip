@@ -5,6 +5,7 @@ policy sentence, not because it seemed tidy. If a test looks over-strict,
 read the docstring before relaxing it.
 """
 import os
+from collections import Counter
 from types import SimpleNamespace
 
 import pytest
@@ -222,11 +223,20 @@ def test_env_limits_are_clamped_not_trusted(monkeypatch):
 
 
 def _seed_published_post(app, *, supporters=2):
+    """Leader plus supporters, all in one brand line.
+
+    Grouping is not incidental: every one of the 57 live Pages belongs to
+    exactly one line, and boosting fails closed for a Page with no line.
+    """
+    from app.models import AccountGroup
     with app.app_context():
         user = User(email="b@example.com", display_name="b")
         db.session.add(user)
         db.session.flush()
         enc = cipher().encrypt("tok")
+        line = AccountGroup(user_id=user.id, name="測試線")
+        db.session.add(line)
+        db.session.flush()
         leader = SocialAccount(
             user_id=user.id, platform=Platform.FACEBOOK,
             external_account_id="page-leader", handle="@leader",
@@ -234,6 +244,7 @@ def _seed_published_post(app, *, supporters=2):
         )
         db.session.add(leader)
         db.session.flush()
+        line.accounts.append(leader)
         ids = []
         for i in range(supporters):
             account = SocialAccount(
@@ -243,6 +254,7 @@ def _seed_published_post(app, *, supporters=2):
             )
             db.session.add(account)
             db.session.flush()
+            line.accounts.append(account)
             write_profile(account, validate_profile({
                 "link_src": f"fb-00000{i}",
                 "interaction": {
@@ -346,18 +358,23 @@ def test_supporters_stay_inside_the_brand_line(app, monkeypatch):
     reader.
     """
     monkeypatch.setenv("BOOST_ENABLED", "1")
+    monkeypatch.delenv("BOOST_CROSS_LINE", raising=False)
     user_id, target_id, account_ids = _seed_published_post(app)
     from app.models import AccountGroup
     from app.scheduler import tasks
 
     with app.app_context():
         target = db.session.get(PostTarget, target_id)
-        line = AccountGroup(user_id=user_id, name="泡泡怪獸")
-        db.session.add(line)
+        assert len(tasks.build_boost_plan(target).actions) == 2
+
+        # Move the second supporter to its own, unrelated line.
+        stray = db.session.get(SocialAccount, account_ids[1])
+        other = AccountGroup(user_id=user_id, name="3Q貢丸")
+        db.session.add(other)
         db.session.flush()
-        # Leader and only the first supporter belong to the line.
-        line.accounts.append(target.account)
-        line.accounts.append(db.session.get(SocialAccount, account_ids[0]))
+        for line in list(stray.groups):
+            line.accounts.remove(stray)
+        other.accounts.append(stray)
         db.session.commit()
 
         assert [a.account_id for a in tasks.build_boost_plan(target).actions] == \
@@ -459,3 +476,144 @@ def test_no_first_comment_configured_reports_nothing(monkeypatch):
     result = PublishResult(external_post_id="p3")
     pub._post_first_comment("tok", result, PublishRequest(caption="x"))
     assert result.first_comment_id == "" and result.first_comment_error == ""
+
+
+# --- the frequency cap, which is the guardrail that actually matters -----
+
+
+def _seed_line(app, *, email, prefix, pages=3, max_per_day=1, grouped=True):
+    """One brand line of Pages, all supporters, plus two published posts."""
+    from app.models import AccountGroup
+    with app.app_context():
+        user = User(email=email, display_name=email)
+        db.session.add(user)
+        db.session.flush()
+        enc = cipher().encrypt("tok")
+        accounts = []
+        for i in range(pages):
+            acct = SocialAccount(user_id=user.id, platform=Platform.FACEBOOK,
+                                 external_account_id=f"{prefix}{i}",
+                                 handle=f"@{prefix}{i}", access_token_enc=enc)
+            db.session.add(acct)
+            db.session.flush()
+            write_profile(acct, validate_profile({
+                "link_src": f"fb-{prefix[0]}0000{i}"[:9],
+                "interaction": {
+                    "role": "supporter", "max_per_day": max_per_day,
+                    "comment_pool": [f"第{i}頁自己的一句話素材內容",
+                                     f"第{i}頁的第二句話素材內容"],
+                },
+            }))
+            accounts.append(acct)
+        if grouped:
+            line = AccountGroup(user_id=user.id, name=f"線-{prefix}")
+            db.session.add(line)
+            db.session.flush()
+            for acct in accounts:
+                line.accounts.append(acct)
+        post = Post(user_id=user.id, caption="c")
+        db.session.add(post)
+        db.session.flush()
+        targets = []
+        for n in range(2):
+            t = PostTarget(post_id=post.id, account_id=accounts[0].id,
+                           status=JobStatus.SUCCEEDED,
+                           external_post_id=f"{prefix}0_{n}")
+            db.session.add(t)
+            db.session.flush()
+            targets.append(t)
+        db.session.commit()
+        return user.id, [t.id for t in targets], [a.id for a in accounts]
+
+
+def test_two_posts_in_one_day_cannot_recruit_the_same_page_twice(app, monkeypatch):
+    """The hole this closes: a boost fires 25-180 minutes after publishing,
+    so counting only what had already happened meant two posts on the same
+    morning both planned against zero and picked the same Page twice. At
+    three posts a day that breached the frequency cap immediately."""
+    monkeypatch.setenv("BOOST_ENABLED", "1")
+    from app.scheduler import tasks
+    _uid, target_ids, _accts = _seed_line(app, email="cap@x", prefix="cap")
+
+    queued = []
+    monkeypatch.setattr(tasks.perform_boost, "apply_async",
+                        lambda args=None, **k: queued.append(args[1]))
+    with app.app_context():
+        for tid in target_ids:
+            tasks.schedule_boost.run(tid)
+    counts = Counter(queued)
+    assert counts, "nothing was scheduled at all"
+    assert max(counts.values()) == 1, f"cap is 1/day, got {dict(counts)}"
+
+
+def test_a_replayed_task_does_not_comment_twice(app, monkeypatch):
+    """Second gate, against what happened rather than what was planned:
+    a redelivered task or a queue resumed after an outage."""
+    monkeypatch.setenv("BOOST_ENABLED", "1")
+    from app.scheduler import tasks
+    _uid, target_ids, account_ids = _seed_line(app, email="replay@x", prefix="rep")
+
+    fake = _FakePublisher()
+    monkeypatch.setattr(tasks, "get_publisher", lambda platform: fake)
+    with app.app_context():
+        first = tasks.perform_boost.run(target_ids[0], account_ids[1], "一句話素材內容在這")
+        again = tasks.perform_boost.run(target_ids[0], account_ids[1], "一句話素材內容在這")
+    assert first["ok"] is True
+    assert again["ok"] is False and "cap" in again["reason"]
+    assert len(fake.commented) == 1
+
+
+def test_an_ungrouped_page_does_not_pull_in_the_whole_fleet(app, monkeypatch):
+    """No line must not read as every line. Fail closed."""
+    monkeypatch.setenv("BOOST_ENABLED", "1")
+    monkeypatch.delenv("BOOST_CROSS_LINE", raising=False)
+    from app.scheduler import tasks
+    _uid, target_ids, _accts = _seed_line(app, email="solo@x", prefix="solo",
+                                          grouped=False)
+    with app.app_context():
+        target = db.session.get(PostTarget, target_ids[0])
+        assert tasks.build_boost_plan(target).actions == []
+
+
+def test_a_page_does_not_repeat_its_last_line(app, monkeypatch):
+    """Three sentences per Page means it cycles every third boost unless it
+    remembers. Instagram bans repetitive comments outright; Facebook reads
+    them as spam. Rotating costs nothing, so there is no reason to hand
+    over that signal."""
+    monkeypatch.setenv("BOOST_ENABLED", "1")
+    from app.scheduler import tasks
+    user_id, target_ids, account_ids = _seed_line(
+        app, email="rot@x", prefix="rot", max_per_day=5)
+
+    said = []
+    with app.app_context():
+        target = db.session.get(PostTarget, target_ids[0])
+        for _ in range(2):
+            plan = tasks.build_boost_plan(target)
+            action = next(a for a in plan.actions if a.account_id == account_ids[1])
+            said.append(action.source_line)
+            # Record it the way perform_boost would.
+            db.session.add(AuditLog(
+                actor_user_id=user_id, action="boost.performed",
+                resource_type="social_account", resource_id=str(account_ids[1]),
+                detail={"line": action.source_line},
+            ))
+            db.session.commit()
+    assert said[0] != said[1], "the same Page said the same thing twice running"
+
+
+def test_the_pool_line_is_recorded_so_rotation_has_something_to_read(app, monkeypatch):
+    monkeypatch.setenv("BOOST_ENABLED", "1")
+    from app.scheduler import tasks
+    user_id, target_id, account_ids = _seed_published_post(app)
+
+    queued = []
+    monkeypatch.setattr(tasks.perform_boost, "apply_async",
+                        lambda args=None, kwargs=None, **k: queued.append((args, kwargs)))
+    with app.app_context():
+        tasks.schedule_boost.run(target_id)
+        reserved = (db.session.query(AuditLog)
+                    .filter_by(action="boost.reserved").all())
+    assert reserved, "nothing reserved"
+    assert all(r.detail.get("line") for r in reserved)
+    assert all(k and k.get("source_line") for _a, k in queued)

@@ -20,6 +20,7 @@ from ..platforms import get_oauth_provider, get_publisher
 from ..platforms._http import clear_proxy, set_proxy
 from ..platforms.base import PlatformError, TokenBundle
 from ..utils import boost as boost_rules
+from ..utils.account_profile import read_profile
 from ..utils.events import publish_event
 from ..utils.telemetry import add_breadcrumb, trace_dispatch
 from ..utils.audit import record as audit
@@ -286,21 +287,39 @@ def _queue_boost(target: PostTarget) -> None:
         log.warning("could not queue boost for target_id=%s", target.id, exc_info=True)
 
 
-def _boost_spend_today(account_ids: list[int]) -> dict[int, int]:
-    """How many posts each Page has already boosted since UTC midnight.
+# Counted toward a Page's allowance. ``reserved`` is written the moment we
+# schedule, ``performed`` when it actually happens.
+#
+# Counting only ``performed`` was a hole with teeth: a boost fires 25-180
+# minutes after publishing, so two posts on the same morning both planned
+# against a count of zero and recruited the same Page twice -- breaking the
+# one guardrail that matters most (frequency). At ~3 posts a day that broke
+# on day one. A reservation closes the window between deciding and acting.
+BOOST_SPEND_ACTIONS = ("boost.performed", "boost.reserved")
+
+# A rolling window rather than "since midnight": UTC midnight is 08:00 in
+# Taipei, so a calendar-day cap quietly reset in the middle of the morning.
+BOOST_WINDOW_HOURS = 24
+
+
+def _boost_spend_recent(account_ids: list[int],
+                        actions: tuple[str, ...] | None = None) -> dict[int, int]:
+    """How many boosts each Page has committed to in the last 24 hours.
 
     Counted from the audit log rather than a counter column so the number
     can always be reconciled against what actually happened.
     """
     if not account_ids:
         return {}
-    since = datetime.now(timezone.utc).replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
+    # Resolved at call time, not bound as a default: a default argument is
+    # evaluated once at import, so tuning or patching the module constant
+    # would silently have no effect.
+    actions = actions or BOOST_SPEND_ACTIONS
+    since = datetime.now(timezone.utc) - timedelta(hours=BOOST_WINDOW_HOURS)
     rows = (
         db.session.query(AuditLog.resource_id)
         .filter(
-            AuditLog.action == "boost.performed",
+            AuditLog.action.in_(actions),
             AuditLog.resource_type == "social_account",
             AuditLog.created_at >= since,
             AuditLog.resource_id.in_([str(i) for i in account_ids]),
@@ -338,18 +357,57 @@ def build_boost_plan(target: PostTarget) -> boost_rules.BoostPlan:
     # read as coordinated. Pages share a line when they share a group.
     if not boost_rules.cross_line_allowed():
         leader_groups = {g.id for g in (target.account.groups or [])}
-        if leader_groups:
-            candidates = [
-                a for a in candidates
-                if leader_groups & {g.id for g in (a.groups or [])}
-            ]
-    spent = _boost_spend_today([a.id for a in candidates])
+        # Fail closed. A Page in no group has no line, and "no line" must
+        # not read as "every line" -- that would let an ungrouped Page pull
+        # the whole fleet into its post.
+        candidates = [
+            a for a in candidates
+            if leader_groups & {g.id for g in (a.groups or [])}
+        ]
+    ids = [a.id for a in candidates]
     return boost_rules.plan_boost(
         post_key=f"target:{target.id}",
         leader_account_id=target.account_id,
         supporters=candidates,
-        spent_today=spent,
+        spent_today=_boost_spend_recent(ids),
+        recent_by_account=_boost_recent_lines(ids),
     )
+
+
+def _boost_recent_lines(account_ids: list[int], depth: int = 6) -> dict[int, list[str]]:
+    """The pool lines each Page used most recently, newest first.
+
+    A Page holds three sentences, so without this it repeats itself every
+    third boost. Instagram bans repetitive comments outright and Facebook
+    reads them as spam, and there is no reason to hand over that signal
+    when rotating is free.
+    """
+    if not account_ids:
+        return {}
+    rows = (
+        db.session.query(AuditLog.resource_id, AuditLog.detail)
+        .filter(
+            AuditLog.action.in_(BOOST_SPEND_ACTIONS),
+            AuditLog.resource_type == "social_account",
+            AuditLog.resource_id.in_([str(i) for i in account_ids]),
+        )
+        .order_by(AuditLog.created_at.desc())
+        .limit(len(account_ids) * depth)
+        .all()
+    )
+    recent: dict[int, list[str]] = {}
+    for resource_id, detail in rows:
+        line = (detail or {}).get("line")
+        if not line:
+            continue
+        try:
+            key = int(resource_id)
+        except (TypeError, ValueError):
+            continue
+        seen = recent.setdefault(key, [])
+        if line not in seen and len(seen) < depth:
+            seen.append(line)
+    return recent
 
 
 @celery_app.task
@@ -363,8 +421,23 @@ def schedule_boost(target_id: int) -> dict:
 
     plan = build_boost_plan(target)
     for action in plan.actions:
+        # Reserve before queueing, and commit before the task can run: the
+        # next post published this morning must see this Page as spoken for
+        # even though nothing has happened on Facebook yet.
+        audit(
+            "boost.reserved",
+            "social_account",
+            action.account_id,
+            actor_user_id=target.post.user_id,
+            detail={"target_id": target.id,
+                    "delay_seconds": action.delay_seconds,
+                    "line": action.source_line},
+        )
+    db.session.commit()
+    for action in plan.actions:
         perform_boost.apply_async(
             args=[target.id, action.account_id, action.message],
+            kwargs={"source_line": action.source_line},
             countdown=action.delay_seconds,
         )
     audit(
@@ -387,7 +460,8 @@ def schedule_boost(target_id: int) -> dict:
 
 
 @celery_app.task(bind=True, max_retries=3)
-def perform_boost(self, target_id: int, account_id: int, message: str) -> dict:
+def perform_boost(self, target_id: int, account_id: int, message: str,
+                  source_line: str = "") -> dict:
     """One supporting Page likes the post, then leaves its comment.
 
     The like comes first because it is the cheaper call: if the token or
@@ -404,6 +478,22 @@ def perform_boost(self, target_id: int, account_id: int, message: str) -> dict:
         # The switch can be turned off between scheduling and firing; the
         # later check is the one that counts.
         return {"ok": False, "reason": "boost disabled"}
+
+    # Second gate, against what actually happened rather than what was
+    # planned. The reservation closes the scheduling window; this closes the
+    # replay window (a redelivered task, a resumed queue after an outage).
+    allowance = int(
+        (read_profile(account).get("interaction") or {}).get("max_per_day") or 0
+    )
+    done = _boost_spend_recent([account.id], actions=("boost.performed",)).get(
+        account.id, 0
+    )
+    if done >= allowance:
+        log.info(
+            "boost skipped account=%s: already did %s in the last %sh (cap %s)",
+            account.handle, done, BOOST_WINDOW_HOURS, allowance,
+        )
+        return {"ok": False, "reason": "daily cap already reached"}
 
     publisher = get_publisher(account.platform)
     set_proxy((account.extra or {}).get("proxy_url"))
@@ -450,6 +540,7 @@ def perform_boost(self, target_id: int, account_id: int, message: str) -> dict:
             "external_post_id": target.external_post_id,
             "comment_id": comment_id,
             "message": message,
+            "line": source_line,
         },
     )
     db.session.commit()

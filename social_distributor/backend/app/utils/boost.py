@@ -155,6 +155,10 @@ class BoostAction:
     message: str
     delay_seconds: int
     link_src: str
+    # The raw pool line, before the link was merged in. Recorded alongside
+    # the action so "what has this Page said recently" is a lookup rather
+    # than string-surgery on the composed comment.
+    source_line: str = ""
 
     def as_dict(self) -> dict:
         return {
@@ -164,6 +168,7 @@ class BoostAction:
             "delay_seconds": self.delay_seconds,
             "delay_minutes": round(self.delay_seconds / 60),
             "link": funnel_link(self.link_src),
+            "source_line": self.source_line,
         }
 
 
@@ -190,6 +195,7 @@ def plan_boost(
     leader_account_id: int,
     supporters: list,
     spent_today: dict[int, int],
+    recent_by_account: dict[int, list[str]] | None = None,
     limit: int | None = None,
     window: int | None = None,
     min_delay: int | None = None,
@@ -198,8 +204,13 @@ def plan_boost(
 
     ``supporters`` are candidate ``SocialAccount`` rows (already filtered to
     the same owner and to Facebook). ``spent_today`` maps account id to how
-    many posts that Page has already boosted today. Nothing here talks to
-    the network, so every rule is unit-testable.
+    many posts that Page has already boosted in the window.
+    ``recent_by_account`` maps account id to the lines that Page has used
+    most recently, newest first, so it does not repeat itself -- a pool of
+    three sentences otherwise cycles every third boost, and "repetitive
+    comments" is banned outright on Instagram and reads as spam on Facebook.
+
+    Nothing here talks to the network, so every rule is unit-testable.
     """
     limit = max_supporters_per_post() if limit is None else limit
     window = window_minutes() if window is None else window
@@ -267,16 +278,28 @@ def plan_boost(
         pool = [t.strip() for t in (interaction.get("comment_pool") or [])
                 if len(t.strip()) >= MIN_COMMENT_CHARS]
         link_src = profile.get("link_src") or ""
-        start = _pool_index(len(pool), f"{post_key}:{getattr(account, 'id', 0)}")
+        account_id = getattr(account, "id", 0)
+        start = _pool_index(len(pool), f"{post_key}:{account_id}")
+        recent = (recent_by_account or {}).get(account_id) or []
+        # Rotate through this Page's own pool, starting at a deterministic
+        # offset, and take the first line no other Page has claimed on this
+        # post. Among those, prefer one this Page has not said recently --
+        # if the whole pool is recent we still speak, using whatever it said
+        # longest ago, rather than going silent over a style preference.
+        free = [pool[(start + offset) % len(pool)] for offset in range(len(pool))]
+        free = [line for line in free if line not in used_messages]
+
+        def staleness(line: str) -> int:
+            # Never said -> most stale. Otherwise, further back in `recent`
+            # (newest first) is staler.
+            return len(recent) if line not in recent else recent.index(line)
+
         message = ""
-        # Rotate within this Page's own pool until we find a line no other
-        # Page is already using on this post.
-        for offset in range(len(pool)):
-            candidate = pool[(start + offset) % len(pool)]
-            if candidate not in used_messages:
-                message = compose_comment(candidate, link_src)
-                used_messages.add(candidate)
-                break
+        pick = ""
+        if free:
+            pick = max(free, key=staleness)
+            message = compose_comment(pick, link_src)
+            used_messages.add(pick)
         if not message:
             plan.skipped.append(
                 _skip(handle, getattr(account, "id", 0),
@@ -291,6 +314,7 @@ def plan_boost(
                 message=message,
                 delay_seconds=slots[index],
                 link_src=link_src if PAGE_SRC_RE.match(link_src or "") else FALLBACK_SRC,
+                source_line=pick,
             )
         )
 
