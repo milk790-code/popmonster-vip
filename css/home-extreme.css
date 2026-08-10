@@ -604,7 +604,7 @@
 .catalog-search > label {
   color: var(--home-muted);
   font-family: var(--home-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .12em;
 }
 .catalog-search-field { position: relative; }
@@ -671,7 +671,7 @@
 .home-page .card-sku { color: var(--home-gold); font-family: var(--home-mono); }
 .home-page .card-name { min-height: 2.6em; color: var(--home-text); font-family: var(--home-serif); font-size: 17px; }
 .home-page .card-price.tbd { color: var(--home-muted); }
-.home-page .card-cat { color: var(--home-muted); border: 0; border-radius: 0; padding: 0; font-size: 10px; }
+.home-page .card-cat { color: var(--home-muted); border: 0; border-radius: 0; padding: 0; font-size: 11px; }
 .home-page .card-btn {
   margin-top: auto;
   padding: 10px 12px;
@@ -785,7 +785,7 @@
   .home-proof li { padding: 14px 10px 14px 0; }
   .home-proof li + li { padding-left: 10px; }
   .home-proof strong { font-size: 12px; }
-  .home-proof span { font-size: 10px; }
+  .home-proof span { font-size: 11px; }
   .home-hero-orbit { top: -12px; right: -8px; width: 68px; height: 68px; }
   .home-page .carousel-section,
   .home-page .brand,
@@ -817,7 +817,7 @@
   .home-page .featured-stats { align-items: stretch; }
   .home-page .stat { padding: 14px 6px; }
   .home-page .stat-num { font-size: 16px; }
-  .home-page .stat-label { font-size: 9px; }
+  .home-page .stat-label { font-size: 11px; }
   .home-page .social { text-align: left; padding-bottom: 82px; }
   .home-page .social-badges { grid-template-columns: 1fr; }
   .home-page .social-badge { align-items: start; padding: 22px 0; }
@@ -827,7 +827,7 @@
   .home-page .card-body { padding: 13px; }
   .home-page .card-name { font-size: 14px; }
   .home-page .card-price { font-size: 14px; }
-  .home-page .card-btn--cart { padding: 7px 8px; font-size: 10px; }
+  .home-page .card-btn--cart { padding: 7px 8px; font-size: 11px; }
   .home-page .cookie-bar {
     right: 10px;
     bottom: 10px;
