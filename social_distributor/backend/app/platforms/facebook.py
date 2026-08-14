@@ -64,6 +64,11 @@ def reels_enabled() -> bool:
 REEL_READY_TIMEOUT = float(os.environ.get("FB_REEL_READY_TIMEOUT", "240"))
 REEL_POLL_INTERVAL = float(os.environ.get("FB_REEL_POLL_INTERVAL", "6"))
 
+# A Reel that has just finished encoding may not have its post id attached
+# yet, so the lookup is worth repeating a couple of times before giving up.
+POST_ID_LOOKUP_ATTEMPTS = int(os.environ.get("FB_POST_ID_ATTEMPTS", "3"))
+POST_ID_LOOKUP_INTERVAL = float(os.environ.get("FB_POST_ID_INTERVAL", "4"))
+
 # ``video_status`` values that mean we can stop waiting.
 _REEL_DONE = {"ready"}
 _REEL_DEAD = {"error", "upload_failed", "expired"}
@@ -80,6 +85,7 @@ def _reject_if_unsuccessful(payload: dict, what: str) -> None:
             f"{what} rejected: {payload.get('message') or payload}",
             retryable=False,
         )
+
 
 DEFAULT_SCOPES = [
     "pages_show_list",
@@ -463,7 +469,7 @@ class FacebookPublisher(Publisher):
             # it would publish anyway -- the duplicate we are trying to avoid.
             self._await_reel_ready(token, video_id)
             return PublishResult(
-                external_post_id=self._resolve_post_id(token, video_id, {}),
+                external_post_id=self._resolve_post_id(token, page_id, video_id, {}),
                 raw={"start": start, "finish": "timeout_but_published"},
                 surface="reel",
             )
@@ -472,38 +478,57 @@ class FacebookPublisher(Publisher):
         self._await_reel_ready(token, video_id)
 
         return PublishResult(
-            external_post_id=self._resolve_post_id(token, video_id, finish),
+            external_post_id=self._resolve_post_id(token, page_id, video_id, finish),
             raw={"start": start, "finish": finish},
             surface="reel",
         )
 
-    def _resolve_post_id(self, token, video_id, finish: dict) -> str:
+    def _resolve_post_id(self, token, page_id, video_id, finish: dict) -> str:
         """The id of the *post*, not the video.
 
-        These are different objects, and only the post accepts comments. The
-        funnel link lives in the first comment, so settling for the video id
-        does not merely mislabel the row -- it silently drops the link off
-        every Reel we publish. That is exactly what was happening: nearly all
-        pending Facebook targets are video, and the comment attempts were
-        coming back "Object with ID does not exist".
+        These are different objects and only the post accepts comments, which
+        is where the funnel link lives. Settling for the video id does not
+        merely mislabel the row -- it drops the link off every Reel.
+
+        Observed in production on the first Reel published this way: the
+        ``post_id`` field came back empty, we fell back to the bare video id,
+        and commenting on it returned ``(#12) singular statuses API is
+        deprecated``. So the bare video id is not a usable fallback at all --
+        it is a guaranteed failure wearing the costume of a safe default.
+
+        Two changes follow from that. The lookup is retried, because a Reel
+        that just finished encoding may not have its post id attached yet;
+        and when the lookup still yields nothing we compose ``page_id_video_id``,
+        the shape Facebook post ids actually take, rather than handing back
+        something already known not to work.
         """
         if post_id := finish.get("post_id"):
             return str(post_id)
-        try:
-            data = request_json(
-                "GET",
-                f"{GRAPH_BASE}/{video_id}",
-                params={"fields": "post_id", "access_token": token},
-                timeout=30,
-            )
-        except PlatformError as exc:
-            log.warning("reel published but its post id could not be read "
-                        "(video_id=%s); the first comment will fail: %s",
-                        video_id, exc)
-            return str(video_id)
-        # Falling back to the video id keeps insights working; the comment is
-        # the part that breaks, and it reports its own failure.
-        return str(data.get("post_id") or video_id)
+
+        for attempt in range(POST_ID_LOOKUP_ATTEMPTS):
+            try:
+                data = request_json(
+                    "GET",
+                    f"{GRAPH_BASE}/{video_id}",
+                    params={"fields": "post_id", "access_token": token},
+                    timeout=30,
+                )
+            except PlatformError as exc:
+                log.warning("reel post id lookup failed (video_id=%s): %s",
+                            video_id, exc)
+                break
+            if post_id := data.get("post_id"):
+                return str(post_id)
+            if attempt + 1 < POST_ID_LOOKUP_ATTEMPTS:
+                time.sleep(POST_ID_LOOKUP_INTERVAL)
+
+        composed = f"{page_id}_{video_id}"
+        log.warning(
+            "reel %s published but Graph never returned a post_id; falling "
+            "back to the composed id %s so the funnel comment has something "
+            "valid to target", video_id, composed,
+        )
+        return composed
 
     def _reel_status(self, token, video_id) -> str:
         """Current ``video_status``, or "" when it cannot be read."""
