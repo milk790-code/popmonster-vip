@@ -12,6 +12,7 @@ from ..transfers.manual_transfer import advance, transition_expired_if_overdue
 from ..utils.audit import record as audit
 from ..utils.auth import current_user_id
 from ..utils.crypto import cipher
+from ..utils.redact import redact_error
 
 bp = Blueprint("transfers", __name__, url_prefix="/api/transfers")
 
@@ -127,7 +128,7 @@ def create_transfer():
             )
         except Exception as exc:
             return jsonify({"error": "meta transfer initiation failed",
-                            "detail": str(exc)[:300]}), 502
+                            "detail": redact_error(exc)}), 502
         transfer.raw = raw if isinstance(raw, dict) else {}
         transfer.status = "awaiting_target"
 

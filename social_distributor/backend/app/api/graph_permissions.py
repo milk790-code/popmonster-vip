@@ -24,6 +24,7 @@ from ..platforms._http import request_json
 from ..platforms.base import PlatformError
 from ..platforms.facebook import GRAPH_BASE
 from ..utils.auth import current_user_id
+from ..utils.redact import redact_error
 
 bp = Blueprint("graph_permissions", __name__, url_prefix="/api/graph")
 
@@ -71,7 +72,7 @@ def account_permissions(account_id: int):
     except PlatformError as exc:
         # A revoked or expired token is the most common cause and is itself
         # the answer, so surface it instead of a generic 500.
-        return jsonify({"error": "graph rejected the token", "detail": str(exc)}), 502
+        return jsonify({"error": "graph rejected the token", "detail": redact_error(exc)}), 502
 
     data = payload.get("data") or {}
     granted = sorted(data.get("scopes") or [])

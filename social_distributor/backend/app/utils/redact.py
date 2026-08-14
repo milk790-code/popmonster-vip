@@ -55,3 +55,15 @@ def _redact_string(s: str) -> str:
     for pat in _TOKEN_PATTERNS:
         out = pat.sub(MASK, out)
     return out
+
+
+def redact_error(exc: object, limit: int = 300) -> str:
+    """A platform error message that is safe to hand back over the API.
+
+    Adapter errors quote the platform's own response body verbatim, and
+    platforms do echo credentials back inside error text -- which is the
+    whole reason ``redact`` exists for audit payloads. An error surfaced to
+    the caller travels further than an audit row does, so it needs at least
+    the same treatment, not less.
+    """
+    return _redact_string(str(exc))[:limit]
