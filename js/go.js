@@ -9,6 +9,8 @@
     "pwa",
     "homescreen",
     "profile-bio",
+    "youtube",
+    "youtube-desc",
     "legacy-worker",
     "facebook-free-first",
     "facebook-dont-pay",
