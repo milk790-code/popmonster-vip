@@ -339,7 +339,15 @@ class FacebookPublisher(Publisher):
                 "access_token": token,
             },
         )
-        return PublishResult(external_post_id=data.get("post_id", data["id"]), raw=data)
+        # ``/photos`` answers with the photo id and *usually* a qualified
+        # post_id. When it withholds the latter the photo id is what is left,
+        # and a bare id cannot be commented on -- same trap as the Reels path.
+        return PublishResult(
+            external_post_id=self._qualify(
+                page_id, data.get("post_id") or data["id"],
+            ),
+            raw=data,
+        )
 
     def fetch_insights(self, token, external_account_id, external_post_id):
         page_token = token.extra.get("page_access_token", token.access_token)
@@ -399,8 +407,14 @@ class FacebookPublisher(Publisher):
             },
             timeout=180,
         )
+        # ``/videos`` hands back a video id, and a video id is not a post id --
+        # the funnel comment would fail here for exactly the reason it failed
+        # on Reels. Resolve it the same way rather than keeping a second copy
+        # of the bug on the fallback path.
         return PublishResult(
-            external_post_id=str(data.get("id")),
+            external_post_id=self._resolve_post_id(
+                token, page_id, str(data.get("id")), data,
+            ),
             raw=data,
             surface="video",
             surface_fallback_error=fallback_error,
@@ -501,9 +515,21 @@ class FacebookPublisher(Publisher):
         and when the lookup still yields nothing we compose ``page_id_video_id``,
         the shape Facebook post ids actually take, rather than handing back
         something already known not to work.
+
+        That was still not enough, and the reason is worth recording. Graph
+        *does* answer with a ``post_id`` -- but it answers with only the second
+        half of one, e.g. ``122123395610788815``. Every id handed back was
+        therefore truthful, un-composed, and unusable, so the fallback above
+        never ran and all fifteen Reels published on 2026-08-14 lost their
+        funnel comment. Reproduced read-only against a live page: the same post
+        answers to ``1101945063003688_122125272129308556`` and returns the very
+        same ``(#12) singular statuses API is deprecated`` for the bare half.
+
+        Hence ``_qualify``: a post id is only usable once the page id is on the
+        front of it, whichever route produced it.
         """
         if post_id := finish.get("post_id"):
-            return str(post_id)
+            return self._qualify(page_id, post_id)
 
         for attempt in range(POST_ID_LOOKUP_ATTEMPTS):
             try:
@@ -518,7 +544,7 @@ class FacebookPublisher(Publisher):
                             video_id, exc)
                 break
             if post_id := data.get("post_id"):
-                return str(post_id)
+                return self._qualify(page_id, post_id)
             if attempt + 1 < POST_ID_LOOKUP_ATTEMPTS:
                 time.sleep(POST_ID_LOOKUP_INTERVAL)
 
@@ -529,6 +555,25 @@ class FacebookPublisher(Publisher):
             "valid to target", video_id, composed,
         )
         return composed
+
+    @staticmethod
+    def _qualify(page_id, post_id) -> str:
+        """A page post id is ``{page_id}_{post_id}``; anything less is a 404.
+
+        Graph is inconsistent about which half it returns, so normalise rather
+        than trust. An id that already carries an underscore is left exactly as
+        it is -- re-prefixing a qualified id would break the working case to
+        fix the broken one.
+        """
+        post_id = str(post_id)
+        if "_" in post_id:
+            return post_id
+        qualified = f"{page_id}_{post_id}"
+        log.info(
+            "graph returned an unqualified post id %s; commenting needs the "
+            "page-qualified form %s", post_id, qualified,
+        )
+        return qualified
 
     def _reel_status(self, token, video_id) -> str:
         """Current ``video_status``, or "" when it cannot be read."""
