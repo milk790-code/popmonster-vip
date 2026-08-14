@@ -29,6 +29,23 @@ GRAPH_BASE = "https://graph.facebook.com/v20.0"
 GRAPH_VIDEO_BASE = "https://graph-video.facebook.com/v20.0"
 DIALOG_BASE = "https://www.facebook.com/v20.0/dialog/oauth"
 
+
+def reels_enabled() -> bool:
+    """Whether video should be published as a Reel rather than a video post.
+
+    A ``/videos`` post is only delivered to people who already follow the
+    Page. Every Page in this fleet has close to zero followers, so that path
+    is a broadcast to nobody -- which is precisely the "zero plays" symptom.
+    Reels are the one surface Facebook still hands to non-followers for free.
+
+    On by default, and safe to be: a Reel that Facebook refuses falls back to
+    the old path, so the worst case is the behaviour we already had.
+    ``FB_REELS=0`` forces the old path for everything.
+    """
+    return (os.environ.get("FB_REELS") or "1").strip().lower() not in {
+        "0", "false", "no", "off",
+    }
+
 DEFAULT_SCOPES = [
     "pages_show_list",
     "pages_read_engagement",
@@ -309,6 +326,25 @@ class FacebookPublisher(Publisher):
         )
 
     def _publish_video(self, token, page_id, req: PublishRequest) -> PublishResult:
+        """Publish as a Reel when we can, as a plain video post otherwise.
+
+        Reels carry format rules (portrait, duration) that cannot be checked
+        from a URL, so the only honest test is to ask Facebook and accept the
+        answer. A refusal must not cost us the post -- it only costs us the
+        recommendation surface, which is exactly what the fallback records.
+        """
+        fallback_error = ""
+        if reels_enabled():
+            try:
+                return self._publish_reel(token, page_id, req)
+            except PlatformError as exc:
+                fallback_error = str(exc)[:500]
+                log.warning(
+                    "reel refused for page_id=%s, falling back to a plain "
+                    "video post (no recommendation surface): %s",
+                    page_id, exc,
+                )
+
         # B6: video uploads can take 60-120s; use long timeout instead of
         # the 60s default so a slow Meta CDN doesn't fail us spuriously.
         data = request_json(
@@ -322,4 +358,65 @@ class FacebookPublisher(Publisher):
             },
             timeout=180,
         )
-        return PublishResult(external_post_id=str(data.get("id")), raw=data)
+        return PublishResult(
+            external_post_id=str(data.get("id")),
+            raw=data,
+            surface="video",
+            surface_fallback_error=fallback_error,
+        )
+
+    def _publish_reel(self, token, page_id, req: PublishRequest) -> PublishResult:
+        """Three-phase hosted upload: start, transfer, finish.
+
+        https://developers.facebook.com/docs/video-api/guides/reels-publishing
+
+        Unlike ``/videos`` there is no single call that accepts a file URL:
+        phase 1 reserves a video id and hands back a one-shot upload host,
+        phase 2 tells that host to fetch our URL, phase 3 publishes it.
+        """
+        start = request_json(
+            "POST",
+            f"{GRAPH_BASE}/{page_id}/video_reels",
+            data={"upload_phase": "start", "access_token": token},
+            timeout=60,
+        )
+        video_id = start.get("video_id")
+        upload_url = start.get("upload_url")
+        if not video_id or not upload_url:
+            raise PlatformError(
+                f"reel start returned no upload target: {start}",
+                retryable=False,
+            )
+
+        # Phase 2 is the odd one out in the whole Graph API: the credentials
+        # and the source URL travel as headers, and the body stays empty.
+        request_json(
+            "POST",
+            upload_url,
+            headers={
+                "Authorization": f"OAuth {token}",
+                "file_url": req.media_url,
+            },
+            timeout=180,
+        )
+
+        finish = request_json(
+            "POST",
+            f"{GRAPH_BASE}/{page_id}/video_reels",
+            data={
+                "video_id": video_id,
+                "upload_phase": "finish",
+                "video_state": "PUBLISHED",
+                "description": req.caption,
+                "access_token": token,
+            },
+            timeout=120,
+        )
+        # finish echoes post_id on success; when it only confirms success the
+        # video id is the durable handle we can still fetch insights against.
+        post_id = finish.get("post_id") or video_id
+        return PublishResult(
+            external_post_id=str(post_id),
+            raw={"start": start, "finish": finish},
+            surface="reel",
+        )

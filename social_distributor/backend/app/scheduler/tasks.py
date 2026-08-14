@@ -248,6 +248,21 @@ def _dispatch_body(self, target: PostTarget) -> None:
                 "error": result.first_comment_error,
             },
         )
+    # Which surface a video landed on decides whether anyone outside the
+    # Page's followers can ever see it, so it has to be answerable per post
+    # rather than inferred from play counts weeks later.
+    if result.surface:
+        audit(
+            "post.surface_downgraded" if result.surface_fallback_error
+            else "post.surface",
+            "post_target",
+            target.id,
+            actor_user_id=target.post.user_id,
+            detail={
+                "surface": result.surface,
+                "error": result.surface_fallback_error,
+            },
+        )
     db.session.commit()
     publish_event(
         target.post.user_id,
