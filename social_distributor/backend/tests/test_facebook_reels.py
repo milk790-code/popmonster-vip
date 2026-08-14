@@ -53,6 +53,7 @@ def _fast_and_clean(monkeypatch):
     monkeypatch.delenv("FB_REELS", raising=False)
     monkeypatch.setattr(fb, "REEL_POLL_INTERVAL", 0)
     monkeypatch.setattr(fb, "REEL_READY_TIMEOUT", 1)
+    monkeypatch.setattr(fb, "POST_ID_LOOKUP_INTERVAL", 0)
 
 
 def _fake_graph(*, finish=REEL_FINISH, statuses=("ready",), video_id="vid-fallback",
@@ -208,15 +209,22 @@ def test_finish_without_post_id_looks_the_post_up_instead_of_using_the_video_id(
     assert any((p or {}).get("fields") == "post_id" for *_, p in calls)
 
 
-def test_an_unreadable_post_id_still_returns_a_usable_handle():
-    """Insights work off the video id, so falling back keeps something. The
-    comment is the part that breaks, and it reports its own failure."""
-    fake, _ = _fake_graph(finish={"success": True}, resolved_post_id=None)
+def test_a_missing_post_id_composes_one_instead_of_using_the_bare_video_id():
+    """Observed in production: post_id came back empty, we fell back to the
+    bare video id, and commenting on it returned "(#12) singular statuses API
+    is deprecated". So the bare video id is not a safe default -- it is a
+    guaranteed failure. Facebook post ids are ``page_video``, so compose one.
+    """
+    fake, calls = _fake_graph(finish={"success": True}, resolved_post_id=None)
     with patch("app.platforms.facebook.request_json", side_effect=fake):
         result = FacebookPublisher().publish(_token(), "page-1", _request())
 
-    assert result.external_post_id == "v-123"
+    assert result.external_post_id == "page-1_v-123"
     assert result.surface == "reel"
+    # Retried first, because a Reel that just finished encoding may not have
+    # its post id attached yet.
+    lookups = sum(1 for *_, p in calls if (p or {}).get("fields") == "post_id")
+    assert lookups == fb.POST_ID_LOOKUP_ATTEMPTS
 
 
 def test_the_switch_can_force_the_old_path(monkeypatch):
