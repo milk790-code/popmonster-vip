@@ -48,6 +48,10 @@ class PublishResult:
     # reaching into the database.
     first_comment_id: str = ""
     first_comment_error: str = ""
+    # Set when a funnel link was already on the post (another engine
+    # beat us to it). Not an error and not a success -- a third state,
+    # because collapsing it into either one hides a real duplicate.
+    first_comment_skipped: str = ""
     # Which surface the video actually landed on ("reel" or "video"), and why
     # it fell back if it did. A Reel is the only surface Facebook still shows
     # to non-followers for free, so on a Page with no followers this is the
