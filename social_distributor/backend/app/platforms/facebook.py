@@ -26,9 +26,17 @@ from .base import (
 
 log = logging.getLogger(__name__)
 
-GRAPH_BASE = "https://graph.facebook.com/v20.0"
-GRAPH_VIDEO_BASE = "https://graph-video.facebook.com/v20.0"
-DIALOG_BASE = "https://www.facebook.com/v20.0/dialog/oauth"
+# Graph versions expire, and expiry is silent: Meta does not fail the call,
+# it quietly reroutes it to the next version still alive. So an unattended
+# fleet does not break on the expiry date -- it starts running against a
+# version nobody chose, with no error to notice. v20.0 expires 2026-09-24.
+#
+# Pinned in one place, and overridable, so the next bump is one variable
+# rather than a hunt through the file.
+GRAPH_VERSION = os.environ.get("META_GRAPH_VERSION", "v23.0")
+GRAPH_BASE = f"https://graph.facebook.com/{GRAPH_VERSION}"
+GRAPH_VIDEO_BASE = f"https://graph-video.facebook.com/{GRAPH_VERSION}"
+DIALOG_BASE = f"https://www.facebook.com/{GRAPH_VERSION}/dialog/oauth"
 
 
 def reels_enabled() -> bool:
