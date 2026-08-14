@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import time
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
@@ -262,6 +263,11 @@ class FacebookPublisher(Publisher):
             return
         try:
             message = template.replace("{link}", req.link_url or "")
+            if self._already_carries_funnel_link(token, post_id, message):
+                result.first_comment_skipped = "funnel_link_already_present"
+                log.info("first comment skipped for %s -- the post already "
+                         "carries a funnel link", post_id)
+                return
             data = request_json(
                 "POST",
                 f"{GRAPH_BASE}/{post_id}/comments",
@@ -283,6 +289,52 @@ class FacebookPublisher(Publisher):
                 "permission; check the account's granted scopes)",
                 post_id, exc,
             )
+
+    @staticmethod
+    def _funnel_host(message: str) -> str:
+        """The bare host of the first link in ``message``, lowercased."""
+        match = re.search(r"https?://([^/\s]+)", message or "")
+        return match.group(1).lower() if match else ""
+
+    def _already_carries_funnel_link(self, token, post_id, message) -> bool:
+        """Is there already a comment pointing at the same funnel host?
+
+        This Page is not the only thing commenting on its own posts: a
+        separate scheduled engine (``fb-auto-engage``) leaves a permanent-entry
+        link of its own, minutes after publishing. Both are configured, both
+        work, and neither knows about the other -- so the steady state is two
+        funnel links per post under two different ``?src=`` codes. That splits
+        the attribution the whole persona matrix exists to measure, and a Page
+        repeatedly dropping links under its own posts is the shape Meta's spam
+        rules actually act on.
+
+        Read before writing, then. On 2026-08-14 a backfill was run off this
+        adapter's own audit trail -- which honestly said the comment had failed
+        -- without looking at the post, and put a second link on fifteen of
+        them. "Our record says we did not do it" is not "it was not done" when
+        something else is also doing it.
+
+        Unreadable comments mean posting anyway: a missing funnel link costs
+        more than a duplicated one, and this check must never be the reason a
+        comment goes missing.
+        """
+        host = self._funnel_host(message)
+        if not host:
+            return False
+        try:
+            data = request_json(
+                "GET",
+                f"{GRAPH_BASE}/{post_id}/comments",
+                params={"fields": "message,from", "limit": 25,
+                        "access_token": token},
+                timeout=30,
+            )
+        except Exception as exc:                              # noqa: BLE001
+            log.warning("could not read existing comments on %s (%s); "
+                        "posting anyway", post_id, exc)
+            return False
+        return any(host in (c.get("message") or "").lower()
+                   for c in data.get("data", []))
 
     # ---- Engagement as a Page (used by the cross-account boost) ----------
     #
@@ -339,7 +391,15 @@ class FacebookPublisher(Publisher):
                 "access_token": token,
             },
         )
-        return PublishResult(external_post_id=data.get("post_id", data["id"]), raw=data)
+        # Deliberately *not* run through _qualify. Photo posts answer with ids
+        # that are already commentable as-is -- 110 of today's non-Reels posts
+        # carry bare ids and every one of them has a live comment on it. Only
+        # the Reels path returns the half-id that cannot be addressed, so only
+        # the Reels path is normalised. Reshaping the 90% that works, on the
+        # strength of a read-only check that never exercised writing, would be
+        # trading a proven success for an unproven one.
+        return PublishResult(external_post_id=data.get("post_id", data["id"]),
+                             raw=data)
 
     def fetch_insights(self, token, external_account_id, external_post_id):
         page_token = token.extra.get("page_access_token", token.access_token)
@@ -399,8 +459,14 @@ class FacebookPublisher(Publisher):
             },
             timeout=180,
         )
+        # ``/videos`` hands back a video id, and a video id is not a post id --
+        # the funnel comment would fail here for exactly the reason it failed
+        # on Reels. Resolve it the same way rather than keeping a second copy
+        # of the bug on the fallback path.
         return PublishResult(
-            external_post_id=str(data.get("id")),
+            external_post_id=self._resolve_post_id(
+                token, page_id, str(data.get("id")), data,
+            ),
             raw=data,
             surface="video",
             surface_fallback_error=fallback_error,
@@ -501,9 +567,21 @@ class FacebookPublisher(Publisher):
         and when the lookup still yields nothing we compose ``page_id_video_id``,
         the shape Facebook post ids actually take, rather than handing back
         something already known not to work.
+
+        That was still not enough, and the reason is worth recording. Graph
+        *does* answer with a ``post_id`` -- but it answers with only the second
+        half of one, e.g. ``122123395610788815``. Every id handed back was
+        therefore truthful, un-composed, and unusable, so the fallback above
+        never ran and all fifteen Reels published on 2026-08-14 lost their
+        funnel comment. Reproduced read-only against a live page: the same post
+        answers to ``1101945063003688_122125272129308556`` and returns the very
+        same ``(#12) singular statuses API is deprecated`` for the bare half.
+
+        Hence ``_qualify``: a post id is only usable once the page id is on the
+        front of it, whichever route produced it.
         """
         if post_id := finish.get("post_id"):
-            return str(post_id)
+            return self._qualify(page_id, post_id)
 
         for attempt in range(POST_ID_LOOKUP_ATTEMPTS):
             try:
@@ -518,7 +596,7 @@ class FacebookPublisher(Publisher):
                             video_id, exc)
                 break
             if post_id := data.get("post_id"):
-                return str(post_id)
+                return self._qualify(page_id, post_id)
             if attempt + 1 < POST_ID_LOOKUP_ATTEMPTS:
                 time.sleep(POST_ID_LOOKUP_INTERVAL)
 
@@ -529,6 +607,25 @@ class FacebookPublisher(Publisher):
             "valid to target", video_id, composed,
         )
         return composed
+
+    @staticmethod
+    def _qualify(page_id, post_id) -> str:
+        """A page post id is ``{page_id}_{post_id}``; anything less is a 404.
+
+        Graph is inconsistent about which half it returns, so normalise rather
+        than trust. An id that already carries an underscore is left exactly as
+        it is -- re-prefixing a qualified id would break the working case to
+        fix the broken one.
+        """
+        post_id = str(post_id)
+        if "_" in post_id:
+            return post_id
+        qualified = f"{page_id}_{post_id}"
+        log.info(
+            "graph returned an unqualified post id %s; commenting needs the "
+            "page-qualified form %s", post_id, qualified,
+        )
+        return qualified
 
     def _reel_status(self, token, video_id) -> str:
         """Current ``video_status``, or "" when it cannot be read."""

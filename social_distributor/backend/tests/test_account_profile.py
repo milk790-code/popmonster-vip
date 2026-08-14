@@ -361,7 +361,10 @@ def test_facebook_posts_the_resolved_first_comment(app, monkeypatch):
         ),
     )
 
-    comment_calls = [c for c in calls if c[1].endswith("/comments")]
+    # A GET on the same edge precedes it -- the post is read for an existing
+    # funnel link before a second one is added -- so count the writes only.
+    comment_calls = [c for c in calls
+                     if c[0] == "POST" and c[1].endswith("/comments")]
     assert len(comment_calls) == 1
     assert comment_calls[0][2]["message"] == (
         "對照表 👉 https://popmonster.vip/go?src=fb-a1b2c3"
@@ -384,6 +387,101 @@ def test_facebook_stays_silent_without_a_first_comment(app, monkeypatch):
         TokenBundle(access_token="tok"), "page-9", PublishRequest(caption="hi")
     )
     assert not [u for u in calls if u.endswith("/comments")]
+
+
+def _fake_graph_with_comments(existing, calls):
+    """Graph stand-in whose posts already carry ``existing`` comments."""
+    def fake(method, url, **kwargs):
+        calls.append((method, url, kwargs.get("data", {})))
+        if method == "GET" and url.endswith("/comments"):
+            return {"data": [{"message": m, "from": {"id": "page-9"}}
+                             for m in existing]}
+        return {"id": "post-123"}
+    return fake
+
+
+def test_no_second_funnel_link_when_something_else_already_left_one(
+        app, monkeypatch):
+    """Another engine (fb-auto-engage) comments on these same posts.
+
+    Two funnel links per post splits the ?src= attribution the persona matrix
+    exists to measure, and a Page dropping repeated links under its own posts
+    is the shape Meta's spam rules act on. On 2026-08-14 a backfill driven by
+    this adapter's own audit trail -- which truthfully said the comment had
+    failed -- put a second link on fifteen posts, because nothing looked at
+    the post itself first.
+    """
+    from app.platforms.base import PublishRequest, TokenBundle
+    from app.platforms.facebook import FacebookPublisher
+
+    monkeypatch.delenv("FB_FIRST_COMMENT", raising=False)
+    calls = []
+    monkeypatch.setattr(
+        "app.platforms.facebook.request_json",
+        _fake_graph_with_comments(
+            ["🔗 永久入口：https://popmonster.vip/go?v=20260729&src=fb-838880"],
+            calls,
+        ),
+    )
+
+    result = FacebookPublisher().publish(
+        TokenBundle(access_token="tok"), "page-9",
+        PublishRequest(caption="hi",
+                       link_url="https://popmonster.vip/go?src=fb-0c7b6c",
+                       first_comment="對照表 👉 {link}"),
+    )
+
+    assert result.first_comment_skipped == "funnel_link_already_present"
+    assert not [c for c in calls if c[0] == "POST" and c[1].endswith("/comments")]
+
+
+def test_an_unrelated_comment_does_not_silence_us(app, monkeypatch):
+    """Only a link to the same funnel counts -- ordinary chatter must not
+    cost the post its one tracked outbound link."""
+    from app.platforms.base import PublishRequest, TokenBundle
+    from app.platforms.facebook import FacebookPublisher
+
+    monkeypatch.delenv("FB_FIRST_COMMENT", raising=False)
+    calls = []
+    monkeypatch.setattr(
+        "app.platforms.facebook.request_json",
+        _fake_graph_with_comments(["請問這款適合白車嗎？"], calls),
+    )
+
+    FacebookPublisher().publish(
+        TokenBundle(access_token="tok"), "page-9",
+        PublishRequest(caption="hi",
+                       link_url="https://popmonster.vip/go?src=fb-0c7b6c",
+                       first_comment="對照表 👉 {link}"),
+    )
+
+    assert [c for c in calls if c[0] == "POST" and c[1].endswith("/comments")]
+
+
+def test_unreadable_comments_do_not_block_the_link(app, monkeypatch):
+    """A missing funnel link costs more than a duplicated one, so this guard
+    must never be the reason a comment goes missing."""
+    from app.platforms.base import PublishRequest, TokenBundle
+    from app.platforms.facebook import FacebookPublisher
+
+    monkeypatch.delenv("FB_FIRST_COMMENT", raising=False)
+    calls = []
+
+    def fake(method, url, **kwargs):
+        calls.append((method, url, kwargs.get("data", {})))
+        if method == "GET" and url.endswith("/comments"):
+            raise RuntimeError("graph is having a day")
+        return {"id": "post-123"}
+
+    monkeypatch.setattr("app.platforms.facebook.request_json", fake)
+    FacebookPublisher().publish(
+        TokenBundle(access_token="tok"), "page-9",
+        PublishRequest(caption="hi",
+                       link_url="https://popmonster.vip/go?src=fb-0c7b6c",
+                       first_comment="對照表 👉 {link}"),
+    )
+
+    assert [c for c in calls if c[0] == "POST" and c[1].endswith("/comments")]
 
 
 def test_overrides_whitelist_accepts_first_comment_for_facebook():

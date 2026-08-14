@@ -236,7 +236,18 @@ def _dispatch_body(self, target: PostTarget) -> None:
     # The first comment is where the funnel link lives, so "did it post?"
     # has to be answerable without reading worker logs. Only recorded when
     # a comment was actually attempted.
-    if result.first_comment_id or result.first_comment_error:
+    # "Skipped" is its own outcome, not a quiet success: it means a second
+    # engine already put a funnel link on this post under a different ?src=,
+    # and that is worth being able to count.
+    if result.first_comment_skipped:
+        audit(
+            "post.first_comment_skipped",
+            "post_target",
+            target.id,
+            actor_user_id=target.post.user_id,
+            detail={"reason": result.first_comment_skipped},
+        )
+    elif result.first_comment_id or result.first_comment_error:
         audit(
             "post.first_comment" if result.first_comment_id
             else "post.first_comment_failed",

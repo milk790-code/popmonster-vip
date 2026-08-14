@@ -127,7 +127,10 @@ def test_a_reel_dropped_after_encoding_falls_back_instead_of_lying():
     with patch("app.platforms.facebook.request_json", side_effect=fake):
         result = FacebookPublisher().publish(_token(), "page-1", _request())
 
-    assert result.external_post_id == "vid-fallback"
+    # A plain video post answers with a video id, and a video id cannot be
+    # commented on, so it is resolved into a post id just like the Reels path
+    # -- never left as the raw "vid-fallback" the /videos call handed back.
+    assert result.external_post_id == "page-1_555"
     assert result.surface == "video"
     assert "video_status=error" in result.surface_fallback_error
     assert any("/videos" in url for _, url, *_ in calls)
@@ -179,18 +182,55 @@ def test_a_finish_timeout_on_a_reel_that_really_died_still_falls_back():
     assert any("/videos" in url for _, url, *_ in calls)
 
 
+def test_graph_answering_with_only_half_a_post_id_still_yields_a_usable_one():
+    """The bug that cost every Reel its funnel comment on 2026-08-14.
+
+    The mocks in this file all handed back ``page-1_555`` -- already qualified
+    -- so the suite stayed green while production lost fifteen links in a row.
+    Graph really answers with the bare second half, e.g. ``122123395610788815``,
+    and ``POST /122123395610788815/comments`` returns ``(#12) singular statuses
+    API is deprecated``. Verified read-only against a live page: the same post
+    is readable as ``{page_id}_{that number}`` and unreadable without it.
+    """
+    fake, _ = _fake_graph(finish={"success": True, "post_id": "122123395610788815"})
+    with patch("app.platforms.facebook.request_json", side_effect=fake):
+        result = FacebookPublisher().publish(_token(), "page-1", _request())
+
+    assert result.external_post_id == "page-1_122123395610788815"
+
+
+def test_an_already_qualified_post_id_is_left_alone():
+    """Fixing the broken half must not break the working one."""
+    fake, _ = _fake_graph(finish={"success": True, "post_id": "page-1_987"})
+    with patch("app.platforms.facebook.request_json", side_effect=fake):
+        result = FacebookPublisher().publish(_token(), "page-1", _request())
+
+    assert result.external_post_id == "page-1_987"
+
+
+def test_a_bare_post_id_from_the_lookup_is_qualified_too():
+    """finish is not the only route -- the retry lookup needs the same guard."""
+    fake, _ = _fake_graph(finish={"success": True}, resolved_post_id="122999")
+    with patch("app.platforms.facebook.request_json", side_effect=fake):
+        result = FacebookPublisher().publish(_token(), "page-1", _request())
+
+    assert result.external_post_id == "page-1_122999"
+
+
 def test_a_start_phase_without_an_upload_url_falls_back_rather_than_crashing():
     def fake(method, url, **kwargs):
         if url.endswith("/video_reels"):
             return {"video_id": "v-123"}          # no upload_url
         if "/videos" in url:
             return {"id": "vid-789"}
+        if url.endswith("/vid-789"):                  # post id lookup
+            return {}
         raise AssertionError(f"unexpected call to {url}")
 
     with patch("app.platforms.facebook.request_json", side_effect=fake):
         result = FacebookPublisher().publish(_token(), "page-1", _request())
 
-    assert result.external_post_id == "vid-789"
+    assert result.external_post_id == "page-1_vid-789"
     assert result.surface == "video"
     assert "no upload target" in result.surface_fallback_error
 
