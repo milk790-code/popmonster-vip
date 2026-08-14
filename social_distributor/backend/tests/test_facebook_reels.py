@@ -5,14 +5,21 @@ almost none, so every video published that way was a broadcast to an empty
 room -- the "not a single play" symptom. Reels are the one surface Facebook
 still gives away to non-followers.
 
-The rule these tests hold down: trying for the better surface must never
-cost us the post. If Facebook refuses the Reel, the video still goes up the
-old way, and the downgrade is recorded rather than swallowed.
+Two rules these tests hold down:
+
+1. Trying for the better surface must never cost us the post. If Facebook
+   refuses the Reel, the video still goes up the old way.
+2. ``finish`` answering 200 is NOT the refusal we are watching for. Aspect
+   ratio, resolution, duration and frame rate are judged *after* finish, so a
+   Reel can be accepted, encoded, and then dropped -- while our row says
+   SUCCEEDED and the Page shows nothing. Every path below therefore ends at
+   the status check, not at the finish call.
 """
 from unittest.mock import patch
 
 import pytest
 
+from app.platforms import facebook as fb
 from app.platforms.base import PlatformError, PublishRequest, TokenBundle
 from app.platforms.facebook import FacebookPublisher
 
@@ -21,6 +28,10 @@ REEL_START = {
     "upload_url": "https://rupload.facebook.com/video-upload/v20.0/v-123",
 }
 REEL_FINISH = {"success": True, "post_id": "page-1_987"}
+
+
+def _status(video_status):
+    return {"status": {"video_status": video_status}}
 
 
 def _request(kind="video"):
@@ -36,77 +47,132 @@ def _token():
 
 
 @pytest.fixture(autouse=True)
-def _no_first_comment(monkeypatch):
-    """The first comment is a separate feature; keep it out of these calls."""
+def _fast_and_clean(monkeypatch):
+    """No first comment (separate feature), and no real waiting."""
     monkeypatch.delenv("FB_FIRST_COMMENT", raising=False)
-
-
-def test_video_is_published_as_a_reel_by_default(monkeypatch):
     monkeypatch.delenv("FB_REELS", raising=False)
+    monkeypatch.setattr(fb, "REEL_POLL_INTERVAL", 0)
+    monkeypatch.setattr(fb, "REEL_READY_TIMEOUT", 1)
+
+
+def _fake_graph(*, finish=REEL_FINISH, statuses=("ready",), video_id="vid-fallback"):
+    """A stand-in Graph API. ``statuses`` is consumed one poll at a time."""
     calls = []
+    remaining = list(statuses)
 
     def fake(method, url, **kwargs):
-        calls.append((url, kwargs.get("data") or {}, kwargs.get("headers") or {}))
+        calls.append((method, url, kwargs.get("data") or {},
+                      kwargs.get("headers") or {}, kwargs.get("params") or {}))
         if url.endswith("/video_reels"):
             phase = (kwargs.get("data") or {}).get("upload_phase")
-            return REEL_START if phase == "start" else REEL_FINISH
-        return {"id": "should-not-be-used"}
+            if phase == "start":
+                return REEL_START
+            if isinstance(finish, Exception):
+                raise finish
+            return finish
+        if url.startswith("https://rupload."):
+            return {"success": True}
+        if "/videos" in url:
+            return {"id": video_id}
+        if method == "GET":                       # the status poll
+            return _status(remaining.pop(0) if remaining else "processing")
+        raise AssertionError(f"unexpected call {method} {url}")
 
+    return fake, calls
+
+
+def test_video_is_published_as_a_reel_and_confirmed_live():
+    fake, calls = _fake_graph(statuses=("processing", "ready"))
     with patch("app.platforms.facebook.request_json", side_effect=fake):
         result = FacebookPublisher().publish(_token(), "page-1", _request())
 
     assert result.surface == "reel"
     assert result.external_post_id == "page-1_987"
     assert result.surface_fallback_error == ""
-    # The plain video endpoint must not be touched at all -- publishing to
-    # both would double-post, not merely waste a call.
-    assert not any("/videos" in url for url, _, _ in calls)
+    # Publishing to both surfaces would double-post, not merely waste a call.
+    assert not any("/videos" in url for _, url, *_ in calls)
 
-    start_url, start_body, _ = calls[0]
+    _, start_url, start_body, _, _ = calls[0]
     assert start_url.endswith("/page-1/video_reels")
     assert start_body["upload_phase"] == "start"
 
     # Phase 2 is the odd one: credentials and source URL ride as headers.
-    upload_url, upload_body, upload_headers = calls[1]
+    _, upload_url, upload_body, upload_headers, _ = calls[1]
     assert upload_url == REEL_START["upload_url"]
     assert upload_headers["Authorization"] == "OAuth page-token"
     assert upload_headers["file_url"] == "https://media.example.test/clip.mp4"
+    assert upload_headers["Content-Type"] == "application/octet-stream"
     assert not upload_body
 
-    _, finish_body, _ = calls[2]
+    _, _, finish_body, _, _ = calls[2]
     assert finish_body["upload_phase"] == "finish"
     assert finish_body["video_state"] == "PUBLISHED"
     assert finish_body["video_id"] == "v-123"
-    assert finish_body["description"] == "洗完沒吹乾就打蠟，等於把水鎖在裡面"
+
+    # It kept asking until Facebook said ready -- one 'processing' was not
+    # mistaken for done.
+    assert sum(1 for m, _, _, _, _ in calls if m == "GET") == 2
 
 
-def test_a_refused_reel_still_gets_published_as_a_video(monkeypatch):
-    """Reels have format rules we cannot check from a URL. Landscape or
-    over-length clips get refused, and losing the post over that would be
-    strictly worse than the behaviour we are replacing."""
-    monkeypatch.delenv("FB_REELS", raising=False)
-
-    def fake(method, url, **kwargs):
-        if url.endswith("/video_reels"):
-            raise PlatformError("(#100) Video does not meet Reels spec",
-                                retryable=False)
-        if "/videos" in url:
-            return {"id": "vid-456"}
-        raise AssertionError(f"unexpected call to {url}")
-
+def test_a_reel_dropped_after_encoding_falls_back_instead_of_lying():
+    """The failure mode that matters: finish says 200, then the encode judges
+    the format and drops it. Without the status check the row would read
+    SUCCEEDED while the Page shows nothing at all."""
+    fake, calls = _fake_graph(statuses=("processing", "error"))
     with patch("app.platforms.facebook.request_json", side_effect=fake):
         result = FacebookPublisher().publish(_token(), "page-1", _request())
 
-    assert result.external_post_id == "vid-456"
+    assert result.external_post_id == "vid-fallback"
     assert result.surface == "video"
-    # Recorded, not swallowed: a fleet that had quietly stopped qualifying
-    # for Reels would otherwise look exactly like one that never stopped.
-    assert "does not meet Reels spec" in result.surface_fallback_error
+    assert "video_status=error" in result.surface_fallback_error
+    assert any("/videos" in url for _, url, *_ in calls)
+
+
+def test_finish_answering_success_false_is_not_success():
+    fake, _ = _fake_graph(finish={"success": False, "message": "bad ratio"})
+    with patch("app.platforms.facebook.request_json", side_effect=fake):
+        result = FacebookPublisher().publish(_token(), "page-1", _request())
+
+    assert result.surface == "video"
+    assert "bad ratio" in result.surface_fallback_error
+
+
+def test_a_reel_stuck_in_processing_gives_up_and_falls_back():
+    """Reels are known to sit in processing indefinitely. Waiting forever
+    would wedge the worker; waiting nowhere would report a phantom post."""
+    fake, _ = _fake_graph(statuses=("processing",) * 50)
+    with patch("app.platforms.facebook.request_json", side_effect=fake):
+        result = FacebookPublisher().publish(_token(), "page-1", _request())
+
+    assert result.surface == "video"
+    assert "still not ready" in result.surface_fallback_error
+
+
+def test_a_finish_timeout_does_not_double_post():
+    """If finish times out on our side but Facebook published anyway, falling
+    straight back to /videos posts the same clip twice -- and a duplicate has
+    to be deleted by hand. So the outcome is confirmed before deciding."""
+    boom = PlatformError("network failure calling finish", retryable=True)
+    fake, calls = _fake_graph(finish=boom, statuses=("processing", "ready"))
+    with patch("app.platforms.facebook.request_json", side_effect=fake):
+        result = FacebookPublisher().publish(_token(), "page-1", _request())
+
+    assert result.surface == "reel"
+    assert result.external_post_id == "v-123"
+    assert not any("/videos" in url for _, url, *_ in calls)
+
+
+def test_a_finish_timeout_on_a_reel_that_really_died_still_falls_back():
+    boom = PlatformError("network failure calling finish", retryable=True)
+    fake, calls = _fake_graph(finish=boom, statuses=("error",))
+    with patch("app.platforms.facebook.request_json", side_effect=fake):
+        result = FacebookPublisher().publish(_token(), "page-1", _request())
+
+    assert result.surface == "video"
+    assert any("/videos" in url for _, url, *_ in calls)
 
 
 def test_a_start_phase_without_an_upload_url_falls_back_rather_than_crashing():
-    """Graph can answer 200 with a body that is missing what we need. Reading
-    that as success would post nothing at all and report success."""
     def fake(method, url, **kwargs):
         if url.endswith("/video_reels"):
             return {"video_id": "v-123"}          # no upload_url
@@ -122,17 +188,8 @@ def test_a_start_phase_without_an_upload_url_falls_back_rather_than_crashing():
     assert "no upload target" in result.surface_fallback_error
 
 
-def test_finish_without_post_id_keeps_the_video_id_as_the_handle(monkeypatch):
-    """Older responses only confirm success. The video id is still a handle
-    we can fetch insights against, so it beats returning ``None``."""
-    monkeypatch.delenv("FB_REELS", raising=False)
-
-    def fake(method, url, **kwargs):
-        if url.endswith("/video_reels"):
-            phase = (kwargs.get("data") or {}).get("upload_phase")
-            return REEL_START if phase == "start" else {"success": True}
-        return {}
-
+def test_finish_without_post_id_keeps_the_video_id_as_the_handle():
+    fake, _ = _fake_graph(finish={"success": True})
     with patch("app.platforms.facebook.request_json", side_effect=fake):
         result = FacebookPublisher().publish(_token(), "page-1", _request())
 
@@ -155,9 +212,7 @@ def test_the_switch_can_force_the_old_path(monkeypatch):
     assert result.surface_fallback_error == ""
 
 
-def test_photos_and_text_are_untouched(monkeypatch):
-    """The Reels change must not leak into the other two publish paths."""
-    monkeypatch.delenv("FB_REELS", raising=False)
+def test_photos_and_text_are_untouched():
     seen = []
 
     def fake(method, url, **kwargs):
@@ -174,3 +229,23 @@ def test_photos_and_text_are_untouched(monkeypatch):
     assert photo.surface == ""
     assert text.surface == ""
     assert not any("video_reels" in url for url in seen)
+
+
+# ---- the derivative that would have made every Reel fail -----------------
+
+def test_facebook_gets_the_portrait_derivative_when_reels_are_on(monkeypatch):
+    """The dispatch layer swaps in a per-platform derivative before publishing.
+    Facebook's preference was 16:9, and Reels reject anything wider than 9:16 --
+    so the Reels path would have been refused on every single video while
+    looking perfectly correct in isolation."""
+    from app.scheduler.tasks import _preferred_aspect
+
+    monkeypatch.delenv("FB_REELS", raising=False)
+    assert _preferred_aspect("facebook") == "9:16"
+
+    monkeypatch.setenv("FB_REELS", "0")
+    assert _preferred_aspect("facebook") == "16:9"
+
+    # Other platforms keep their own preference either way.
+    assert _preferred_aspect("youtube") == "16:9"
+    assert _preferred_aspect("tiktok") == "9:16"

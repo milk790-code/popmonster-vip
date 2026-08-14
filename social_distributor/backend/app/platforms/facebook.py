@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
 
@@ -45,6 +46,32 @@ def reels_enabled() -> bool:
     return (os.environ.get("FB_REELS") or "1").strip().lower() not in {
         "0", "false", "no", "off",
     }
+
+
+# A Reel that breaks the format rules is not refused by the ``finish`` call --
+# encoding and validation happen afterwards, so ``finish`` answers 200 and the
+# failure only surfaces in the status phases minutes later. Without waiting for
+# that answer we would record SUCCEEDED for a Reel that never appears on the
+# Page, and the fallback would never fire. So we wait.
+REEL_READY_TIMEOUT = float(os.environ.get("FB_REEL_READY_TIMEOUT", "240"))
+REEL_POLL_INTERVAL = float(os.environ.get("FB_REEL_POLL_INTERVAL", "6"))
+
+# ``video_status`` values that mean we can stop waiting.
+_REEL_DONE = {"ready"}
+_REEL_DEAD = {"error", "upload_failed", "expired"}
+
+
+def _reject_if_unsuccessful(payload: dict, what: str) -> None:
+    """Graph answers 200 with ``{"success": false}`` on a refusal.
+
+    Treating that as success is worse than an error would be: we would report
+    a post id for something that was never published, and never fall back.
+    """
+    if isinstance(payload, dict) and payload.get("success") is False:
+        raise PlatformError(
+            f"{what} rejected: {payload.get('message') or payload}",
+            retryable=False,
+        )
 
 DEFAULT_SCOPES = [
     "pages_show_list",
@@ -390,28 +417,52 @@ class FacebookPublisher(Publisher):
 
         # Phase 2 is the odd one out in the whole Graph API: the credentials
         # and the source URL travel as headers, and the body stays empty.
-        request_json(
+        transfer = request_json(
             "POST",
             upload_url,
             headers={
                 "Authorization": f"OAuth {token}",
                 "file_url": req.media_url,
+                "Content-Type": "application/octet-stream",
             },
             timeout=180,
         )
+        _reject_if_unsuccessful(transfer, "reel transfer")
 
-        finish = request_json(
-            "POST",
-            f"{GRAPH_BASE}/{page_id}/video_reels",
-            data={
-                "video_id": video_id,
-                "upload_phase": "finish",
-                "video_state": "PUBLISHED",
-                "description": req.caption,
-                "access_token": token,
-            },
-            timeout=120,
-        )
+        try:
+            finish = request_json(
+                "POST",
+                f"{GRAPH_BASE}/{page_id}/video_reels",
+                data={
+                    "video_id": video_id,
+                    "upload_phase": "finish",
+                    "video_state": "PUBLISHED",
+                    "description": req.caption,
+                    "access_token": token,
+                },
+                timeout=120,
+            )
+        except PlatformError as exc:
+            # A timeout here cannot tell "never arrived" from "arrived and
+            # published". Falling straight back to /videos on the second case
+            # posts the same clip twice, and a duplicate has to be deleted by
+            # hand -- the only irreversible outcome in this whole path. So ask
+            # Facebook what actually happened before deciding.
+            log.warning("reel finish did not answer cleanly, waiting for the "
+                        "real outcome before deciding: %s", exc)
+            # Wait it out rather than peeking once: a Reel that is still
+            # encoding would read as "not ready", we would fall back, and then
+            # it would publish anyway -- the duplicate we are trying to avoid.
+            self._await_reel_ready(token, video_id)
+            return PublishResult(
+                external_post_id=str(video_id),
+                raw={"start": start, "finish": "timeout_but_published"},
+                surface="reel",
+            )
+
+        _reject_if_unsuccessful(finish, "reel finish")
+        self._await_reel_ready(token, video_id)
+
         # finish echoes post_id on success; when it only confirms success the
         # video id is the durable handle we can still fetch insights against.
         post_id = finish.get("post_id") or video_id
@@ -419,4 +470,45 @@ class FacebookPublisher(Publisher):
             external_post_id=str(post_id),
             raw={"start": start, "finish": finish},
             surface="reel",
+        )
+
+    def _reel_status(self, token, video_id) -> str:
+        """Current ``video_status``, or "" when it cannot be read."""
+        try:
+            data = request_json(
+                "GET",
+                f"{GRAPH_BASE}/{video_id}",
+                params={"fields": "status", "access_token": token},
+                timeout=30,
+            )
+        except PlatformError:
+            return ""
+        return ((data.get("status") or {}).get("video_status") or "").lower()
+
+    def _await_reel_ready(self, token, video_id) -> None:
+        """Block until Facebook says the Reel is live, or say it failed.
+
+        ``finish`` only starts the encode. Aspect ratio, resolution, duration
+        and frame rate are all judged after that, so a 200 from ``finish``
+        proves nothing about whether anyone will ever see this. Raising here
+        is what lets the caller fall back to a plain video post -- the whole
+        point of the fallback is defeated if we never learn of the refusal.
+        """
+        deadline = time.monotonic() + REEL_READY_TIMEOUT
+        last = ""
+        while time.monotonic() < deadline:
+            last = self._reel_status(token, video_id)
+            if last in _REEL_DONE:
+                return
+            if last in _REEL_DEAD:
+                raise PlatformError(
+                    f"reel rejected after upload (video_status={last}); "
+                    "usually aspect ratio, resolution, duration or frame rate",
+                    retryable=False,
+                )
+            time.sleep(REEL_POLL_INTERVAL)
+        raise PlatformError(
+            f"reel still not ready after {REEL_READY_TIMEOUT:.0f}s "
+            f"(last video_status={last or 'unknown'})",
+            retryable=False,
         )

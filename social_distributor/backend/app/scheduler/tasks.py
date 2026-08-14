@@ -645,9 +645,25 @@ def _swap_in_preferred_derivative(request, media: MediaAsset | None, platform: s
 
     if not media or media.kind != "video" or not media.derivatives:
         return
-    aspect = _PREFERRED_ASPECT.get(platform)
+    aspect = _preferred_aspect(platform)
     if aspect and (url := fresh_media_url(media, aspect)):
         request.media_url = url
+
+
+def _preferred_aspect(platform: str) -> str | None:
+    """Which derivative to send, given the surface we are aiming for.
+
+    Facebook is the one platform where this is not a matter of taste. Reels
+    reject anything wider than 9:16 outright, so handing the 16:9 derivative
+    to the Reels path does not merely look wrong -- it guarantees a refusal on
+    every single video, which would quietly turn the whole Reels change into a
+    no-op. A portrait clip posted as a plain video (the fallback) is merely
+    tall, so preferring 9:16 costs nothing there.
+    """
+    if platform == "facebook":
+        from ..platforms.facebook import reels_enabled
+        return "9:16" if reels_enabled() else "16:9"
+    return _PREFERRED_ASPECT.get(platform)
 
 
 @celery_app.task
