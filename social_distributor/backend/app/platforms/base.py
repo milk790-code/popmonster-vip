@@ -48,6 +48,14 @@ class PublishResult:
     # reaching into the database.
     first_comment_id: str = ""
     first_comment_error: str = ""
+    # Which surface the video actually landed on ("reel" or "video"), and why
+    # it fell back if it did. A Reel is the only surface Facebook still shows
+    # to non-followers for free, so on a Page with no followers this is the
+    # difference between some plays and none. Without recording it, a fleet
+    # that had quietly stopped qualifying for Reels would look identical to
+    # one that never stopped -- the same blind spot as the first comment.
+    surface: str = ""
+    surface_fallback_error: str = ""
 
 
 @dataclass

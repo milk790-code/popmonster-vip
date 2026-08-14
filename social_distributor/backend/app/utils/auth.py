@@ -82,6 +82,16 @@ def verify_operator_token(token: str) -> int | None:
         return None
 
 
+# The only route allowed to carry the operator token in the query string.
+# EventSource cannot set headers, so SSE has no alternative -- but a token in
+# a URL is written into every access log it passes through (Railway's, the
+# proxy's, the browser's history), and this one token exchanges for the whole
+# fleet's Page credentials. Confining it to the one endpoint that genuinely
+# cannot use a header keeps an accidental ``?op_token=`` on an ordinary API
+# call from ever being logged.
+_QUERY_TOKEN_PATHS = frozenset({"/api/events/stream"})
+
+
 def _bearer_user_id() -> int | None:
     """Resolve operator user_id from the Authorization header or ?op_token=."""
     if not has_request_context():
@@ -89,7 +99,7 @@ def _bearer_user_id() -> int | None:
     from flask import request
     auth = request.headers.get("Authorization", "")
     token = auth[7:].strip() if auth.startswith("Bearer ") else ""
-    if not token:
+    if not token and request.path in _QUERY_TOKEN_PATHS:
         token = request.args.get("op_token", "")
     return verify_operator_token(token)
 

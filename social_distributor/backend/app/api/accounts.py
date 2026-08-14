@@ -30,6 +30,30 @@ def _load_owned_account(account_id: int):
     return account, None
 
 
+# Keys inside ``SocialAccount.extra`` that must never leave the server. The
+# filter is a deny-list rather than an allow-list only because ``extra`` also
+# carries the whole persona profile, which the console does render.
+_SECRET_EXTRA_KEYS = ("page_access_token", "access_token", "refresh_token",
+                      "client_secret", "app_secret", "proxy_url")
+
+
+def _safe_extra(extra: dict | None) -> dict:
+    """``extra`` minus anything that is a credential.
+
+    The stored token is Fernet-encrypted precisely so it cannot leak; handing
+    the decrypted value back out over the API gave that away for free. One
+    operator token was enough to walk off with the Page tokens for the whole
+    fleet -- and those grant post/edit/delete, do not expire, and belong to
+    Pages that Meta treats as one entity, so a single misuse is a fleet-wide
+    problem. Nothing in the dashboard reads these keys.
+    """
+    return {
+        k: ("***" if k in _SECRET_EXTRA_KEYS else v)
+        for k, v in (extra or {}).items()
+        if k != "proxy_url"
+    }
+
+
 @bp.get("")
 def list_accounts():
     # Always scope to the logged-in user.
@@ -47,7 +71,7 @@ def list_accounts():
                 if a.token_expires_at
                 else None,
                 "scopes": (a.scopes or "").split(",") if a.scopes else [],
-                "extra": {k: v for k, v in (a.extra or {}).items() if k != "proxy_url"},
+                "extra": _safe_extra(a.extra),
                 "proxy_configured": bool((a.extra or {}).get("proxy_url")),
             }
             for a in rows

@@ -87,6 +87,9 @@ class VariantRequest:
     platform: str          # facebook | instagram | tiktok | youtube | threads
     style_profile: dict
     seed: str              # stable identifier — same seed → same output
+    # Who this variant is for. Handed to the model so accounts sharing one
+    # persona do not all receive an identical prompt.
+    account_label: str = ""
     few_shot_examples: list[dict] = field(default_factory=list)
     # Each example: {"caption": str, "engagement_rate": float}
     referral_code: str | None = None  # 若設定，caption 結尾附上裂變 CTA
@@ -97,6 +100,13 @@ class VariantResult:
     caption: str
     title: str
     used_engine: str       # "claude" | "template"
+    # True when the "variant" came back byte-identical to the source. The
+    # template engine does that whenever the group has no style profile --
+    # with no tone, no emoji and no hashtag pool there is nothing to vary, so
+    # it hands the caption straight back. That is the worst possible silence:
+    # variants look enabled, every Page publishes the same text, and the only
+    # symptom is a spam penalty weeks later. Callers must be able to see it.
+    unchanged: bool = False
 
 
 # ---------------------------------------------------------------------------
@@ -217,9 +227,20 @@ def _claude_variant(req: VariantRequest) -> VariantResult:
         },
     ]
 
+    # Every account in a group shares one style profile, so without this the
+    # prompt is byte-identical for all of them and "each Page sounds
+    # different" rests entirely on sampling luck. Naming the account and
+    # handing over its seed gives the model something to actually differ on,
+    # and keeps the same account landing on a consistent voice across posts.
     user_text = (
         f"Platform: {req.platform}\n"
         f"Platform conventions: {_PLATFORM_HINTS.get(req.platform, '')}\n\n"
+        f"Account: {req.account_label or req.seed}\n"
+        f"Variation key: {req.seed}\n"
+        f"This exact caption is being rewritten separately for several other "
+        f"accounts that share this persona. Yours must not read like theirs: "
+        f"pick a different opening line, a different order of points, and a "
+        f"different closing. Same facts, same claims, different writing.\n\n"
         f"Source title: {req.source_title}\n"
         f"Source caption:\n{req.source_caption}\n\n"
         f"Rewrite for this platform in the persona's voice, in the SAME "
@@ -290,10 +311,19 @@ def _template_variant(req: VariantRequest) -> VariantResult:
     if chosen_tags:
         base = f"{base}\n\n{' '.join(chosen_tags)}"
 
+    if base.strip() == req.source_caption.strip():
+        log.warning(
+            "template variant could not vary anything for seed=%s "
+            "(style_profile has no tone, emoji_density or hashtag_pool) -- "
+            "this Page will publish the source caption verbatim",
+            req.seed,
+        )
+
     return VariantResult(
         caption=base,
         title=req.source_title,
         used_engine="template",
+        unchanged=base.strip() == req.source_caption.strip(),
     )
 
 

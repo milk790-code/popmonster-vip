@@ -30,7 +30,10 @@ from .celery_app import celery_app
 
 log = logging.getLogger(__name__)
 
-GRAPH_BASE = "https://graph.facebook.com/v20.0"
+# Share the publisher's pin rather than keeping a second copy: two hardcoded
+# versions drift, and the drift is invisible until one of them expires.
+from ..platforms.facebook import GRAPH_BASE  # noqa: E402
+
 EXPIRY_HORIZON_DAYS = 7
 _META_PLATFORMS = (Platform.FACEBOOK, Platform.INSTAGRAM)
 

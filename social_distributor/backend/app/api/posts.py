@@ -25,6 +25,11 @@ from ..utils.variants import VariantRequest, generate_variant
 
 bp = Blueprint("posts", __name__, url_prefix="/api/posts")
 
+# Spread a fan-out across ±N minutes when the caller does not say otherwise.
+# Twenty is wide enough that a group no longer posts in lockstep, and narrow
+# enough that a chosen posting hour still means something.
+DEFAULT_JITTER_MINUTES = 20
+
 
 def _load_owned_post(post_id: int):
     """Return (post, None) if the post belongs to the logged-in user.
@@ -314,8 +319,21 @@ def distribute(post_id: int):
         body.get("scheduled_for") or body.get("scheduled_at"), tz_name
     ) or datetime.now(timezone.utc)
 
-    jitter = max(0, int(body.get("jitter_minutes", 0)))
-    do_variants = bool(body.get("generate_variants", False))
+    # Both of these default to the *safe* value rather than the inert one.
+    #
+    # Forgetting them is not a neutral omission: a fan-out with no variants
+    # publishes one caption, character for character, to every Page in the
+    # group, and a fan-out with no jitter lands them within seconds of each
+    # other. That pair is the exact shape Meta's spam policy names -- "the
+    # same content across many assets" -- and these Pages are treated as one
+    # entity, so the penalty is fleet-wide. Meanwhile the cost of getting
+    # them by accident is a few rewrites and a few minutes of spread.
+    #
+    # This is not hypothetical: 69 scheduled posts (671 targets) went out
+    # this way because a caller simply omitted the flags. The defaults were
+    # doing the damage, not the callers.
+    jitter = max(0, int(body.get("jitter_minutes", DEFAULT_JITTER_MINUTES)))
+    do_variants = bool(body.get("generate_variants", True))
     referral_code: str | None = body.get("referral_code") or None
     dry_run = bool(body.get("dry_run", False))
     media_map, media_map_err = _parse_media_map(body.get("media_map"), post.user_id)
@@ -343,6 +361,7 @@ def distribute(post_id: int):
 
     plan: list[dict] = []
     created_ids: list[int] = []
+    unchanged_accounts: list[str] = []
     selected_account_ids = {
         a.id for g in groups for a in g.accounts if a.revoked_at is None
     }
@@ -383,12 +402,20 @@ def distribute(post_id: int):
                     platform=account.platform.value,
                     style_profile=group.style_profile or {},
                     seed=f"{seed}:{account.id}",
+                    account_label=account.handle or f"account-{account.id}",
                     referral_code=referral_code,
                 )
                 result = generate_variant(req)
                 overrides["caption"] = result.caption
                 overrides["title"] = result.title
                 engine_used = result.used_engine
+                if result.unchanged:
+                    # Variants were asked for and quietly not produced. Saying
+                    # so here is the difference between finding out now and
+                    # finding out from a spam penalty: the group has no style
+                    # profile, so every one of its accounts is about to
+                    # publish the same caption word for word.
+                    unchanged_accounts.append(account.handle or str(account.id))
 
             entry = {
                 "group_id": group.id,
@@ -429,6 +456,9 @@ def distribute(post_id: int):
                 "target_count": len(created_ids),
                 "jitter_minutes": jitter,
                 "variants": do_variants,
+                # Which accounts got the source caption verbatim despite
+                # variants being on. Empty is the healthy case.
+                "variants_unchanged": unchanged_accounts,
             },
         )
         db.session.commit()
@@ -452,6 +482,10 @@ def distribute(post_id: int):
             "created_target_ids": created_ids,
             "plan": plan,
             "best_time_used": best_time_used,
+            # Accounts that asked for a variant and got the source caption
+            # back unchanged. A dry run exists to be read before committing,
+            # so this is the one place the operator can still act on it.
+            "variants_unchanged": unchanged_accounts,
         }
     ), (200 if dry_run else 201)
 

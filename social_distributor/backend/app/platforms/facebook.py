@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
 
@@ -25,9 +26,60 @@ from .base import (
 
 log = logging.getLogger(__name__)
 
-GRAPH_BASE = "https://graph.facebook.com/v20.0"
-GRAPH_VIDEO_BASE = "https://graph-video.facebook.com/v20.0"
-DIALOG_BASE = "https://www.facebook.com/v20.0/dialog/oauth"
+# Graph versions expire, and expiry is silent: Meta does not fail the call,
+# it quietly reroutes it to the next version still alive. So an unattended
+# fleet does not break on the expiry date -- it starts running against a
+# version nobody chose, with no error to notice. v20.0 expires 2026-09-24.
+#
+# Pinned in one place, and overridable, so the next bump is one variable
+# rather than a hunt through the file.
+GRAPH_VERSION = os.environ.get("META_GRAPH_VERSION", "v23.0")
+GRAPH_BASE = f"https://graph.facebook.com/{GRAPH_VERSION}"
+GRAPH_VIDEO_BASE = f"https://graph-video.facebook.com/{GRAPH_VERSION}"
+DIALOG_BASE = f"https://www.facebook.com/{GRAPH_VERSION}/dialog/oauth"
+
+
+def reels_enabled() -> bool:
+    """Whether video should be published as a Reel rather than a video post.
+
+    A ``/videos`` post is only delivered to people who already follow the
+    Page. Every Page in this fleet has close to zero followers, so that path
+    is a broadcast to nobody -- which is precisely the "zero plays" symptom.
+    Reels are the one surface Facebook still hands to non-followers for free.
+
+    On by default, and safe to be: a Reel that Facebook refuses falls back to
+    the old path, so the worst case is the behaviour we already had.
+    ``FB_REELS=0`` forces the old path for everything.
+    """
+    return (os.environ.get("FB_REELS") or "1").strip().lower() not in {
+        "0", "false", "no", "off",
+    }
+
+
+# A Reel that breaks the format rules is not refused by the ``finish`` call --
+# encoding and validation happen afterwards, so ``finish`` answers 200 and the
+# failure only surfaces in the status phases minutes later. Without waiting for
+# that answer we would record SUCCEEDED for a Reel that never appears on the
+# Page, and the fallback would never fire. So we wait.
+REEL_READY_TIMEOUT = float(os.environ.get("FB_REEL_READY_TIMEOUT", "240"))
+REEL_POLL_INTERVAL = float(os.environ.get("FB_REEL_POLL_INTERVAL", "6"))
+
+# ``video_status`` values that mean we can stop waiting.
+_REEL_DONE = {"ready"}
+_REEL_DEAD = {"error", "upload_failed", "expired"}
+
+
+def _reject_if_unsuccessful(payload: dict, what: str) -> None:
+    """Graph answers 200 with ``{"success": false}`` on a refusal.
+
+    Treating that as success is worse than an error would be: we would report
+    a post id for something that was never published, and never fall back.
+    """
+    if isinstance(payload, dict) and payload.get("success") is False:
+        raise PlatformError(
+            f"{what} rejected: {payload.get('message') or payload}",
+            retryable=False,
+        )
 
 DEFAULT_SCOPES = [
     "pages_show_list",
@@ -309,6 +361,25 @@ class FacebookPublisher(Publisher):
         )
 
     def _publish_video(self, token, page_id, req: PublishRequest) -> PublishResult:
+        """Publish as a Reel when we can, as a plain video post otherwise.
+
+        Reels carry format rules (portrait, duration) that cannot be checked
+        from a URL, so the only honest test is to ask Facebook and accept the
+        answer. A refusal must not cost us the post -- it only costs us the
+        recommendation surface, which is exactly what the fallback records.
+        """
+        fallback_error = ""
+        if reels_enabled():
+            try:
+                return self._publish_reel(token, page_id, req)
+            except PlatformError as exc:
+                fallback_error = str(exc)[:500]
+                log.warning(
+                    "reel refused for page_id=%s, falling back to a plain "
+                    "video post (no recommendation surface): %s",
+                    page_id, exc,
+                )
+
         # B6: video uploads can take 60-120s; use long timeout instead of
         # the 60s default so a slow Meta CDN doesn't fail us spuriously.
         data = request_json(
@@ -322,4 +393,155 @@ class FacebookPublisher(Publisher):
             },
             timeout=180,
         )
-        return PublishResult(external_post_id=str(data.get("id")), raw=data)
+        return PublishResult(
+            external_post_id=str(data.get("id")),
+            raw=data,
+            surface="video",
+            surface_fallback_error=fallback_error,
+        )
+
+    def _publish_reel(self, token, page_id, req: PublishRequest) -> PublishResult:
+        """Three-phase hosted upload: start, transfer, finish.
+
+        https://developers.facebook.com/docs/video-api/guides/reels-publishing
+
+        Unlike ``/videos`` there is no single call that accepts a file URL:
+        phase 1 reserves a video id and hands back a one-shot upload host,
+        phase 2 tells that host to fetch our URL, phase 3 publishes it.
+        """
+        start = request_json(
+            "POST",
+            f"{GRAPH_BASE}/{page_id}/video_reels",
+            data={"upload_phase": "start", "access_token": token},
+            timeout=60,
+        )
+        video_id = start.get("video_id")
+        upload_url = start.get("upload_url")
+        if not video_id or not upload_url:
+            raise PlatformError(
+                f"reel start returned no upload target: {start}",
+                retryable=False,
+            )
+
+        # Phase 2 is the odd one out in the whole Graph API: the credentials
+        # and the source URL travel as headers, and the body stays empty.
+        transfer = request_json(
+            "POST",
+            upload_url,
+            headers={
+                "Authorization": f"OAuth {token}",
+                "file_url": req.media_url,
+                "Content-Type": "application/octet-stream",
+            },
+            timeout=180,
+        )
+        _reject_if_unsuccessful(transfer, "reel transfer")
+
+        try:
+            finish = request_json(
+                "POST",
+                f"{GRAPH_BASE}/{page_id}/video_reels",
+                data={
+                    "video_id": video_id,
+                    "upload_phase": "finish",
+                    "video_state": "PUBLISHED",
+                    "description": req.caption,
+                    "access_token": token,
+                },
+                timeout=120,
+            )
+        except PlatformError as exc:
+            # A timeout here cannot tell "never arrived" from "arrived and
+            # published". Falling straight back to /videos on the second case
+            # posts the same clip twice, and a duplicate has to be deleted by
+            # hand -- the only irreversible outcome in this whole path. So ask
+            # Facebook what actually happened before deciding.
+            log.warning("reel finish did not answer cleanly, waiting for the "
+                        "real outcome before deciding: %s", exc)
+            # Wait it out rather than peeking once: a Reel that is still
+            # encoding would read as "not ready", we would fall back, and then
+            # it would publish anyway -- the duplicate we are trying to avoid.
+            self._await_reel_ready(token, video_id)
+            return PublishResult(
+                external_post_id=self._resolve_post_id(token, video_id, {}),
+                raw={"start": start, "finish": "timeout_but_published"},
+                surface="reel",
+            )
+
+        _reject_if_unsuccessful(finish, "reel finish")
+        self._await_reel_ready(token, video_id)
+
+        return PublishResult(
+            external_post_id=self._resolve_post_id(token, video_id, finish),
+            raw={"start": start, "finish": finish},
+            surface="reel",
+        )
+
+    def _resolve_post_id(self, token, video_id, finish: dict) -> str:
+        """The id of the *post*, not the video.
+
+        These are different objects, and only the post accepts comments. The
+        funnel link lives in the first comment, so settling for the video id
+        does not merely mislabel the row -- it silently drops the link off
+        every Reel we publish. That is exactly what was happening: nearly all
+        pending Facebook targets are video, and the comment attempts were
+        coming back "Object with ID does not exist".
+        """
+        if post_id := finish.get("post_id"):
+            return str(post_id)
+        try:
+            data = request_json(
+                "GET",
+                f"{GRAPH_BASE}/{video_id}",
+                params={"fields": "post_id", "access_token": token},
+                timeout=30,
+            )
+        except PlatformError as exc:
+            log.warning("reel published but its post id could not be read "
+                        "(video_id=%s); the first comment will fail: %s",
+                        video_id, exc)
+            return str(video_id)
+        # Falling back to the video id keeps insights working; the comment is
+        # the part that breaks, and it reports its own failure.
+        return str(data.get("post_id") or video_id)
+
+    def _reel_status(self, token, video_id) -> str:
+        """Current ``video_status``, or "" when it cannot be read."""
+        try:
+            data = request_json(
+                "GET",
+                f"{GRAPH_BASE}/{video_id}",
+                params={"fields": "status", "access_token": token},
+                timeout=30,
+            )
+        except PlatformError:
+            return ""
+        return ((data.get("status") or {}).get("video_status") or "").lower()
+
+    def _await_reel_ready(self, token, video_id) -> None:
+        """Block until Facebook says the Reel is live, or say it failed.
+
+        ``finish`` only starts the encode. Aspect ratio, resolution, duration
+        and frame rate are all judged after that, so a 200 from ``finish``
+        proves nothing about whether anyone will ever see this. Raising here
+        is what lets the caller fall back to a plain video post -- the whole
+        point of the fallback is defeated if we never learn of the refusal.
+        """
+        deadline = time.monotonic() + REEL_READY_TIMEOUT
+        last = ""
+        while time.monotonic() < deadline:
+            last = self._reel_status(token, video_id)
+            if last in _REEL_DONE:
+                return
+            if last in _REEL_DEAD:
+                raise PlatformError(
+                    f"reel rejected after upload (video_status={last}); "
+                    "usually aspect ratio, resolution, duration or frame rate",
+                    retryable=False,
+                )
+            time.sleep(REEL_POLL_INTERVAL)
+        raise PlatformError(
+            f"reel still not ready after {REEL_READY_TIMEOUT:.0f}s "
+            f"(last video_status={last or 'unknown'})",
+            retryable=False,
+        )
