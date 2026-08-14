@@ -455,7 +455,7 @@ class FacebookPublisher(Publisher):
             # it would publish anyway -- the duplicate we are trying to avoid.
             self._await_reel_ready(token, video_id)
             return PublishResult(
-                external_post_id=str(video_id),
+                external_post_id=self._resolve_post_id(token, video_id, {}),
                 raw={"start": start, "finish": "timeout_but_published"},
                 surface="reel",
             )
@@ -463,14 +463,39 @@ class FacebookPublisher(Publisher):
         _reject_if_unsuccessful(finish, "reel finish")
         self._await_reel_ready(token, video_id)
 
-        # finish echoes post_id on success; when it only confirms success the
-        # video id is the durable handle we can still fetch insights against.
-        post_id = finish.get("post_id") or video_id
         return PublishResult(
-            external_post_id=str(post_id),
+            external_post_id=self._resolve_post_id(token, video_id, finish),
             raw={"start": start, "finish": finish},
             surface="reel",
         )
+
+    def _resolve_post_id(self, token, video_id, finish: dict) -> str:
+        """The id of the *post*, not the video.
+
+        These are different objects, and only the post accepts comments. The
+        funnel link lives in the first comment, so settling for the video id
+        does not merely mislabel the row -- it silently drops the link off
+        every Reel we publish. That is exactly what was happening: nearly all
+        pending Facebook targets are video, and the comment attempts were
+        coming back "Object with ID does not exist".
+        """
+        if post_id := finish.get("post_id"):
+            return str(post_id)
+        try:
+            data = request_json(
+                "GET",
+                f"{GRAPH_BASE}/{video_id}",
+                params={"fields": "post_id", "access_token": token},
+                timeout=30,
+            )
+        except PlatformError as exc:
+            log.warning("reel published but its post id could not be read "
+                        "(video_id=%s); the first comment will fail: %s",
+                        video_id, exc)
+            return str(video_id)
+        # Falling back to the video id keeps insights working; the comment is
+        # the part that breaks, and it reports its own failure.
+        return str(data.get("post_id") or video_id)
 
     def _reel_status(self, token, video_id) -> str:
         """Current ``video_status``, or "" when it cannot be read."""

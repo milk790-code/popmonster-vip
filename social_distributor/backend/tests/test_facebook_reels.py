@@ -55,7 +55,8 @@ def _fast_and_clean(monkeypatch):
     monkeypatch.setattr(fb, "REEL_READY_TIMEOUT", 1)
 
 
-def _fake_graph(*, finish=REEL_FINISH, statuses=("ready",), video_id="vid-fallback"):
+def _fake_graph(*, finish=REEL_FINISH, statuses=("ready",), video_id="vid-fallback",
+                resolved_post_id="page-1_555"):
     """A stand-in Graph API. ``statuses`` is consumed one poll at a time."""
     calls = []
     remaining = list(statuses)
@@ -74,7 +75,10 @@ def _fake_graph(*, finish=REEL_FINISH, statuses=("ready",), video_id="vid-fallba
             return {"success": True}
         if "/videos" in url:
             return {"id": video_id}
-        if method == "GET":                       # the status poll
+        if method == "GET":
+            fields = (kwargs.get("params") or {}).get("fields")
+            if fields == "post_id":               # resolving the post handle
+                return {"post_id": resolved_post_id} if resolved_post_id else {}
             return _status(remaining.pop(0) if remaining else "processing")
         raise AssertionError(f"unexpected call {method} {url}")
 
@@ -158,7 +162,9 @@ def test_a_finish_timeout_does_not_double_post():
         result = FacebookPublisher().publish(_token(), "page-1", _request())
 
     assert result.surface == "reel"
-    assert result.external_post_id == "v-123"
+    # No finish body to read the handle from, so it is looked up -- the same
+    # path a normal publish takes when finish omits post_id.
+    assert result.external_post_id == "page-1_555"
     assert not any("/videos" in url for _, url, *_ in calls)
 
 
@@ -188,8 +194,24 @@ def test_a_start_phase_without_an_upload_url_falls_back_rather_than_crashing():
     assert "no upload target" in result.surface_fallback_error
 
 
-def test_finish_without_post_id_keeps_the_video_id_as_the_handle():
-    fake, _ = _fake_graph(finish={"success": True})
+def test_finish_without_post_id_looks_the_post_up_instead_of_using_the_video_id():
+    """A video id is not a post id, and only a post takes comments. The funnel
+    link lives in the first comment, so settling for the video id silently
+    drops the link off every Reel -- which is what "Object with ID does not
+    exist" on 62 of the last 65 comment attempts actually was."""
+    fake, calls = _fake_graph(finish={"success": True})
+    with patch("app.platforms.facebook.request_json", side_effect=fake):
+        result = FacebookPublisher().publish(_token(), "page-1", _request())
+
+    assert result.external_post_id == "page-1_555"
+    assert result.surface == "reel"
+    assert any((p or {}).get("fields") == "post_id" for *_, p in calls)
+
+
+def test_an_unreadable_post_id_still_returns_a_usable_handle():
+    """Insights work off the video id, so falling back keeps something. The
+    comment is the part that breaks, and it reports its own failure."""
+    fake, _ = _fake_graph(finish={"success": True}, resolved_post_id=None)
     with patch("app.platforms.facebook.request_json", side_effect=fake):
         result = FacebookPublisher().publish(_token(), "page-1", _request())
 
