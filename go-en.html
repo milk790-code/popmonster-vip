@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0d0c0a">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="index,follow">
+<meta name="description" content="Car detailing from Taichung, Taiwan. Ask a working detailer anything — products, dilution, what actually works. Free. WhatsApp is the fastest way.">
+<title>Ask a detailer in Taiwan — Chen Xue-Yi</title>
+
+<link rel="canonical" href="https://popmonster.vip/go-en">
+<link rel="alternate" hreflang="en" href="https://popmonster.vip/go-en">
+<link rel="alternate" hreflang="zh-Hant" href="https://popmonster.vip/go">
+<link rel="alternate" hreflang="x-default" href="https://popmonster.vip/go">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="zh_TW">
+<meta property="og:site_name" content="Pop Monster">
+<meta property="og:title" content="You're not in Taiwan. I noticed.">
+<meta property="og:description" content="I run a detailing shop in Taichung. Ask me anything — products, dilution, what actually works. Free, and I'll tell you when you don't need it.">
+<meta property="og:url" content="https://popmonster.vip/go-en">
+<meta property="og:image" content="https://popmonster.vip/assets/go-v4/go-link-preview-1200x630-20260729.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<style>
+:root{
+  /* same tokens as css/go.css so this page is the same brand, not a bolt-on */
+  --ink:#0d0c0a; --panel:#171512; --paper:#f4ebdd; --paper-dim:#d8ccba;
+  --muted:#b9ad9b; --gold:#c6a15b; --gold-bright:#e1bd76; --line:#342f29;
+  --line-gold:rgba(198,161,91,.34);
+  --display:"Iowan Old Style",Georgia,"Times New Roman",serif;
+  --body:system-ui,-apple-system,"Segoe UI Variable Text","Segoe UI",sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+body,h1,h2,h3,p,ul,ol,li,figure,dl,dd{margin:0;padding:0}
+html{background:var(--ink);color:var(--paper);text-size-adjust:100%;-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--body); font-size:17px; line-height:1.72; letter-spacing:.002em;
+  background-image:
+    radial-gradient(ellipse 66% 32% at 14% -6%, rgba(198,161,91,.11), transparent 62%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.84' numOctaves='3'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  background-attachment:fixed;
+}
+.wrap{max-width:60rem;margin:0 auto;padding:clamp(2.6rem,6vw,4.6rem) clamp(1.15rem,4vw,2.2rem) 7rem}
+a{color:var(--gold-bright)}
+
+/* masthead, not a navbar */
+.mast{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;
+      border-bottom:1px solid var(--line-gold);padding-bottom:1.1rem}
+.mast .brand{font-size:.75rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase}
+.mast .lang{font-size:.92rem;letter-spacing:.06em;color:var(--muted);text-decoration:none;
+            border-bottom:1px solid var(--line);padding-bottom:2px;transition:.45s var(--ease)}
+.mast .lang:hover{color:var(--paper);border-bottom-color:var(--gold)}
+
+h1{font-family:var(--display);font-weight:400;font-size:clamp(2.35rem,7.4vw,4.4rem);
+   line-height:1.06;margin:clamp(2.4rem,6vw,3.6rem) 0 0;max-width:20ch}
+.dek{font-size:clamp(1.06rem,2.3vw,1.32rem);line-height:1.66;color:var(--paper-dim);
+     margin-top:1.5rem;max-width:44ch}
+.dek b{color:var(--paper);font-weight:600}
+
+.stat{display:flex;gap:clamp(1.4rem,5vw,3.2rem);flex-wrap:wrap;margin-top:2.4rem;
+      border-top:1px solid var(--line);padding-top:1.4rem}
+.stat div{min-width:0}
+.stat dt{font-size:.75rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.stat dd{font-family:var(--display);font-size:clamp(1.5rem,4vw,2.1rem);color:var(--gold-bright);margin-top:.25rem}
+
+section{margin-top:clamp(3.4rem,9vw,6rem)}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,4vw,2.35rem);line-height:1.2}
+h2 + p{margin-top:1rem;color:var(--paper-dim);max-width:52ch}
+
+/* numbered list, not equal cards */
+ol.items{list-style:none;counter-reset:i;margin-top:2.1rem}
+ol.items li{counter-increment:i;display:grid;grid-template-columns:3.1rem 1fr;gap:0 1.15rem;
+            padding:1.5rem 0;border-top:1px solid var(--line)}
+ol.items li::before{content:counter(i,decimal-leading-zero);font-family:var(--display);
+                    font-size:1.1rem;color:var(--gold);padding-top:.28rem;grid-column:1}
+/* both text nodes stay in column 2 — without this the span falls back to the 3.1rem
+   column and renders one word per line */
+ol.items b,ol.items span{grid-column:2}
+ol.items b{display:block;font-size:1.14rem;font-weight:600;line-height:1.45}
+ol.items span{display:block;color:var(--muted);margin-top:.4rem;max-width:48ch}
+
+/* the honest bit — deliberately not symmetrical with the section above */
+.plain{border-left:2px solid var(--line-gold);padding:.2rem 0 .2rem 1.5rem;margin-top:2rem;
+       color:var(--paper-dim);max-width:50ch}
+.plain p + p{margin-top:.9rem}
+
+.cta{margin-top:clamp(3.4rem,9vw,5.5rem);border-top:1px solid var(--line-gold);padding-top:2.4rem}
+.cta h2{margin-bottom:.9rem}
+.btn{display:inline-block;margin-top:1.7rem;background:var(--gold);color:#14110c;
+     font-weight:700;font-size:1.06rem;letter-spacing:.01em;text-decoration:none;
+     padding:.95rem 2.1rem;border-radius:.5rem;transition:.45s var(--ease)}
+.btn:hover{background:var(--gold-bright);transform:translateY(-1px)}
+.alt{margin-top:1.5rem;font-size:.92rem;color:var(--muted)}
+.alt a{color:var(--paper-dim)}
+
+footer{margin-top:clamp(3.4rem,8vw,5rem);border-top:1px solid var(--line);padding-top:1.5rem;
+       font-size:.92rem;color:var(--muted);display:flex;justify-content:space-between;
+       gap:1rem;flex-wrap:wrap}
+footer a{color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <span class="brand">Pop Monster · Taichung, Taiwan</span>
+    <a class="lang" href="/go" hreflang="zh-Hant">中文版 →</a>
+  </header>
+
+  <h1>You’re not in Taiwan. I noticed.</h1>
+
+  <p class="dek">I’m Chen Xue-Yi. I run a car detailing shop in Taichung.
+  I wash the cars, I polish them, and I write the invoices — <b>all of it myself</b>.
+  So when you ask me something, you get the answer a working detailer would give a friend,
+  not the answer a brand would give a lead.</p>
+
+  <dl class="stat">
+    <div><dt>Where you're watching from</dt><dd>67% outside Taiwan</dd></div>
+    <div><dt>Top countries after Taiwan</dt><dd>MX · US · ID · MY</dd></div>
+    <div><dt>What this costs you</dt><dd>Nothing</dd></div>
+  </dl>
+
+  <section>
+    <h2>What you can actually get from me</h2>
+    <p>Today. Without buying anything.</p>
+    <ol class="items">
+      <li><b>The product list I really use</b>
+        <span>Brands, dilution ratios, how much a bottle actually covers, and which ones I stopped buying.</span></li>
+      <li><b>A straight answer on whether you need it</b>
+        <span>Half the time the honest answer is “your paint doesn’t need that step.” I’ll say so.</span></li>
+      <li><b>How a one-person shop stays booked</b>
+        <span>If you run a shop too: what I charge, how I quote, and how the work comes in without ads.</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>What I can’t do yet</h2>
+    <div class="plain">
+      <p>I’m not set up to ship products to every country. I’d rather tell you that now
+      than take your money and disappoint you at customs.</p>
+      <p>What I can do is tell you exactly what I use and why, so you can source the
+      equivalent where you are — and if I can get it to you, I’ll say so plainly.</p>
+      <p>Tell me where you are. That’s the first question I’ll ask anyway.</p>
+    </div>
+  </section>
+
+  <section class="cta">
+    <h2>Message me</h2>
+    <p>WhatsApp is the fastest way to reach me. English is fine — write however you write.</p>
+    <a class="btn" id="wa" href="https://wa.me/886970527037" rel="noopener">Message me on WhatsApp</a>
+    <p class="alt">Or <a href="https://www.facebook.com/chen.xue.yi.174864" rel="noopener">message me on Facebook</a>.
+    If you’re in Taiwan, <a href="/go">the Chinese page</a> has more options including LINE.</p>
+  </section>
+
+  <footer>
+    <span>Chen Xue-Yi · Taichung, Taiwan</span>
+    <span><a href="/go" hreflang="zh-Hant">中文</a> · <a href="https://popmonster.vip/">popmonster.vip</a></span>
+  </footer>
+
+</div>
+
+<script>
+// Carry the campaign source into the WhatsApp conversation itself.
+// Beacons get blocked by consent prompts; a first message never does.
+(function () {
+  var ALLOWED = ['direct','business-card','package-insert','social','pwa','homescreen',
+    'profile-bio','legacy-worker','facebook-free-first','facebook-dont-pay','facebook-connect',
+    'line-free-first','line-dont-pay','line-connect','threads-free-first','threads-dont-pay','threads-connect'];
+  var raw = new URLSearchParams(location.search).get('src') || '';
+  var src = ALLOWED.indexOf(raw) !== -1 ? raw : (/^fb-[0-9a-f]{6}$/.test(raw) ? raw : 'direct');
+  var msg = 'Hi Xue-Yi — I found you from your car detailing videos. ';
+  msg += (src === 'profile-bio') ? 'I came from your Facebook profile. '
+       : (src === 'social') ? 'I came from one of your posts. ' : '';
+  msg += 'I have a question about ';
+  var a = document.getElementById('wa');
+  a.href = 'https://wa.me/886970527037?text=' + encodeURIComponent(msg);
+  a.setAttribute('data-src', src);
+})();
+</script>
+</body>
+</html>

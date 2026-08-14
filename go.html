@@ -11,6 +11,9 @@
   <title>POP 免費接線台｜把第一步分清楚</title>
 
   <link rel="canonical" href="https://popmonster.vip/go">
+  <link rel="alternate" hreflang="zh-Hant" href="https://popmonster.vip/go">
+  <link rel="alternate" hreflang="en" href="https://popmonster.vip/go-en">
+  <link rel="alternate" hreflang="x-default" href="https://popmonster.vip/go">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
@@ -332,5 +335,33 @@
       <span>店家系統</span>
     </a>
   </nav>
+
+<!-- English switch: only rendered for non-Chinese browsers. Self-contained, no deps. -->
+<style>
+#en-switch{display:none;position:sticky;top:0;z-index:80;background:#171512;
+  border-bottom:1px solid rgba(198,161,91,.34);padding:.6rem 1rem;text-align:center;
+  font:500 .92rem/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;color:#d8ccba}
+#en-switch a{color:#e1bd76;text-decoration:none;border-bottom:1px solid rgba(225,189,118,.5);
+  padding-bottom:1px;margin-left:.4rem}
+#en-switch a:hover{border-bottom-color:#e1bd76}
+#en-switch b{display:none}
+</style>
+<div id="en-switch" role="region" aria-label="Language">
+  This page is in Chinese.&nbsp;<a href="/go-en" hreflang="en">Read it in English &rarr;</a>
+</div>
+<script>
+(function(){
+  try{
+    var l=(navigator.language||'').toLowerCase();
+    var ls=(navigator.languages||[]).join(',').toLowerCase();
+    if(l.indexOf('zh')===0||ls.indexOf('zh')!==-1) return;      // Chinese reader: leave alone
+    var el=document.getElementById('en-switch');
+    var q=location.search||'';
+    el.querySelector('a').href='/go-en'+q;                       // carry ?src= across
+    el.style.display='block';
+    document.body.insertBefore(el,document.body.firstChild);
+  }catch(e){}
+})();
+</script>
 </body>
 </html>
