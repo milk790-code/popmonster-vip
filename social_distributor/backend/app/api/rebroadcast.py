@@ -32,6 +32,7 @@ from ..utils.audit import record as audit
 from ..utils.auth import current_user_id
 from ..utils.crypto import cipher
 from ..utils.jitter import spread
+from ..utils.redact import redact_error
 
 log = logging.getLogger(__name__)
 bp = Blueprint("rebroadcast", __name__, url_prefix="/api/rebroadcast")
@@ -82,7 +83,7 @@ def scan():
     try:
         items = _scan_platform(account, token, limit)
     except Exception as exc:
-        return jsonify({"error": "scan failed", "detail": str(exc)[:300]}), 502
+        return jsonify({"error": "scan failed", "detail": redact_error(exc)}), 502
 
     inserted = 0
     for item in items:

@@ -26,6 +26,7 @@ from ..permissions.health import run_health_sweep
 from ..utils.audit import record as audit
 from ..utils.auth import current_user_id
 from ..utils.crypto import cipher
+from ..utils.redact import redact_error
 
 bp = Blueprint("permissions", __name__, url_prefix="/api/permissions")
 
@@ -117,7 +118,7 @@ def create_grant():
         else:
             return jsonify({"error": f"grants not supported for {platform_str}"}), 422
     except Exception as exc:
-        return jsonify({"error": "platform grant failed", "detail": str(exc)[:300]}), 502
+        return jsonify({"error": "platform grant failed", "detail": redact_error(exc)}), 502
 
     grant = PermissionGrant(
         user_id=user_id,
@@ -175,7 +176,7 @@ def revoke_grant(grant_id: int):
                 access_token=token,
             )
     except Exception as exc:
-        return jsonify({"error": "platform revoke failed", "detail": str(exc)[:300]}), 502
+        return jsonify({"error": "platform revoke failed", "detail": redact_error(exc)}), 502
 
     grant.status = "revoked"
     grant.revoked_at = datetime.now(timezone.utc)
