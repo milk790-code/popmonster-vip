@@ -75,6 +75,28 @@ _REEL_DONE = {"ready"}
 _REEL_DEAD = {"error", "upload_failed", "expired"}
 
 
+class ReelPending(PlatformError):
+    """We stopped waiting, but Facebook has not refused the Reel.
+
+    This is deliberately not the same as a refusal, because the two call for
+    opposite actions. A refusal means nothing was published and we should post
+    the plain video instead. A pending Reel means the upload succeeded and
+    Meta is still encoding -- posting the plain video as well would put the
+    same clip on the Page twice, and a duplicate has to be deleted by hand.
+
+    Observed 2026-08-15 on target 15470: ``upload_complete`` for the whole
+    240s window. Nothing was wrong with it; it was simply slow.
+
+    Carries the ``video_id`` so the caller can still record a handle without
+    reaching for publisher instance state -- a publisher is shared, so
+    stashing per-call values on ``self`` would leak across concurrent posts.
+    """
+
+    def __init__(self, message: str, *, video_id: str = "", **kwargs) -> None:
+        super().__init__(message, **kwargs)
+        self.video_id = video_id
+
+
 def _reject_if_unsuccessful(payload: dict, what: str) -> None:
     """Graph answers 200 with ``{"success": false}`` on a refusal.
 
@@ -438,6 +460,24 @@ class FacebookPublisher(Publisher):
         if reels_enabled():
             try:
                 return self._publish_reel(token, page_id, req)
+            except ReelPending as exc:
+                # Not a refusal -- Meta simply had not finished encoding when
+                # we stopped waiting. Posting the plain video too would put
+                # the same clip on the Page twice, and only a human can undo
+                # that. A row that turns out to point at a Reel Facebook never
+                # published is the cheaper mistake: it is wrong data, not
+                # wrong content on a live Page.
+                log.warning("reel %s still pending; reporting it as published "
+                            "rather than posting a second copy: %s",
+                            req.media_url, exc)
+                return PublishResult(
+                    external_post_id=self._resolve_post_id(
+                        token, page_id, exc.video_id, {},
+                    ) if exc.video_id else "",
+                    raw={"pending": str(exc)},
+                    surface="reel",
+                    surface_fallback_error=str(exc)[:500],
+                )
             except PlatformError as exc:
                 fallback_error = str(exc)[:500]
                 log.warning(
@@ -685,8 +725,10 @@ class FacebookPublisher(Publisher):
                     retryable=False,
                 )
             time.sleep(REEL_POLL_INTERVAL)
-        raise PlatformError(
+        raise ReelPending(
             f"reel still not ready after {REEL_READY_TIMEOUT:.0f}s "
-            f"(last video_status={last or 'unknown'})",
+            f"(last video_status={last or 'unknown'}); assuming it will "
+            "publish rather than risking a duplicate",
+            video_id=str(video_id),
             retryable=False,
         )

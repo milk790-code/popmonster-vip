@@ -153,15 +153,28 @@ def test_finish_answering_success_false_is_not_success():
     assert "bad ratio" in result.surface_fallback_error
 
 
-def test_a_reel_stuck_in_processing_gives_up_and_falls_back():
-    """Reels are known to sit in processing indefinitely. Waiting forever
-    would wedge the worker; waiting nowhere would report a phantom post."""
-    fake, _ = _fake_graph(statuses=("processing",) * 50)
+def test_a_reel_still_encoding_is_not_posted_a_second_time():
+    """Changed deliberately on 2026-08-15. This used to fall back to a plain
+    video post, on the theory that a timeout meant the Reel was lost.
+
+    Production said otherwise: target 15470 sat at ``upload_complete`` for the
+    whole window -- nothing was wrong with it, it was merely slow -- and the
+    fallback posted the same clip a second time. A duplicate on a live Page
+    can only be undone by hand.
+
+    So a timeout is now treated as "probably published". If that guess is
+    wrong we hold a row pointing at a Reel that never appeared: wrong data,
+    which is recoverable, instead of wrong content on a Page, which is not.
+    Only a definite refusal still falls back.
+    """
+    fake, calls = _fake_graph(statuses=("processing",) * 50)
     with patch("app.platforms.facebook.request_json", side_effect=fake):
         result = FacebookPublisher().publish(_token(), "page-1", _request())
 
-    assert result.surface == "video"
+    assert result.surface == "reel"
     assert "still not ready" in result.surface_fallback_error
+    assert not any("/videos" in url for _, url, *_ in calls), \
+        "a pending reel must never be duplicated onto the plain video surface"
 
 
 def test_a_finish_timeout_does_not_double_post():
