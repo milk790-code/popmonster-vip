@@ -459,13 +459,36 @@ class FacebookPublisher(Publisher):
             },
             timeout=180,
         )
+        # A freshly accepted video has no post behind it yet -- Facebook still
+        # has to encode it. The Reels path waits for that (up to four minutes)
+        # before asking for the post id; this path used to wait only as long as
+        # the id lookup's own retries, about twelve seconds. On 2026-08-15 a
+        # Reel upload hit a network fault, fell through to here, and its funnel
+        # comment came back "Object with ID ... does not exist" -- the id was
+        # correctly page-qualified, the post simply did not exist yet. That was
+        # the single failure among thirty; every success went down the Reels
+        # path, which waits.
+        #
+        # Unlike the Reels path, a timeout here must not raise: the post is
+        # already published, so failing now would report a live post as failed
+        # and invite a duplicate on retry. We wait, then proceed regardless.
+        video_id = str(data.get("id"))
+        try:
+            self._await_reel_ready(token, video_id)
+        except PlatformError as exc:
+            log.warning(
+                "video %s not confirmed ready; resolving its post id anyway "
+                "(the post exists, only the comment is at risk): %s",
+                video_id, exc,
+            )
+
         # ``/videos`` hands back a video id, and a video id is not a post id --
         # the funnel comment would fail here for exactly the reason it failed
         # on Reels. Resolve it the same way rather than keeping a second copy
         # of the bug on the fallback path.
         return PublishResult(
             external_post_id=self._resolve_post_id(
-                token, page_id, str(data.get("id")), data,
+                token, page_id, video_id, data,
             ),
             raw=data,
             surface="video",
