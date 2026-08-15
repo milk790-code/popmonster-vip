@@ -57,8 +57,14 @@ def _fast_and_clean(monkeypatch):
 
 
 def _fake_graph(*, finish=REEL_FINISH, statuses=("ready",), video_id="vid-fallback",
-                resolved_post_id="page-1_555"):
-    """A stand-in Graph API. ``statuses`` is consumed one poll at a time."""
+                resolved_post_id="page-1_555", transfer=None):
+    """A stand-in Graph API. ``statuses`` is consumed one poll at a time.
+
+    ``transfer`` fails the rupload step, which is a different branch from a
+    failing ``finish``: a transfer fault propagates and drops us onto the
+    plain-video fallback, whereas a finish fault is recovered by asking Graph
+    what actually happened. The production incident was the former.
+    """
     calls = []
     remaining = list(statuses)
 
@@ -73,6 +79,8 @@ def _fake_graph(*, finish=REEL_FINISH, statuses=("ready",), video_id="vid-fallba
                 raise finish
             return finish
         if url.startswith("https://rupload."):
+            if isinstance(transfer, Exception):
+                raise transfer
             return {"success": True}
         if "/videos" in url:
             return {"id": video_id}
@@ -145,15 +153,28 @@ def test_finish_answering_success_false_is_not_success():
     assert "bad ratio" in result.surface_fallback_error
 
 
-def test_a_reel_stuck_in_processing_gives_up_and_falls_back():
-    """Reels are known to sit in processing indefinitely. Waiting forever
-    would wedge the worker; waiting nowhere would report a phantom post."""
-    fake, _ = _fake_graph(statuses=("processing",) * 50)
+def test_a_reel_still_encoding_is_not_posted_a_second_time():
+    """Changed deliberately on 2026-08-15. This used to fall back to a plain
+    video post, on the theory that a timeout meant the Reel was lost.
+
+    Production said otherwise: target 15470 sat at ``upload_complete`` for the
+    whole window -- nothing was wrong with it, it was merely slow -- and the
+    fallback posted the same clip a second time. A duplicate on a live Page
+    can only be undone by hand.
+
+    So a timeout is now treated as "probably published". If that guess is
+    wrong we hold a row pointing at a Reel that never appeared: wrong data,
+    which is recoverable, instead of wrong content on a Page, which is not.
+    Only a definite refusal still falls back.
+    """
+    fake, calls = _fake_graph(statuses=("processing",) * 50)
     with patch("app.platforms.facebook.request_json", side_effect=fake):
         result = FacebookPublisher().publish(_token(), "page-1", _request())
 
-    assert result.surface == "video"
+    assert result.surface == "reel"
     assert "still not ready" in result.surface_fallback_error
+    assert not any("/videos" in url for _, url, *_ in calls), \
+        "a pending reel must never be duplicated onto the plain video surface"
 
 
 def test_a_finish_timeout_does_not_double_post():
@@ -319,3 +340,39 @@ def test_facebook_gets_the_portrait_derivative_when_reels_are_on(monkeypatch):
     # Other platforms keep their own preference either way.
     assert _preferred_aspect("youtube") == "16:9"
     assert _preferred_aspect("tiktok") == "9:16"
+
+
+# ---- the fallback path has to wait too ----------------------------------
+
+def test_the_video_fallback_waits_for_the_post_to_exist():
+    """The one failure among thirty on 2026-08-15 went down this path: a Reel
+    upload hit a network fault, fell through to ``/videos``, and its funnel
+    comment came back "Object with ID ... does not exist". The id was correctly
+    page-qualified -- the post simply had not been encoded yet. The Reels path
+    waits up to four minutes; this path used to wait only as long as the id
+    lookup's own retries."""
+    boom = PlatformError("network failure calling rupload", retryable=True)
+    # Reel dies at transfer, then the plain video needs two polls to be ready.
+    fake, calls = _fake_graph(transfer=boom, statuses=("processing", "ready"))
+    with patch("app.platforms.facebook.request_json", side_effect=fake):
+        result = FacebookPublisher().publish(_token(), "page-1", _request())
+
+    assert result.surface == "video"
+    status_polls = [
+        c for c in calls
+        if c[0] == "GET" and (c[4] or {}).get("fields") != "post_id"
+    ]
+    assert len(status_polls) >= 2, "fallback must poll until the video is ready"
+
+
+def test_a_video_that_never_becomes_ready_is_still_reported_as_published():
+    """Unlike the Reels path, a timeout here must not raise. The post is
+    already live, so failing now would report a real post as failed and invite
+    a duplicate on the retry."""
+    boom = PlatformError("network failure calling rupload", retryable=True)
+    fake, _ = _fake_graph(transfer=boom, statuses=("processing",) * 50)
+    with patch("app.platforms.facebook.request_json", side_effect=fake):
+        result = FacebookPublisher().publish(_token(), "page-1", _request())
+
+    assert result.surface == "video"
+    assert result.external_post_id  # a handle was still returned

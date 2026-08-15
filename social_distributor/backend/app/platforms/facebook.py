@@ -75,6 +75,28 @@ _REEL_DONE = {"ready"}
 _REEL_DEAD = {"error", "upload_failed", "expired"}
 
 
+class ReelPending(PlatformError):
+    """We stopped waiting, but Facebook has not refused the Reel.
+
+    This is deliberately not the same as a refusal, because the two call for
+    opposite actions. A refusal means nothing was published and we should post
+    the plain video instead. A pending Reel means the upload succeeded and
+    Meta is still encoding -- posting the plain video as well would put the
+    same clip on the Page twice, and a duplicate has to be deleted by hand.
+
+    Observed 2026-08-15 on target 15470: ``upload_complete`` for the whole
+    240s window. Nothing was wrong with it; it was simply slow.
+
+    Carries the ``video_id`` so the caller can still record a handle without
+    reaching for publisher instance state -- a publisher is shared, so
+    stashing per-call values on ``self`` would leak across concurrent posts.
+    """
+
+    def __init__(self, message: str, *, video_id: str = "", **kwargs) -> None:
+        super().__init__(message, **kwargs)
+        self.video_id = video_id
+
+
 def _reject_if_unsuccessful(payload: dict, what: str) -> None:
     """Graph answers 200 with ``{"success": false}`` on a refusal.
 
@@ -438,6 +460,24 @@ class FacebookPublisher(Publisher):
         if reels_enabled():
             try:
                 return self._publish_reel(token, page_id, req)
+            except ReelPending as exc:
+                # Not a refusal -- Meta simply had not finished encoding when
+                # we stopped waiting. Posting the plain video too would put
+                # the same clip on the Page twice, and only a human can undo
+                # that. A row that turns out to point at a Reel Facebook never
+                # published is the cheaper mistake: it is wrong data, not
+                # wrong content on a live Page.
+                log.warning("reel %s still pending; reporting it as published "
+                            "rather than posting a second copy: %s",
+                            req.media_url, exc)
+                return PublishResult(
+                    external_post_id=self._resolve_post_id(
+                        token, page_id, exc.video_id, {},
+                    ) if exc.video_id else "",
+                    raw={"pending": str(exc)},
+                    surface="reel",
+                    surface_fallback_error=str(exc)[:500],
+                )
             except PlatformError as exc:
                 fallback_error = str(exc)[:500]
                 log.warning(
@@ -459,13 +499,36 @@ class FacebookPublisher(Publisher):
             },
             timeout=180,
         )
+        # A freshly accepted video has no post behind it yet -- Facebook still
+        # has to encode it. The Reels path waits for that (up to four minutes)
+        # before asking for the post id; this path used to wait only as long as
+        # the id lookup's own retries, about twelve seconds. On 2026-08-15 a
+        # Reel upload hit a network fault, fell through to here, and its funnel
+        # comment came back "Object with ID ... does not exist" -- the id was
+        # correctly page-qualified, the post simply did not exist yet. That was
+        # the single failure among thirty; every success went down the Reels
+        # path, which waits.
+        #
+        # Unlike the Reels path, a timeout here must not raise: the post is
+        # already published, so failing now would report a live post as failed
+        # and invite a duplicate on retry. We wait, then proceed regardless.
+        video_id = str(data.get("id"))
+        try:
+            self._await_reel_ready(token, video_id)
+        except PlatformError as exc:
+            log.warning(
+                "video %s not confirmed ready; resolving its post id anyway "
+                "(the post exists, only the comment is at risk): %s",
+                video_id, exc,
+            )
+
         # ``/videos`` hands back a video id, and a video id is not a post id --
         # the funnel comment would fail here for exactly the reason it failed
         # on Reels. Resolve it the same way rather than keeping a second copy
         # of the bug on the fallback path.
         return PublishResult(
             external_post_id=self._resolve_post_id(
-                token, page_id, str(data.get("id")), data,
+                token, page_id, video_id, data,
             ),
             raw=data,
             surface="video",
@@ -662,8 +725,10 @@ class FacebookPublisher(Publisher):
                     retryable=False,
                 )
             time.sleep(REEL_POLL_INTERVAL)
-        raise PlatformError(
+        raise ReelPending(
             f"reel still not ready after {REEL_READY_TIMEOUT:.0f}s "
-            f"(last video_status={last or 'unknown'})",
+            f"(last video_status={last or 'unknown'}); assuming it will "
+            "publish rather than risking a duplicate",
+            video_id=str(video_id),
             retryable=False,
         )
