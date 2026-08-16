@@ -552,7 +552,18 @@ class FacebookPublisher(Publisher):
         )
         video_id = start.get("video_id")
         upload_url = start.get("upload_url")
-        if not video_id or not upload_url:
+        # Observed in production (target 18141, 2026-08-16): Graph answered
+        # start with video_id="0" and a real-looking upload_url. "0" is a
+        # non-empty string, so ``not video_id`` is False and this sailed past
+        # the check below -- transfer and finish both "succeeded" against a
+        # video that was never real, polling sat at upload_complete forever,
+        # and the eventual fallback composed page_id_0: a post id that has
+        # never existed. The comment then failed with "Invalid post_id
+        # parameter", but worse, ``post.published`` recorded a fabricated
+        # handle as a live post. Treating "0" as absent turns that into an
+        # ordinary refusal, which correctly falls back to a plain video post
+        # that is actually real.
+        if not video_id or video_id == "0" or not upload_url:
             raise PlatformError(
                 f"reel start returned no upload target: {start}",
                 retryable=False,
