@@ -376,3 +376,31 @@ def test_a_video_that_never_becomes_ready_is_still_reported_as_published():
 
     assert result.surface == "video"
     assert result.external_post_id  # a handle was still returned
+
+
+def test_a_video_id_of_literal_zero_is_treated_as_absent():
+    """Observed in production (target 18141, 2026-08-16): Graph answered
+    start with video_id="0" and a real-looking upload_url. "0" is a non-empty
+    string, so the plain ``not video_id`` check let it through -- transfer and
+    finish both "succeeded" against a video that was never real, polling sat
+    at upload_complete forever, and the fallback composed page_id_0: a post
+    id that has never existed. The comment failed with "Invalid post_id
+    parameter", but worse, the row recorded a fabricated handle as a live
+    post. Rejecting "0" up front turns this into an ordinary refusal that
+    falls back to a plain video post that is actually real."""
+    def fake(method, url, **kwargs):
+        if url.endswith("/video_reels"):
+            return {"video_id": "0", "upload_url": "https://rupload.example/x"}
+        if "/videos" in url:
+            return {"id": "vid-real"}
+        if url.endswith("/vid-real"):                  # post id lookup
+            return {}
+        raise AssertionError(f"unexpected call to {url}")
+
+    with patch("app.platforms.facebook.request_json", side_effect=fake):
+        result = FacebookPublisher().publish(_token(), "page-1", _request())
+
+    assert result.surface == "video"
+    assert result.external_post_id == "page-1_vid-real"
+    # Must never fabricate a post id from the bogus "0" video id.
+    assert "_0" not in result.external_post_id
