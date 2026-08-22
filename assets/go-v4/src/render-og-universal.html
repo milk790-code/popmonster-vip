@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<title>渲染正本：/go 通用分享卡 1200×630</title>
+<style>
+/*
+  POP 免費接線台 · 通用 OG 分享卡
+  ------------------------------------------------------------------
+  這張卡會被貼在「任何」貼文下面（實拍 Reel、汽美貼文、圖卡、名片、
+  包裝夾帶），所以不綁定任何單一主題，只講 11 個入口共通的那件事。
+
+  色票直接沿用 css/go.css 的 :root——點進去才不會視覺斷裂。
+  出處：夜間工作檯——墨黑鐵件、鎢絲燈、舊紙。全卡只有「金」一個強調色。
+
+  排版：報頭 → 主標 → 細金線 → 說明 → 頁腳聲明，單欄左傾，非對稱。
+  刻意不做：卡片格、圓角方塊 icon、h1 上方膠囊標籤、假儀表板面板、彩虹色。
+*/
+:root {
+  --ink: #0d0c0a;
+  --panel: #171512;
+  --paper: #f4ebdd;
+  --paper-dim: #d8ccba;
+  --muted: #b9ad9b;
+  --gold: #c6a15b;
+  --gold-bright: #e1bd76;
+  --line-gold: rgba(198, 161, 91, 0.30);
+
+  --font-body: "PingFang TC", "Noto Sans TC", "Heiti TC", sans-serif;
+  --font-display: "Songti TC", "STSong", "Noto Serif TC", serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; font-synthesis: none; }
+
+#capture {
+  position: relative;
+  width: 1200px;
+  height: 630px;
+  overflow: hidden;
+  background-color: var(--ink);
+  /* 不用彩色聚光暈（impeccable 抓 radial-spotlight-glow，/go 改版時已汰除過一次）。
+     改用兩種物理質感：紙面本身的暖度不均（線性、貼著版面斜向）＋邊緣壓暗（印刷與鏡頭都有的暗角）。 */
+  background-image:
+    radial-gradient(ellipse 122% 132% at 50% 48%, transparent 40%, rgba(0, 0, 0, 0.58) 100%),
+    linear-gradient(104deg, #100e0b 0%, #16130e 44%, #0b0a08 100%);
+  color: var(--paper);
+}
+
+/* 紙張顆粒。乾淨平面色是最好認的 AI 指紋 */
+#capture::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.062'/%3E%3C/svg%3E");
+}
+
+/* 內框細線：海報裁切線的意思，不是卡片邊框 */
+.frame {
+  position: absolute;
+  inset: 26px;
+  border: 1px solid var(--line-gold);
+  border-radius: 2px;
+}
+
+.sheet {
+  position: absolute;
+  inset: 26px;
+  padding: 44px 60px 42px;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+}
+/* 不准任何一層被壓扁：寧可撐破被閘擋下，也不要悄悄變形 */
+.sheet > * { flex: none; }
+
+/* ── 報頭：品牌與網址各據一端，中間留空 ───────────────── */
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+}
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.brand-pop {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--gold-bright);
+}
+.brand-name {
+  font-family: var(--font-body);
+  font-size: 29px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--paper);
+}
+.brand-latin {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  letter-spacing: 0.30em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-left: 4px;
+}
+.url {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  letter-spacing: 0.01em;
+  color: var(--gold);
+}
+
+.rule-full {
+  margin-top: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line-gold) 0%, var(--line-gold) 62%, transparent 100%);
+}
+
+/* ── 主標 ─────────────────────────────────────────── */
+.headline {
+  margin-top: 16px;
+  font-family: var(--font-display);
+  font-size: 84px;
+  /* 中文字身滿框，line-height 低於 1 會直接撞行。1.02–1.10 是甜蜜點 */
+  line-height: 1.08;
+  /* 中文不用負字距 */
+  letter-spacing: 0;
+  font-weight: 600;
+  color: var(--paper);
+  max-width: 940px;
+}
+.headline em {
+  font-style: normal;
+  color: var(--gold-bright);
+}
+
+/* 金線刻意不對齊左邊界，也刻意不置中 */
+.rule-short {
+  margin-top: 30px;
+  margin-left: 5px;
+  width: 146px;
+  height: 4px;
+  background: var(--gold);
+}
+
+/* ── 說明 ─────────────────────────────────────────── */
+.dek {
+  margin-top: 20px;
+  font-family: var(--font-body);
+  font-size: 32px;
+  line-height: 1.68;
+  letter-spacing: 0.01em;
+  color: var(--paper-dim);
+  max-width: 900px;
+}
+.dek {
+  margin-bottom: auto;
+}
+.foot {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(198, 161, 91, 0.16);
+  font-family: var(--font-body);
+  font-size: 22px;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+.dek b {
+  font-weight: 600;
+  color: var(--paper);
+  letter-spacing: 0.02em;
+}
+
+</style>
+</head>
+<body>
+  <div id="capture">
+    <div class="frame"></div>
+
+    <div class="sheet">
+      <header class="masthead">
+        <div class="brand">
+          <span class="brand-pop">POP</span>
+          <span class="brand-name">免費接線台</span>
+          <span class="brand-latin">free first-step switchboard</span>
+        </div>
+        <span class="url">popmonster.vip/go</span>
+      </header>
+      <div class="rule-full"></div>
+
+      <h1 class="headline" id="headline">你卡住的那件事，<br>第一步先別急著<em>花錢</em>。</h1>
+
+      <div class="rule-short"></div>
+
+      <p class="dek" id="dek">生意、簽約、旅行、汽美、開店，<br><b>先問又不用錢。</b></p>
+      <p class="foot">每個入口都先講清楚我不做什麼，你再決定要不要往下走。</p>
+    </div>
+  </div>
+</body>
+</html>
