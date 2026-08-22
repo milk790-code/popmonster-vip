@@ -132,25 +132,6 @@
   els.forEach(function(el){io.observe(el)});
 })();
 
-// === ?ref= 邀請碼捕獲 + 跨域橫幅（所有頁面） ===
-(function(){
-  try{
-    var r=new URLSearchParams(location.search).get('ref');
-    if(r&&/^[A-Za-z0-9_-]{4,16}$/.test(r)){
-      localStorage.setItem('pm_ref',r);
-      localStorage.setItem('pm_ref_ts',String(Date.now()));
-      // 僅在 index.html 以外的頁面顯示橫幅（index.html 有自己的橫幅）
-      if(!document.getElementById('pm-ref-banner')){
-        var b=document.createElement('div');
-        b.id='pm-ref-banner';
-        b.innerHTML='<span style="font-size:1.2em;margin-right:6px">🎁</span>朋友邀請你來！完成登入後自動綁定邀請碼 <strong>'+r+'</strong>&nbsp;&nbsp;<a href="https://portal.popmonster.vip/portal?ref='+encodeURIComponent(r)+'" style="color:#c8a96b;font-weight:700;text-decoration:underline">立即登入</a><button onclick="document.getElementById(\'pm-ref-banner\').remove()" style="margin-left:12px;background:none;border:none;color:#fff;cursor:pointer;font-size:1rem">✕</button>';
-        b.style.cssText='position:fixed;top:0;left:0;width:100%;z-index:9999;background:#1a1a1a;color:#fff;font-size:13px;padding:10px 16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap';
-        document.body.prepend(b);
-      }
-    }
-  }catch(e){}
-})();
-
 // === FAQ Toggle ===
 document.querySelectorAll('.faq-q').forEach(function(q){
   q.addEventListener('click',function(){this.parentElement.classList.toggle('open')});
