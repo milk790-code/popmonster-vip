@@ -173,18 +173,46 @@ class GoV4ContractTests(unittest.TestCase):
                 self.assertIn(word, accessible_name)
         self.assertIn("返回 POP MONSTER 首頁", accessible_name)
 
+    @staticmethod
+    def _jpeg_size(payload: bytes) -> tuple:
+        """從 JPEG 的 SOF 段讀出寬高（PNG 那套 struct 解法對 JPEG 無效）。"""
+        i = 2
+        while i < len(payload) - 9:
+            if payload[i] != 0xFF:
+                i += 1
+                continue
+            marker = payload[i + 1]
+            if 0xC0 <= marker <= 0xCF and marker not in (0xC4, 0xC8, 0xCC):
+                height, width = struct.unpack(">HH", payload[i + 5:i + 9])
+                return (width, height)
+            i += 2 + struct.unpack(">H", payload[i + 2:i + 4])[0]
+        raise AssertionError("JPEG 找不到 SOF 段")
+
+    def _og_card_text(self) -> str:
+        """分享卡渲染正本裡的可見文字——數字禁令要對著它驗，不是對著 HTML 頁面。"""
+        source = (ROOT / "assets/go-v4/src/render-og-universal.html").read_text(
+            encoding="utf-8")
+        body = source.split("<body>", 1)[1]
+        return re.sub(r"<[^>]+>", " ", body)
+
     def test_v4_og_asset_is_social_safe_scoped_and_not_the_legacy_3q_card(self):
         html = self.read_required("go.html")
-        relative = "assets/go-v4/go-link-preview-1200x630-20260729.png"
+        relative = "assets/go-v4/go-link-preview-1200x630-20260823.jpg"
         self.assertIn(f"https://popmonster.vip/{relative}", html)
         self.assertIn(
             'property="og:title" content="你卡住的那件事，第一步先別急著花錢。"',
             html,
         )
         self.assertIn(
-            'property="og:description" content="生意、網站、風險、出國、汽美，10 個免費入口幫你把下一步分清楚。"',
+            'property="og:description" content="生意、簽約、旅行、汽美、開店，'
+            '10 個免費第一步，每個都先講清楚我不做什麼。"',
             html,
         )
+        self.assertIn('property="og:image:type" content="image/jpeg"', html)
+        # 圖上不准出現任何入口數量：入口一增減，1200x630 的圖要重畫，
+        # 而且過期時沒有人會發現（"10 個免費入口" 就這樣過期過一次）。
+        # 數字只准活在 meta 文字裡，那裡改一行就好。
+        self.assertNotIn("10 個", self._og_card_text())
         self.assertIn('property="og:image:width" content="1200"', html)
         self.assertIn('property="og:image:height" content="630"', html)
         self.assertNotIn("1.1億", html)
@@ -195,9 +223,11 @@ class GoV4ContractTests(unittest.TestCase):
         legacy = ROOT / "og-image-1200x630.png"
         self.assertTrue(asset.is_file(), relative)
         payload = asset.read_bytes()
-        self.assertEqual(payload[:8], b"\x89PNG\r\n\x1a\n")
-        width, height = struct.unpack(">II", payload[16:24])
-        self.assertEqual((width, height), (1200, 630))
+        self.assertEqual(payload[:3], b"\xff\xd8\xff", "交付檔應為 JPEG")
+        self.assertEqual(self._jpeg_size(payload), (1200, 630))
+        # 滿版顆粒讓 PNG 壓不動（實測 967 KB）。JPEG q92 應落在 200 KB 以內，
+        # 超過就是有人把顆粒或尺寸改大了，爬蟲抓圖會變慢。
+        self.assertLess(len(payload), 200 * 1024, "分享卡過大")
         self.assertNotEqual(
             hashlib.sha256(payload).digest(),
             hashlib.sha256(legacy.read_bytes()).digest(),
