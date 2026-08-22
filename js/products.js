@@ -74,7 +74,7 @@ window.PM_PRODUCTS = [
   { sku:"A038", name:"包膜店專用除膠劑", cat:"清潔系列", img:"", url:"a038.html", tagline:"包膜師傅指定 · 殘膠溶解去除", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A039", name:"RO 訂製羊毛盤 素黑軟漆專用", cat:"耗材系列", img:"img/a039-main.jpg", url:"a039.html", tagline:"重切削首選 · 合成羊毛不噴毛", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A040", name:"米速 RO 商用重切拋光劑", cat:"研磨系列", img:"", url:"a040.html", tagline:"店家產能翻倍 · P800-P1200 職人級", get price(){ return window.PM_PRICES[this.sku] || null; } },
-  { sku:"A041", name:"米速鍍鉻拋光劑", cat:"研磨系列", img:"", url:"a041.html", tagline:"鍍鉻件去氧化 · 光澤完全恢復", get price(){ return window.PM_PRICES[this.sku] || null; } },
+  { sku:"A041", name:"米速鍍鉻拋光劑", cat:"研磨系列", img:"img/a041-main.jpg", url:"a041.html", tagline:"鍍鉻件去氧化 · 光澤完全恢復", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A042", name:"柔和真皮清潔劑（慕斯款）", cat:"護理系列", img:"", url:"a042.html", tagline:"慕斯泡沫護皮革 · 弱酸性深層護理", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A043", name:"柏油清潔劑", cat:"清潔系列", img:"img/a043-main.jpg", url:"a043.html", tagline:"柏油一抹即去 · 車漆安全無腐蝕", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A044", name:"超級泡沫洗車精 Super Foam", cat:"清潔系列", img:"img/a044-main.jpg", url:"a044.html", tagline:"洗車前置厚泡沫 · 高濃縮", get price(){ return window.PM_PRICES[this.sku] || null; } },
