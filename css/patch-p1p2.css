@@ -97,3 +97,44 @@
 
 /* 缺失變數補定義(guide/商品頁使用) */
 :root{--border-w:rgba(200,169,107,.22);--txt-dim:#5a5347;}
+
+/* ── 商品頁常見問題 ──────────────────────────────────────────────
+   main.css 早就有一套可運作的 max-height 手風琴，但商品頁的 inline <style>
+   用 grid-template-rows 0fr→1fr 覆蓋掉它，而那版在自動高度容器裡會解析成 0，
+   點開沒有反應。這裡用 .faq-list 提高特異性（0,4,0 > inline 的 0,3,0）繞開，
+   同時把問題列改成 <button> 讓鍵盤可操作。 */
+.faq-list{display:flex;flex-direction:column;gap:10px;max-width:820px;}
+.faq-list .faq-item{border:1px solid var(--border);border-radius:var(--r);background:var(--bg-card);overflow:hidden;margin-bottom:0;}
+.faq-list .faq-a{
+  display:block;max-height:0;overflow:hidden;padding:0 18px;
+  transition:max-height .4s cubic-bezier(.2,.7,.3,1),padding .4s cubic-bezier(.2,.7,.3,1);
+}
+.faq-list .faq-item.open .faq-a{max-height:60rem;padding:14px 18px;}
+.faq-list .faq-a p{margin:0;color:var(--txt-m);font-size:15px;line-height:1.85;}
+.faq-list .faq-q{
+  all:unset;box-sizing:border-box;display:flex;align-items:center;gap:14px;width:100%;
+  padding:16px 18px;cursor:pointer;color:var(--txt);background:var(--bg-sub);
+  font-family:'Noto Serif TC',serif;font-size:16px;line-height:1.6;font-weight:500;
+  transition:color .45s cubic-bezier(.2,.7,.3,1);
+}
+.faq-list .faq-q:hover{color:var(--gold-lt);}
+.faq-list .faq-q:focus-visible{outline:2px solid var(--gold);outline-offset:-2px;}
+.faq-list .faq-q::after{
+  content:"";margin-left:auto;flex:none;width:9px;height:9px;
+  border-right:1.5px solid var(--gold);border-bottom:1.5px solid var(--gold);
+  transform:rotate(45deg) translateY(-2px);
+  transition:transform .45s cubic-bezier(.2,.7,.3,1);
+}
+.faq-list .faq-item.open .faq-q{color:var(--gold-lt);}
+.faq-list .faq-item.open .faq-q::after{transform:rotate(-135deg) translateY(-2px);}
+@media (prefers-reduced-motion:reduce){
+  .faq-list .faq-a,.faq-list .faq-q,.faq-list .faq-q::after{transition:none;}
+}
+
+/* ── 同類別精選：補上價格（原本 96 個格子全是占位圖、一個價格都沒有） ── */
+.related-body-new .rpx{
+  font-family:"Noto Serif TC",serif;font-size:15px;color:var(--gold-lt);
+  margin-top:6px;font-variant-numeric:tabular-nums;
+}
+.related-body-new .rpx .cur{font-size:11px;letter-spacing:.06em;margin-right:2px;opacity:.8;}
+.related-body-new .rpx.tbd{font-size:13px;color:var(--txt-m);}
