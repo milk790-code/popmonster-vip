@@ -21,7 +21,7 @@
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.52 0 0 0 0 0.45 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 .ink-ph-char{
-  font-family:'Noto Serif TC',serif;
+  font-family:'Songti TC',STSong,'Noto Serif TC',serif;
   font-size:clamp(72px,42%,150px);
   font-size:min(150px,38cqw,9em);
   line-height:1;color:#1b1712;
@@ -32,7 +32,7 @@
   position:absolute;right:10%;bottom:10%;
   width:34px;height:34px;
   background:#9e3a2b;color:#f4efe3;
-  font-family:'Noto Serif TC',serif;
+  font-family:'Songti TC',STSong,'Noto Serif TC',serif;
   font-size:13px;line-height:1.15;
   display:flex;align-items:center;justify-content:center;
   text-align:center;writing-mode:vertical-rl;
@@ -44,7 +44,7 @@
 .ink-ph--sm .ink-ph-seal{width:22px;height:22px;font-size:9px;right:8%;bottom:8%}
 .ink-ph-note{
   position:absolute;left:10%;top:9%;
-  font-family:'Noto Serif TC',serif;font-size:11px;letter-spacing:.35em;
+  font-family:'Songti TC',STSong,'Noto Serif TC',serif;font-size:11px;letter-spacing:.35em;
   color:rgba(27,23,18,.45);writing-mode:vertical-rl;
 }
 
@@ -69,7 +69,7 @@
 .seal-dot{
   display:inline-flex;align-items:center;justify-content:center;
   width:20px;height:20px;background:#9e3a2b;color:#f4efe3;
-  font-family:'Noto Serif TC',serif;font-size:12px;
+  font-family:'Songti TC',STSong,'Noto Serif TC',serif;font-size:12px;
   border-radius:3px;transform:rotate(-2.5deg);vertical-align:middle;
   margin-left:8px;
 }
@@ -89,7 +89,7 @@
 }
 .totem-notes{display:flex;flex-direction:column;gap:26px}
 .totem-notes .tn h3{
-  font-family:'Noto Serif TC',serif;font-size:17px;font-weight:700;
+  font-family:'Songti TC',STSong,'Noto Serif TC',serif;font-size:17px;font-weight:700;
   color:var(--txt,#e8e2d6);margin:0 0 6px;
 }
 .totem-notes .tn h3 .zhu{color:#c8543f}
@@ -117,7 +117,7 @@
 .ink-band-totem{
   flex:none;
   writing-mode:vertical-rl;
-  font-family:'Noto Serif TC',serif;
+  font-family:'Songti TC',STSong,'Noto Serif TC',serif;
   font-size:clamp(64px,9vw,104px);
   line-height:1;letter-spacing:.12em;
   color:#fbf7ee;
@@ -130,7 +130,7 @@
   color:#8a8170;margin:0 0 14px;
 }
 .ink-band-title{
-  font-family:'Noto Serif TC',serif;
+  font-family:'Songti TC',STSong,'Noto Serif TC',serif;
   font-size:clamp(24px,3.4vw,34px);font-weight:700;
   color:#fbf7ee;line-height:1.35;margin:0 0 14px;
 }
@@ -140,7 +140,7 @@
 }
 .ink-band-links{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center}
 .ink-band-links a{
-  font-family:'Noto Serif TC',serif;font-size:15px;letter-spacing:.08em;
+  font-family:'Songti TC',STSong,'Noto Serif TC',serif;font-size:15px;letter-spacing:.08em;
   color:#f4efe3;text-decoration:none;
   padding:10px 2px;border-bottom:1.5px solid rgba(244,239,227,.24);
   transition:color .2s,border-color .2s;
@@ -151,7 +151,7 @@
   display:inline-grid;grid-template-columns:1fr 1fr;
   width:56px;height:56px;margin-top:28px;padding:7px;
   background:#b8412f;color:#faf6ec;
-  font-family:'Noto Serif TC',serif;font-size:20px;line-height:1;
+  font-family:'Songti TC',STSong,'Noto Serif TC',serif;font-size:20px;line-height:1;
   align-items:center;justify-items:center;
   border-radius:3px;box-shadow:inset 0 1px 2px rgba(124,44,32,.3);
   transform:rotate(-2deg);
