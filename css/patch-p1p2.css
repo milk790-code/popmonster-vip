@@ -138,3 +138,17 @@
 }
 .related-body-new .rpx .cur{font-size:11px;letter-spacing:.06em;margin-right:2px;opacity:.8;}
 .related-body-new .rpx.tbd{font-size:13px;color:var(--txt-m);}
+
+/* ── 商品頁的延伸閱讀（連回教學文；原本 32 頁只有 1 頁有） ── */
+.pd-guide-links{display:flex;flex-wrap:wrap;gap:10px;max-width:820px;}
+.pd-guide-links a{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:12px 18px;border:1px solid var(--border);border-radius:var(--r);
+  background:var(--bg-card);color:var(--txt);text-decoration:none;
+  font-family:'Noto Serif TC',serif;font-size:15px;line-height:1.5;
+  transition:border-color .45s cubic-bezier(.2,.7,.3,1),color .45s cubic-bezier(.2,.7,.3,1);
+}
+.pd-guide-links a::before{content:"↗";color:var(--gold);font-size:13px;}
+.pd-guide-links a:hover{border-color:var(--gold);color:var(--gold-lt);}
+.pd-guide-links a:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){.pd-guide-links a{transition:none;}}

@@ -1,7 +1,9 @@
 .systems-page {
-  --cyan: #58d7e1;
-  --cyan-bright: #82eef1;
-  --cyan-line: rgba(88, 215, 225, .32);
+  /* 2026-08-23：全站黑金，這頁原本殘留青色（/go 的同一組汙染早就清掉了，這頁漏掉）
+     變數名保留不動，避免動到 100 多處使用點 */
+  --cyan: #c8a96b;
+  --cyan-bright: #d8c08a;
+  --cyan-line: rgba(200, 169, 107, .32);
 }
 
 .systems-header nav,
