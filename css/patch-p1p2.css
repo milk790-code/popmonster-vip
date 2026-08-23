@@ -152,3 +152,32 @@
 .pd-guide-links a:hover{border-color:var(--gold);color:var(--gold-lt);}
 .pd-guide-links a:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 @media (prefers-reduced-motion:reduce){.pd-guide-links a{transition:none;}}
+
+/* ── 商品頁的產品資訊區（規格／怎麼用／注意事項）
+   模板本來就有 .pd-desc-txt / .spec-grid-new 這些 class 的樣式，
+   但整站沒有任何 HTML 用過它們（死碼），所以這裡另開一套乾淨的。 ── */
+.pd-detail{max-width:860px;}
+.pd-lede p{font-family:'Noto Serif TC',serif;font-size:17px;line-height:1.95;color:var(--txt);margin:0 0 30px;}
+.pd-block{margin-bottom:30px;}
+.pd-block h2{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:19px;line-height:1.5;
+  color:var(--gold-lt);margin:0 0 14px;padding-bottom:9px;border-bottom:1px solid var(--border);
+}
+.pd-spec{margin:0;display:grid;gap:0;}
+.pd-spec-row{display:grid;grid-template-columns:130px 1fr;gap:0 18px;padding:11px 0;border-bottom:1px solid var(--border);}
+.pd-spec-row dt{margin:0;font-size:13.5px;letter-spacing:.05em;color:var(--txt-m);}
+.pd-spec-row dd{margin:0;font-size:15px;line-height:1.8;color:var(--txt);}
+@media(max-width:600px){.pd-spec-row{grid-template-columns:1fr;gap:3px}.pd-spec-row dt{font-size:12.5px}}
+.pd-steps{margin:0;padding-left:0;list-style:none;counter-reset:s;}
+.pd-steps li{
+  counter-increment:s;position:relative;padding:0 0 15px 42px;
+  font-size:15px;line-height:1.85;color:var(--txt-m);
+}
+.pd-steps li::before{
+  content:counter(s,decimal-leading-zero);position:absolute;left:0;top:1px;
+  font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:.12em;color:var(--gold-dk);
+}
+.pd-notes{margin:0;padding-left:0;list-style:none;}
+.pd-notes li{position:relative;padding:0 0 12px 20px;font-size:14.5px;line-height:1.8;color:var(--txt-m);}
+.pd-notes li::before{content:"";position:absolute;left:2px;top:11px;width:5px;height:5px;background:var(--gold-dk);}
+.pd-warn h2{color:var(--txt);}
