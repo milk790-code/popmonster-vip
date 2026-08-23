@@ -114,7 +114,7 @@
 .faq-list .faq-q{
   all:unset;box-sizing:border-box;display:flex;align-items:center;gap:14px;width:100%;
   padding:16px 18px;cursor:pointer;color:var(--txt);background:var(--bg-sub);
-  font-family:'Noto Serif TC',serif;font-size:16px;line-height:1.6;font-weight:500;
+  font-family:'Songti TC',STSong,'Noto Serif TC',serif;font-size:16px;line-height:1.6;font-weight:500;
   transition:color .45s cubic-bezier(.2,.7,.3,1);
 }
 .faq-list .faq-q:hover{color:var(--gold-lt);}
@@ -133,7 +133,7 @@
 
 /* ── 同類別精選：補上價格（原本 96 個格子全是占位圖、一個價格都沒有） ── */
 .related-body-new .rpx{
-  font-family:"Noto Serif TC",serif;font-size:15px;color:var(--gold-lt);
+  font-family:"Songti TC",STSong,"Noto Serif TC",serif;font-size:15px;color:var(--gold-lt);
   margin-top:6px;font-variant-numeric:tabular-nums;
 }
 .related-body-new .rpx .cur{font-size:11px;letter-spacing:.06em;margin-right:2px;opacity:.8;}
@@ -145,7 +145,7 @@
   display:inline-flex;align-items:center;gap:9px;
   padding:12px 18px;border:1px solid var(--border);border-radius:var(--r);
   background:var(--bg-card);color:var(--txt);text-decoration:none;
-  font-family:'Noto Serif TC',serif;font-size:15px;line-height:1.5;
+  font-family:'Songti TC',STSong,'Noto Serif TC',serif;font-size:15px;line-height:1.5;
   transition:border-color .45s cubic-bezier(.2,.7,.3,1),color .45s cubic-bezier(.2,.7,.3,1);
 }
 .pd-guide-links a::before{content:"↗";color:var(--gold);font-size:13px;}
@@ -157,10 +157,10 @@
    模板本來就有 .pd-desc-txt / .spec-grid-new 這些 class 的樣式，
    但整站沒有任何 HTML 用過它們（死碼），所以這裡另開一套乾淨的。 ── */
 .pd-detail{max-width:860px;}
-.pd-lede p{font-family:'Noto Serif TC',serif;font-size:17px;line-height:1.95;color:var(--txt);margin:0 0 30px;}
+.pd-lede p{font-family:'Songti TC',STSong,'Noto Serif TC',serif;font-size:17px;line-height:1.95;color:var(--txt);margin:0 0 30px;}
 .pd-block{margin-bottom:30px;}
 .pd-block h2{
-  font-family:'Noto Serif TC',serif;font-weight:700;font-size:19px;line-height:1.5;
+  font-family:'Songti TC',STSong,'Noto Serif TC',serif;font-weight:700;font-size:19px;line-height:1.5;
   color:var(--gold-lt);margin:0 0 14px;padding-bottom:9px;border-bottom:1px solid var(--border);
 }
 .pd-spec{margin:0;display:grid;gap:0;}
@@ -181,3 +181,14 @@
 .pd-notes li{position:relative;padding:0 0 12px 20px;font-size:14.5px;line-height:1.8;color:var(--txt-m);}
 .pd-notes li::before{content:"";position:absolute;left:2px;top:11px;width:5px;height:5px;background:var(--gold-dk);}
 .pd-warn h2{color:var(--txt);}
+
+/* ── 商品說明圖相簿（416 張詳情圖原本零引用） ── */
+.pd-gallery{max-width:860px;}
+.pd-gallery .gallery-grid{grid-template-columns:repeat(4,1fr);gap:8px;}
+@media(max-width:760px){.pd-gallery .gallery-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:460px){.pd-gallery .gallery-grid{grid-template-columns:repeat(2,1fr)}}
+.pd-gallery .gallery-grid a{border-radius:2px;transition:border-color .45s cubic-bezier(.2,.7,.3,1);}
+.pd-gallery .gallery-grid a:hover{border-color:var(--gold);}
+.pd-gallery .gallery-grid a:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.pd-gallery-more{font-size:13.5px;color:var(--txt-m);margin:14px 0 0;}
+@media (prefers-reduced-motion:reduce){.pd-gallery .gallery-grid a,.pd-gallery .gallery-grid img{transition:none}}
