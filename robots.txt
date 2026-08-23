@@ -4,3 +4,6 @@ Disallow: /tools/
 Disallow: /cart.html
 
 Sitemap: https://popmonster.vip/sitemap.xml
+
+# AI 抓取器：品牌與商品摘要
+# https://popmonster.vip/llms.txt
