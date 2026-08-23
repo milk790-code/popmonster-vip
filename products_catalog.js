@@ -11,7 +11,7 @@ const PM_PRODUCTS = [
   { sku:"a007", name:"鐵粉清潔劑", nameEn:"Iron Remover", cat:"清潔", variants:[{spec:"1入", price:599},{spec:"2入 雙入補貨", price:999},{spec:"3入 入門囤貨", price:1399},{spec:"6入 划算", price:2499}] },
   { sku:"a008", name:"泡沫洗車液", nameEn:"Foam Car Wash", cat:"清潔", variants:[{spec:"100ml", price:199},{spec:"200ml", price:299},{spec:"500ml", price:599}] },
   { sku:"a009", name:"液體橡皮擦", nameEn:"Liquid Eraser", cat:"清潔", variants:[{spec:"1入", price:599},{spec:"2入 雙入補貨", price:999},{spec:"3入 入門囤貨", price:1299},{spec:"6入 划算", price:2499}] },
-  { sku:"a010", name:"玻璃鍍膜劑(淨護噴霧)", nameEn:"Glass Care Spray", cat:"鍍膜", variants:[{spec:"1入 ,⚠️無噴頭", price:399},{spec:"2入 雙入補貨,⚠️無噴頭", price:659},{spec:"3入 入門囤貨,⚠️無噴頭", price:899},{spec:"6入 划算,⚠️無噴頭", price:1659}] },
+  { sku:"a010", name:"玻璃清潔劑(淨護噴霧)", nameEn:"Glass Care Spray", cat:"鍍膜", variants:[{spec:"1入 ,⚠️無噴頭", price:399},{spec:"2入 雙入補貨,⚠️無噴頭", price:659},{spec:"3入 入門囤貨,⚠️無噴頭", price:899},{spec:"6入 划算,⚠️無噴頭", price:1659}] },
   { sku:"a012", name:"內飾清潔劑 APC 橙油款", nameEn:"Interior Cleaner APC", cat:"清潔", variants:[{spec:"100ml", price:99},{spec:"200ml", price:199},{spec:"500ml", price:489}] },
   { sku:"a013", name:"高端真皮清潔劑", nameEn:"Premium Leather Cleaner", cat:"護理", variants:[{spec:"單一規格", price:1999}] },
   { sku:"a017", name:"雨刷精 1200 高濃縮", nameEn:"Windshield Washer 1200x", cat:"護理", variants:[{spec:"單一規格", price:399}] },

@@ -22,7 +22,7 @@ window.PM_PRICES = {
   A007: 499,      // 鐵粉清潔劑
   A008: 599,      // 泡沫洗車液
   A009: 599,      // 液體橡皮擦
-  A010: 399,      // 玻璃鍍膜劑
+  A010: 399,      // 玻璃清潔劑
   A012: 599,      // 內飾清潔劑
   A013: 999,      // 皮革護理（真皮清潔劑）
   A017: 399,      // 雨刷精
@@ -57,7 +57,7 @@ window.PM_PRODUCTS = [
   { sku:"A007", name:"鐵粉清潔劑", cat:"清潔系列", img:"img/a007-main.jpg", url:"a007.html", tagline:"紫色變色・看得見的溶解效果", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A008", name:"泡沫洗車液", cat:"清潔系列", img:"", url:"a008.html", tagline:"1 瓶抵 50 公升 · 高濃縮泡沫", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A009", name:"液體橡皮擦", cat:"清潔系列", img:"", url:"a009.html", tagline:"化學溶解 · 0 磨損深層去污", get price(){ return window.PM_PRICES[this.sku] || null; } },
-  { sku:"A010", name:"玻璃鍍膜劑", cat:"鍍膜系列", img:"img/a010-main.jpg", url:"a010.html", tagline:"雨天視線救星 · 去油膜提升撥水", get price(){ return window.PM_PRICES[this.sku] || null; } },
+  { sku:"A010", name:"玻璃清潔劑", cat:"清潔系列", img:"img/a010-main.jpg", url:"a010.html", tagline:"一噴一擦 · 中性無氨不留痕", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A012", name:"內飾清潔劑", cat:"清潔系列", img:"img/a012-main.jpg", url:"a012.html", tagline:"橙油 APC · 1 瓶抵 20 罐", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A013", name:"皮革護理（真皮清潔劑）", cat:"護理系列", img:"", url:"a013.html", tagline:"高端真皮専用 · 深層滋潤防乾裂", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A017", name:"雨刷精", cat:"護理系列", img:"", url:"a017.html", tagline:"1200 高濃縮 · 防凍防霧", get price(){ return window.PM_PRICES[this.sku] || null; } },
