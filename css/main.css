@@ -4,7 +4,7 @@
   --gold:#c8a96b;--gold-lt:#d8c08a;--gold-dk:#8a6a2f;
   --txt:#e8e2d6;--txt-m:#a89e8e;
   --border:rgba(200,169,107,.15);--border-s:rgba(200,169,107,.4);
-  --font:'Montserrat','Noto Sans TC',system-ui,sans-serif;
+  --font:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
   --r:8px;--r-lg:16px;--tap:44px;
   --shadow:0 4px 24px rgba(0,0,0,.6);
   --gold-grad:linear-gradient(135deg,#c8a96b,#d8c08a);
@@ -52,8 +52,7 @@ a:hover{color:var(--gold-lt)}
 /* === HERO (首頁) === */
 .hero{padding:80px 24px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(200,169,107,.08) 0%,transparent 70%)}
 .hero h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;color:#fff;margin-bottom:16px;letter-spacing:-1px}
-.hero h1 em{font-style:normal;background:var(--shimmer);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite}
-@keyframes shimmer{to{background-position:200% center}}
+.hero h1 em{font-style:normal;color:var(--gold-lt)}
 .hero p{font-size:18px;color:var(--txt-m);max-width:600px;margin:0 auto 32px}
 
 /* === PRODUCT GRID (首頁) === */
@@ -62,7 +61,7 @@ a:hover{color:var(--gold-lt)}
 .section-sub{font-size:14px;color:var(--txt-m);margin-bottom:32px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
 .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .35s;display:flex;flex-direction:column}
-.card:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 12px 32px rgba(200,169,107,.15)}
+.card:hover{transform:translateY(-2px);border-color:var(--gold)}
 .card-img{aspect-ratio:4/3;background:var(--bg-sub);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
 .card-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
 .card:hover .card-img img{transform:scale(1.05)}
@@ -73,7 +72,7 @@ a:hover{color:var(--gold-lt)}
 .card-desc{font-size:13px;color:var(--txt-m);flex:1;margin-bottom:16px}
 .card-cat{font-size:11px;color:var(--gold-dk);border:1px solid var(--gold-dk);display:inline-block;padding:2px 8px;border-radius:4px;margin-bottom:12px;align-self:flex-start}
 .card-btn{display:block;text-align:center;padding:10px;background:var(--gold-grad);color:#0a0a0a;font-weight:700;font-size:14px;border-radius:var(--r);transition:box-shadow .3s}
-.card-btn:hover{box-shadow:0 4px 20px rgba(200,169,107,.35);color:#0a0a0a}
+.card-btn:hover{color:#0a0a0a;filter:brightness(1.06)}
 
 /* === PRODUCT DETAIL PAGE === */
 .pd{max-width:1000px;margin:0 auto;padding:40px 24px}
@@ -90,7 +89,7 @@ a:hover{color:var(--gold-lt)}
 .btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:14px 32px;font-size:15px;font-weight:700;border-radius:var(--r);border:none;cursor:pointer;transition:transform .2s,box-shadow .2s;text-decoration:none;letter-spacing:.5px}
 .btn:focus-visible{outline:2px solid var(--gold-lt);outline-offset:3px}
 .btn-gold{background:var(--gold-grad);color:#0a0a0a}
-.btn-gold:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(200,169,107,.4);color:#0a0a0a}
+.btn-gold:hover{filter:brightness(1.06);color:#0a0a0a}
 .btn-outline{background:transparent;color:var(--gold);border:2px solid var(--gold)}
 .btn-outline:hover{background:rgba(200,169,107,.1);color:var(--gold)}
 
@@ -98,8 +97,8 @@ a:hover{color:var(--gold-lt)}
 .features{border-top:1px solid var(--border);padding-top:40px}
 .features h2{font-size:20px;color:var(--gold);margin-bottom:20px}
 .feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
-.feat-item{padding:14px 18px;background:var(--bg-sub);border-left:3px solid var(--gold-dk);border-radius:0 var(--r) var(--r) 0;font-size:14px;color:var(--txt);transition:border-color .2s}
-.feat-item:hover{border-left-color:var(--gold)}
+.feat-item{padding:14px 18px;background:var(--bg-sub);border:1px solid var(--border);border-radius:var(--r);font-size:14px;color:var(--txt);transition:border-color .2s}
+.feat-item:hover{border-color:var(--gold-dk)}
 
 /* === FAQ === */
 .faq{margin-top:48px;border-top:1px solid var(--border);padding-top:40px}
@@ -108,7 +107,7 @@ a:hover{color:var(--gold-lt)}
 .faq-q{padding:14px 18px;background:var(--bg-sub);color:var(--gold-lt);font-weight:600;font-size:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
 .faq-q::after{content:'+';font-size:18px;color:var(--gold-dk);transition:transform .3s}
 .faq-item.open .faq-q::after{transform:rotate(45deg)}
-.faq-a{padding:0 18px;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s;font-size:14px;color:var(--txt-m);line-height:1.7}
+.faq-a{padding:0 18px;max-height:0;overflow:hidden;font-size:14px;color:var(--txt-m);line-height:1.7}
 .faq-item.open .faq-a{max-height:800px;padding:14px 18px}
 
 /* === FOOTER === */
@@ -118,7 +117,7 @@ a:hover{color:var(--gold-lt)}
 .footer-links{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:16px}
 .footer-links a{font-size:12px;color:var(--txt-m)}
 .footer-links a:hover{color:var(--gold)}
-.footer-copy{font-size:11px;color:var(--txt-m);opacity:.6}
+.footer-copy{font-size:12px;color:var(--txt-m)}
 
 /* === COOKIE CONSENT === */
 .cookie-bar{position:fixed;bottom:0;left:0;right:0;z-index:999;background:var(--bg-card);border-top:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:13px;color:var(--txt-m);transform:translateY(100%);transition:transform .4s}
@@ -132,7 +131,7 @@ a:hover{color:var(--gold-lt)}
 .page-404{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px}
 
 /* === HOOK TAG 鉤子標語徽章 === */
-.hook-tag{position:absolute;bottom:8px;left:8px;background:rgba(10,10,10,.85);color:var(--gold);font-size:10px;padding:3px 8px;border-radius:3px;letter-spacing:1px;border:1px solid var(--gold-dk);font-weight:600;backdrop-filter:blur(4px)}
+.hook-tag{position:absolute;bottom:8px;left:8px;background:rgba(10,10,10,.85);color:var(--gold);font-size:11px;padding:3px 8px;border-radius:3px;letter-spacing:1px;border:1px solid var(--gold-dk);font-weight:600;backdrop-filter:blur(4px)}
 .card-img{position:relative}
 .page-404 h1{font-size:72px;color:var(--gold);margin-bottom:8px}
 .page-404 p{color:var(--txt-m);margin-bottom:24px}
@@ -141,7 +140,7 @@ a:hover{color:var(--gold-lt)}
 .progress-bar{position:fixed;top:0;left:0;z-index:200;height:2px;background:var(--gold-grad);width:0%;transition:width .1s linear}
 
 /* === BACK TO TOP === */
-.back-top{position:fixed;bottom:80px;right:20px;z-index:97;width:44px;height:44px;border-radius:50%;background:var(--gold-grad);color:#0a0a0a;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;box-shadow:0 4px 20px rgba(200,169,107,.3)}
+.back-top{position:fixed;bottom:80px;right:20px;z-index:97;width:44px;height:44px;border-radius:50%;background:var(--gold-grad);color:#0a0a0a;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;box-shadow:0 4px 16px rgba(0,0,0,.5)}
 .back-top.show{opacity:1;transform:translateY(0)}
 .back-top:hover{transform:translateY(-2px)}
 
@@ -221,7 +220,7 @@ a:hover{color:var(--gold-lt)}
 .article ul,.article ol{padding-left:24px;margin-bottom:18px;color:var(--txt);line-height:1.9}
 .article li{margin-bottom:8px;font-size:15px}
 .article strong{color:var(--gold-lt);font-weight:700}
-.article blockquote{border-left:3px solid var(--gold);padding:12px 20px;background:rgba(200,169,107,.04);margin:20px 0;color:var(--txt-m);font-style:italic;font-size:14px}
+.article blockquote{border-left:1px solid var(--gold);padding:12px 20px;background:rgba(200,169,107,.04);margin:20px 0;color:var(--txt-m);font-style:italic;font-size:14px}
 .article code{background:var(--bg-sub);color:var(--gold-lt);padding:2px 8px;border-radius:4px;font-size:13px;font-family:monospace}
 .article-cta{margin-top:48px;padding:32px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);text-align:center}
 .article-cta h3{color:var(--gold-lt);font-size:18px;margin-bottom:12px}
@@ -269,7 +268,6 @@ a:hover{color:var(--gold-lt)}
 /* === FEATURED PRODUCT (首頁主打) === */
 .featured{padding:60px 24px;max-width:1200px;margin:0 auto}
 .featured-inner{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:40px;position:relative;overflow:hidden}
-.featured-inner::before{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(200,169,107,.06) 0%,transparent 70%);pointer-events:none}
 .featured-img{aspect-ratio:1/1;background:var(--bg-sub);border-radius:var(--r);display:flex;align-items:center;justify-content:center;position:relative}
 .featured-badge{position:absolute;top:16px;left:16px;background:var(--gold);color:#000;font-size:12px;font-weight:700;padding:6px 14px;border-radius:4px;letter-spacing:1px}
 .featured-info h2{font-size:clamp(1.4rem,3vw,2rem);color:#fff;margin-bottom:12px}
@@ -277,8 +275,8 @@ a:hover{color:var(--gold-lt)}
 .featured-info p{font-size:14px;color:var(--txt-m);line-height:1.8;margin-bottom:20px}
 .featured-stats{display:flex;gap:24px;margin-bottom:24px}
 .stat{text-align:center}
-.stat-num{font-size:28px;font-weight:800;color:var(--gold-lt);font-family:'Montserrat',sans-serif}
-.stat-label{font-size:11px;color:var(--txt-m);margin-top:2px}
+.stat-num{font-size:28px;font-weight:800;color:var(--gold-lt);font-variant-numeric:tabular-nums}
+.stat-label{font-size:12px;color:var(--txt-m);margin-top:2px}
 
 /* === STEP PROCESS (施工步驟) === */
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:28px 0}
@@ -312,7 +310,7 @@ a:hover{color:var(--gold-lt)}
 .social{padding:40px 24px;max-width:1200px;margin:0 auto;text-align:center}
 .social-badges{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin-top:20px}
 .social-badge{display:flex;flex-direction:column;align-items:center;gap:4px}
-.social-badge .num{font-size:24px;font-weight:800;color:var(--gold-lt);font-family:'Montserrat',sans-serif}
+.social-badge .num{font-size:24px;font-weight:800;color:var(--gold-lt);font-variant-numeric:tabular-nums}
 .social-badge .label{font-size:12px;color:var(--txt-m)}
 
 /* === GLASSMORPHISM CARD === */
@@ -325,9 +323,7 @@ a:hover{color:var(--gold-lt)}
 .rating-badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--gold-lt);font-weight:600}
 .rating-badge .stars{color:var(--gold);letter-spacing:2px}
 .rating-badge .count{color:var(--txt-m);font-size:12px;font-weight:400}
-.scarcity{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:linear-gradient(90deg,rgba(216,192,138,.12),rgba(200,169,107,.04));border-left:3px solid var(--gold);font-size:12px;color:var(--gold-lt);border-radius:0 var(--r) var(--r) 0;margin-bottom:12px}
-.scarcity::before{content:'●';color:var(--gold);animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.scarcity{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border);font-size:12px;color:var(--gold-lt);border-radius:var(--r);margin-bottom:12px}
 
 /* 行動端商品頁避免被浮動 CTA 遮擋 */
 @media(max-width:920px){
@@ -345,8 +341,8 @@ a:hover{color:var(--gold-lt)}
 /* === BRAND BELIEF 品牌信念三段論 === */
 .brand-belief{display:flex;justify-content:center;flex-wrap:wrap;gap:24px;padding:16px 0;margin:0 auto 16px;max-width:680px;font-size:12px;color:var(--txt-m);letter-spacing:1px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
 .brand-belief span{display:inline-flex;align-items:center;gap:8px}
-.brand-belief b{color:var(--gold);font-weight:700;font-size:11px;letter-spacing:3px}
-@media(max-width:480px){.brand-belief{gap:10px;font-size:11px;padding:12px 16px}.brand-belief b{font-size:10px;letter-spacing:2px}}
+.brand-belief b{color:var(--gold);font-weight:700;font-size:12px;letter-spacing:2px}
+@media(max-width:480px){.brand-belief{gap:10px;font-size:12px;padding:12px 16px}.brand-belief b{font-size:12px;letter-spacing:1px}}
 
 /* === SUB-BRAND GRID 子品牌介紹 (首頁) === */
 .subbrands{padding:60px 24px;max-width:1200px;margin:0 auto}
@@ -355,11 +351,10 @@ a:hover{color:var(--gold-lt)}
 .subbrands-header h2{font-size:clamp(1.6rem,3.5vw,2.4rem);color:#fff;font-weight:800}
 .subbrands-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .sb-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:32px 24px;text-align:center;position:relative;overflow:hidden;transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .35s}
-.sb-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--brand-color,var(--gold))}
 .sb-card:hover{transform:translateY(-4px);border-color:var(--brand-color,var(--gold))}
-.sb-dot{width:14px;height:14px;border-radius:50%;background:var(--brand-color);margin:0 auto 12px;box-shadow:0 0 18px 2px rgba(255,255,255,.05)}
+.sb-dot{width:14px;height:14px;border-radius:50%;background:var(--brand-color);margin:0 auto 12px}
 .sb-card h3{font-size:20px;color:#fff;font-weight:800;margin-bottom:4px;letter-spacing:1px}
-.sb-card .en{font-size:11px;color:var(--txt-m);letter-spacing:3px;margin-bottom:14px}
+.sb-card .en{font-size:12px;color:var(--txt-m);letter-spacing:3px;margin-bottom:14px}
 .sb-card p{font-size:13px;color:var(--txt-m);line-height:1.7;margin-bottom:16px}
 .sb-card .sb-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--brand-color,var(--gold));font-weight:600;letter-spacing:1px}
 .sb-miso{--brand-color:var(--brand-miso)}
@@ -385,10 +380,9 @@ a:hover{color:var(--gold-lt)}
 /* === BELIEF SECTION (about.html 品牌信念三段論) === */
 .belief-section{max-width:780px;margin:0 auto}
 .belief-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:20px}
-.belief-list li{display:flex;align-items:flex-start;gap:28px;padding:24px 28px;background:linear-gradient(135deg,rgba(200,169,107,.04),transparent);border-left:3px solid var(--gold-dk);border-radius:0 var(--r-lg) var(--r-lg) 0;transition:border-color .35s,transform .35s}
-.belief-list li:hover{border-left-color:var(--gold);transform:translateX(4px)}
-.belief-num{font-size:48px;font-weight:800;line-height:1;color:var(--gold);font-family:var(--font);flex-shrink:0;background:var(--gold-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.belief-list .belief-tag{font-size:11px;letter-spacing:5px;color:var(--txt-m);margin-bottom:6px;font-weight:600}
+.belief-list li{display:flex;align-items:flex-start;gap:28px;padding:24px 28px;border-top:1px solid var(--border)}
+.belief-num{font-size:48px;font-weight:800;line-height:1;color:var(--gold);font-family:var(--font);flex-shrink:0}
+.belief-list .belief-tag{font-size:12px;letter-spacing:2px;color:var(--txt-m);margin-bottom:6px;font-weight:600}
 .belief-list h3{font-size:22px;color:#fff;font-weight:700;line-height:1.4}
 @media(max-width:480px){
   .belief-list li{gap:16px;padding:20px}
@@ -430,17 +424,11 @@ a:hover{color:var(--gold-lt)}
 .btn,.card-btn,.filter-btn,.card{-webkit-tap-highlight-color:transparent}
 @keyframes imgIn{from{opacity:0;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}
 .card-img img,.featured-img img{animation:imgIn .55s ease both}
-@keyframes sheen{0%{background-position:-120% 0}55%{background-position:220% 0}100%{background-position:220% 0}}
-.btn-gold{position:relative;overflow:hidden}
-.btn-gold::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 38%,rgba(255,245,220,.45) 50%,transparent 62%);background-size:240% 100%;animation:sheen 4.6s ease-in-out infinite;pointer-events:none}
 .grid .fade-up:nth-child(2){transition-delay:.06s}
 .grid .fade-up:nth-child(3){transition-delay:.12s}
 .grid .fade-up:nth-child(4){transition-delay:.18s}
-@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-.featured-badge,.card-img .badge{animation:floaty 3.6s ease-in-out infinite}
 
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   .fade-up{opacity:1;transform:none}
-  .btn-gold::after,.featured-badge,.card-img .badge{animation:none}
 }

@@ -8,12 +8,12 @@
 <meta property="og:title" content="千倍濃縮天使塗層｜泡泡怪獸官網下單">
 <meta property="og:description" content="32 款職人汽美用品,選規格直接下單。付款後 3 個工作天內出貨,LINE 一對一服務。">
 <meta property="og:url" content="https://popmonster.vip/order.html">
-<meta property="og:image" content="https://popmonster.vip/img/og-order-1200x630.jpg">
+<meta property="og:image" content="https://popmonster.vip/img/og/og-home-1200x630.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="zh_TW">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://popmonster.vip/img/og-order-1200x630.jpg">
+<meta name="twitter:image" content="https://popmonster.vip/img/og/og-home-1200x630.jpg">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="alternate" hreflang="zh-Hant" href="https://popmonster.vip/order.html">
 <link rel="alternate" hreflang="en" href="https://popmonster.vip/order.html?lang=en">
@@ -32,7 +32,7 @@
   .cats button.on{background:#16120a;border-color:var(--gold-d);color:#e8c674;font-weight:700}
   .item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
   .top{display:flex;align-items:center;gap:12px}
-  .item img{width:54px;height:54px;border-radius:8px;object-fit:cover;background:#222;flex:none}
+  .item img,.item .noimg{width:54px;height:54px;border-radius:8px;object-fit:cover;background:#222;flex:none}
   .iname{font-weight:700;font-size:.97em}.icat{color:var(--mut);font-size:.78em}
   .row2{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
   select{flex:1;min-width:170px;background:#0e0e0e;color:var(--tx2);border:1px solid var(--line);border-radius:8px;padding:9px 8px;font-size:.88em}
@@ -183,6 +183,9 @@
     });
     return out.length?'<div class="picked">'+out.join('<br>')+'</div>':'';
   }
+  // 縮圖：a005 原主圖背景是 AI 合成車庫，改用棚拍；下列 SKU 只有 AI 合成主圖，先不放圖
+  var PM_NO_REAL_IMG={a008:1,a009:1,a013:1,a017:1,a033:1,a036:1,a037:1,a038:1,a040:1,a042:1};
+  function pimg(s){ if(s==='a005') return 'img/real/a005-shi10-studio.jpg'; return PM_NO_REAL_IMG[s]?'':'img/'+s+'-main.jpg'; }
   function renderList(){
     var el=document.getElementById('list');
     el.innerHTML=PM_PRODUCTS.filter(function(p){return cat==='__all__'||p.cat===cat}).map(function(p){
@@ -190,7 +193,7 @@
       var opts=p.variants.map(function(x,j){
         return '<option value="'+j+'"'+(j===i?' selected':'')+'>'+pspec(x.spec)+'｜'+fmt(x.price)+'</option>';}).join('');
       return '<div class="item"><div class="top">'+
-        '<img loading="lazy" src="img/'+p.sku+'-main.jpg" onerror="this.style.visibility=\'hidden\'" alt="'+pname(p)+'">'+
+        (pimg(p.sku)?'<img loading="lazy" src="'+pimg(p.sku)+'" onerror="this.style.visibility=\'hidden\'" alt="'+pname(p)+'">':'<span class="noimg" aria-hidden="true"></span>')+
         '<div><div class="iname">'+pname(p)+'</div><div class="icat">'+p.sku.toUpperCase()+' · '+pcat(p.cat)+'</div></div></div>'+
         '<div class="row2"><select onchange="PM.pick(\''+p.sku+'\',this.value)">'+opts+'</select>'+
         '<div class="iprice">'+fmt(v.price)+ref(v.price)+'</div>'+

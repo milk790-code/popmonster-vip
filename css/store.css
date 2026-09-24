@@ -2,13 +2,13 @@
 :root{
   --bg-1:#0f0f0f;--bg-2:#141414;--bg-3:#1a1a1a;
   --gold-lt:#d8c08a;--gold-dk:#8a6830;
-  --txt-m:#a89e8e;--txt-dim:#5a5347;--txt-strong:#f5efe2;
+  --txt-m:#a89e8e;--txt-dim:#8f877a;--txt-strong:#f5efe2;
   --bdr:rgba(200,169,107,.12);--bdr-w:rgba(200,169,107,.22);
   --line:#06c755;
   --ff-tc:"Noto Serif TC","Playfair Display",serif;
   --ff-sans:"Noto Sans TC",sans-serif;
-  --ff-mono:"Montserrat",sans-serif;
-  --ff-ui:"Montserrat",sans-serif;
+  --ff-mono:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  --ff-ui:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
 }
 /* ═══ POP MONSTER 購物車 UI · css/store.css ═══ */
 
@@ -19,7 +19,7 @@
 .pm-drawer.on{transform:none;box-shadow:-24px 0 80px rgba(0,0,0,.6);}
 .pm-dw-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--bdr);}
 .pm-dw-head h3{font-family:var(--ff-mono);font-weight:800;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);}
-.pm-dw-head .ct{font-family:var(--ff-mono);font-size:10px;color:var(--txt-dim);letter-spacing:.1em;margin-left:8px;}
+.pm-dw-head .ct{font-family:var(--ff-mono);font-size:12px;color:var(--txt-dim);letter-spacing:.1em;margin-left:8px;}
 .pm-dw-close{background:none;border:1px solid var(--bdr);color:var(--txt-m);width:38px;height:38px;font-size:16px;cursor:pointer;transition:all .2s;}
 .pm-dw-close:hover{color:var(--gold);border-color:var(--gold);}
 
@@ -35,10 +35,10 @@
 .pm-item{display:grid;grid-template-columns:64px 1fr auto;gap:14px;padding:16px 0;border-bottom:1px solid var(--bdr);align-items:center;}
 .pm-item-img{width:64px;height:64px;object-fit:cover;border:1px solid var(--bdr);background:var(--bg-2);}
 .pm-item-info{min-width:0;}
-.pm-item-sku{font-family:var(--ff-mono);font-size:8px;letter-spacing:.24em;color:var(--gold-dk);text-transform:uppercase;margin-bottom:3px;}
+.pm-item-sku{font-family:var(--ff-mono);font-size:12px;letter-spacing:.06em;color:var(--txt-m);text-transform:uppercase;margin-bottom:3px;}
 .pm-item-name{font-family:var(--ff-tc);font-weight:700;font-size:14px;color:var(--txt);line-height:1.35;margin-bottom:6px;}
 .pm-item-price{font-family:var(--ff-mono);font-weight:700;font-size:12px;color:var(--gold);}
-.pm-item-price.tbd{color:var(--txt-dim);font-weight:600;font-size:10px;letter-spacing:.1em;}
+.pm-item-price.tbd{color:var(--txt-dim);font-weight:600;font-size:12px;}
 .pm-item-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
 .pm-qty{display:inline-flex;align-items:stretch;border:1px solid var(--bdr-w);}
 .pm-qty button{width:30px;height:30px;background:none;border:none;color:var(--gold);font-size:14px;cursor:pointer;}
@@ -72,7 +72,7 @@
 
 /* 表單 */
 .pm-field{margin-top:16px;}
-.pm-field label{display:block;font-family:var(--ff-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--txt-m);margin-bottom:8px;}
+.pm-field label{display:block;font-family:var(--ff-mono);font-size:13px;letter-spacing:.04em;color:var(--txt-m);margin-bottom:8px;}
 .pm-field label .req{color:var(--gold);}
 .pm-field input,.pm-field textarea{width:100%;background:var(--bg-2);border:1px solid var(--bdr-w);color:var(--txt);font-family:var(--ff-sans);font-size:15px;padding:13px 14px;transition:border-color .2s;min-height:48px;}
 .pm-field textarea{min-height:84px;resize:vertical;}
@@ -103,16 +103,16 @@
 
 /* 浮動購物車（手機） */
 .pm-fab{position:fixed;right:16px;bottom:84px;z-index:190;width:54px;height:54px;border-radius:50%;background:var(--gold);color:#0a0a0a;border:none;font-size:20px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 10px 32px rgba(0,0,0,.55);}
-.pm-fab .pm-fab-badge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 6px;background:#0a0a0a;border:1px solid var(--gold);color:var(--gold);font-family:var(--ff-mono);font-weight:800;font-size:10px;border-radius:99px;display:flex;align-items:center;justify-content:center;}
+.pm-fab .pm-fab-badge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 6px;background:#0a0a0a;border:1px solid var(--gold);color:var(--gold);font-family:var(--ff-mono);font-weight:800;font-size:11px;border-radius:99px;display:flex;align-items:center;justify-content:center;}
 @media(max-width:900px){.pm-fab.has{display:flex;}}
 
 /* ── nav 購物車鈕(v2 樣式,原版 main.css 無) ── */
 /* nav 購物車按鈕（store.js 注入） */
-.nav-cart-btn{position:relative;display:inline-flex;align-items:center;gap:8px;background:none;border:1px solid var(--bdr-w);color:var(--gold);font-family:var(--ff-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:9px 14px;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
-.nav-cart-btn .t{display:none;}
+.nav-cart-btn{position:relative;display:inline-flex;align-items:center;gap:8px;background:none;border:1px solid var(--bdr-w);color:var(--gold);font-family:var(--ff-ui);font-size:13px;letter-spacing:.04em;padding:9px 14px;min-height:40px;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.nav-cart-btn .t{display:inline;}
 .nav-cart-btn{padding:9px 12px;}
 .nav-cart-btn:hover{border-color:var(--gold);background:rgba(200,169,107,.08);}
-.nav-cart-badge{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;padding:0 5px;background:var(--gold);color:#0a0a0a;font-family:var(--ff-mono);font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;border-radius:99px;transform:scale(0);transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
+.nav-cart-badge{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;padding:0 5px;background:var(--gold);color:#0a0a0a;font-family:var(--ff-mono);font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;border-radius:99px;transform:scale(0);transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
 .nav-cart-badge.on{transform:scale(1);}
 
 /* LINE 綠色主鈕(cart 送單/再次開啟) */
@@ -123,7 +123,7 @@
 .pm-item-ph{display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#f6f1e5,#ece4d4);color:#1b1712;font-family:"Ma Shan Zheng","Songti TC",STSong,"Noto Serif TC",serif;font-size:22px;border:1px solid rgba(27,23,18,.14);}
 
 /* ── 價格顯示(卡片+商品頁) ── */
-.card-price{font-family:"Montserrat","Songti TC",STSong,"Noto Serif TC",serif;color:var(--gold-lt,#d8c08a);font-weight:800;font-size:17px;margin:2px 0 4px;letter-spacing:.01em;}
+.card-price{font-family:"Songti TC",STSong,"Noto Serif TC",serif;color:var(--gold-lt,#d8c08a);font-weight:800;font-size:17px;margin:2px 0 4px;letter-spacing:.01em;}
 .card-price .cur{font-size:12px;font-weight:600;opacity:.85;margin-right:1px;}
 .card-price.tbd{color:var(--txt-dim,#8a8378);font-size:13px;font-weight:500;}
 .pd-price{font-family:var(--serif-p,"Playfair Display"),serif;font-size:30px;font-weight:800;color:var(--gold-lt,#d8c08a);line-height:1;margin:16px 0 4px;}
