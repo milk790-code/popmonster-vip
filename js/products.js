@@ -52,7 +52,7 @@ window.PM_PRODUCTS = [
   { sku:"A002", name:"米速研磨劑三件組", cat:"研磨系列", img:"img/a002-main.jpg", url:"a002.html", tagline:"一套搞定全流程", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A003", name:"米速三號 80 番", cat:"研磨系列", img:"img/a003-main.jpg", url:"a003.html", tagline:"重切削極限 · 深刮痕的克星", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A004", name:"米速伍號 600 番", cat:"研磨系列", img:"img/a004-main.jpg", url:"a004.html", tagline:"一劑拋・最有效率的中切削", get price(){ return window.PM_PRICES[this.sku] || null; } },
-  { sku:"A005", name:"米速拾號 1000 番", cat:"研磨系列", img:"img/a005-main.jpg", url:"a005.html", tagline:"鏡面還原的最後一步", get price(){ return window.PM_PRICES[this.sku] || null; } },
+  { sku:"A005", name:"米速拾號 1000 番", cat:"研磨系列", img:"img/real/a005-shi10-studio.jpg", url:"a005.html", tagline:"鏡面還原的最後一步", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A006", name:"拋光盤系列", cat:"耗材系列", img:"img/a006-main.jpg", url:"a006.html", tagline:"RO 訂製職人級多規格", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A007", name:"鐵粉清潔劑", cat:"清潔系列", img:"img/a007-main.jpg", url:"a007.html", tagline:"紫色變色・看得見的溶解效果", get price(){ return window.PM_PRICES[this.sku] || null; } },
   { sku:"A008", name:"泡沫洗車液", cat:"清潔系列", img:"", url:"a008.html", tagline:"1 瓶抵 50 公升 · 高濃縮泡沫", get price(){ return window.PM_PRICES[this.sku] || null; } },

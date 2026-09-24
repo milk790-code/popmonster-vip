@@ -24,19 +24,21 @@ class HomepageExtremeContract(unittest.TestCase):
 
     def test_semantic_entry_and_social_metadata(self):
         self.assertIn('<link rel="canonical" href="https://popmonster.vip/">', self.html)
-        self.assertIn('og-image-1200x630.png', self.html)
+        # 舊的 og-image-1200x630.png 是別的品牌的圖，首頁改用自家字卡＋實拍
+        self.assertIn('img/og/og-home-1200x630.jpg', self.html)
+        self.assertNotIn('og-image-1200x630.png', self.html)
+        self.assertTrue((ROOT / 'img' / 'og' / 'og-home-1200x630.jpg').is_file())
         self.assertRegex(self.html, r'<a[^>]+class="skip-link"[^>]+href="#main-content"')
         self.assertRegex(self.html, r'<main[^>]+id="main-content"')
         self.assertIn('aria-current="page"', self.html)
 
     def test_real_brand_and_product_assets_drive_the_hero(self):
         self.assertRegex(self.html, r'class="nav-mark"[^>]+src="favicon\.svg"')
-        self.assertRegex(self.html, r'class="home-hero-product"[^>]+src="img/a001-main\.jpg"')
+        # 第一屏用 FB 施工影片的真實截圖，不用 AI 合成圖
+        self.assertRegex(self.html, r'class="home-hero-product"[^>]+src="img/real/[^"]+\.jpg"')
         self.assertRegex(self.html, r'class="home-hero-product"[^>]+fetchpriority="high"')
         self.assertNotIn('圖片整備中', self.html)
-        featured = re.search(r'<section class="featured.*?</section>', self.html, re.S)
-        self.assertIsNotNone(featured)
-        self.assertIn('img/a001-main.jpg', featured.group(0))
+        self.assertNotIn('img/a005-main.jpg', self.html)
 
     def test_hero_fetch_priority_does_not_duplicate_an_unused_preload(self):
         self.assertNotRegex(self.html, r'<link[^>]+rel="preload"[^>]+as="image"')
@@ -58,10 +60,10 @@ class HomepageExtremeContract(unittest.TestCase):
         self.assertIn('aria-hidden="true"', self.store)
 
     def test_lighthouse_contrast_and_touch_target_contracts(self):
-        self.assertRegex(self.css, r'carousel-slide-info \.sku[^}]*color: var\(--home-gold-soft\)')
         self.assertRegex(self.css, r'card-price\.tbd[^}]*color: var\(--home-muted\)')
         self.assertRegex(self.css, r'footer-copy[^}]*opacity: 1')
-        self.assertRegex(self.css, r'carousel-dot[^}]*min-width: 32px[^}]*min-height: 32px')
+        self.assertRegex(self.css, r'\.card-cat \{[^}]*font-size: 12px')
+        self.assertRegex(self.css, r'filter-btn \{[^}]*min-height: 42px')
 
     def test_noncritical_assets_and_analytics_do_not_block_first_paint(self):
         self.assertNotRegex(self.html, r'<script[^>]+src="https://www\.googletagmanager\.com')
