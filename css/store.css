@@ -103,7 +103,7 @@
 
 /* 浮動購物車（手機） */
 .pm-fab{position:fixed;right:16px;bottom:84px;z-index:190;width:54px;height:54px;border-radius:50%;background:var(--gold);color:#0a0a0a;border:none;font-size:20px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 10px 32px rgba(0,0,0,.55);}
-.pm-fab .pm-fab-badge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 6px;background:#0a0a0a;border:1px solid var(--gold);color:var(--gold);font-family:var(--ff-mono);font-weight:800;font-size:11px;border-radius:99px;display:flex;align-items:center;justify-content:center;}
+.pm-fab .pm-fab-badge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 6px;background:#0a0a0a;border:1px solid var(--gold);color:var(--gold);font-family:var(--ff-mono);font-weight:800;font-size:12px;border-radius:99px;display:flex;align-items:center;justify-content:center;}
 @media(max-width:900px){.pm-fab.has{display:flex;}}
 
 /* ── nav 購物車鈕(v2 樣式,原版 main.css 無) ── */
@@ -112,7 +112,7 @@
 .nav-cart-btn .t{display:inline;}
 .nav-cart-btn{padding:9px 12px;}
 .nav-cart-btn:hover{border-color:var(--gold);background:rgba(200,169,107,.08);}
-.nav-cart-badge{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;padding:0 5px;background:var(--gold);color:#0a0a0a;font-family:var(--ff-mono);font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;border-radius:99px;transform:scale(0);transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
+.nav-cart-badge{position:absolute;top:-8px;right:-8px;min-width:20px;height:20px;padding:0 5px;background:var(--gold);color:#0a0a0a;font-family:var(--ff-mono);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;border-radius:99px;transform:scale(0);transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
 .nav-cart-badge.on{transform:scale(1);}
 
 /* LINE 綠色主鈕(cart 送單/再次開啟) */

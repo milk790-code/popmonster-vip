@@ -435,4 +435,4 @@ a:hover{color:var(--gold-lt)}
 
 /* 2026-09-25 r2：手機點擊區至少 44px（頁尾連結、隱私權／服務條款） */
 .footer-legal a{display:inline-flex;align-items:center;min-height:44px}
-@media(max-width:768px){.footer-links a{display:inline-flex;align-items:center;min-height:44px}}
+@media(max-width:768px){.footer-links{gap:0;align-items:center}.footer-links a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px}}
