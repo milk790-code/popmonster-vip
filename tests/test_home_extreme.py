@@ -63,7 +63,11 @@ class HomepageExtremeContract(unittest.TestCase):
         self.assertRegex(self.css, r'card-price\.tbd[^}]*color: var\(--home-muted\)')
         self.assertRegex(self.css, r'footer-copy[^}]*opacity: 1')
         self.assertRegex(self.css, r'\.card-cat \{[^}]*font-size: 12px')
-        self.assertRegex(self.css, r'filter-btn \{[^}]*min-height: 42px')
+        # 點擊區至少 44px（2026-09-25 r2 由 42 提高到 44）
+        self.assertRegex(self.css, r'filter-btn \{[^}]*min-height: 44px')
+        self.assertRegex(self.css, r'nav-menu-btn \{[^}]*min-height: 44px')
+        self.assertRegex(self.css, r'nav-cart-btn \{[^}]*min-height: 44px')
+        self.assertRegex(self.css, r'card-btn--cart \{[^}]*min-height: 44px')
 
     def test_noncritical_assets_and_analytics_do_not_block_first_paint(self):
         self.assertNotRegex(self.html, r'<script[^>]+src="https://www\.googletagmanager\.com')
