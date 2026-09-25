@@ -45,6 +45,46 @@ class OrderCartContract(unittest.TestCase):
             for px in re.findall(r"font-size:\s*(\d+(?:\.\d+)?)px", css):
                 self.assertGreaterEqual(float(px), 12, "%s 有 %spx 的字" % (name, px))
 
+    # ── r4：跨分頁不互蓋、清空不動下單頁的規格、結帳列不斷字 ──
+    def _fn(self, name):
+        m = re.search(r"function %s\([^)]*\)\s*\{(.*?)\n  \}" % name, self.store, re.S) or \
+            re.search(r"function %s\([^)]*\)\s*\{([^\n]*)\}" % name, self.store)
+        self.assertIsNotNone(m, "store.js 找不到 %s()" % name)
+        return m.group(1)
+
+    def test_store_js_rereads_storage_before_every_write(self):
+        # 首頁分頁手上的舊資料不能蓋掉下單頁剛改的數量：add/setQty/clearCart 改之前都要先重讀
+        self.assertRegex(self.store, r"function sync\(\)\s*\{\s*cart\s*=\s*load\(\);\s*\}")
+        for name in ("add", "setQty", "clearCart", "removeOrdered"):
+            self.assertIn("sync();", self._fn(name), "%s() 沒有先重讀 localStorage" % name)
+
+    def test_store_js_clear_keeps_order_page_variants(self):
+        # 清空只清 items；v（下單頁另選的規格）沒進這張單，不能一起清掉
+        body = self._fn("clearCart")
+        self.assertIn("cart.items = {}", body)
+        self.assertNotRegex(body, r"cart\s*=\s*\{\s*items")
+
+    def test_store_js_listens_to_other_tabs_and_bfcache(self):
+        self.assertRegex(self.store, r"addEventListener\('storage'")
+        self.assertRegex(self.store, r"addEventListener\('pageshow'")
+
+    def test_store_js_shows_order_page_variants(self):
+        # 從 order.html?add= 進來的新訪客，首頁購物車數字不能是 0、抽屜要告訴他東西在下單頁
+        self.assertIn("count() + extraCount()", self.store)
+        self.assertIn("order.html", self._fn("extrasHtml"))
+
+    def test_order_page_rereads_before_changing_quantity(self):
+        for fn in ("pick", "add"):
+            m = re.search(r"\n\s*%s:function\([^)]*\)\{([^\n]*)\}," % fn, self.order)
+            self.assertIsNotNone(m, "order.html 找不到 PM.%s" % fn)
+            self.assertIn("cart=fromShared(readShared())", m.group(1))
+
+    def test_order_bar_buttons_never_wrap_their_label(self):
+        m = re.search(r"\.bar \.btn\{([^}]*)\}", self.order)
+        self.assertIsNotNone(m)
+        self.assertIn("white-space:nowrap", m.group(1))
+        self.assertIn("min-width:max-content", m.group(1))
+
 
 if __name__ == "__main__":
     unittest.main()

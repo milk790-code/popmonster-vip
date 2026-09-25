@@ -58,6 +58,15 @@
 .pm-row.total b{color:var(--gold);font-size:19px;}
 .pm-note{font-size:12px;color:var(--txt-dim);margin:8px 0 12px;line-height:1.6;}
 .pm-dw-foot .btn{width:100%;margin-top:4px;}
+.nw{white-space:nowrap;}
+
+/* 下單頁（order.html）另選的規格：這裡不能一起結帳，列名稱件數＋回下單頁的連結 */
+.pm-extra{border:1px dashed var(--bdr-w);background:var(--bg-2);padding:14px 16px;margin:16px 0 8px;}
+.pm-extra-h{font-family:var(--ff-tc);font-weight:700;font-size:13px;color:var(--gold);margin-bottom:6px;}
+.pm-extra ul{margin:0 0 8px;padding-left:18px;font-size:13px;line-height:1.7;color:var(--txt);}
+.pm-extra p{font-size:12px;line-height:1.6;color:var(--txt-m);margin:0 0 10px;}
+.pm-extra .btn{width:100%;}
+.pm-cart-extra{max-width:420px;margin:0 auto 40px;padding:0 20px;}
 
 /* 結帳頁 */
 .pm-cart-page{max-width:1100px;margin:0 auto;padding:104px 24px 80px;}

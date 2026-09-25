@@ -51,10 +51,17 @@
   .bar .in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .total{font-weight:800;color:#e8c674}
   .btn{flex:1;min-width:150px;text-align:center;font-weight:800;text-decoration:none;padding:13px 10px;border-radius:30px;border:none;cursor:pointer;font-size:.98em}
-  .btn-line{background:#c8a96b;color:#0a0a0a}
+  .btn-line{background:#c8a96b;color:#0a0a0a;border:1px solid #c8a96b}
+  /* 結帳列的兩顆鈕：字不換行；放得下就並排、等寬，放不下就各佔一整排（不會一顆高一顆矮、也不會斷出「通)」孤字） */
+  .bar .btn{flex:1 1 0;min-width:max-content;white-space:nowrap}
+  .total{white-space:nowrap}
+  @media(max-width:600px){
+    .bar .in>div:first-child{flex-basis:100%} /* 手機：已選件數＋合計固定自己一排，有沒有「待報價」版面都一樣 */
+    .bar .btn{font-size:.92em;padding:13px 8px}
+  }
   .btn-pay{background:transparent;color:#d8c08a;border:1px solid var(--gold-d)}
   .btn[disabled]{opacity:.35;cursor:not-allowed}
-  .ship{color:var(--mut);font-size:.8em;text-align:center;width:100%;margin-top:2px}
+  .ship{color:var(--mut);font-size:.8em;text-align:center;width:100%;margin-top:2px;text-wrap:balance} /* 兩行時平均分，不剩「日」一個字 */
   dialog{background:var(--card);color:var(--tx);border:1px solid var(--gold-d);border-radius:14px;max-width:430px;width:92%;padding:20px}
   dialog::backdrop{background:rgba(0,0,0,.7)}
   textarea{width:100%;min-height:170px;background:#0e0e0e;color:var(--tx2);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:.88em}
@@ -201,7 +208,7 @@
   }
   function lineInfo(k){ // 購物車一行 → 顯示用；對不到商品回 null（不顯示、不計數，但資料照留）
     var a=k.split('|'),s=a[0],j=a[1],p=prod(s),sp=SITE[s];
-    if(j==='site')return sp?{sku:s,name:sp.name,spec:T.siteSpec,price:sp.price||null}:null;
+    if(j==='site')return sp?{sku:s,name:lang==='en'&&p&&p.nameEn?p.nameEn:sp.name,spec:T.siteSpec,price:sp.price||null}:null; // 中文照官網名稱；英文用規格表的英文名（A044–A046 規格表沒有，只能留中文）
     var v=p&&j!==''&&j!=null?p.variants[+j]:null;
     return v?{sku:s,name:pname(p),spec:pspec(v.spec),price:v.price}:null;
   }
@@ -304,6 +311,8 @@
     if(w&&b)w.style.paddingBottom=(b.offsetHeight+24)+'px';
   }
   window.addEventListener('resize',padForBar);
+  // 字型晚到、手機工具列伸縮讓結帳列變高時也重算
+  if(window.ResizeObserver){try{new ResizeObserver(padForBar).observe(document.querySelector('.bar'));}catch(e){}}
   function orderText(){
     var lines=[T.orderHead];
     for(var k in cart){var q=cart[k];if(!(q>0))continue;
@@ -314,8 +323,9 @@
   }
   window.PM={
     setCat:function(c){cat=c;renderCats();renderList();},
-    pick:function(sku,j){sel[sku]=j==='site'?'site':+j;save();renderList();},
-    add:function(sku,d){var k=sku+'|'+vi(sku);cart[k]=Math.min(99,Math.max(0,(cart[k]||0)+d));if(!cart[k])delete cart[k];save();renderList();},
+    // 改之前先重讀共用購物車：別的分頁（首頁、商品頁）剛改的數量才不會被這頁手上的舊資料蓋掉
+    pick:function(sku,j){cart=fromShared(readShared());sel[sku]=j==='site'?'site':+j;save();renderList();},
+    add:function(sku,d){cart=fromShared(readShared());var k=sku+'|'+vi(sku);cart[k]=Math.min(99,Math.max(0,(cart[k]||0)+d));if(!cart[k])delete cart[k];save();renderList();},
     lang:function(l){lang=l;save();applyLang();renderCats();renderList();}
   };
   document.getElementById('lzh').onclick=function(){PM.lang('zh')};
@@ -358,7 +368,10 @@
   if(old){
     var o2=null;try{o2=JSON.parse(old);}catch(e){}
     if(o2&&typeof o2==='object')Object.keys(o2).forEach(function(k){addTo(cart,k,o2[k]);});
-    if(save()){try{localStorage.setItem(LS_OLD+'_merged',old);localStorage.removeItem(LS_OLD);}catch(e){}}
+    if(save()){try{
+      var mk=LS_OLD+'_merged';if(localStorage.getItem(mk)!=null)mk+='_'+Date.now(); // 已經有一份留底就另存，不蓋掉
+      localStorage.setItem(mk,old);localStorage.removeItem(LS_OLD);
+    }catch(e){}}
   }
   var add=params.get('add');
   if(add&&prod(add)){addTo(cart,add+'|'+vi(add),1);save();}
