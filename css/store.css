@@ -44,7 +44,7 @@
 .pm-qty button{width:30px;height:30px;background:none;border:none;color:var(--gold);font-size:14px;cursor:pointer;}
 .pm-qty button:hover{background:rgba(200,169,107,.1);}
 .pm-qty span{width:34px;display:flex;align-items:center;justify-content:center;font-family:var(--ff-mono);font-weight:700;font-size:12px;color:var(--txt);border-left:1px solid var(--bdr);border-right:1px solid var(--bdr);}
-.pm-item-rm{background:none;border:none;color:var(--txt-dim);font-size:11px;cursor:pointer;letter-spacing:.1em;padding:2px;}
+.pm-item-rm{background:none;border:none;color:var(--txt-dim);font-size:12px;cursor:pointer;letter-spacing:.1em;padding:2px;}
 .pm-item-rm:hover{color:#c2474e;}
 .pm-empty{text-align:center;padding:64px 20px;color:var(--txt-dim);}
 .pm-empty .big{font-size:34px;margin-bottom:14px;opacity:.5;}
@@ -56,8 +56,28 @@
 .pm-row b{font-family:var(--ff-mono);font-weight:700;color:var(--txt);}
 .pm-row.total{font-size:14px;padding-top:8px;margin-top:6px;border-top:1px solid var(--bdr);}
 .pm-row.total b{color:var(--gold);font-size:19px;}
-.pm-note{font-size:11px;color:var(--txt-dim);margin:8px 0 12px;line-height:1.6;}
+.pm-note{font-size:12px;color:var(--txt-dim);margin:8px 0 12px;line-height:1.6;}
 .pm-dw-foot .btn{width:100%;margin-top:4px;}
+.nw{white-space:nowrap;}
+
+/* 下單頁（order.html）另選的規格：這裡不能一起結帳，列名稱件數＋回下單頁的連結 */
+.pm-extra{border:1px dashed var(--bdr-w);background:var(--bg-2);padding:14px 16px;margin:16px 0 8px;}
+.pm-extra-h{font-family:var(--ff-tc);font-weight:700;font-size:13px;color:var(--gold);margin-bottom:6px;}
+.pm-extra ul{list-style:none;margin:0 0 10px;padding:0;font-size:13px;line-height:1.5;color:var(--txt);}
+/* 一列：品名／規格（灰字、第二行）＋右邊件數；規格很長（例：1入 體驗裝，20倍稀釋…）也只在自己那格換行 */
+.pm-extra li{display:grid;grid-template-columns:1fr auto;column-gap:12px;padding:8px 0;border-bottom:1px solid var(--bdr);}
+.pm-extra li:last-child{border-bottom:none;}
+.pm-extra li .nm{grid-column:1;}
+.pm-extra li .sp{grid-column:1;grid-row:2;font-size:12px;color:var(--txt-m);}
+.pm-extra li .sp .c{display:inline-block;}
+.pm-extra li .q{grid-column:2;grid-row:1 / span 2;align-self:center;font-family:var(--ff-mono);font-weight:700;color:var(--gold-lt);}
+.pm-extra p{font-size:12px;line-height:1.6;color:var(--txt-m);margin:0 0 10px;}
+.pm-extra .btn{width:100%;}
+.pm-extra.only{border-style:solid;padding:18px 20px;margin-top:0;}
+.pm-extra.only .pm-extra-h{font-size:15px;}
+.pm-cart-extra{max-width:460px;margin:0 0 40px;}
+.pm-cart-more{font-size:13px;line-height:1.6;color:var(--txt-m);margin:14px 0 0;}
+.pm-cart-more a{color:var(--gold);display:inline-flex;align-items:center;min-height:44px;}
 
 /* 結帳頁 */
 .pm-cart-page{max-width:1100px;margin:0 auto;padding:104px 24px 80px;}
@@ -66,7 +86,7 @@
 .pm-cart-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:start;}
 @media(max-width:900px){.pm-cart-grid{grid-template-columns:1fr;}}
 .pm-panel{border:1px solid var(--bdr);background:var(--bg-1);}
-.pm-panel-h{font-family:var(--ff-mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);padding:16px 20px;border-bottom:1px solid var(--bdr);}
+.pm-panel-h{font-family:var(--ff-mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);padding:16px 20px;border-bottom:1px solid var(--bdr);}
 .pm-panel-b{padding:8px 20px 20px;}
 .pm-panel-b .pm-item:last-child{border-bottom:none;}
 
@@ -78,7 +98,7 @@
 .pm-field textarea{min-height:84px;resize:vertical;}
 .pm-field input:focus,.pm-field textarea:focus{outline:none;border-color:var(--gold);}
 .pm-field input.err,.pm-field textarea.err{border-color:#c2474e;}
-.pm-field .hint{font-size:11px;color:var(--txt-dim);margin-top:6px;line-height:1.5;}
+.pm-field .hint{font-size:12px;color:var(--txt-dim);margin-top:6px;line-height:1.5;}
 .pm-info-strip{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--bdr);background:var(--bg-2);padding:13px 15px;margin-top:16px;font-size:12px;line-height:1.7;color:var(--txt-m);}
 .pm-info-strip .ic{color:var(--gold);flex-shrink:0;}
 .pm-submit{width:100%;margin-top:20px;font-size:13px;padding:17px;}

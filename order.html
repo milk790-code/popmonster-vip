@@ -17,6 +17,10 @@
 <meta name="theme-color" content="#0a0a0a">
 <link rel="alternate" hreflang="zh-Hant" href="https://popmonster.vip/order.html">
 <link rel="alternate" hreflang="en" href="https://popmonster.vip/order.html?lang=en">
+<!-- js/products.js＝全站購物車（store.js）用的名稱與售價，先存成 PM_SITE_PRODUCTS：
+     下一行 products_catalog.js 用 const 宣告同名的 PM_PRODUCTS（下單頁規格表），直接寫 PM_PRODUCTS 拿到的是那一份 -->
+<script src="js/products.js"></script>
+<script>window.PM_SITE_PRODUCTS=window.PM_PRODUCTS;</script>
 <script src="products_catalog.js"></script>
 <style>
   :root{--bg:#0a0a0a;--card:#141414;--line:#2a2a2a;--gold:#c8a96b;--gold-d:#8a6a2f;--tx:#e8e2d6;--tx2:#cfc8ba;--mut:#a89e8e}
@@ -37,19 +41,33 @@
   .row2{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
   select{flex:1;min-width:170px;background:#0e0e0e;color:var(--tx2);border:1px solid var(--line);border-radius:8px;padding:9px 8px;font-size:.88em}
   .iprice{color:#e8c674;font-weight:800;font-size:1em;min-width:84px;text-align:right}
-  .ref{color:var(--mut);font-size:.72em;display:block;font-weight:400}
+  .ref{color:var(--mut);font-size:.75em;display:block;font-weight:400}
   .qty{display:flex;align-items:center;gap:8px;margin-left:auto}
   .qty button{width:32px;height:32px;border-radius:50%;border:1px solid var(--gold-d);background:transparent;color:var(--gold);font-size:1.1em;cursor:pointer}
   .qty span{min-width:20px;text-align:center;font-weight:800}
   .picked{color:var(--mut);font-size:.78em;margin-top:6px;line-height:1.5}
+  .sitespec{flex:1;min-width:170px;color:var(--tx2);font-size:.88em;line-height:1.5}
   .bar{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(180deg,#141414,#0a0a0a);border-top:1px solid var(--gold-d);padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
   .bar .in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .total{font-weight:800;color:#e8c674}
   .btn{flex:1;min-width:150px;text-align:center;font-weight:800;text-decoration:none;padding:13px 10px;border-radius:30px;border:none;cursor:pointer;font-size:.98em}
-  .btn-line{background:#c8a96b;color:#0a0a0a}
+  .btn-line{background:#c8a96b;color:#0a0a0a;border:1px solid #c8a96b}
+  /* 結帳列的兩顆鈕：字不換行；放得下就並排、等寬，放不下就各佔一整排（不會一顆高一顆矮、也不會斷出「通)」孤字） */
+  .bar .btn{flex:1 1 0;min-width:max-content;white-space:nowrap}
+  .total{white-space:nowrap}
+  @media(max-width:600px){
+    .bar .in>div:first-child{flex-basis:100%} /* 手機：已選件數＋合計固定自己一排，有沒有「待報價」版面都一樣 */
+    .bar .btn{font-size:.92em;padding:13px 8px}
+  }
+  /* 桌機：合計太長（英文＋待報價）擠掉一顆鈕時，合計自己一排、兩顆鈕一起放下一排（balanceBar 判斷） */
+  .bar.stack .in>div:first-child{flex-basis:100%}
+  @media(max-width:320px){.bar .btn{padding:13px 4px}} /* Galaxy Fold 外螢幕 280 寬：英文付款鈕原本比容器寬 4px */
   .btn-pay{background:transparent;color:#d8c08a;border:1px solid var(--gold-d)}
   .btn[disabled]{opacity:.35;cursor:not-allowed}
   .ship{color:var(--mut);font-size:.8em;text-align:center;width:100%;margin-top:2px}
+  /* 出貨說明兩句各自不斷行；同一排時中間畫一條細線，放不下就一句一排，不會剩「｜」或「· Pre-order」開頭 */
+  .ship span{display:inline-block;margin:0 .6em;position:relative;text-wrap:balance} /* 280 寬英文一句放不下時兩行平均分，不剩 payment 一個字 */
+  .ship.one span+span::before{content:'';position:absolute;left:-.65em;top:22%;height:56%;border-left:1px solid #4a4a4a}
   dialog{background:var(--card);color:var(--tx);border:1px solid var(--gold-d);border-radius:14px;max-width:430px;width:92%;padding:20px}
   dialog::backdrop{background:rgba(0,0,0,.7)}
   textarea{width:100%;min-height:170px;background:#0e0e0e;color:var(--tx2);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:.88em}
@@ -109,13 +127,15 @@
         dlgTitle:'LINE 下單 · 兩步完成',dlgNote:'① 按「複製訂單」 ② 開 LINE 後直接貼上送出,小編立刻幫你結帳出貨。',
         copy:'📋 複製訂單',copied:'✅ 已複製,去 LINE 貼上',chat:'開啟 LINE',close:'關閉',
         orderHead:'🛒 泡泡怪獸 官網訂單',orderTail:['收件人:','電話:','地址:','付款方式:(轉帳/貨到付款)'],
-        payFail:'付款頁連線失敗,請改用 LINE 下單或稍後再試'},
+        payFail:'付款頁連線失敗,請改用 LINE 下單或稍後再試',
+        siteSpec:'商品頁款式',quote:'待報價',quoteLine:'(請報價)'},
     en:{title:'Order Online',sub:'Pick products & size → add to list → order via WhatsApp or pay online<br>Every order earns POP membership rewards. Ships from Taiwan worldwide.',
         all:'All',picked:'Items',pcs:'',go:'💬 Order via WhatsApp',pay:'💳 Online payment (coming soon)',payOn:'💳 Pay online',
         dlgTitle:'WhatsApp Order · 2 steps',dlgNote:'① Tap "Open WhatsApp" — your order is pre-filled ② Send it, we reply with total + shipping quote.',
         copy:'📋 Copy order',copied:'✅ Copied',chat:'Open WhatsApp',close:'Close',
         orderHead:'🛒 POP MONSTER Order (International)',orderTail:['Name:','WhatsApp/Phone:','Country & Address:','Payment: (PayPal / card — we will quote shipping)'],
-        payFail:'Payment page unavailable — please order via WhatsApp.'}
+        payFail:'Payment page unavailable — please order via WhatsApp.',
+        siteSpec:'as listed on product page',quote:'price on request',quoteLine:'(price on request)'}
   };
   // 規格英譯規則(不逐條翻 97 筆,規則覆蓋)
   function specEn(s){
@@ -123,27 +143,88 @@
       .replace(/入門體驗款|嚐鮮裝|體驗裝/g,'starter').replace(/熱銷首選款/g,'best seller')
       .replace(/團購優惠款/g,'value size').replace(/超值優惠款/g,'jumbo')
       .replace(/可兌(\d+)L成品/g,'makes $1L').replace(/樣品|試用品/g,'sample')
+      .replace(/（?不划算）?/g,' (not best value)').replace(/最划算/g,'best value') // 英文模式不能留「不」「最」
       .replace(/划算/g,'best value').replace(/雙入補貨/g,'').replace(/入門囤貨|常規補貨|店家必囤/g,'')
       .replace(/⚠️無噴頭/g,'no spray head').replace(/不附噴頭/g,'no spray head')
       .replace(/最高300倍稀釋/g,'dilute up to 300x').replace(/20倍稀釋最高可稀釋65倍/g,'dilute 20–65x')
       .replace(/贈油膜擦/g,'+ free applicator').replace(/（贈慕斯瓶）/g,' (+ foam bottle)')
       .replace(/紅色（重切）/g,'Red (heavy cut)').replace(/灰色（細切）/g,'Grey (fine cut)')
       .replace(/GA\/DA適用套裝/g,'GA/DA set').replace(/RO適用套裝/g,'RO set')
-      .replace(/單一規格/g,'standard').replace(/\s*,\s*/g,', ').replace(/\s+/g,' ').trim();
+      .replace(/單一規格/g,'standard').replace(/（/g,' (').replace(/）/g,')')
+      .replace(/(\d+(?:ml|g|L))(?=[A-Za-z])/g,'$1 ').replace(/(\d)\+/g,'$1 +') // 100mlstarter → 100ml starter
+      .replace(/\s*,\s*/g,', ').replace(/\s+/g,' ').trim();
   }
   var lang=params.get('lang')||localStorage.getItem('pm_lang')||'zh';
   if(lang!=='en')lang='zh';
   var T=I18N[lang];
-  var cart={};try{cart=JSON.parse(localStorage.getItem('pm_cart_v2')||'{}')}catch(e){}
-  var sel={};try{sel=JSON.parse(localStorage.getItem('pm_sel')||'{}')}catch(e){}
+  // ── 購物車：跟全站 js/store.js 共用 localStorage 的 pm_cart_v1 ──
+  // store.js 的格式是 {items:{A001:2}}：一個 SKU 一個價（js/products.js 的 PM_PRICES），沒有規格。下單頁有規格，所以這樣對應：
+  //   跟官網售價同價的那個規格 ⇄ items['A001']（首頁、商品頁的購物車看得到也改得到）
+  //   其他規格               ⇄ 同一筆資料多一欄 v:{'a001|0':1}，規格名稱另存 vn:{'a001|0':'30ml入門體驗款'}
+  //                              （store.js 不改 v／vn、存檔原樣留著；抽屜與結帳頁用 vn 寫出是哪個規格）
+  //   對不到規格的官網品項     ⇄ 下單頁內部 key 'a006|site'，照官網名稱和售價顯示（售價跟規格表不同、或規格表沒有這款）
+  // 舊版下單頁的 pm_cart_v2：第一次打開就併進來（數量相加），舊資料改名 pm_cart_v2_merged 留底。
+  var LS_CART='pm_cart_v1',LS_OLD='pm_cart_v2';
+  var SITE={};(window.PM_SITE_PRODUCTS||[]).forEach(function(p){SITE[String(p.sku).toLowerCase()]=p;});
+  function sitePrice(sku){var s=SITE[sku];return s&&s.price?s.price:null;}
+  function defVar(sku){ // 跟官網售價同價的規格序號，沒有就 -1
+    var p=prod(sku),sp=sitePrice(sku);if(!p||!sp)return -1;
+    for(var j=0;j<p.variants.length;j++)if(p.variants[j].price===sp)return j;
+    return -1;
+  }
+  function addTo(o,k,q){q=parseInt(q,10)||0;if(q>0)o[k]=Math.min(99,(o[k]||0)+q);}
+  function readShared(){
+    var c=null;try{c=JSON.parse(localStorage.getItem(LS_CART));}catch(e){}
+    return c&&typeof c==='object'&&c.items&&typeof c.items==='object'?c:{items:{}};
+  }
+  function fromShared(c){
+    var out={};
+    Object.keys(c.items).forEach(function(S){var s=S.toLowerCase(),j=defVar(s);addTo(out,s+'|'+(j>=0?j:'site'),c.items[S]);});
+    if(c.v&&typeof c.v==='object')Object.keys(c.v).forEach(function(k){addTo(out,k,c.v[k]);});
+    return out;
+  }
+  var cart=fromShared(readShared());
+  var sel={};try{sel=JSON.parse(localStorage.getItem('pm_sel')||'{}')||{}}catch(e){}
   var cat='__all__';
   var catKeys=[...new Set(PM_PRODUCTS.map(function(p){return p.cat}))];
 
-  function save(){localStorage.setItem('pm_cart_v2',JSON.stringify(cart));localStorage.setItem('pm_sel',JSON.stringify(sel));localStorage.setItem('pm_lang',lang);}
+  function save(){
+    var c=readShared(),items={},v={};
+    Object.keys(cart).forEach(function(k){
+      var q=cart[k];if(!(q>0))return;
+      var a=k.split('|'),s=a[0],j=a[1];
+      if(j==='site'||(a.length===2&&j!==''&&+j===defVar(s)))addTo(items,s.toUpperCase(),q);else addTo(v,k,q);
+    });
+    c.items=items;
+    if(Object.keys(v).length){
+      c.v=v;c.vn={};
+      Object.keys(v).forEach(function(k){var a=k.split('|'),p=prod(a[0]),x=p&&p.variants[+a[1]];if(x)c.vn[k]=x.spec;}); // 一律存中文規格名：抽屜、結帳頁是中文頁
+    }else{delete c.v;delete c.vn;}
+    c.updated=Date.now();
+    try{
+      localStorage.setItem(LS_CART,JSON.stringify(c));
+      localStorage.setItem('pm_sel',JSON.stringify(sel));localStorage.setItem('pm_lang',lang);
+      return true;
+    }catch(e){return false;}
+  }
   function fmt(n){return 'NT$'+n.toLocaleString('zh-Hant-TW');}
   function ref(n){if(lang!=='en')return '';return '<span class="ref">≈ US$'+(n/CFG.FX.USD).toFixed(1)+' / RM'+(n/CFG.FX.MYR).toFixed(0)+' · charged in TWD</span>';}
   function prod(sku){return PM_PRODUCTS.find(function(x){return x.sku===sku});}
-  function vi(sku){return sel[sku]||0;}
+  function vi(sku){ // 這張卡的 − ＋ 目前作用在哪個規格
+    var p=prod(sku),s=sel[sku];
+    if(s==='site'&&cart[sku+'|site']>0)return 'site';
+    if(typeof s==='number'&&p&&s>=0&&s<p.variants.length)return s;
+    if(cart[sku+'|site']>0)return 'site';
+    var d=defVar(sku);if(d>=0&&cart[sku+'|'+d]>0)return d; // 購物車裡有官網同價那款，就先顯示它
+    for(var j=0;p&&j<p.variants.length;j++)if(cart[sku+'|'+j]>0)return j;
+    return 0;
+  }
+  function lineInfo(k){ // 購物車一行 → 顯示用；對不到商品回 null（不顯示、不計數，但資料照留）
+    var a=k.split('|'),s=a[0],j=a[1],p=prod(s),sp=SITE[s];
+    if(j==='site')return sp?{sku:s,name:lang==='en'&&p&&p.nameEn?p.nameEn:sp.name,spec:T.siteSpec,price:sp.price||null}:null; // 中文照官網名稱；英文用規格表的英文名（A044–A046 規格表沒有，只能留中文）
+    var v=p&&j!==''&&j!=null?p.variants[+j]:null;
+    return v?{sku:s,name:pname(p),spec:pspec(v.spec),price:v.price}:null;
+  }
   function pname(p){return lang==='en'&&p.nameEn?p.nameEn:p.name;}
   function pcat(c){return lang==='en'?(PM_CAT_EN[c]||c):c;}
   function pspec(s){return lang==='en'?specEn(s):s;}
@@ -174,7 +255,8 @@
     document.getElementById('cats').innerHTML=btn('__all__',T.all)+catKeys.map(function(c){return btn(c,pcat(c));}).join('');
   }
   function pickedLines(sku){
-    var p=prod(sku),out=[];
+    var p=prod(sku),out=[],qs=cart[sku+'|site']||0,sp=sitePrice(sku);
+    if(qs>0)out.push('🛒 '+T.siteSpec+' × '+qs+' ('+(sp?fmt(sp*qs):T.quote)+')');
     p.variants.forEach(function(v,i){
       var q=cart[sku+'|'+i]||0;
       if(q>0)out.push('🛒 '+pspec(v.spec)+' × '+q+' ('+fmt(v.price*q)+')');
@@ -185,49 +267,92 @@
   // a005 用棚拍、a008 用 Super Foam 實拍（都在 img/card/）；下列 SKU 只有 AI 合成主圖，先不放圖
   var PM_NO_REAL_IMG={a009:1,a013:1,a017:1,a033:1,a036:1,a037:1,a038:1,a040:1,a042:1};
   function pimg(s){ return PM_NO_REAL_IMG[s]?'':'img/card/'+s+'-160.jpg'; }
+  function thumb(sku,alt){
+    var src=pimg(sku);
+    return src?'<img loading="lazy" decoding="async" width="54" height="54" src="'+src+'" onerror="this.style.visibility=\'hidden\'" alt="'+alt+'">':'<span class="noimg" aria-hidden="true"></span>';
+  }
+  function catOf(sku){var p=prod(sku);if(p)return p.cat;var sp=SITE[sku];return sp?String(sp.cat||'').replace(/系列$/,''):'';}
+  function inCat(sku){return cat==='__all__'||catOf(sku)===cat;}
+  function qtyHtml(sku,q){
+    return '<div class="qty"><button onclick="PM.add(\''+sku+'\',-1)">−</button><span>'+q+'</span><button onclick="PM.add(\''+sku+'\',1)">＋</button></div>';
+  }
   function renderList(){
     var el=document.getElementById('list');
-    el.innerHTML=PM_PRODUCTS.filter(function(p){return cat==='__all__'||p.cat===cat}).map(function(p){
-      var i=vi(p.sku),v=p.variants[i],q=cart[p.sku+'|'+i]||0;
+    var html=PM_PRODUCTS.filter(function(p){return inCat(p.sku)}).map(function(p){
+      var i=vi(p.sku),site=i==='site',q=cart[p.sku+'|'+i]||0,sp=sitePrice(p.sku);
+      var price=site?sp:p.variants[i].price;
       var opts=p.variants.map(function(x,j){
         return '<option value="'+j+'"'+(j===i?' selected':'')+'>'+pspec(x.spec)+'｜'+fmt(x.price)+'</option>';}).join('');
-      return '<div class="item"><div class="top">'+
-        (pimg(p.sku)?'<img loading="lazy" decoding="async" width="54" height="54" src="'+pimg(p.sku)+'" onerror="this.style.visibility=\'hidden\'" alt="'+pname(p)+'">':'<span class="noimg" aria-hidden="true"></span>')+
+      if(cart[p.sku+'|site']>0)opts+='<option value="site"'+(site?' selected':'')+'>'+T.siteSpec+'｜'+(sp?fmt(sp):T.quote)+'</option>';
+      return '<div class="item"><div class="top">'+thumb(p.sku,pname(p))+
         '<div><div class="iname">'+pname(p)+'</div><div class="icat">'+p.sku.toUpperCase()+' · '+pcat(p.cat)+'</div></div></div>'+
         '<div class="row2"><select onchange="PM.pick(\''+p.sku+'\',this.value)">'+opts+'</select>'+
-        '<div class="iprice">'+fmt(v.price)+ref(v.price)+'</div>'+
-        '<div class="qty"><button onclick="PM.add(\''+p.sku+'\',-1)">−</button><span>'+q+'</span><button onclick="PM.add(\''+p.sku+'\',1)">＋</button></div></div>'+
+        '<div class="iprice">'+(price?fmt(price)+ref(price):T.quote)+'</div>'+
+        qtyHtml(p.sku,q)+'</div>'+
         pickedLines(p.sku)+'</div>';
-    }).join('');
+    });
+    // 購物車裡有、但下單頁規格表沒有的商品（例：A044–A046 還沒有規格價格）：照官網名稱和售價列在最後，不會不見
+    Object.keys(cart).forEach(function(k){
+      var a=k.split('|'),s=a[0],sp=SITE[s];
+      if(a[1]!=='site'||prod(s)||!sp||!(cart[k]>0)||!inCat(s))return;
+      html.push('<div class="item"><div class="top">'+thumb(s,sp.name)+
+        '<div><div class="iname">'+sp.name+'</div><div class="icat">'+s.toUpperCase()+' · '+pcat(catOf(s))+'</div></div></div>'+
+        '<div class="row2"><div class="sitespec">'+T.siteSpec+'</div>'+
+        '<div class="iprice">'+(sp.price?fmt(sp.price)+ref(sp.price):T.quote)+'</div>'+
+        qtyHtml(s,cart[k])+'</div></div>');
+    });
+    el.innerHTML=html.join('');
     renderBar();
   }
   function renderBar(){
-    var n=0,sum=0;
-    for(var k in cart){var q=cart[k];if(!q)continue;
-      var sku=k.split('|')[0],j=+k.split('|')[1];
-      var p=prod(sku);if(!p||!p.variants[j])continue;
-      n+=q;sum+=p.variants[j].price*q;}
+    var n=0,sum=0,un=false;
+    for(var k in cart){var q=cart[k];if(!(q>0))continue;
+      var L=lineInfo(k);if(!L)continue;
+      n+=q;if(L.price)sum+=L.price*q;else un=true;}
     document.getElementById('cnt').textContent=n;
-    document.getElementById('total').innerHTML=n?(fmt(sum)+(lang==='en'?' '+ref(sum):'')):'';
-    document.getElementById('ship').textContent='📦 '+(lang==='en'?PM_SHIPPING.leadDaysTextEn+' · '+PM_SHIPPING.noteEn:PM_SHIPPING.leadDaysText+'｜'+PM_SHIPPING.note);
+    document.getElementById('total').innerHTML=n?((sum?fmt(sum):'')+(un?(sum?(lang==='en'?' + ':'＋'):'')+T.quote:'')+(lang==='en'&&sum?' '+ref(sum):'')):'';
+    var sh=lang==='en'?[PM_SHIPPING.leadDaysTextEn,PM_SHIPPING.noteEn]:[PM_SHIPPING.leadDaysText,PM_SHIPPING.note];
+    document.getElementById('ship').innerHTML='<span>📦 '+sh[0]+'</span> <span>'+sh[1]+'</span>';
     var pay=document.getElementById('btnPay');
-    pay.disabled=!CFG.PAY_ENABLED||!n;
+    pay.disabled=!CFG.PAY_ENABLED||!n||un; // 有待報價的品項就不能線上付款
     pay.textContent=CFG.PAY_ENABLED?T.payOn:T.pay;
     document.getElementById('btnGo').disabled=!n;
+    padForBar();
   }
+  // 手機上底部結帳列有兩排（約 190px），原本固定留 150px，捲到底最後一張卡的 − ＋ 會被蓋住；改成照結帳列實際高度留白
+  function padForBar(){
+    balanceBar();
+    var w=document.querySelector('.wrap'),b=document.querySelector('.bar');
+    if(w&&b)w.style.paddingBottom=(b.offsetHeight+24)+'px';
+  }
+  // 兩顆鈕要嘛同一排、要嘛各佔一整排；不能一顆跟合計擠第一排、另一顆自己掉到第二排（桌機英文＋待報價會這樣）
+  // 先拿掉 stack 量一次，兩顆不同排才讓合計自己一排；結果只看寬度，ResizeObserver 重算也不會來回跳
+  function balanceBar(){
+    var b=document.querySelector('.bar'),go=document.getElementById('btnGo'),pay=document.getElementById('btnPay');
+    if(!b||!go||!pay)return;
+    b.classList.remove('stack');
+    if(!sameRow(go,pay))b.classList.add('stack');
+    var s=document.querySelectorAll('#ship span');
+    document.getElementById('ship').classList.toggle('one',s.length===2&&sameRow(s[0],s[1]));
+  }
+  function sameRow(a,b){return Math.abs(a.offsetTop-b.offsetTop)<Math.min(a.offsetHeight,b.offsetHeight)/2;} // 📦 會把第一句撐高 2px，不能用 ===
+
+  window.addEventListener('resize',padForBar);
+  // 字型晚到、手機工具列伸縮讓結帳列變高時也重算
+  if(window.ResizeObserver){try{new ResizeObserver(padForBar).observe(document.querySelector('.bar'));}catch(e){}}
   function orderText(){
     var lines=[T.orderHead];
-    for(var k in cart){var q=cart[k];if(!q)continue;
-      var sku=k.split('|')[0],j=+k.split('|')[1];
-      var p=prod(sku);if(!p)continue;var v=p.variants[j];
-      lines.push('- '+pname(p)+' ('+sku.toUpperCase()+') '+pspec(v.spec)+' x'+q+' '+fmt(v.price*q));}
+    for(var k in cart){var q=cart[k];if(!(q>0))continue;
+      var L=lineInfo(k);if(!L)continue;
+      lines.push('- '+L.name+' ('+L.sku.toUpperCase()+') '+L.spec+' x'+q+' '+(L.price?fmt(L.price*q):T.quoteLine));}
     lines.push('');T.orderTail.forEach(function(t){lines.push(t)});
     return lines.join('\n');
   }
   window.PM={
     setCat:function(c){cat=c;renderCats();renderList();},
-    pick:function(sku,j){sel[sku]=+j;save();renderList();},
-    add:function(sku,d){var k=sku+'|'+vi(sku);cart[k]=Math.max(0,(cart[k]||0)+d);save();renderList();},
+    // 改之前先重讀共用購物車：別的分頁（首頁、商品頁）剛改的數量才不會被這頁手上的舊資料蓋掉
+    pick:function(sku,j){cart=fromShared(readShared());sel[sku]=j==='site'?'site':+j;save();renderList();},
+    add:function(sku,d){cart=fromShared(readShared());var k=sku+'|'+vi(sku);cart[k]=Math.min(99,Math.max(0,(cart[k]||0)+d));if(!cart[k])delete cart[k];save();renderList();},
     lang:function(l){lang=l;save();applyLang();renderCats();renderList();}
   };
   document.getElementById('lzh').onclick=function(){PM.lang('zh')};
@@ -248,9 +373,10 @@
   document.getElementById('btnPay').onclick=function(){
     if(!CFG.PAY_ENABLED)return;
     var items=[];
-    for(var k in cart){var q=cart[k];if(!q)continue;
-      var sku=k.split('|')[0],j=+k.split('|')[1];
-      var p=prod(sku);if(!p)continue;var v=p.variants[j];
+    for(var k in cart){var q=cart[k];if(!(q>0))continue;
+      var a=k.split('|'),sku=a[0];
+      if(a[1]==='site'){var sp=SITE[sku];if(sp&&sp.price)items.push({name:sp.name,sku:sku.toUpperCase(),price:sp.price,qty:q});continue;}
+      var p=prod(sku),v=p&&a[1]!==''&&a[1]!=null?p.variants[+a[1]]:null;if(!v)continue;
       items.push({name:p.name+' '+v.spec,sku:sku.toUpperCase(),price:v.price,qty:q});}
     fetch(CFG.ECPAY_CHECKOUT_API,{method:'POST',headers:{'content-type':'application/json'},
       body:JSON.stringify({
@@ -264,8 +390,22 @@
       .then(function(r){return r.text()}).then(function(html){document.open();document.write(html);document.close();})
       .catch(function(){alert(T.payFail);});
   };
+  // 舊版下單頁的 pm_cart_v2：併進共用購物車（數量相加），存成功才把舊資料改名留底
+  var old=null;try{old=localStorage.getItem(LS_OLD);}catch(e){}
+  if(old){
+    var o2=null;try{o2=JSON.parse(old);}catch(e){}
+    if(o2&&typeof o2==='object')Object.keys(o2).forEach(function(k){addTo(cart,k,o2[k]);});
+    if(save()){try{
+      var mk=LS_OLD+'_merged';if(localStorage.getItem(mk)!=null)mk+='_'+Date.now(); // 已經有一份留底就另存，不蓋掉
+      localStorage.setItem(mk,old);localStorage.removeItem(LS_OLD);
+    }catch(e){}}
+  }
   var add=params.get('add');
-  if(add&&prod(add)){var k0=add+'|'+vi(add);cart[k0]=(cart[k0]||0)+1;save();}
+  if(add&&prod(add)){addTo(cart,add+'|'+vi(add),1);save();}
+  // 別的分頁改了購物車、或按上一頁回來（瀏覽器快取的舊畫面）：重讀一次
+  function reloadCart(){cart=fromShared(readShared());renderList();}
+  window.addEventListener('storage',function(e){if(e.key===LS_CART||e.key===null)reloadCart();});
+  window.addEventListener('pageshow',function(e){if(e.persisted)reloadCart();});
   var dlg=document.getElementById('dlg');window.dlg=dlg;
   applyLang();renderCats();renderList();
 })();
