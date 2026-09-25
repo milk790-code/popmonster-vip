@@ -63,10 +63,21 @@
 /* 下單頁（order.html）另選的規格：這裡不能一起結帳，列名稱件數＋回下單頁的連結 */
 .pm-extra{border:1px dashed var(--bdr-w);background:var(--bg-2);padding:14px 16px;margin:16px 0 8px;}
 .pm-extra-h{font-family:var(--ff-tc);font-weight:700;font-size:13px;color:var(--gold);margin-bottom:6px;}
-.pm-extra ul{margin:0 0 8px;padding-left:18px;font-size:13px;line-height:1.7;color:var(--txt);}
+.pm-extra ul{list-style:none;margin:0 0 10px;padding:0;font-size:13px;line-height:1.5;color:var(--txt);}
+/* 一列：品名／規格（灰字、第二行）＋右邊件數；規格很長（例：1入 體驗裝，20倍稀釋…）也只在自己那格換行 */
+.pm-extra li{display:grid;grid-template-columns:1fr auto;column-gap:12px;padding:8px 0;border-bottom:1px solid var(--bdr);}
+.pm-extra li:last-child{border-bottom:none;}
+.pm-extra li .nm{grid-column:1;}
+.pm-extra li .sp{grid-column:1;grid-row:2;font-size:12px;color:var(--txt-m);}
+.pm-extra li .sp .c{display:inline-block;}
+.pm-extra li .q{grid-column:2;grid-row:1 / span 2;align-self:center;font-family:var(--ff-mono);font-weight:700;color:var(--gold-lt);}
 .pm-extra p{font-size:12px;line-height:1.6;color:var(--txt-m);margin:0 0 10px;}
 .pm-extra .btn{width:100%;}
-.pm-cart-extra{max-width:420px;margin:0 auto 40px;padding:0 20px;}
+.pm-extra.only{border-style:solid;padding:18px 20px;margin-top:0;}
+.pm-extra.only .pm-extra-h{font-size:15px;}
+.pm-cart-extra{max-width:460px;margin:0 0 40px;}
+.pm-cart-more{font-size:13px;line-height:1.6;color:var(--txt-m);margin:14px 0 0;}
+.pm-cart-more a{color:var(--gold);display:inline-flex;align-items:center;min-height:44px;}
 
 /* 結帳頁 */
 .pm-cart-page{max-width:1100px;margin:0 auto;padding:104px 24px 80px;}

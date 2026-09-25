@@ -85,6 +85,24 @@ class OrderCartContract(unittest.TestCase):
         self.assertIn("white-space:nowrap", m.group(1))
         self.assertIn("min-width:max-content", m.group(1))
 
+    # ── r5：下單頁規格要寫出是哪個規格、只有下單頁規格時結帳頁不說「購物車是空的」 ──
+    def test_order_page_saves_spec_names_with_variants(self):
+        m = re.search(r"function save\(\)\{(.*?)\n  \}", self.order, re.S)
+        self.assertIsNotNone(m, "order.html 找不到 save()")
+        self.assertIn("c.vn={}", m.group(1))
+        self.assertIn("delete c.vn", m.group(1))
+
+    def test_store_js_lists_spec_name_of_order_page_variants(self):
+        body = self._fn("extras")
+        self.assertIn("cart.vn", body)
+        self.assertIn("規格在下單頁", self._fn("extrasHtml"))  # 舊資料沒有規格名稱時的寫法
+
+    def test_cart_page_with_only_order_page_variants_is_not_called_empty(self):
+        body = self._fn("renderCartPage")
+        self.assertIn("extrasHtml(true)", body)
+        self.assertLess(body.index("extras().length"), body.index("<p>購物車是空的</p>"),
+                        "只有下單頁規格時要先判斷，不能直接顯示「購物車是空的」")
+
 
 if __name__ == "__main__":
     unittest.main()

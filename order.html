@@ -151,7 +151,8 @@
   // ── 購物車：跟全站 js/store.js 共用 localStorage 的 pm_cart_v1 ──
   // store.js 的格式是 {items:{A001:2}}：一個 SKU 一個價（js/products.js 的 PM_PRICES），沒有規格。下單頁有規格，所以這樣對應：
   //   跟官網售價同價的那個規格 ⇄ items['A001']（首頁、商品頁的購物車看得到也改得到）
-  //   其他規格               ⇄ 同一筆資料多一欄 v:{'a001|0':1}（store.js 不讀，但它存檔會原樣留著）
+  //   其他規格               ⇄ 同一筆資料多一欄 v:{'a001|0':1}，規格名稱另存 vn:{'a001|0':'30ml入門體驗款'}
+  //                              （store.js 不改 v／vn、存檔原樣留著；抽屜與結帳頁用 vn 寫出是哪個規格）
   //   對不到規格的官網品項     ⇄ 下單頁內部 key 'a006|site'，照官網名稱和售價顯示（售價跟規格表不同、或規格表沒有這款）
   // 舊版下單頁的 pm_cart_v2：第一次打開就併進來（數量相加），舊資料改名 pm_cart_v2_merged 留底。
   var LS_CART='pm_cart_v1',LS_OLD='pm_cart_v2';
@@ -186,7 +187,10 @@
       if(j==='site'||(a.length===2&&j!==''&&+j===defVar(s)))addTo(items,s.toUpperCase(),q);else addTo(v,k,q);
     });
     c.items=items;
-    if(Object.keys(v).length)c.v=v;else delete c.v;
+    if(Object.keys(v).length){
+      c.v=v;c.vn={};
+      Object.keys(v).forEach(function(k){var a=k.split('|'),p=prod(a[0]),x=p&&p.variants[+a[1]];if(x)c.vn[k]=x.spec;}); // 一律存中文規格名：抽屜、結帳頁是中文頁
+    }else{delete c.v;delete c.vn;}
     c.updated=Date.now();
     try{
       localStorage.setItem(LS_CART,JSON.stringify(c));

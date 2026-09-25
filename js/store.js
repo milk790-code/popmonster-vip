@@ -37,24 +37,37 @@
   var cart = load();
   function sync() { cart = load(); }
 
-  /* 下單頁另選的規格（cart.v，key 像 'a001|0'）：這支沒有規格價格表，只列名稱與件數，請客人回下單頁確認、送出 */
+  /* 下單頁另選的規格（cart.v，key 像 'a001|0'；規格名稱在 cart.vn，下單頁存的）：
+     這支沒有規格價格表，只列名稱、規格、件數，請客人回下單頁確認、送出。舊資料沒有 vn 就寫「規格在下單頁」 */
   function extras() {
-    var v = cart.v, sum = {};
+    var v = cart.v, vn = cart.vn && typeof cart.vn === 'object' ? cart.vn : {}, rows = {}, order = [];
     if (!v || typeof v !== 'object') return [];
     Object.keys(v).forEach(function (k) {
       var q = parseInt(v[k], 10) || 0, S = String(k).split('|')[0].toUpperCase();
-      if (q > 0 && BYSKU[S]) sum[S] = (sum[S] || 0) + q;
+      if (!(q > 0) || !BYSKU[S]) return;
+      var spec = typeof vn[k] === 'string' ? vn[k].trim() : '', id = S + '|' + spec;
+      if (!rows[id]) { rows[id] = { sku: S, qty: 0, p: BYSKU[S], spec: spec }; order.push(id); }
+      rows[id].qty += q;
     });
-    return Object.keys(sum).map(function (S) { return { sku: S, qty: sum[S], p: BYSKU[S] }; });
+    return order.map(function (id) { return rows[id]; });
   }
   function extraCount() { return extras().reduce(function (a, e) { return a + e.qty; }, 0); }
-  function extrasHtml() {
+  /* 規格名稱照逗號切段、每段不拆開（「1入 體驗裝（不划算），20倍稀釋最高可稀釋65倍」不會剩一個「倍」掉到下一行） */
+  function specHtml(s) {
+    var parts = String(s).split(/\s*,\s*/).filter(Boolean);
+    return parts.map(function (t, i) { return '<span class="c">' + esc(t) + (i < parts.length - 1 ? '，' : '') + '</span>'; }).join('');
+  }
+  /* only＝這裡的購物車沒有別的商品：下單頁那幾件就是全部，按鈕改成主要按鈕「到下單頁送出」 */
+  function extrasHtml(only) {
     var xs = extras();
     if (!xs.length) return '';
-    return '<div class="pm-extra"><div class="pm-extra-h">在下單頁選的其他規格 · ' + extraCount() + ' 件</div><ul>' +
-      xs.map(function (e) { return '<li>' + esc(e.p.name) + ' ×' + e.qty + '</li>'; }).join('') +
-      '</ul><p>這幾件不會跟這裡的購物車一起送出，規格和價格請回下單頁確認、<span class="nw">送出。</span></p>' +
-      '<a class="btn btn-outline" href="' + (CFG.base || '') + 'order.html">到下單頁查看 →</a></div>';
+    return '<div class="pm-extra' + (only ? ' only' : '') + '"><div class="pm-extra-h">在下單頁選的規格 · ' + extraCount() + ' 件</div><ul>' +
+      xs.map(function (e) {
+        return '<li><span class="nm">' + esc(e.p.name) + '</span><span class="sp">' + (e.spec ? specHtml(e.spec) : '規格在下單頁') + '</span><span class="q">×' + e.qty + '</span></li>';
+      }).join('') + '</ul>' +
+      (only ? '<p>這幾件要在下單頁送出，規格和價格也在那裡確認。</p>'
+            : '<p>這幾件不會跟這裡的購物車一起送出，規格和價格請回下單頁確認、<span class="nw">送出。</span></p>') +
+      '<a class="btn ' + (only ? 'btn-gold' : 'btn-outline') + '" href="' + (CFG.base || '') + 'order.html">' + (only ? '到下單頁送出 →' : '到下單頁查看 →') + '</a></div>';
   }
 
   function entries() {
@@ -190,9 +203,10 @@
     var es = entries();
     var itemsEl = $('[data-pm-items]'), footEl = $('[data-pm-foot]'), ctEl = $('[data-pm-count]');
     if (!itemsEl) return;
-    ctEl.textContent = es.length ? '· ' + count() + ' 件' : '';
+    var all = count() + extraCount(); // 跟購物車鈕上的數字一致（含下單頁另選的規格）
+    ctEl.textContent = all ? '· ' + all + ' 件' : '';
     if (!es.length) {
-      itemsEl.innerHTML = extras().length ? extrasHtml() : '<div class="pm-empty"><div class="big">🛒</div><p>購物車還是空的<br>把喜歡的商品加進來吧</p></div>';
+      itemsEl.innerHTML = extras().length ? extrasHtml(true) : '<div class="pm-empty"><div class="big">🛒</div><p>購物車還是空的<br>把喜歡的商品加進來吧</p></div>';
       footEl.innerHTML = '<a class="btn btn-outline" href="' + (CFG.base || '') + 'index.html#products" style="width:100%">去逛全部商品</a>';
     } else {
       itemsEl.innerHTML = es.map(itemRow).join('') + extrasHtml();
@@ -268,9 +282,12 @@
     var kept = {}, focused = document.activeElement && root.contains(document.activeElement) ? document.activeElement.name : '';
     $all('input[name],textarea[name]', root).forEach(function (i) { kept[i.name] = i.value; });
     if (!es.length) {
-      root.innerHTML = '<div class="pm-empty" style="padding:80px 20px"><div class="big">🛒</div>' +
-        '<p>購物車是空的</p><a class="btn btn-gold" href="index.html#products" style="margin-top:20px">去逛全部商品</a></div>' +
-        (extras().length ? '<div class="pm-cart-extra">' + extrasHtml() + '</div>' : '');
+      /* 只有下單頁另選的規格：不寫「購物車是空的」（右上角數字明明是 1），把那幾件放最上面，逛商品改成次要連結 */
+      root.innerHTML = extras().length
+        ? '<div class="pm-cart-extra">' + extrasHtml(true) +
+          '<p class="pm-cart-more">還想加別的？<a href="index.html#products">去逛全部商品 →</a></p></div>'
+        : '<div class="pm-empty" style="padding:80px 20px"><div class="big">🛒</div>' +
+          '<p>購物車是空的</p><a class="btn btn-gold" href="index.html#products" style="margin-top:20px">去逛全部商品</a></div>';
       return;
     }
     var sub = pricedSubtotal(), fee = shipFee(sub);
