@@ -1,6 +1,9 @@
 """下單頁（order.html）跟全站購物車（js/store.js）要讀寫同一個購物車；購物車相關的字不小於 12px。"""
 from pathlib import Path
+import json
 import re
+import shutil
+import subprocess
 import unittest
 
 
@@ -85,7 +88,7 @@ class OrderCartContract(unittest.TestCase):
         self.assertIn("white-space:nowrap", m.group(1))
         self.assertIn("min-width:max-content", m.group(1))
 
-    # ── r5：下單頁規格要寫出是哪個規格、只有下單頁規格時結帳頁不說「購物車是空的」 ──
+    # ── r5：下單頁規格要寫出是哪個規格、只有下單頁規格時結帳頁不說「購物車是空的」、英文結帳列兩顆鈕平衡 ──
     def test_order_page_saves_spec_names_with_variants(self):
         m = re.search(r"function save\(\)\{(.*?)\n  \}", self.order, re.S)
         self.assertIsNotNone(m, "order.html 找不到 save()")
@@ -102,6 +105,24 @@ class OrderCartContract(unittest.TestCase):
         self.assertIn("extrasHtml(true)", body)
         self.assertLess(body.index("extras().length"), body.index("<p>購物車是空的</p>"),
                         "只有下單頁規格時要先判斷，不能直接顯示「購物車是空的」")
+
+    def test_order_bar_keeps_both_buttons_on_the_same_row_or_stacked(self):
+        self.assertIn(".bar.stack .in>div:first-child{flex-basis:100%}", self.order)
+        m = re.search(r"function padForBar\(\)\{(.*?)\n  \}", self.order, re.S)
+        self.assertIsNotNone(m)
+        self.assertIn("balanceBar();", m.group(1))
+
+    def test_english_spec_names_have_no_chinese_left(self):
+        node = shutil.which("node")
+        if not node:
+            self.skipTest("沒有 node")
+        fn = re.search(r"(function specEn\(s\)\{.*?\n  \})", self.order, re.S).group(1)
+        js = ("const {PM_PRODUCTS}=require(process.argv[1]);" + fn +
+              "const bad=[];PM_PRODUCTS.forEach(p=>p.variants.forEach(v=>{const e=specEn(v.spec);"
+              "if(/[\\u3400-\\u9fff\\uff00-\\uffef]/.test(e)||/\\d(ml|g|L)[A-Za-z]/.test(e))bad.push(v.spec+' => '+e);}));"
+              "process.stdout.write(JSON.stringify(bad));")
+        out = subprocess.run([node, "-e", js, str(ROOT / "products_catalog.js")], capture_output=True, text=True, check=True)
+        self.assertEqual(json.loads(out.stdout), [], "英文模式規格名稱還有中文或黏在一起")
 
 
 if __name__ == "__main__":

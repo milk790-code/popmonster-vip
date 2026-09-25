@@ -59,9 +59,15 @@
     .bar .in>div:first-child{flex-basis:100%} /* 手機：已選件數＋合計固定自己一排，有沒有「待報價」版面都一樣 */
     .bar .btn{font-size:.92em;padding:13px 8px}
   }
+  /* 桌機：合計太長（英文＋待報價）擠掉一顆鈕時，合計自己一排、兩顆鈕一起放下一排（balanceBar 判斷） */
+  .bar.stack .in>div:first-child{flex-basis:100%}
+  @media(max-width:320px){.bar .btn{padding:13px 4px}} /* Galaxy Fold 外螢幕 280 寬：英文付款鈕原本比容器寬 4px */
   .btn-pay{background:transparent;color:#d8c08a;border:1px solid var(--gold-d)}
   .btn[disabled]{opacity:.35;cursor:not-allowed}
-  .ship{color:var(--mut);font-size:.8em;text-align:center;width:100%;margin-top:2px;text-wrap:balance} /* 兩行時平均分，不剩「日」一個字 */
+  .ship{color:var(--mut);font-size:.8em;text-align:center;width:100%;margin-top:2px}
+  /* 出貨說明兩句各自不斷行；同一排時中間畫一條細線，放不下就一句一排，不會剩「｜」或「· Pre-order」開頭 */
+  .ship span{display:inline-block;margin:0 .6em;position:relative;text-wrap:balance} /* 280 寬英文一句放不下時兩行平均分，不剩 payment 一個字 */
+  .ship.one span+span::before{content:'';position:absolute;left:-.65em;top:22%;height:56%;border-left:1px solid #4a4a4a}
   dialog{background:var(--card);color:var(--tx);border:1px solid var(--gold-d);border-radius:14px;max-width:430px;width:92%;padding:20px}
   dialog::backdrop{background:rgba(0,0,0,.7)}
   textarea{width:100%;min-height:170px;background:#0e0e0e;color:var(--tx2);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:.88em}
@@ -137,13 +143,16 @@
       .replace(/入門體驗款|嚐鮮裝|體驗裝/g,'starter').replace(/熱銷首選款/g,'best seller')
       .replace(/團購優惠款/g,'value size').replace(/超值優惠款/g,'jumbo')
       .replace(/可兌(\d+)L成品/g,'makes $1L').replace(/樣品|試用品/g,'sample')
+      .replace(/（?不划算）?/g,' (not best value)').replace(/最划算/g,'best value') // 英文模式不能留「不」「最」
       .replace(/划算/g,'best value').replace(/雙入補貨/g,'').replace(/入門囤貨|常規補貨|店家必囤/g,'')
       .replace(/⚠️無噴頭/g,'no spray head').replace(/不附噴頭/g,'no spray head')
       .replace(/最高300倍稀釋/g,'dilute up to 300x').replace(/20倍稀釋最高可稀釋65倍/g,'dilute 20–65x')
       .replace(/贈油膜擦/g,'+ free applicator').replace(/（贈慕斯瓶）/g,' (+ foam bottle)')
       .replace(/紅色（重切）/g,'Red (heavy cut)').replace(/灰色（細切）/g,'Grey (fine cut)')
       .replace(/GA\/DA適用套裝/g,'GA/DA set').replace(/RO適用套裝/g,'RO set')
-      .replace(/單一規格/g,'standard').replace(/\s*,\s*/g,', ').replace(/\s+/g,' ').trim();
+      .replace(/單一規格/g,'standard').replace(/（/g,' (').replace(/）/g,')')
+      .replace(/(\d+(?:ml|g|L))(?=[A-Za-z])/g,'$1 ').replace(/(\d)\+/g,'$1 +') // 100mlstarter → 100ml starter
+      .replace(/\s*,\s*/g,', ').replace(/\s+/g,' ').trim();
   }
   var lang=params.get('lang')||localStorage.getItem('pm_lang')||'zh';
   if(lang!=='en')lang='zh';
@@ -302,7 +311,8 @@
       n+=q;if(L.price)sum+=L.price*q;else un=true;}
     document.getElementById('cnt').textContent=n;
     document.getElementById('total').innerHTML=n?((sum?fmt(sum):'')+(un?(sum?(lang==='en'?' + ':'＋'):'')+T.quote:'')+(lang==='en'&&sum?' '+ref(sum):'')):'';
-    document.getElementById('ship').textContent='📦 '+(lang==='en'?PM_SHIPPING.leadDaysTextEn+' · '+PM_SHIPPING.noteEn:PM_SHIPPING.leadDaysText+'｜'+PM_SHIPPING.note);
+    var sh=lang==='en'?[PM_SHIPPING.leadDaysTextEn,PM_SHIPPING.noteEn]:[PM_SHIPPING.leadDaysText,PM_SHIPPING.note];
+    document.getElementById('ship').innerHTML='<span>📦 '+sh[0]+'</span> <span>'+sh[1]+'</span>';
     var pay=document.getElementById('btnPay');
     pay.disabled=!CFG.PAY_ENABLED||!n||un; // 有待報價的品項就不能線上付款
     pay.textContent=CFG.PAY_ENABLED?T.payOn:T.pay;
@@ -311,9 +321,22 @@
   }
   // 手機上底部結帳列有兩排（約 190px），原本固定留 150px，捲到底最後一張卡的 − ＋ 會被蓋住；改成照結帳列實際高度留白
   function padForBar(){
+    balanceBar();
     var w=document.querySelector('.wrap'),b=document.querySelector('.bar');
     if(w&&b)w.style.paddingBottom=(b.offsetHeight+24)+'px';
   }
+  // 兩顆鈕要嘛同一排、要嘛各佔一整排；不能一顆跟合計擠第一排、另一顆自己掉到第二排（桌機英文＋待報價會這樣）
+  // 先拿掉 stack 量一次，兩顆不同排才讓合計自己一排；結果只看寬度，ResizeObserver 重算也不會來回跳
+  function balanceBar(){
+    var b=document.querySelector('.bar'),go=document.getElementById('btnGo'),pay=document.getElementById('btnPay');
+    if(!b||!go||!pay)return;
+    b.classList.remove('stack');
+    if(!sameRow(go,pay))b.classList.add('stack');
+    var s=document.querySelectorAll('#ship span');
+    document.getElementById('ship').classList.toggle('one',s.length===2&&sameRow(s[0],s[1]));
+  }
+  function sameRow(a,b){return Math.abs(a.offsetTop-b.offsetTop)<Math.min(a.offsetHeight,b.offsetHeight)/2;} // 📦 會把第一句撐高 2px，不能用 ===
+
   window.addEventListener('resize',padForBar);
   // 字型晚到、手機工具列伸縮讓結帳列變高時也重算
   if(window.ResizeObserver){try{new ResizeObserver(padForBar).observe(document.querySelector('.bar'));}catch(e){}}
