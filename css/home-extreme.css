@@ -117,7 +117,7 @@
 }
 .home-page .nav-menu-btn {
   width: auto;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 12px;
   color: var(--home-text);
   border: 1px solid var(--home-line);
@@ -327,7 +327,7 @@
 .catalog-search > span { color: var(--home-muted); font-size: 13px; }
 .home-page .filter-bar { gap: 8px; margin-bottom: 20px; }
 .home-page .filter-btn {
-  min-height: 42px;
+  min-height: 44px;
   padding: 8px 16px;
   color: var(--home-muted);
   background: transparent;
@@ -517,7 +517,7 @@
     text-align: left;
   }
   .home-page .cookie-bar > span:last-child { display: flex; gap: 8px; }
-  .home-page .cookie-bar button { flex: 1; min-height: 42px; }
+  .home-page .cookie-bar button { flex: 1; min-height: 44px; }
 }
 
 @media (max-width: 420px) {
