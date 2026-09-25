@@ -108,7 +108,7 @@
 
 /* ── nav 購物車鈕(v2 樣式,原版 main.css 無) ── */
 /* nav 購物車按鈕（store.js 注入） */
-.nav-cart-btn{position:relative;display:inline-flex;align-items:center;gap:8px;background:none;border:1px solid var(--bdr-w);color:var(--gold);font-family:var(--ff-ui);font-size:13px;letter-spacing:.04em;padding:9px 14px;min-height:40px;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.nav-cart-btn{position:relative;display:inline-flex;align-items:center;gap:8px;background:none;border:1px solid var(--bdr-w);color:var(--gold);font-family:var(--ff-ui);font-size:13px;letter-spacing:.04em;padding:9px 14px;min-height:44px;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
 .nav-cart-btn .t{display:inline;}
 .nav-cart-btn{padding:9px 12px;}
 .nav-cart-btn:hover{border-color:var(--gold);background:rgba(200,169,107,.08);}

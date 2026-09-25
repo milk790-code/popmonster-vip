@@ -125,7 +125,7 @@
   letter-spacing: .04em;
 }
 .home-page .nav-cart-btn {
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 12px;
   border-color: var(--home-line-strong);
 }
@@ -500,7 +500,7 @@
   .home-page .card-body { padding: 12px; }
   .home-page .card-name { font-size: 15px; }
   .home-page .card-price { font-size: 15px; }
-  .home-page .card-btn--cart { padding: 9px 8px; font-size: 13px; }
+  .home-page .card-btn--cart { padding: 10px 8px; font-size: 13px; min-height: 44px; }
   .home-page .universe-section { padding-top: 40px; padding-bottom: 48px; }
   .universe-grid { grid-template-columns: 1fr; }
   .universe-card,

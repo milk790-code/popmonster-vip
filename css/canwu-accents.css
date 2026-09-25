@@ -44,7 +44,7 @@
 .ink-ph--sm .ink-ph-seal{width:22px;height:22px;font-size:9px;right:8%;bottom:8%}
 .ink-ph-note{
   position:absolute;left:10%;top:9%;
-  font-family:'Songti TC',STSong,'Noto Serif TC',serif;font-size:11px;letter-spacing:.35em;
+  font-family:'Songti TC',STSong,'Noto Serif TC',serif;font-size:12px;letter-spacing:.35em;
   color:rgba(27,23,18,.45);writing-mode:vertical-rl;
 }
 

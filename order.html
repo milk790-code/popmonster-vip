@@ -183,9 +183,10 @@
     });
     return out.length?'<div class="picked">'+out.join('<br>')+'</div>':'';
   }
-  // 縮圖：a005 原主圖背景是 AI 合成車庫，改用棚拍；下列 SKU 只有 AI 合成主圖，先不放圖
-  var PM_NO_REAL_IMG={a008:1,a009:1,a013:1,a017:1,a033:1,a036:1,a037:1,a038:1,a040:1,a042:1};
-  function pimg(s){ if(s==='a005') return 'img/real/a005-shi10-studio.jpg'; return PM_NO_REAL_IMG[s]?'':'img/'+s+'-main.jpg'; }
+  // 縮圖：顯示 54px，用 img/card/ 的 160px 縮圖（原本載 1000px 主圖，一張約 100KB）。
+  // a005 用棚拍、a008 用 Super Foam 實拍（都在 img/card/）；下列 SKU 只有 AI 合成主圖，先不放圖
+  var PM_NO_REAL_IMG={a009:1,a013:1,a017:1,a033:1,a036:1,a037:1,a038:1,a040:1,a042:1};
+  function pimg(s){ return PM_NO_REAL_IMG[s]?'':'img/card/'+s+'-160.jpg'; }
   function renderList(){
     var el=document.getElementById('list');
     el.innerHTML=PM_PRODUCTS.filter(function(p){return cat==='__all__'||p.cat===cat}).map(function(p){
@@ -193,7 +194,7 @@
       var opts=p.variants.map(function(x,j){
         return '<option value="'+j+'"'+(j===i?' selected':'')+'>'+pspec(x.spec)+'｜'+fmt(x.price)+'</option>';}).join('');
       return '<div class="item"><div class="top">'+
-        (pimg(p.sku)?'<img loading="lazy" src="'+pimg(p.sku)+'" onerror="this.style.visibility=\'hidden\'" alt="'+pname(p)+'">':'<span class="noimg" aria-hidden="true"></span>')+
+        (pimg(p.sku)?'<img loading="lazy" decoding="async" width="54" height="54" src="'+pimg(p.sku)+'" onerror="this.style.visibility=\'hidden\'" alt="'+pname(p)+'">':'<span class="noimg" aria-hidden="true"></span>')+
         '<div><div class="iname">'+pname(p)+'</div><div class="icat">'+p.sku.toUpperCase()+' · '+pcat(p.cat)+'</div></div></div>'+
         '<div class="row2"><select onchange="PM.pick(\''+p.sku+'\',this.value)">'+opts+'</select>'+
         '<div class="iprice">'+fmt(v.price)+ref(v.price)+'</div>'+
