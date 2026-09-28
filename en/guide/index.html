@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<title>Guides | POP MONSTER</title>
+<meta name="description" content="POP MONSTER guides: Angel Coating Guard application, polisher basics, compound grit charts, and the full wash routine. A knowledge base for pro detailers in Taiwan.">
+<link rel="canonical" href="https://popmonster.vip/en/guide/">
+<!--i18n:alt-->
+<link rel="alternate" hreflang="zh-Hant-TW" href="https://popmonster.vip/guide/">
+<link rel="alternate" hreflang="zh-Hans" href="https://popmonster.vip/zh-hans/guide/">
+<link rel="alternate" hreflang="en" href="https://popmonster.vip/en/guide/">
+<link rel="alternate" hreflang="x-default" href="https://popmonster.vip/guide/">
+<link rel="stylesheet" href="/css/i18n.css">
+<script src="/js/i18n.js" defer></script>
+<!--/i18n:alt-->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/favicon.svg">
+<link rel="manifest" href="/manifest.json">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Complete Detailing Guide for Pros | POP MONSTER Knowledge Base">
+<meta property="og:description" content="An in-depth knowledge base for car-care enthusiasts in Taiwan.">
+<meta property="og:url" content="https://popmonster.vip/en/guide/">
+<meta property="og:image" content="https://popmonster.vip/assets/brand-totem/og-brand-1200x630.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WTKLHW33D7"></script>
+<script>
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'denied','wait_for_update':500});
+gtag('js',new Date());gtag('config','G-WTKLHW33D7',{'anonymize_ip':true,'cookie_flags':'SameSite=None;Secure'});
+</script>
+<link rel="stylesheet" href="../../css/main.css">
+<link rel="stylesheet" href="../../css/patch-p1p2.css">
+<style>
+:root{
+  --serif-g:"Playfair Display","Noto Serif TC",ui-serif,serif;
+  --tcserif-g:"Noto Serif TC","Playfair Display",serif;
+}
+/* mobile menu fix */
+.mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:#0a0a0a;border-bottom:1px solid var(--border);padding:20px;z-index:99;flex-direction:column;gap:16px;}
+.mobile-menu.show{display:flex;}
+.mobile-menu a{color:#e8e2d6;font-size:16px;display:block;padding:8px 0;}
+.mobile-menu a.active{color:var(--gold);}
+
+/* COVER */
+.g-cover{
+  padding:110px 24px 64px;
+  background:radial-gradient(ellipse at 50% 0%,rgba(200,169,107,.07) 0%,transparent 65%);
+  text-align:center;
+}
+.g-cover .kicker{
+  font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.42em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:24px;
+  display:inline-flex;align-items:center;gap:16px;
+}
+.g-cover .kicker::before,.g-cover .kicker::after{content:"";width:40px;height:1px;background:var(--gold);opacity:.5;}
+.g-cover h1{
+  font-family:var(--serif-g);font-weight:900;line-height:.92;
+  font-size:clamp(56px,10vw,140px);letter-spacing:-.02em;color:var(--txt);margin-bottom:20px;
+}
+.g-cover h1 .it{font-style:italic;font-weight:500;color:var(--gold-lt);}
+.g-cover .lede{
+  font-family:var(--tcserif-g);font-size:clamp(17px,1.8vw,22px);
+  line-height:1.55;color:var(--txt-m);max-width:600px;margin:0 auto 40px;
+}
+.g-cover .lede em{color:var(--gold);font-style:normal;}
+
+/* STAT STRIP */
+.g-stats{
+  display:flex;justify-content:center;gap:0;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  max-width:800px;margin:0 auto;
+}
+.g-stat{
+  flex:1;padding:20px 16px;text-align:center;border-right:1px solid var(--border);
+}
+.g-stat:last-child{border-right:none;}
+.g-stat .n{font-family:var(--serif-g);font-weight:900;font-size:32px;color:var(--gold);line-height:1;}
+.g-stat .l{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--txt-m);margin-top:8px;}
+
+/* ARTICLE GRID */
+.g-wrap{max-width:1200px;margin:0 auto;padding:64px 24px;}
+.g-section-kk{font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);display:inline-flex;align-items:center;gap:14px;margin-bottom:32px;}
+.g-section-kk::before{content:"";width:36px;height:1px;background:var(--gold);}
+
+.article-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--border);}
+@media(max-width:980px){.article-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.article-grid{grid-template-columns:1fr;}}
+
+.art-card{
+  border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+  text-decoration:none;display:flex;flex-direction:column;
+  transition:background .15s ease;position:relative;overflow:hidden;
+}
+.art-card:hover{background:var(--bg-sub);}
+.art-card:nth-child(3n){border-right:none;}
+@media(max-width:980px){
+  .art-card:nth-child(2n){border-right:none;}
+  .art-card:nth-child(3n){border-right:1px solid var(--border);}
+}
+@media(max-width:560px){.art-card{border-right:none;}}
+
+/* card visual header */
+.ac-vis{
+  height:200px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);
+  display:flex;align-items:flex-end;justify-content:flex-start;
+  padding:20px;
+}
+.ac-vis .ac-cat{
+  font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:.28em;
+  text-transform:uppercase;padding:5px 10px;border:1px solid var(--gold);
+  background:rgba(200,169,107,.1);color:var(--gold);
+}
+.ac-vis .ac-num{
+  position:absolute;right:16px;top:16px;
+  font-family:var(--serif-g);font-weight:900;font-size:64px;line-height:1;
+  color:rgba(200,169,107,.12);letter-spacing:-.02em;font-feature-settings:"lnum";
+}
+/* different gradient per card */
+.ac-vis.v1{background:linear-gradient(135deg,#0e1414 0%,#1a2424 100%);}
+.ac-vis.v2{background:linear-gradient(135deg,#140e0e 0%,#241a1a 100%);}
+.ac-vis.v3{background:linear-gradient(135deg,#0e100a 0%,#1a1e14 100%);}
+.ac-vis.v4{background:linear-gradient(135deg,#14100e 0%,#241e1a 100%);}
+.ac-vis.v5{background:linear-gradient(135deg,#0e0e14 0%,#1a1a24 100%);}
+
+.ac-body{padding:22px 22px 20px;flex:1;display:flex;flex-direction:column;gap:10px;}
+.ac-date{font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.2em;color:var(--txt-dim);}
+.ac-h{
+  font-family:var(--tcserif-g);font-weight:700;font-size:18px;
+  color:var(--txt);line-height:1.3;
+}
+.ac-exc{
+  font-family:'Noto Sans TC',sans-serif;font-size:13px;
+  color:var(--txt-m);line-height:1.65;flex:1;
+}
+.ac-foot{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:12px;border-top:1px solid var(--border-w);
+  margin-top:auto;
+}
+.ac-read{
+  font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);
+}
+.ac-time{font-family:'Montserrat',sans-serif;font-size:10px;color:var(--txt-dim);letter-spacing:.1em;}
+.art-card:hover .ac-read{color:var(--gold-lt);}
+
+/* FEATURED (first card) */
+.art-card.featured{grid-column:span 2;}
+@media(max-width:980px){.art-card.featured{grid-column:span 1;}}
+.art-card.featured .ac-vis{height:280px;}
+.art-card.featured .ac-h{font-size:24px;}
+
+/* CATEGORY TAGS */
+.cat-row{
+  display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px;
+}
+.cat-btn{
+  font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.2em;
+  text-transform:uppercase;padding:6px 14px;border:1px solid var(--border);
+  background:transparent;color:var(--txt-m);cursor:pointer;transition:all .15s ease;
+}
+.cat-btn:hover{color:var(--txt);border-color:var(--border-s);}
+.cat-btn.on{background:var(--gold);color:var(--bg);border-color:var(--gold);}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="nav-inner">
+  <a href="../index.html" class="nav-logo">POP MONSTER<span>泡泡怪獸</span></a>
+  <div class="nav-links">
+    <a href="../index.html">All Products</a>
+    <a href="../members.html">Members</a>
+    <a href="index.html" style="color:var(--gold)">Guides</a>
+    <a href="../about.html">About</a>
+    
+    <a href="https://wa.me/886970527037" target="_blank" rel="noopener">WhatsApp us</a>
+  </div>
+  <!--i18n:switch--><details class="lang-switch" data-i18n-skip><summary aria-label="Change language"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M12 3c2.6 2.8 3.9 5.8 3.9 9s-1.3 6.2-3.9 9c-2.6-2.8-3.9-5.8-3.9-9S9.4 5.8 12 3z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>EN</span></summary><div class="lang-menu"><a href="/guide/" hreflang="zh-Hant-TW" lang="zh-Hant-TW" data-lang="zh-Hant">繁中<small>繁體中文</small></a><a href="/zh-hans/guide/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh-Hans">简中<small>简体中文</small></a><a href="/en/guide/" hreflang="en" lang="en" data-lang="en" aria-current="true">EN<small>English</small></a></div></details><!--/i18n:switch-->
+  <button class="nav-menu-btn" aria-label="Menu" onclick="this.nextElementSibling.classList.toggle('show');this.nextElementSibling.setAttribute('aria-hidden',!this.nextElementSibling.classList.contains('show'))">☰</button>
+  <div class="mobile-menu" aria-hidden="true">
+    <a href="../index.html">All Products</a>
+    <a href="../members.html">Members</a>
+    <a href="index.html" class="active">Guides</a>
+    <a href="../about.html">About</a>
+    
+    <a href="https://wa.me/886970527037" target="_blank" rel="noopener">WhatsApp us</a>
+    <!--i18n:menu--><div class="lang-row" data-i18n-skip role="group" aria-label="Change language"><a href="/guide/" hreflang="zh-Hant-TW" lang="zh-Hant-TW" data-lang="zh-Hant">繁體中文</a><a href="/zh-hans/guide/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh-Hans">简体中文</a><a href="/en/guide/" hreflang="en" lang="en" data-lang="en" aria-current="true">English</a></div><!--/i18n:menu-->
+  </div>
+</div></nav>
+
+<div class="brand-tagline" role="doc-tip"><em>Sanwu</em><span class="x">×</span><em>Redefining car care</em></div>
+
+<section class="g-cover" data-screen-label="01 Cover">
+  <div class="kicker">Knowledge · Guides</div>
+  <h1>Pro Detailer<br/><span class="it">Knowledge Base.</span></h1>
+  <p class="lede">From Angel Coating Guard to compounding and polishing, from grit charts to the full wash routine — <em>5 in-depth guides</em> anyone can follow.</p>
+</section>
+
+<div class="g-stats">
+  <div class="g-stat"><div class="n">5</div><div class="l">In-depth Guides</div></div>
+  <div class="g-stat"><div class="n">3</div><div class="l">Categories</div></div>
+  <div class="g-stat"><div class="n">30+</div><div class="l">Minutes of Reading</div></div>
+  <div class="g-stat"><div class="n">Free</div><div class="l">Open to all</div></div>
+</div>
+
+<div class="g-wrap" data-screen-label="02 Articles">
+  <div class="g-section-kk">All Articles</div>
+  <div class="cat-row">
+    <button class="cat-btn on" data-cat="all">All</button>
+    <button class="cat-btn" data-cat="鍍膜養護">Coating and Maintenance</button>
+    <button class="cat-btn" data-cat="拋光研磨">Polishing</button>
+    <button class="cat-btn" data-cat="洗車保養">Washing &amp; care</button>
+  </div>
+
+  <div class="article-grid" id="article-grid">
+
+    <a href="angel-coating-guide.html" class="art-card featured fade-up" data-cat="鍍膜養護">
+      <div class="ac-vis v1">
+        <span class="ac-cat">Coating and Maintenance</span>
+        <span class="ac-num">01</span>
+      </div>
+      <div class="ac-body">
+        <div class="ac-date">2026 · 05 · 02</div>
+        <h3 class="ac-h">Angel Coating Guard Full Application Guide: The Science and Steps of 1:1000 Dilution</h3>
+        <p class="ac-exc">A deep dive into how Angel Coating Guard works: dilution ratios, application steps, and common mistakes. From beginners to pro detailers, everyone can find a use case that fits.</p>
+        <div class="ac-foot">
+          <span class="ac-read">Read more →</span>
+          <span class="ac-time">About 8 min</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="ro-polish-beginner.html" class="art-card fade-up" data-cat="拋光研磨">
+      <div class="ac-vis v2">
+        <span class="ac-cat">Polishing</span>
+        <span class="ac-num">02</span>
+      </div>
+      <div class="ac-body">
+        <div class="ac-date">2026 · 05 · 02</div>
+        <h3 class="ac-h">Polishing for Beginners: Choosing RO/GA/DA and Sequencing Your Grits</h3>
+        <p class="ac-exc">Beginners should start with a dual-action polisher (DA), not a rotary polisher (RO). Cutting power runs DA &lt; GA &lt; RO, and so does the risk of burning the paint.</p>
+        <div class="ac-foot">
+          <span class="ac-read">Read more →</span>
+          <span class="ac-time">About 7 min</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="polishing-pad-selection.html" class="art-card fade-up" data-cat="拋光研磨">
+      <div class="ac-vis v3">
+        <span class="ac-cat">Polishing</span>
+        <span class="ac-num">03</span>
+      </div>
+      <div class="ac-body">
+        <div class="ac-date">2026 · 05 · 02</div>
+        <h3 class="ac-h">The complete guide to polishing pads: how to pick wool, coarse foam, fine foam, and mirror-finish pads</h3>
+        <p class="ac-exc">Pick the wrong pad and you've wasted the whole job. Here's how to choose the right pad by material, density, and hardness.</p>
+        <div class="ac-foot">
+          <span class="ac-read">Read more →</span>
+          <span class="ac-time">About 6 min</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="miso-grit-system.html" class="art-card fade-up" data-cat="拋光研磨">
+      <div class="ac-vis v4">
+        <span class="ac-cat">Polishing</span>
+        <span class="ac-num">04</span>
+      </div>
+      <div class="ac-body">
+        <div class="ac-date">2026 · 05 · 02</div>
+        <h3 class="ac-h">MISO compound grit chart: which number to use and when</h3>
+        <p class="ac-exc">MISO covers everything from 80 grit to 1500 grit. This guide tells you which one to pick for your paint condition.</p>
+        <div class="ac-foot">
+          <span class="ac-read">Read more →</span>
+          <span class="ac-time">About 7 min</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="wash-flow-complete.html" class="art-card fade-up" data-cat="洗車保養">
+      <div class="ac-vis v5">
+        <span class="ac-cat">Washing &amp; care</span>
+        <span class="ac-num">05</span>
+      </div>
+      <div class="ac-body">
+        <div class="ac-date">2026 · 05 · 02</div>
+        <h3 class="ac-h">The Complete Wash Routine: 8 Steps From Pre-Wash to Coating</h3>
+        <p class="ac-exc">Washing a car right is more than rinse and suds. These 8 steps, from pre-wash to coating, get your car clean inside and out.</p>
+        <div class="ac-foot">
+          <span class="ac-read">Read more →</span>
+          <span class="ac-time">About 9 min</span>
+        </div>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<section style="padding:64px 24px;text-align:center;background:var(--bg-card);border-top:1px solid var(--border);" data-screen-label="03 CTA">
+  <div style="font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.36em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;">Ready to buy?</div>
+  <h2 style="font-family:var(--serif-g);font-weight:900;font-size:clamp(32px,4.5vw,56px);line-height:.94;color:var(--txt);margin-bottom:12px;">Knowledge in Hand<br/><span style="font-style:italic;color:var(--gold-lt);font-weight:500;">Time to Act.</span></h2>
+  <p style="font-family:var(--tcserif-g);font-size:17px;color:var(--txt-m);margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto;">Got application questions? Message us on WhatsApp and we'll walk you through it.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    <a href="https://wa.me/886970527037" target="_blank" rel="noopener" class="btn btn-gold">WhatsApp order</a>
+    <a href="https://wa.me/886970527037" target="_blank" rel="noopener" class="btn btn-outline">WhatsApp us</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-brand">POP MONSTER × MISO</div>
+  <div class="footer-sub">Check material and application conditions first | Follow product instructions | Not sure? Ask first, then use with confidence</div>
+  <div class="brand-belief">
+    <span><b>In the past</b>, safety was the foundation we were built on.</span>
+    <span><b>Now</b>, safety is the bottom line of every product.</span>
+    <span><b>In the future</b>, safety stays the standard we'll always hold to.</span>
+  </div>
+  <div class="footer-links">
+    <a href="../index.html">All Products</a>
+    <a href="../members.html">Members</a>
+    <a href="index.html">Guides</a><a href="../../go-en">Free Help Desk</a>
+    <a href="../about.html">About</a>
+    
+    <a href="https://wa.me/886970527037" target="_blank" rel="noopener">WhatsApp us</a>
+  </div>
+  <div class="footer-legal" style="margin-bottom:8px">
+    <a href="../privacy.html" style="font-size:12px;color:var(--txt-m)">Privacy Policy</a>
+    <span style="color:var(--txt-m);margin:0 8px">|</span>
+    <a href="../terms.html" style="font-size:12px;color:var(--txt-m)">Terms of Service</a>
+  </div>
+  <div class="footer-copy">© 2026 POP MONSTER. All rights reserved.</div>
+</footer>
+<div class="cookie-bar">
+  <span>This site uses cookies to improve your browsing experience. By continuing to browse, you agree to their use.</span>
+  <span><button class="cookie-accept" id="ck-accept">Accept</button> <button class="cookie-decline" id="ck-decline">Decline</button></span>
+</div>
+<script src="../js/main.js" defer></script>
+<script>
+(function(){
+  // category filter
+  var btns = document.querySelectorAll('.cat-btn[data-cat]');
+  var cards = document.querySelectorAll('.art-card[data-cat]');
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      var cat = b.getAttribute('data-cat');
+      btns.forEach(function(x){ x.classList.toggle('on', x === b); });
+      cards.forEach(function(c){
+        var match = cat === 'all' || c.getAttribute('data-cat') === cat;
+        c.style.display = match ? '' : 'none';
+        if(match) c.classList.add('fade-up');
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

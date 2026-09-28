@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d0c0a">
+  <meta name="color-scheme" content="dark">
+  <meta name="robots" content="index,follow">
+  <meta name="systems-events" content="https://go-events.milk790.workers.dev/e">
+  <title>店家系统｜POP MONSTER × POP CARD</title>
+  <meta name="description" content="泡泡怪兽店家系统馆：了解 POP MONSTER 与 POP CARD 如何把车主选品、服务菜单、预约、会员、车况与帐本接成清楚且数据分离的流程。">
+  <link rel="canonical" href="https://popmonster.vip/zh-hans/systems.html">
+<!--i18n:alt-->
+<link rel="alternate" hreflang="zh-Hant-TW" href="https://popmonster.vip/systems.html">
+<link rel="alternate" hreflang="zh-Hans" href="https://popmonster.vip/zh-hans/systems.html">
+<link rel="alternate" hreflang="en" href="https://popmonster.vip/en/systems.html">
+<link rel="alternate" hreflang="x-default" href="https://popmonster.vip/systems.html">
+<link rel="stylesheet" href="/css/i18n.css">
+<script src="/js/i18n.js" defer></script>
+<!--/i18n:alt-->
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/go.css">
+  <link rel="stylesheet" href="../css/systems.css">
+  <script src="../js/systems-funnel.js" defer></script>
+
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:site_name" content="泡泡怪兽 POP MONSTER">
+  <meta property="og:title" content="店家系统｜POP MONSTER × POP CARD">
+  <meta property="og:description" content="车主把施工选对，店家把服务说清楚。看 POP CARD 公开展示与两套系统的数据边界。">
+  <meta property="og:url" content="https://popmonster.vip/zh-hans/systems.html">
+  <meta property="og:image" content="https://popmonster.vip/assets/brand-totem/og-brand-1200x630.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="泡泡怪兽 POP MONSTER 店家系统馆">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="店家系统｜POP MONSTER × POP CARD">
+  <meta name="twitter:description" content="车主把施工选对，店家把服务说清楚。">
+  <meta name="twitter:image" content="https://popmonster.vip/assets/brand-totem/og-brand-1200x630.png">
+</head>
+<body class="systems-page">
+<!--i18n:switch--><details class="lang-switch lang-float" data-i18n-skip><summary aria-label="切换语言"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M12 3c2.6 2.8 3.9 5.8 3.9 9s-1.3 6.2-3.9 9c-2.6-2.8-3.9-5.8-3.9-9S9.4 5.8 12 3z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>简中</span></summary><div class="lang-menu"><a href="/systems.html" hreflang="zh-Hant-TW" lang="zh-Hant-TW" data-lang="zh-Hant">繁中<small>繁體中文</small></a><a href="/zh-hans/systems.html" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh-Hans" aria-current="true">简中<small>简体中文</small></a><a href="/en/systems.html" hreflang="en" lang="en" data-lang="en">EN<small>English</small></a></div></details><!--/i18n:switch-->
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+  <header class="site-header systems-header">
+    <a class="brand-mark" href="index.html" aria-label="返回 POP MONSTER 首页">
+      <span aria-hidden="true">POP</span>
+      <span>店家系统馆</span>
+    </a>
+    <nav aria-label="系统馆导览">
+      <a href="index.html#entry-paths">车主选品</a>
+      <a href="#creator-tools">创作者工具</a>
+      <a href="../go.html">免费接线台</a>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <section class="systems-hero" aria-labelledby="systems-title">
+      <div class="systems-hero-copy">
+        <p class="eyebrow">POP MONSTER UNIVERSE / SHOP SYSTEMS</p>
+        <h1 id="systems-title">车主把施工选对，<em>店家把服务说清楚。</em></h1>
+        <p class="systems-lede">POP MONSTER 负责品牌、商品、教学与车主选品；POP CARD 负责店家的服务菜单、预约、会员、车况与帐本。入口接在一起，正式数据保持分离。</p>
+        <div class="systems-actions">
+          <a class="button button-primary" href="https://popcard-saas-preview.milk790.workers.dev/s/jilin#story" rel="external">打开 POP CARD 公开展示</a>
+          <a class="button button-secondary" href="#boundary">先看集成边界</a>
+        </div>
+        <p class="systems-disclosure">目前链接的是独立公开展示，不是正式店家后台，也不读取官网的会员、购物车或付款数据。</p>
+      </div>
+      <aside class="systems-signal" aria-label="CreatorKit 精选工具与泡泡怪兽宇宙的两条路">
+        <div class="creator-sprint" aria-labelledby="creator-sprint-title">
+          <div class="creator-sprint-heading">
+            <p>CREATOR SPRINT / START HERE</p>
+            <h2 id="creator-sprint-title">今天先做一支。</h2>
+          </div>
+          <div class="creator-sprint-tools">
+            <a href="https://creatorkit.milk790.workers.dev/?src=th3&amp;tool=viral-breakdown" rel="external" data-creator-tool data-tool-slug="viral-breakdown" data-surface="systems_hero">
+              <span>01</span><strong>爆款拆解</strong><small>找出内容为什幺有效</small>
+            </a>
+            <a href="https://creatorkit.milk790.workers.dev/?src=th3&amp;tool=ai-script" rel="external" data-creator-tool data-tool-slug="ai-script" data-surface="systems_hero">
+              <span>02</span><strong>短影音脚本</strong><small>把主题变成完整口播</small>
+            </a>
+            <a href="https://creatorkit.milk790.workers.dev/?src=th3&amp;tool=rewrite" rel="external" data-creator-tool data-tool-slug="rewrite" data-surface="systems_hero">
+              <span>03</span><strong>多平台改写</strong><small>同一内容切成各平台版本</small>
+            </a>
+          </div>
+          <a class="creator-sprint-all" href="https://creatorkit.milk790.workers.dev/?src=th3" rel="external" data-creator-entry data-surface="systems_hero" data-creator-cta data-cta-a="先逛 22 个免费工具" data-cta-b="今天先做一支内容">先逛 22 个免费工具</a>
+        </div>
+        <p class="systems-map-label">UNIVERSE MAP / 02 PATHS</p>
+        <ol>
+          <li><span>01</span><div><strong>车主现场</strong><small>车况 → 施工任务 → 商品／教学／LINE</small></div></li>
+          <li><span>02</span><div><strong>店家现场</strong><small>服务菜单 → 预约 → 会员 → 车况与帐本</small></div></li>
+        </ol>
+        <div class="systems-signal-status"><i aria-hidden="true"></i><span>公开入口已接线</span><small>数据库未合并</small></div>
+      </aside>
+    </section>
+
+    <section class="systems-proof" aria-labelledby="proof-title">
+      <div class="systems-section-heading">
+        <p class="eyebrow">THREE EVIDENCE CHAINS</p>
+        <h2 id="proof-title">不是多一个后台，是把每次服务留成看得懂的路。</h2>
+      </div>
+      <div class="systems-proof-grid">
+        <article>
+          <p>01 / BEFORE SERVICE</p>
+          <h3>先让客人看懂</h3>
+          <span>服务照片、白话说明、时间与价格先说清楚，再进预约。</span>
+        </article>
+        <article>
+          <p>02 / DURING SERVICE</p>
+          <h3>把车况与进度留下</h3>
+          <span>预约、订金、车况、施工与签收沿同一条流程往下走。</span>
+        </article>
+        <article>
+          <p>03 / AFTER SERVICE</p>
+          <h3>让下次回店有依据</h3>
+          <span>会员看得到余额、预约与纪录；店家保留可追的帐本。</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="boundary" class="systems-boundary" aria-labelledby="boundary-title">
+      <div class="systems-section-heading">
+        <p class="eyebrow">INTEGRATION CONTRACT</p>
+        <h2 id="boundary-title">同一个宇宙，不代表同一份客户数据。</h2>
+        <p>这次只集成品牌、语言与导流。不共用登录、Cookie、会员数据、购物车或付款状态。</p>
+      </div>
+      <div class="boundary-grid">
+        <article>
+          <p>POP MONSTER / OFFICIAL SITE</p>
+          <h3>公开品牌与车主入口</h3>
+          <ul>
+            <li>品牌、商品与教学内容</li>
+            <li>32 款商品与施工任务选品</li>
+            <li>官网会员、购物车与分析同意</li>
+          </ul>
+        </article>
+        <article class="boundary-shared">
+          <p>SHARED / PUBLIC ONLY</p>
+          <h3>只共享可公开的接线层</h3>
+          <ul>
+            <li>泡泡怪兽品牌与视觉语言</li>
+            <li>角色、情境与入口名称</li>
+            <li>可被验证的公开展示网址</li>
+          </ul>
+        </article>
+        <article class="boundary-popcard">
+          <p>POP CARD / SEPARATE ORIGIN</p>
+          <h3>店家营运与数据边界</h3>
+          <ul>
+            <li>独立登录、Cookie 与 Session</li>
+            <li>会员、车辆、预约、施工与帐本</li>
+            <li>正式数据与商家权限不进官网</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="systems-demo" aria-labelledby="demo-title">
+      <div>
+        <p class="eyebrow">PUBLIC REVIEW PATH</p>
+        <h2 id="demo-title">先看产品故事，再切到会员视角。</h2>
+        <p>公开展示使用示范数据。先理解店家流程，再检查车主实际会看到什幺；不需要先创建正式帐号。</p>
+      </div>
+      <div class="systems-demo-actions">
+        <a href="https://popcard-saas-preview.milk790.workers.dev/s/jilin#story" rel="external"><span>01</span><strong>产品故事</strong><small>给汽美店家的完整介绍</small></a>
+        <a href="https://popcard-saas-preview.milk790.workers.dev/s/jilin#member" rel="external"><span>02</span><strong>会员视角</strong><small>看预约、余额与施工纪录</small></a>
+      </div>
+    </section>
+
+    <section id="creator-tools" class="systems-tools" aria-labelledby="creator-tools-title">
+      <div>
+        <p class="eyebrow">SELF-GUIDED CREATOR TOOLS</p>
+        <h2 id="creator-tools-title">想先自己做内容？直接进 CreatorKit 开始逛。</h2>
+        <p>22 个创作者工具集中在同一个入口，包含选题、脚本、文案、标签、OCR、视频文案提取与内容日历；不用注册，先用再决定下一步。</p>
+        <ul aria-label="CreatorKit 适合的使用情境">
+          <li>店家想自己整理社群题材与促销文案</li>
+          <li>创作者想快速比较不同平台的内容版本</li>
+          <li>还没准备委托服务，想先试工具找出卡点</li>
+        </ul>
+      </div>
+      <div class="systems-tools-action">
+        <p>CREATORKIT / 22 TOOLS</p>
+        <strong>免费自媒体工具箱</strong>
+        <span>从选题到发布规划，依照自己的节奏自由探索。</span>
+        <a class="button button-primary" href="https://creatorkit.milk790.workers.dev/?src=th3" rel="external" data-creator-entry data-surface="systems_section" data-creator-cta data-cta-a="打开 CreatorKit 工具箱" data-cta-b="直接开始做内容">自己逛 CreatorKit</a>
+        <small>外部公开工具页；不会共用本站会员、购物车或付款数据。</small>
+      </div>
+    </section>
+
+    <aside id="systems-analytics-consent" class="systems-consent" aria-label="匿名成效分析偏好" hidden>
+      <div>
+        <strong>是否允许匿名成效分析？</strong>
+        <span>只记录 CTA 版本、入口位置与打开的工具；不收姓名、IP、Cookie 或输入内容，分页关闭后匿名 session 即失效。</span>
+      </div>
+      <div class="systems-consent-actions">
+        <button type="button" data-systems-consent="granted">允许匿名分析</button>
+        <button type="button" data-systems-consent="denied">不要记录</button>
+      </div>
+    </aside>
+
+    <section class="systems-final" aria-labelledby="final-title">
+      <p class="eyebrow">NEXT / OWNER REVIEW</p>
+      <h2 id="final-title">先用公开展示判断，不把预览说成正式上线。</h2>
+      <p>若流程适合，再由 POP CARD 内的店家入口谈客制与导入；正式帐号、数据、价格与上线时程都另行确认。</p>
+      <a class="button button-primary" href="https://popcard-saas-preview.milk790.workers.dev/s/jilin#story" rel="external">看 POP CARD 公开展示</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>POP MONSTER × POP CARD × CreatorKit · 台中</p>
+    <nav class="footer-links" aria-label="网站政策">
+      <a href="privacy.html">隐私权政策</a>
+      <a href="terms.html">使用条款</a>
+      <a href="index.html">返回官方网站</a>
+    </nav>
+    <p class="footer-note">外部展示链接只代表打开公开页面，不代表正式店家帐号已创建或系统已切换。</p>
+  </footer>
+</body>
+</html>

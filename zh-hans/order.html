@@ -1,0 +1,437 @@
+<!doctype html><html lang="zh-Hans" data-intl="1"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>官网下单 Order｜泡泡怪兽 POP MONSTER</title>
+<link rel="canonical" href="https://popmonster.vip/zh-hans/order.html">
+<!--i18n:alt-->
+<link rel="alternate" hreflang="zh-Hant-TW" href="https://popmonster.vip/order.html">
+<link rel="alternate" hreflang="zh-Hans" href="https://popmonster.vip/zh-hans/order.html">
+<link rel="alternate" hreflang="en" href="https://popmonster.vip/order.html?lang=en">
+<link rel="alternate" hreflang="x-default" href="https://popmonster.vip/order.html">
+<link rel="stylesheet" href="/css/i18n.css">
+<script src="/js/i18n.js" defer></script>
+<!--/i18n:alt-->
+<meta name="description" content="泡泡怪兽官网直接下单:选品选规格,LINE/WhatsApp 快速下单或在线付款。POP MONSTER official order page — car care products shipped from Taiwan.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="泡泡怪兽 POP MONSTER">
+<meta property="og:title" content="千倍浓缩天使涂层｜泡泡怪兽官网下单">
+<meta property="og:description" content="32 款职人汽美用品,选规格直接下单。付款后 3 个工作天内出货,LINE 一对一服务。">
+<meta property="og:url" content="https://popmonster.vip/zh-hans/order.html">
+<meta property="og:image" content="https://popmonster.vip/img/og/og-home-1200x630.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://popmonster.vip/img/og/og-home-1200x630.jpg">
+<meta name="theme-color" content="#0a0a0a">
+<!-- js/products.js＝全站购物车（store.js）用的名称与售价，先存成 PM_SITE_PRODUCTS：
+     下一行 products_catalog.js 用 const 声明同名的 PM_PRODUCTS（下单页规格表），直接写 PM_PRODUCTS 拿到的是那一份 -->
+<script src="js/products.js"></script>
+<script>window.PM_SITE_PRODUCTS=window.PM_PRODUCTS;</script>
+<script src="products_catalog.js"></script>
+<style>
+  :root{--bg:#0a0a0a;--card:#141414;--line:#2a2a2a;--gold:#c8a96b;--gold-d:#8a6a2f;--tx:#e8e2d6;--tx2:#cfc8ba;--mut:#a89e8e}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:'Noto Sans TC',-apple-system,sans-serif}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 14px 150px}
+  h1{color:var(--gold);text-align:center;letter-spacing:3px;font-size:1.5em;margin:10px 0 2px}
+  .sub{text-align:center;color:var(--mut);font-size:.88em;margin-bottom:12px}
+  .langbar{text-align:center;margin-bottom:14px}
+  .langbar button{background:#141414;border:1px solid var(--line);color:var(--tx2);padding:5px 14px;border-radius:16px;cursor:pointer;font-size:.82em;margin:0 3px}
+  .langbar button.on{border-color:var(--gold-d);color:#e8c674;font-weight:700}
+  .cats{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
+  .cats button{background:#141414;border:1px solid var(--line);color:var(--tx2);padding:7px 14px;border-radius:20px;cursor:pointer;font-size:.9em}
+  .cats button.on{background:#16120a;border-color:var(--gold-d);color:#e8c674;font-weight:700}
+  .item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .top{display:flex;align-items:center;gap:12px}
+  .item img,.item .noimg{width:54px;height:54px;border-radius:8px;object-fit:cover;background:#222;flex:none}
+  .iname{font-weight:700;font-size:.97em}.icat{color:var(--mut);font-size:.78em}
+  .row2{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  select{flex:1;min-width:170px;background:#0e0e0e;color:var(--tx2);border:1px solid var(--line);border-radius:8px;padding:9px 8px;font-size:.88em}
+  .iprice{color:#e8c674;font-weight:800;font-size:1em;min-width:84px;text-align:right}
+  .ref{color:var(--mut);font-size:.75em;display:block;font-weight:400}
+  .qty{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .qty button{width:32px;height:32px;border-radius:50%;border:1px solid var(--gold-d);background:transparent;color:var(--gold);font-size:1.1em;cursor:pointer}
+  .qty span{min-width:20px;text-align:center;font-weight:800}
+  .picked{color:var(--mut);font-size:.78em;margin-top:6px;line-height:1.5}
+  .sitespec{flex:1;min-width:170px;color:var(--tx2);font-size:.88em;line-height:1.5}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(180deg,#141414,#0a0a0a);border-top:1px solid var(--gold-d);padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+  .bar .in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .total{font-weight:800;color:#e8c674}
+  .btn{flex:1;min-width:150px;text-align:center;font-weight:800;text-decoration:none;padding:13px 10px;border-radius:30px;border:none;cursor:pointer;font-size:.98em}
+  .btn-line{background:#c8a96b;color:#0a0a0a;border:1px solid #c8a96b}
+  /* 结帐列的两颗钮：字不换行；放得下就并排、等宽，放不下就各占一整排（不会一颗高一颗矮、也不会断出「通)」孤字） */
+  .bar .btn{flex:1 1 0;min-width:max-content;white-space:nowrap}
+  .total{white-space:nowrap}
+  @media(max-width:600px){
+    .bar .in>div:first-child{flex-basis:100%} /* 手机：已选件数＋合计固定自己一排，有没有「待报价」版面都一样 */
+    .bar .btn{font-size:.92em;padding:13px 8px}
+  }
+  /* 桌机：合计太长（英文＋待报价）挤掉一颗钮时，合计自己一排、两颗钮一起放下一排（balanceBar 判断） */
+  .bar.stack .in>div:first-child{flex-basis:100%}
+  @media(max-width:320px){.bar .btn{padding:13px 4px}} /* Galaxy Fold 外屏幕 280 宽：英文付款钮原本比容器宽 4px */
+  .btn-pay{background:transparent;color:#d8c08a;border:1px solid var(--gold-d)}
+  .btn[disabled]{opacity:.35;cursor:not-allowed}
+  .ship{color:var(--mut);font-size:.8em;text-align:center;width:100%;margin-top:2px}
+  /* 出货说明两句各自不断行；同一排时中间画一条细线，放不下就一句一排，不会剩「｜」或「· Pre-order」开头 */
+  .ship span{display:inline-block;margin:0 .6em;position:relative;text-wrap:balance} /* 280 宽英文一句放不下时两行平均分，不剩 payment 一个字 */
+  .ship.one span+span::before{content:'';position:absolute;left:-.65em;top:22%;height:56%;border-left:1px solid #4a4a4a}
+  dialog{background:var(--card);color:var(--tx);border:1px solid var(--gold-d);border-radius:14px;max-width:430px;width:92%;padding:20px}
+  dialog::backdrop{background:rgba(0,0,0,.7)}
+  textarea{width:100%;min-height:170px;background:#0e0e0e;color:var(--tx2);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:.88em}
+  .note{color:var(--mut);font-size:.82em;line-height:1.6}
+  /* 手机友好动效(2026-06-08):GPU transform/opacity,触摸回馈 */
+  @keyframes itemIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .item{animation:itemIn .4s ease both}
+  .item:nth-child(2){animation-delay:.04s}.item:nth-child(3){animation-delay:.08s}.item:nth-child(4){animation-delay:.12s}
+  .qty button,.btn,.langbar button{transition:transform .15s ease,box-shadow .25s ease;-webkit-tap-highlight-color:transparent}
+  .qty button:active{transform:scale(.85)}
+  .btn:active:not([disabled]){transform:scale(.97)}
+  @keyframes barUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .bar{animation:barUp .45s cubic-bezier(.16,1,.3,1) both}
+  @keyframes dlgUp{from{opacity:.4;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+  dialog[open]{animation:dlgUp .3s cubic-bezier(.16,1,.3,1)}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style></head><body>
+<section class="wrap">
+  <h1 id="t_title">官网下单</h1>
+  <p class="sub" id="t_sub">选品 → 选规格 → 加入清单 → LINE 快速下单或在线付款<br>下单即成为泡泡会员,消费累积自动升级</p>
+  <div class="langbar"><button id="lzh">中文</button><button id="len">EN</button></div>
+  <div class="cats" id="cats"></div>
+  <div id="list"></div>
+</section>
+
+<div class="bar"><div class="in">
+  <div><span id="t_picked">已选</span> <b id="cnt">0</b> <span id="t_pcs">件</span> <span class="total" id="total"></span></div>
+  <button class="btn btn-line" id="btnGo">💬 LINE 一键下单</button>
+  <button class="btn btn-pay" id="btnPay" disabled>💳 在线付款(即将开通)</button>
+  <div class="ship" id="ship"></div>
+</div></div>
+
+<dialog id="dlg">
+  <h2 style="color:var(--gold);margin:0 0 8px;font-size:1.17em" id="t_dlgTitle">下单 · 两步完成</h2>
+  <p class="note" id="t_dlgNote">① 按「拷贝订单」 ② 开 LINE 后直接粘贴送出,小编立刻帮你结帐出货。</p>
+  <textarea id="orderText" readonly></textarea>
+  <div style="display:flex;gap:10px;margin-top:12px">
+    <button class="btn btn-pay" id="copyBtn" style="flex:1">📋 拷贝订单</button>
+    <a class="btn btn-line" style="flex:1" id="chatBtn" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">打开 LINE</a>
+  </div>
+  <p class="note" style="text-align:center;margin-bottom:0"><a href="javascript:void(0)" onclick="dlg.close()" style="color:var(--mut)" id="t_close">关闭</a></p>
+</dialog>
+
+<script>
+(function(){
+  var params=new URLSearchParams(location.search);
+  var CFG={
+    BRAND:'pop',
+    ECPAY_CHECKOUT_API:'https://cdg-core-eyes.milk790.workers.dev/api/checkout',
+    PAY_ENABLED:false, // cdg-core-eyes secrets + deploy + ECPay callback 确认后改 true
+    WHATSAPP:'886970527037', LINE_URL:'https://line.me/R/ti/p/@150tiznd',
+    FX:{USD:32, MYR:7} // 参考汇率(TWD→外币除数);仅显示参考,实际以 TWD 收款
+  };
+  var I18N={
+    zh:{title:'官网下单',sub:'选品 → 选规格 → 加入清单 → LINE 快速下单或在线付款<br>下单即成为泡泡会员,消费累积自动升级',
+        all:'全部',picked:'已选',pcs:'件',go:'💬 LINE 一键下单',pay:'💳 在线付款(即将开通)',payOn:'💳 在线付款',
+        dlgTitle:'LINE 下单 · 两步完成',dlgNote:'① 按「拷贝订单」 ② 开 LINE 后直接粘贴送出,小编立刻帮你结帐出货。',
+        copy:'📋 拷贝订单',copied:'✅ 已拷贝,去 LINE 粘贴',chat:'打开 LINE',close:'关闭',
+        orderHead:'🛒 泡泡怪兽 官网订单',orderTail:['收件人:','电话:','地址:','付款方式:(转帐/货到付款)'],
+        payFail:'付款页连接失败,请改用 LINE 下单或稍后再试',
+        siteSpec:'商品页款式',quote:'待报价',quoteLine:'(请报价)'},
+    en:{title:'Order Online',sub:'Pick products & size → add to list → order via WhatsApp or pay online<br>Every order earns POP membership rewards. Ships from Taiwan; we confirm on WhatsApp whether each item can ship to your country.',
+        all:'All',picked:'Items',pcs:'',go:'💬 Order via WhatsApp',pay:'💳 Online payment (coming soon)',payOn:'💳 Pay online',
+        dlgTitle:'WhatsApp Order · 2 steps',dlgNote:'① Tap "Open WhatsApp" — your order is pre-filled ② Send it, we reply with total + shipping quote.',
+        copy:'📋 Copy order',copied:'✅ Copied',chat:'Open WhatsApp',close:'Close',
+        orderHead:'🛒 POP MONSTER Order (International)',orderTail:['Name:','WhatsApp/Phone:','Country & Address:','Payment: (PayPal / card — we will quote shipping)'],
+        payFail:'Payment page unavailable — please order via WhatsApp.',
+        siteSpec:'as listed on product page',quote:'price on request',quoteLine:'(price on request)'},
+    // 简中版（/zh-hans/order.html，build.py 转成简体）用：中文本，但走海外流程（WhatsApp、运费另报）
+    zhi:{title:'官网下单',sub:'选品 → 选规格 → 加入清单 → WhatsApp 下单<br>从台湾出货；每款能不能寄到你的国家、运费多少，我们先在 WhatsApp 回复',
+        all:'全部',picked:'已选',pcs:'件',go:'💬 WhatsApp 下单',pay:'💳 在线付款(即将开通)',payOn:'💳 在线付款',
+        dlgTitle:'WhatsApp 下单 · 两步完成',dlgNote:'① 按「打开 WhatsApp」，订单内容已经带好 ② 送出后，我们回复总金额和运费。',
+        copy:'📋 拷贝订单',copied:'✅ 已拷贝',chat:'打开 WhatsApp',close:'关闭',
+        orderHead:'🛒 泡泡怪兽 官网订单（海外）',orderTail:['收件人:','WhatsApp／电话:','国家与地址:','付款方式:(PayPal／信用卡，运费另外报价)'],
+        payFail:'付款页连接失败,请改用 WhatsApp 下单',
+        siteSpec:'商品页款式',quote:'待报价',quoteLine:'(请报价)',
+        ship:'海外订单：每款能不能寄到你的国家、运费多少，先在 WhatsApp 确认再付款'}
+  };
+  // 规格英译规则(不逐条翻 97 笔,规则覆盖)
+  function specEn(s){
+    return s.replace(/(\d+)\s*入/g,'$1-pack').replace(/(\d+)\s*克/g,'$1g')
+      .replace(/入门体验款|尝鲜装|体验装/g,'starter').replace(/热销首选款/g,'best seller')
+      .replace(/团购优惠款/g,'value size').replace(/超值优惠款/g,'jumbo')
+      .replace(/可兑(\d+)L成品/g,'makes $1L').replace(/样品|试用品/g,'sample')
+      .replace(/（?不划算）?/g,' (not best value)').replace(/最划算/g,'best value') // 英文模式不能留「不」「最」
+      .replace(/划算/g,'best value').replace(/双入补货/g,'').replace(/入门囤货|常规补货|店家必囤/g,'')
+      .replace(/⚠️无喷头/g,'no spray head').replace(/不附喷头/g,'no spray head')
+      .replace(/最高300倍稀释/g,'dilute up to 300x').replace(/20倍稀释最高可稀释65倍/g,'dilute 20–65x')
+      .replace(/赠油膜擦/g,'+ free applicator').replace(/（赠慕斯瓶）/g,' (+ foam bottle)')
+      .replace(/红色（重切）/g,'Red (heavy cut)').replace(/灰色（细切）/g,'Grey (fine cut)')
+      .replace(/GA\/DA适用套装/g,'GA/DA set').replace(/RO适用套装/g,'RO set')
+      .replace(/单一规格/g,'standard').replace(/（/g,' (').replace(/）/g,')')
+      .replace(/(\d+(?:ml|g|L))(?=[A-Za-z])/g,'$1 ').replace(/(\d)\+/g,'$1 +') // 100mlstarter → 100ml starter
+      .replace(/\s*,\s*/g,', ').replace(/\s+/g,' ').trim();
+  }
+  var lang=params.get('lang')||localStorage.getItem('pm_lang')||'zh';
+  if(lang!=='en')lang='zh';
+  var INTL=document.documentElement.getAttribute('data-intl')==='1'; // 简中版：中文本＋海外流程
+  function tr(l){return INTL&&l==='zh'?I18N.zhi:I18N[l];}
+  var T=tr(lang);
+  // ── 购物车：跟全站 js/store.js 共用 localStorage 的 pm_cart_v1 ──
+  // store.js 的格式是 {items:{A001:2}}：一个 SKU 一个价（js/products.js 的 PM_PRICES），没有规格。下单页有规格，所以这样对应：
+  //   跟官网售价同价的那个规格 ⇄ items['A001']（首页、商品页的购物车看得到也改得到）
+  //   其他规格               ⇄ 同一笔数据多一栏 v:{'a001|0':1}，规格名称另存 vn:{'a001|0':'30ml入门体验款'}
+  //                              （store.js 不改 v／vn、存盘原样留着；抽屉与结帐页用 vn 写出是哪个规格）
+  //   对不到规格的官网品项     ⇄ 下单页内部 key 'a006|site'，照官网名称和售价显示（售价跟规格表不同、或规格表没有这款）
+  // 旧版下单页的 pm_cart_v2：第一次打开就并进来（数量相加），旧数据改名 pm_cart_v2_merged 留底。
+  var LS_CART='pm_cart_v1',LS_OLD='pm_cart_v2';
+  var SITE={};(window.PM_SITE_PRODUCTS||[]).forEach(function(p){SITE[String(p.sku).toLowerCase()]=p;});
+  function sitePrice(sku){var s=SITE[sku];return s&&s.price?s.price:null;}
+  function defVar(sku){ // 跟官网售价同价的规格序号，没有就 -1
+    var p=prod(sku),sp=sitePrice(sku);if(!p||!sp)return -1;
+    for(var j=0;j<p.variants.length;j++)if(p.variants[j].price===sp)return j;
+    return -1;
+  }
+  function addTo(o,k,q){q=parseInt(q,10)||0;if(q>0)o[k]=Math.min(99,(o[k]||0)+q);}
+  function readShared(){
+    var c=null;try{c=JSON.parse(localStorage.getItem(LS_CART));}catch(e){}
+    return c&&typeof c==='object'&&c.items&&typeof c.items==='object'?c:{items:{}};
+  }
+  function fromShared(c){
+    var out={};
+    Object.keys(c.items).forEach(function(S){var s=S.toLowerCase(),j=defVar(s);addTo(out,s+'|'+(j>=0?j:'site'),c.items[S]);});
+    if(c.v&&typeof c.v==='object')Object.keys(c.v).forEach(function(k){addTo(out,k,c.v[k]);});
+    return out;
+  }
+  var cart=fromShared(readShared());
+  var sel={};try{sel=JSON.parse(localStorage.getItem('pm_sel')||'{}')||{}}catch(e){}
+  var cat='__all__';
+  var catKeys=[...new Set(PM_PRODUCTS.map(function(p){return p.cat}))];
+
+  function save(){
+    var c=readShared(),items={},v={};
+    Object.keys(cart).forEach(function(k){
+      var q=cart[k];if(!(q>0))return;
+      var a=k.split('|'),s=a[0],j=a[1];
+      if(j==='site'||(a.length===2&&j!==''&&+j===defVar(s)))addTo(items,s.toUpperCase(),q);else addTo(v,k,q);
+    });
+    c.items=items;
+    if(Object.keys(v).length){
+      c.v=v;c.vn={};
+      Object.keys(v).forEach(function(k){var a=k.split('|'),p=prod(a[0]),x=p&&p.variants[+a[1]];if(x)c.vn[k]=x.spec;}); // 一律存中文规格名：抽屉、结帐页是中文页
+    }else{delete c.v;delete c.vn;}
+    c.updated=Date.now();
+    try{
+      localStorage.setItem(LS_CART,JSON.stringify(c));
+      localStorage.setItem('pm_sel',JSON.stringify(sel));localStorage.setItem('pm_lang',lang);
+      return true;
+    }catch(e){return false;}
+  }
+  function fmt(n){return 'NT$'+n.toLocaleString('zh-Hant-TW');}
+  function ref(n){if(lang!=='en'&&!INTL)return '';return '<span class="ref">≈ US$'+(n/CFG.FX.USD).toFixed(1)+' / RM'+(n/CFG.FX.MYR).toFixed(0)+(lang==='en'?' · charged in TWD':' · 以新台币收款')+'</span>';}
+  function prod(sku){return PM_PRODUCTS.find(function(x){return x.sku===sku});}
+  function vi(sku){ // 这张卡的 − ＋ 目前作用在哪个规格
+    var p=prod(sku),s=sel[sku];
+    if(s==='site'&&cart[sku+'|site']>0)return 'site';
+    if(typeof s==='number'&&p&&s>=0&&s<p.variants.length)return s;
+    if(cart[sku+'|site']>0)return 'site';
+    var d=defVar(sku);if(d>=0&&cart[sku+'|'+d]>0)return d; // 购物车里有官网同价那款，就先显示它
+    for(var j=0;p&&j<p.variants.length;j++)if(cart[sku+'|'+j]>0)return j;
+    return 0;
+  }
+  function lineInfo(k){ // 购物车一行 → 显示用；对不到商品回 null（不显示、不计数，但数据照留）
+    var a=k.split('|'),s=a[0],j=a[1],p=prod(s),sp=SITE[s];
+    if(j==='site')return sp?{sku:s,name:lang==='en'&&p&&p.nameEn?p.nameEn:sp.name,spec:T.siteSpec,price:sp.price||null}:null; // 中文照官网名称；英文用规格表的英文名（A044–A046 规格表没有，只能留中文）
+    var v=p&&j!==''&&j!=null?p.variants[+j]:null;
+    return v?{sku:s,name:pname(p),spec:pspec(v.spec),price:v.price}:null;
+  }
+  function pname(p){return lang==='en'&&p.nameEn?p.nameEn:p.name;}
+  function pcat(c){return lang==='en'?(PM_CAT_EN[c]||c):c;}
+  function pspec(s){return lang==='en'?specEn(s):s;}
+  function checkoutCid(){
+    var key='pm_checkout_cid', cid=localStorage.getItem(key);
+    if(!cid){cid=(window.crypto&&window.crypto.randomUUID?window.crypto.randomUUID():('pm_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2)));localStorage.setItem(key,cid);}
+    return cid;
+  }
+
+  function applyLang(){
+    T=tr(lang);
+    document.documentElement.lang=lang==='en'?'en':(INTL?'zh-Hans':'zh-Hant');
+    document.getElementById('t_title').textContent=T.title;
+    document.getElementById('t_sub').innerHTML=T.sub;
+    document.getElementById('t_picked').textContent=T.picked;
+    document.getElementById('t_pcs').textContent=T.pcs;
+    document.getElementById('btnGo').textContent=T.go;
+    document.getElementById('t_dlgTitle').textContent=T.dlgTitle;
+    document.getElementById('t_dlgNote').textContent=T.dlgNote;
+    document.getElementById('copyBtn').textContent=T.copy;
+    document.getElementById('t_close').textContent=T.close;
+    var chat=document.getElementById('chatBtn');chat.textContent=T.chat;
+    document.getElementById('lzh').className=lang==='zh'?'on':'';
+    document.getElementById('len').className=lang==='en'?'on':'';
+  }
+  function renderCats(){
+    var btn=function(key,label){return '<button class="'+(cat===key?'on':'')+'" onclick="PM.setCat(\''+key+'\')">'+label+'</button>';};
+    document.getElementById('cats').innerHTML=btn('__all__',T.all)+catKeys.map(function(c){return btn(c,pcat(c));}).join('');
+  }
+  function pickedLines(sku){
+    var p=prod(sku),out=[],qs=cart[sku+'|site']||0,sp=sitePrice(sku);
+    if(qs>0)out.push('🛒 '+T.siteSpec+' × '+qs+' ('+(sp?fmt(sp*qs):T.quote)+')');
+    p.variants.forEach(function(v,i){
+      var q=cart[sku+'|'+i]||0;
+      if(q>0)out.push('🛒 '+pspec(v.spec)+' × '+q+' ('+fmt(v.price*q)+')');
+    });
+    return out.length?'<div class="picked">'+out.join('<br>')+'</div>':'';
+  }
+  // 缩略图：显示 54px，用 img/card/ 的 160px 缩略图（原本载 1000px 主图，一张约 100KB）。
+  // a005 用棚拍、a008 用 Super Foam 实拍（都在 img/card/）；下列 SKU 只有 AI 合成主图，先不放图
+  var PM_NO_REAL_IMG={a009:1,a013:1,a017:1,a033:1,a036:1,a037:1,a038:1,a040:1,a042:1};
+  function pimg(s){ return PM_NO_REAL_IMG[s]?'':'../img/card/'+s+'-160.jpg'; }
+  function thumb(sku,alt){
+    var src=pimg(sku);
+    return src?'<img loading="lazy" decoding="async" width="54" height="54" src="'+src+'" onerror="this.style.visibility=\'hidden\'" alt="'+alt+'">':'<span class="noimg" aria-hidden="true"></span>';
+  }
+  function catOf(sku){var p=prod(sku);if(p)return p.cat;var sp=SITE[sku];return sp?String(sp.cat||'').replace(/系列$/,''):'';}
+  function inCat(sku){return cat==='__all__'||catOf(sku)===cat;}
+  function qtyHtml(sku,q){
+    return '<div class="qty"><button onclick="PM.add(\''+sku+'\',-1)">−</button><span>'+q+'</span><button onclick="PM.add(\''+sku+'\',1)">＋</button></div>';
+  }
+  function renderList(){
+    var el=document.getElementById('list');
+    var html=PM_PRODUCTS.filter(function(p){return inCat(p.sku)}).map(function(p){
+      var i=vi(p.sku),site=i==='site',q=cart[p.sku+'|'+i]||0,sp=sitePrice(p.sku);
+      var price=site?sp:p.variants[i].price;
+      var opts=p.variants.map(function(x,j){
+        return '<option value="'+j+'"'+(j===i?' selected':'')+'>'+pspec(x.spec)+'｜'+fmt(x.price)+'</option>';}).join('');
+      if(cart[p.sku+'|site']>0)opts+='<option value="site"'+(site?' selected':'')+'>'+T.siteSpec+'｜'+(sp?fmt(sp):T.quote)+'</option>';
+      return '<div class="item"><div class="top">'+thumb(p.sku,pname(p))+
+        '<div><div class="iname">'+pname(p)+'</div><div class="icat">'+p.sku.toUpperCase()+' · '+pcat(p.cat)+'</div></div></div>'+
+        '<div class="row2"><select onchange="PM.pick(\''+p.sku+'\',this.value)">'+opts+'</select>'+
+        '<div class="iprice">'+(price?fmt(price)+ref(price):T.quote)+'</div>'+
+        qtyHtml(p.sku,q)+'</div>'+
+        pickedLines(p.sku)+'</div>';
+    });
+    // 购物车里有、但下单页规格表没有的商品（例：A044–A046 还没有规格价格）：照官网名称和售价列在最后，不会不见
+    Object.keys(cart).forEach(function(k){
+      var a=k.split('|'),s=a[0],sp=SITE[s];
+      if(a[1]!=='site'||prod(s)||!sp||!(cart[k]>0)||!inCat(s))return;
+      html.push('<div class="item"><div class="top">'+thumb(s,sp.name)+
+        '<div><div class="iname">'+sp.name+'</div><div class="icat">'+s.toUpperCase()+' · '+pcat(catOf(s))+'</div></div></div>'+
+        '<div class="row2"><div class="sitespec">'+T.siteSpec+'</div>'+
+        '<div class="iprice">'+(sp.price?fmt(sp.price)+ref(sp.price):T.quote)+'</div>'+
+        qtyHtml(s,cart[k])+'</div></div>');
+    });
+    el.innerHTML=html.join('');
+    renderBar();
+  }
+  function renderBar(){
+    var n=0,sum=0,un=false;
+    for(var k in cart){var q=cart[k];if(!(q>0))continue;
+      var L=lineInfo(k);if(!L)continue;
+      n+=q;if(L.price)sum+=L.price*q;else un=true;}
+    document.getElementById('cnt').textContent=n;
+    document.getElementById('total').innerHTML=n?((sum?fmt(sum):'')+(un?(sum?(lang==='en'?' + ':'＋'):'')+T.quote:'')+((lang==='en'||INTL)&&sum?' '+ref(sum):'')):'';
+    var sh=lang==='en'?[PM_SHIPPING.leadDaysTextEn,PM_SHIPPING.noteEn]:INTL?[PM_SHIPPING.leadDaysText,T.ship]:[PM_SHIPPING.leadDaysText,PM_SHIPPING.note];
+    document.getElementById('ship').innerHTML='<span>📦 '+sh[0]+'</span> <span>'+sh[1]+'</span>';
+    var pay=document.getElementById('btnPay');
+    pay.disabled=!CFG.PAY_ENABLED||!n||un; // 有待报价的品项就不能在线付款
+    pay.textContent=CFG.PAY_ENABLED?T.payOn:T.pay;
+    document.getElementById('btnGo').disabled=!n;
+    padForBar();
+  }
+  // 手机上底部结帐列有两排（约 190px），原本固定留 150px，卷到底最后一张卡的 − ＋ 会被盖住；改成照结帐列实际高度留白
+  function padForBar(){
+    balanceBar();
+    var w=document.querySelector('.wrap'),b=document.querySelector('.bar');
+    if(w&&b)w.style.paddingBottom=(b.offsetHeight+24)+'px';
+  }
+  // 两颗钮要嘛同一排、要嘛各占一整排；不能一颗跟合计挤第一排、另一颗自己掉到第二排（桌机英文＋待报价会这样）
+  // 先拿掉 stack 量一次，两颗不同排才让合计自己一排；结果只看宽度，ResizeObserver 重算也不会来回跳
+  function balanceBar(){
+    var b=document.querySelector('.bar'),go=document.getElementById('btnGo'),pay=document.getElementById('btnPay');
+    if(!b||!go||!pay)return;
+    b.classList.remove('stack');
+    if(!sameRow(go,pay))b.classList.add('stack');
+    var s=document.querySelectorAll('#ship span');
+    document.getElementById('ship').classList.toggle('one',s.length===2&&sameRow(s[0],s[1]));
+  }
+  function sameRow(a,b){return Math.abs(a.offsetTop-b.offsetTop)<Math.min(a.offsetHeight,b.offsetHeight)/2;} // 📦 会把第一句撑高 2px，不能用 ===
+
+  window.addEventListener('resize',padForBar);
+  // 字体晚到、手机工具列伸缩让结帐列变高时也重算
+  if(window.ResizeObserver){try{new ResizeObserver(padForBar).observe(document.querySelector('.bar'));}catch(e){}}
+  function orderText(){
+    var lines=[T.orderHead];
+    for(var k in cart){var q=cart[k];if(!(q>0))continue;
+      var L=lineInfo(k);if(!L)continue;
+      lines.push('- '+L.name+' ('+L.sku.toUpperCase()+') '+L.spec+' x'+q+' '+(L.price?fmt(L.price*q):T.quoteLine));}
+    lines.push('');T.orderTail.forEach(function(t){lines.push(t)});
+    return lines.join('\n');
+  }
+  window.PM={
+    setCat:function(c){cat=c;renderCats();renderList();},
+    // 改之前先重读共用购物车：别的分页（首页、商品页）刚改的数量才不会被这页手上的旧数据盖掉
+    pick:function(sku,j){cart=fromShared(readShared());sel[sku]=j==='site'?'site':+j;save();renderList();},
+    add:function(sku,d){cart=fromShared(readShared());var k=sku+'|'+vi(sku);cart[k]=Math.min(99,Math.max(0,(cart[k]||0)+d));if(!cart[k])delete cart[k];save();renderList();},
+    lang:function(l){lang=l;save();applyLang();renderCats();renderList();}
+  };
+  document.getElementById('lzh').onclick=function(){PM.lang('zh')};
+  document.getElementById('len').onclick=function(){PM.lang('en')};
+  document.getElementById('btnGo').onclick=function(){
+    var txt=orderText();
+    document.getElementById('orderText').value=txt;
+    var chat=document.getElementById('chatBtn');
+    if(lang==='en'||INTL){chat.href='https://wa.me/'+CFG.WHATSAPP+'?text='+encodeURIComponent(txt);}
+    else{chat.href=CFG.LINE_URL;}
+    document.getElementById('dlg').showModal();
+  };
+  document.getElementById('copyBtn').onclick=function(){
+    var t=document.getElementById('orderText');t.select();
+    try{navigator.clipboard.writeText(t.value);}catch(e){document.execCommand('copy');}
+    this.textContent=T.copied;
+  };
+  document.getElementById('btnPay').onclick=function(){
+    if(!CFG.PAY_ENABLED)return;
+    var items=[];
+    for(var k in cart){var q=cart[k];if(!(q>0))continue;
+      var a=k.split('|'),sku=a[0];
+      if(a[1]==='site'){var sp=SITE[sku];if(sp&&sp.price)items.push({name:sp.name,sku:sku.toUpperCase(),price:sp.price,qty:q});continue;}
+      var p=prod(sku),v=p&&a[1]!==''&&a[1]!=null?p.variants[+a[1]]:null;if(!v)continue;
+      items.push({name:p.name+' '+v.spec,sku:sku.toUpperCase(),price:v.price,qty:q});}
+    fetch(CFG.ECPAY_CHECKOUT_API,{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({
+        brand:CFG.BRAND,
+        items:items,
+        cid:checkoutCid(),
+        ref_code:params.get('ref')||'',
+        client_back_url:location.origin+location.pathname,
+        lang:lang
+      })})
+      .then(function(r){return r.text()}).then(function(html){document.open();document.write(html);document.close();})
+      .catch(function(){alert(T.payFail);});
+  };
+  // 旧版下单页的 pm_cart_v2：并进共用购物车（数量相加），存成功才把旧数据改名留底
+  var old=null;try{old=localStorage.getItem(LS_OLD);}catch(e){}
+  if(old){
+    var o2=null;try{o2=JSON.parse(old);}catch(e){}
+    if(o2&&typeof o2==='object')Object.keys(o2).forEach(function(k){addTo(cart,k,o2[k]);});
+    if(save()){try{
+      var mk=LS_OLD+'_merged';if(localStorage.getItem(mk)!=null)mk+='_'+Date.now(); // 已经有一份留底就另存，不盖掉
+      localStorage.setItem(mk,old);localStorage.removeItem(LS_OLD);
+    }catch(e){}}
+  }
+  var add=params.get('add');
+  if(add&&prod(add)){addTo(cart,add+'|'+vi(add),1);save();}
+  // 别的分页改了购物车、或按上一页回来（浏览器缓存的旧画面）：重读一次
+  function reloadCart(){cart=fromShared(readShared());renderList();}
+  window.addEventListener('storage',function(e){if(e.key===LS_CART||e.key===null)reloadCart();});
+  window.addEventListener('pageshow',function(e){if(e.persisted)reloadCart();});
+  var dlg=document.getElementById('dlg');window.dlg=dlg;
+  applyLang();renderCats();renderList();
+})();
+</script>
+<!-- v3 国际化(2026-06-07):
+  - 双语 zh/EN(?lang=en 或页内切换,localStorage 记忆);hreflang 标签。
+  - EN 模式:品名用 catalog nameEn、分类英译、规格走规则翻译函数(97 笔规则覆盖);
+    价格附 ≈USD/RM 参考(CFG.FX 可调,标 charged in TWD);CTA 改 WhatsApp(wa.me 预填完整订单文本)。
+  - 跨境投放链接规格:popmonster.vip/order.html?lang=en&add=a001(英文落地+自动带品)。
+  - 自主判断:海外 CTA 用 WhatsApp 而非 LINE(海外渗透率);汇率写死为参考值并明标 charged in TWD,
+    避免汇率宣称失准;EN 订单尾栏改 Country & Address + 运费另报(国际运费未定,不乱承诺)。 -->
+</body></html>

@@ -74,7 +74,9 @@ class OrderCartContract(unittest.TestCase):
     def test_store_js_shows_order_page_variants(self):
         # 從 order.html?add= 進來的新訪客，首頁購物車數字不能是 0、抽屜要告訴他東西在下單頁
         self.assertIn("count() + extraCount()", self.store)
-        self.assertIn("order.html", self._fn("extrasHtml"))
+        # 連結走 ORDER_URL：台灣版預設 order.html，海外版（/en/、/zh-hans/）由 PM_CONFIG.orderUrl 指定
+        self.assertIn("ORDER_URL", self._fn("extrasHtml"))
+        self.assertIn("CFG.orderUrl || ((CFG.base || '') + 'order.html')", self.store)
 
     def test_order_page_rereads_before_changing_quantity(self):
         for fn in ("pick", "add"):

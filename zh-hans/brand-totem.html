@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>品牌图腾「汽美之道」水墨海报｜泡泡怪兽 POP MONSTER</title>
+<meta name="description" content="泡泡怪兽品牌图腾 — 9:16 水墨宣纸海报。直排书法「汽美之道」、泡怪朱砂钤印。先选对施工任务，再选对汽美产品；安全第一，效果当下验证。">
+<link rel="canonical" href="https://popmonster.vip/zh-hans/brand-totem.html">
+<!--i18n:alt-->
+<link rel="alternate" hreflang="zh-Hant-TW" href="https://popmonster.vip/brand-totem.html">
+<link rel="alternate" hreflang="zh-Hans" href="https://popmonster.vip/zh-hans/brand-totem.html">
+<link rel="alternate" hreflang="en" href="https://popmonster.vip/en/brand-totem.html">
+<link rel="alternate" hreflang="x-default" href="https://popmonster.vip/brand-totem.html">
+<link rel="stylesheet" href="/css/i18n.css">
+<script src="/js/i18n.js" defer></script>
+<!--/i18n:alt-->
+<meta property="og:site_name" content="泡泡怪兽 POP MONSTER">
+<meta property="og:type" content="website">
+<meta property="og:title" content="品牌图腾「汽美之道」水墨海报｜泡泡怪兽 POP MONSTER">
+<meta property="og:description" content="直排书法「汽美之道」与泡怪朱砂钤印 — 先选对施工任务，再选对汽美产品。">
+<meta property="og:url" content="https://popmonster.vip/zh-hans/brand-totem.html">
+<meta property="og:image" content="https://popmonster.vip/assets/brand-totem/og-brand-1200x630.png">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="../css/canwu-brand.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: var(--font-serif);
+    color: var(--text);
+    background-color: var(--bg);
+    background-image: var(--paper-fibre);
+    background-blend-mode: screen;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ---- 页眉导览（墨地发丝线）---- */
+  .site-head {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    background-color: var(--bg);
+    border-bottom: var(--rule-hair) solid var(--line);
+    padding: var(--space-2) clamp(16px, 4vw, 40px);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+  }
+  .site-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: var(--tracking-wide);
+    color: var(--text-strong);
+    white-space: nowrap;
+  }
+  .site-logo .logo-seal {
+    width: 26px;
+    height: 26px;
+    flex: none;
+    background: var(--seal);
+    color: var(--paper-light);
+    border-radius: var(--radius-seal);
+    box-shadow: var(--shadow-inset-seal);
+    font-family: var(--font-brush);
+    font-size: 12px;
+    line-height: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    padding: 2px;
+  }
+  .site-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    margin-left: auto;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: var(--tracking-wide);
+  }
+  .site-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-2);
+    color: var(--text-muted);
+    border-bottom: var(--rule-med) solid transparent;
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .site-nav a:hover, .site-nav a:focus-visible { color: var(--text-strong); }
+  .site-nav a[aria-current="page"] {
+    color: var(--text-strong);
+    border-bottom-color: var(--accent);
+  }
+  .nav-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 var(--space-5);
+    background: var(--accent);
+    color: var(--accent-text) !important;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: var(--tracking-wide);
+    box-shadow: var(--shadow-inset-seal);
+    transition: background var(--dur-fast) var(--ease-soft);
+  }
+  .nav-cta:hover, .nav-cta:focus-visible { background: var(--accent-active); }
+
+  /* ---- 墨底画布 ---- */
+  .canvas {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(16px, 3vh, 28px);
+    padding: clamp(14px, 3.5vw, 40px);
+  }
+
+  /* ---- 海报 · 9:16 宣纸（等比缩放，正本 1080×1920）---- */
+  .poster {
+    position: relative;
+    width: min(100%, calc(92vh * 9 / 16), calc(92svh * 9 / 16));
+    aspect-ratio: 9 / 16;
+    max-height: 92vh;
+    max-height: 92svh;
+    flex: none;
+    overflow: hidden;
+    container-type: inline-size;
+    background-color: var(--paper-raw);
+    background-image: var(--paper-fibre), var(--paper-texture);
+    background-blend-mode: multiply, multiply;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.45);
+    color: var(--ink-thick);
+  }
+
+  /* 发丝内框（正本 inset 54/1080）*/
+  .poster-frame {
+    position: absolute;
+    inset: 5cqw;
+    border: 1px solid var(--wash-12);
+    pointer-events: none;
+  }
+
+  /* 巨大幽灵字 — 图腾背后的一口气（正本 1180px／右 -90 底 -180）*/
+  .poster-ghost {
+    position: absolute;
+    right: -8.33%;
+    bottom: -9.4%;
+    font-family: var(--font-brush);
+    font-size: 109cqw;
+    line-height: 1;
+    color: rgba(27, 23, 18, 0.035);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* 顶部 tracked label（正本 top 120／22px／字距 0.46em）*/
+  .poster-label {
+    position: absolute;
+    top: 6.25%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 2.04cqw;
+    font-weight: 600;
+    letter-spacing: 0.46em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    padding-left: 0.46em;
+    animation-delay: 120ms;
+  }
+
+  /* 中央直排书法图腾（正本 top 250 / bottom 560 / 248px；
+     正本预留给扫描书法图，改用真字后微调带高与字级以免压到对联）*/
+  .poster-totem {
+    position: absolute;
+    top: 10%;
+    left: 0;
+    right: 0;
+    bottom: 31%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .poster-totem h1 {
+    writing-mode: vertical-rl;
+    white-space: nowrap;
+    font-family: var(--font-brush);
+    font-weight: 400;
+    font-size: 18.5cqw;
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+    color: var(--ink-burnt);
+    animation-delay: 320ms;
+  }
+
+  /* 对联（正本 bottom 360／40px／字距 0.28em／间 44）*/
+  .poster-couplet {
+    position: absolute;
+    bottom: 18.75%;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 4.07cqw;
+    animation-delay: 640ms;
+  }
+  .poster-couplet span {
+    writing-mode: vertical-rl;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 3.7cqw;
+    letter-spacing: 0.28em;
+    line-height: 1;
+  }
+  .poster-couplet .line-heavy { color: var(--ink-heavy); }
+  .poster-couplet .line-light { color: var(--ink-light); }
+
+  /* 泡怪钤印（正本 bottom 168／116×116／字 42）*/
+  .poster-seal-row {
+    position: absolute;
+    bottom: 8.75%;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+  }
+  .poster-seal {
+    width: 10.74cqw;
+    height: 10.74cqw;
+    background: var(--seal);
+    color: var(--paper-light);
+    font-family: var(--font-brush);
+    font-size: 3.89cqw;
+    line-height: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    padding: 1.2cqw;
+    border-radius: var(--radius-seal);
+    box-shadow: var(--shadow-inset-seal);
+    animation-delay: 1000ms;
+  }
+
+  /* 底部小字（正本 bottom 110／26px／字距 0.2em）*/
+  .poster-footing {
+    position: absolute;
+    bottom: 5.7%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-serif);
+    font-size: 2.4cqw;
+    letter-spacing: 0.2em;
+    color: var(--ink-mid);
+    animation-delay: 1180ms;
+  }
+
+  /* ---- 海报下方小导览（画布外）---- */
+  .poster-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-5);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: var(--tracking-wide);
+  }
+  .poster-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    color: var(--text-muted);
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .poster-nav a:hover, .poster-nav a:focus-visible { color: var(--text-strong); }
+  .poster-nav .sep {
+    width: 3px;
+    height: 3px;
+    border-radius: var(--radius-full);
+    background: var(--line-strong);
+  }
+  .poster-nav .is-line { color: var(--accent); }
+  .poster-nav .is-line:hover, .poster-nav .is-line:focus-visible { color: var(--accent-active); }
+
+  /* ---- 页脚（精简）---- */
+  .site-foot {
+    border-top: var(--rule-hair) solid var(--line);
+    padding: var(--space-5) clamp(16px, 4vw, 40px) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    text-align: center;
+  }
+  .foot-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: var(--tracking-wide);
+  }
+  .foot-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-2);
+    color: var(--text-muted);
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .foot-links a:hover, .foot-links a:focus-visible { color: var(--text-strong); }
+  .foot-copy {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: var(--tracking-wide);
+    color: var(--text-faint);
+  }
+
+  @media (max-width: 480px) {
+    .site-nav { font-size: 12px; gap: 0 var(--space-2); }
+    .nav-cta { padding: 0 var(--space-4); }
+  }
+</style>
+</head>
+<body data-ground="ink">
+<!--i18n:switch--><details class="lang-switch lang-float" data-i18n-skip><summary aria-label="切换语言"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M12 3c2.6 2.8 3.9 5.8 3.9 9s-1.3 6.2-3.9 9c-2.6-2.8-3.9-5.8-3.9-9S9.4 5.8 12 3z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>简中</span></summary><div class="lang-menu"><a href="/brand-totem.html" hreflang="zh-Hant-TW" lang="zh-Hant-TW" data-lang="zh-Hant">繁中<small>繁體中文</small></a><a href="/zh-hans/brand-totem.html" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh-Hans" aria-current="true">简中<small>简体中文</small></a><a href="/en/brand-totem.html" hreflang="en" lang="en" data-lang="en">EN<small>English</small></a></div></details><!--/i18n:switch-->
+
+<header class="site-head">
+  <a class="site-logo" href="index.html" aria-label="回泡泡怪兽官网首页">
+    <span class="logo-seal" aria-hidden="true"><span>泡</span><span>怪</span></span>
+    泡泡怪兽 POP MONSTER
+  </a>
+  <nav class="site-nav" aria-label="品牌馆子导览">
+    <a href="brand.html">品牌之道</a>
+    <a href="brand-deck.html">品牌卷轴</a>
+    <a href="brand-totem.html" aria-current="page">品牌图腾</a>
+    <a class="nav-cta" href="https://wa.me/886970527037" target="_blank" rel="noopener">WhatsApp 选品咨询</a>
+  </nav>
+</header>
+
+<main class="canvas">
+
+  <!-- 海报 · 9:16 宣纸 -->
+  <section class="poster" aria-label="泡泡怪兽品牌图腾海报：直排书法「汽美之道」与泡怪朱砂钤印">
+
+    <div class="poster-frame" aria-hidden="true"></div>
+
+    <!-- 巨大幽灵字 — 图腾背后的一口气 -->
+    <div class="poster-ghost" aria-hidden="true">泡</div>
+
+    <!-- 顶部 label -->
+    <div class="poster-label reveal">泡泡怪兽 · POP MONSTER</div>
+
+    <!-- 图腾 -->
+    <div class="poster-totem">
+      <h1 class="reveal">汽美之道</h1>
+    </div>
+
+    <!-- 对联 -->
+    <div class="poster-couplet reveal">
+      <span class="line-heavy">先选对施工任务</span>
+      <span class="line-light">再选对汽美产品</span>
+    </div>
+
+    <!-- 泡怪钤印 -->
+    <div class="poster-seal-row">
+      <div class="poster-seal reveal-seal" role="img" aria-label="朱砂钤印：泡怪"><span aria-hidden="true">泡</span><span aria-hidden="true">怪</span></div>
+    </div>
+
+    <!-- 底部小字 -->
+    <div class="poster-footing reveal">安全第一 · 效果当下验证</div>
+
+  </section>
+
+  <!-- 海报下方小导览 -->
+  <nav class="poster-nav" aria-label="品牌馆页面导览">
+    <a href="brand.html">回品牌之道</a>
+    <span class="sep" aria-hidden="true"></span>
+    <a href="brand-deck.html">看品牌卷轴</a>
+    <span class="sep" aria-hidden="true"></span>
+    <a class="is-line" href="https://wa.me/886970527037" target="_blank" rel="noopener">WhatsApp 咨询</a>
+  </nav>
+
+</main>
+
+<footer class="site-foot">
+  <div class="foot-links">
+    <a href="index.html">官网首页</a>
+    <a href="about.html">品牌故事</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE @150tiznd</a>
+    <a href="https://wa.me/886970527037" target="_blank" rel="noopener">WhatsApp 下单</a>
+  </div>
+  <div class="foot-copy">© 2026 泡泡怪兽 POP MONSTER. All rights reserved.</div>
+</footer>
+
+</body>
+</html>

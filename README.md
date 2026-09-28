@@ -12,6 +12,7 @@
 | `brand.html` | 水墨品牌館 |
 | `members.html` | 官網車主會員生態 |
 | `guide/` | 汽車美容施工教學 |
+| `en/`、`zh-hans/` | 英文與简中版（自動產生，見下方「多語版」） |
 
 ## 泡泡怪獸宇宙邊界
 
@@ -24,6 +25,26 @@
   `docs/analytics/systems-creatorkit-th3-funnel.md`。
 
 架構圖與決策見 [`docs/architecture/popmonster-universe.md`](docs/architecture/popmonster-universe.md)。
+
+## 多語版（繁中／简中／English）
+
+根目錄的繁中頁是唯一原稿；`/en/`、`/zh-hans/` 是 `scripts/i18n/build.py` 產出來的，**不要手改**。
+
+| 檔案 | 用途 |
+|---|---|
+| `i18n/en.json` | 英文翻譯庫（原句雜湊 → 譯文）。`"manual": true` 的是人工定稿，API 不會蓋掉 |
+| `i18n/zh-hans.json`、`i18n/zh-hans.phrases.json` | 简中人工改寫與用語規則（海外改走 WhatsApp） |
+| `i18n/glossary.md` | 翻譯守則與品名對照，API 翻譯時整份當 system prompt |
+| `scripts/i18n/translate.py` | 用 Claude API 補英文缺句（需要 `ANTHROPIC_API_KEY`） |
+| `.github/workflows/i18n.yml` | `main` 有改字就自動補譯、重產、開 `i18n-auto` PR；PR 只做檢查 |
+
+```bash
+python3 scripts/i18n/build.py           # 改完繁中頁後重產 /en/、/zh-hans/
+python3 scripts/i18n/translate.py       # 有新句子沒英文時補譯
+python3 -m pytest -q tests/test_i18n.py
+```
+
+海外流程：英文與简中頁的購物車一律送到 WhatsApp，不顯示銀行轉帳、台灣宅配與蝦皮連結；每款能不能寄到對方國家、運費多少，先在 WhatsApp 確認再付款。
 
 ## 本機檢查
 

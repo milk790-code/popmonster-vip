@@ -10,6 +10,10 @@
   var BYSKU = {};
   LIST.forEach(function (p) { BYSKU[p.sku] = p; });
 
+  /* 海外模式（/en/、/zh-hans/ 的 products.js 會設 intl:true）：不走 LINE 宅配結帳，改到下單頁用 WhatsApp；
+     運費依國家另報，不顯示台灣滿額免運 */
+  var INTL = !!CFG.intl;
+  var ORDER_URL = CFG.orderUrl || ((CFG.base || '') + 'order.html');
   var LS_CART = 'pm_cart_v1';
   var LS_ORDERS = 'pm_orders_v1';
 
@@ -67,7 +71,7 @@
       }).join('') + '</ul>' +
       (only ? '<p>這幾件要在下單頁送出，規格和價格也在那裡確認。</p>'
             : '<p>這幾件不會跟這裡的購物車一起送出，規格和價格請回下單頁確認、<span class="nw">送出。</span></p>') +
-      '<a class="btn ' + (only ? 'btn-gold' : 'btn-outline') + '" href="' + (CFG.base || '') + 'order.html">' + (only ? '到下單頁送出 →' : '到下單頁查看 →') + '</a></div>';
+      '<a class="btn ' + (only ? 'btn-gold' : 'btn-outline') + '" href="' + ORDER_URL + '">' + (only ? '到下單頁送出 →' : '到下單頁查看 →') + '</a></div>';
   }
 
   function entries() {
@@ -182,6 +186,11 @@
 
   function totalsHtml(sub, fee) {
     var un = hasUnpriced();
+    if (INTL) {
+      return '<div class="pm-row"><span>商品小計</span><b>' + (sub ? nt(sub) : '待報價') + (un && sub ? '＋待報價' : '') + '</b></div>' +
+        '<div class="pm-row"><span>運費</span><b>依寄送國家報價</b></div>' +
+        '<div class="pm-note">每款能不能寄到你的國家、運費多少，會先在 WhatsApp 確認，再請你付款。</div>';
+    }
     var h = '<div class="pm-row"><span>商品小計</span><b>' + (sub ? nt(sub) : (un ? '待報價' : nt(0))) + (un && sub ? '＋待報價' : '') + '</b></div>';
     h += '<div class="pm-row"><span>運費（' + esc(CFG.shipLabel || '宅配到府') + '）</span><b>' + (fee === 0 && sub >= (CFG.freeShipAt || 2000) ? '免運' : (un && !sub ? '結帳時計算' : nt(fee))) + '</b></div>';
     h += '<div class="pm-row total"><span>合計</span><b>' + (un ? (sub ? nt(sub + fee) + '＋' : '') + '待報價' : nt(sub + fee)) + '</b></div>';
@@ -193,6 +202,7 @@
     var sub = pricedSubtotal(), goal = CFG.freeShipAt || 2000;
     var txtEl = $('[data-pm-shiptxt]'), fillEl = $('[data-pm-shipfill]');
     if (!txtEl) return;
+    if (INTL) { var bar = $('[data-pm-shipbar]'); if (bar) bar.style.display = 'none'; return; }
     if (!entries().length) { txtEl.innerHTML = '滿 <b>' + nt(goal) + '</b> 免運費'; fillEl.style.width = '0%'; return; }
     if (sub >= goal) { txtEl.innerHTML = '<b>已達免運門檻 ✓</b>'; fillEl.style.width = '100%'; }
     else { txtEl.innerHTML = '再買 <b>' + nt(goal - sub) + '</b> 即享免運'; fillEl.style.width = Math.min(100, sub / goal * 100) + '%'; }
@@ -212,7 +222,7 @@
       itemsEl.innerHTML = es.map(itemRow).join('') + extrasHtml();
       var sub = pricedSubtotal(), fee = shipFee(sub);
       footEl.innerHTML = totalsHtml(sub, fee) +
-        '<a class="btn btn-gold" href="' + (CFG.base || '') + 'cart.html">前往結帳 →</a>' +
+        '<a class="btn btn-gold" href="' + (INTL ? ORDER_URL : (CFG.base || '') + 'cart.html') + '">前往結帳 →</a>' +
         '<button class="btn btn-outline" data-pm-continue style="width:100%">繼續選購</button>';
       $('[data-pm-continue]', footEl).addEventListener('click', closeDrawer);
     }
@@ -416,6 +426,7 @@
     $all('[data-pm-price-note]').forEach(function (el) {
       var p = BYSKU[el.getAttribute('data-pm-price-note')];
       if (!p) return;
+      if (INTL) { el.textContent = ''; return; }
       el.textContent = p.price ? '滿 ' + nt(CFG.freeShipAt || 2000) + ' 免運' : '可先加入購物車，送單後由 LINE 回覆報價';
     });
   }
