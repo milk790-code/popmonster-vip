@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<title>渲染正本：首頁分享預覽圖（商標版）1200×630</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600&display=block" rel="stylesheet">
+<style>
+  /* 渲染專用：固定像素、零動畫。規格見 ../PROMPT.md */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; }
+  #capture {
+    position: relative;
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    background: #0a0a0a;               /* 品牌手冊 PURE BLACK */
+    isolation: isolate;
+  }
+  /* 商標原圖是純黑底：screen 疊上去，黑色直接變成底色，四周不會有方框 */
+  .mark {
+    position: absolute;
+    left: 291px;                        /* 本體中心 x=309 → 畫面中心 600 */
+    top: -29px;                         /* 本體中心 y=338 → 309（中心往上 6px，光學置中） */
+    width: 616px;
+    height: 616px;
+    mix-blend-mode: screen;
+  }
+  .sig {
+    position: absolute;
+    bottom: 86px;                       /* 字底對齊「泡泡怪獸」四字底線（y=544） */
+    font-family: "Noto Serif TC", "Songti TC", serif;
+    line-height: 1;
+  }
+  .sig-brand {
+    left: 60px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: .34em;
+    color: #c8a96b;                     /* CHAMPAGNE 核心識別金 */
+  }
+  .sig-url {
+    right: 60px;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: .06em;
+    color: rgba(232, 226, 214, .56);    /* IVORY WHITE 降一階 */
+  }
+</style>
+</head>
+<body>
+<div id="capture">
+  <img class="mark" src="logo-mark-616.png" alt="">
+  <div class="sig sig-brand">POP MONSTER</div>
+  <div class="sig sig-url">popmonster.vip</div>
+</div>
+</body>
+</html>
