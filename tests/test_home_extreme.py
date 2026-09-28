@@ -24,7 +24,9 @@ class HomepageExtremeContract(unittest.TestCase):
 
     def test_semantic_entry_and_social_metadata(self):
         self.assertIn('<link rel="canonical" href="https://popmonster.vip/">', self.html)
-        self.assertIn('og-image-1200x630.png', self.html)
+        # 舊的 og-image-1200x630.png 是別的品牌（3Q貢丸）的圖；首頁預覽改用泡泡怪獸商標
+        self.assertIn('property="og:image" content="https://popmonster.vip/img/og/og-logo-1200x630.jpg"', self.html)
+        self.assertTrue((ROOT / 'img' / 'og' / 'og-logo-1200x630.jpg').is_file())
         self.assertRegex(self.html, r'<a[^>]+class="skip-link"[^>]+href="#main-content"')
         self.assertRegex(self.html, r'<main[^>]+id="main-content"')
         self.assertIn('aria-current="page"', self.html)
