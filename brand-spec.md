@@ -36,7 +36,8 @@
 - Repository brand mark: `favicon.svg`.
 - Hero / featured product: `img/a001-main.jpg` with responsive source `img/a001-main-480.jpg`.
 - Product catalogue assets: existing `img/a*-main.jpg` files only; no hotlinks or synthetic silhouettes.
-- Social preview: `og-image-1200x630.png`.
+- Brand logo: the colorful round POP MONSTER badge (`assets/og-logo/src/brand-logo-circle-1008x992.jpg`).
+- Social preview: `img/og/og-badge-1200x630.jpg` (the badge on `#0a0a0a`; spec in `assets/og-logo/PROMPT.md`). `og-image-1200x630.png` and `img/og/og-logo-1200x630.jpg` are old URLs that now serve the same image.
 
 ## Copy and trust rules
 

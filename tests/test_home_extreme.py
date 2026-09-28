@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import re
+import struct
 import subprocess
 import unittest
 
@@ -27,9 +28,27 @@ class HomepageExtremeContract(unittest.TestCase):
         # 舊的 og-image-1200x630.png 是別的品牌（3Q貢丸）的圖；首頁預覽改用泡泡怪獸商標（彩色圓形徽章）
         self.assertIn('property="og:image" content="https://popmonster.vip/img/og/og-badge-1200x630.jpg"', self.html)
         self.assertTrue((ROOT / 'img' / 'og' / 'og-badge-1200x630.jpg').is_file())
+        self.assertIn('name="twitter:image" content="https://popmonster.vip/img/og/og-badge-1200x630.jpg"', self.html)
         self.assertRegex(self.html, r'<a[^>]+class="skip-link"[^>]+href="#main-content"')
         self.assertRegex(self.html, r'<main[^>]+id="main-content"')
         self.assertIn('aria-current="page"', self.html)
+
+    def test_share_card_size_and_old_urls_serve_the_same_badge(self):
+        # 規格見 assets/og-logo/PROMPT.md。兩個舊網址（金羽毛版 jpg、3Q貢丸時期 png）平台可能還會回抓，內容要是同一張徽章
+        card = (ROOT / 'img' / 'og' / 'og-badge-1200x630.jpg').read_bytes()
+        self.assertLess(len(card), 200 * 1024, '分享卡過大')
+        i = 2
+        while True:
+            self.assertEqual(card[i], 0xFF)
+            marker = card[i + 1]
+            if 0xC0 <= marker <= 0xCF and marker not in (0xC4, 0xC8, 0xCC):
+                height, width = struct.unpack('>HH', card[i + 5:i + 9])
+                break
+            i += 2 + struct.unpack('>H', card[i + 2:i + 4])[0]
+        self.assertEqual((width, height), (1200, 630))
+        self.assertEqual((ROOT / 'img' / 'og' / 'og-logo-1200x630.jpg').read_bytes(), card)
+        legacy = (ROOT / 'og-image-1200x630.png').read_bytes()
+        self.assertEqual(struct.unpack('>II', legacy[16:24]), (1200, 630))
 
     def test_real_brand_and_product_assets_drive_the_hero(self):
         self.assertRegex(self.html, r'class="nav-mark"[^>]+src="favicon\.svg"')
