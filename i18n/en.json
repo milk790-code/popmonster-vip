@@ -2453,11 +2453,6 @@
   "en": "This website uses cookies to improve your browsing experience. You can manage or decline cookies in your browser settings, but this may affect some features.",
   "model": "claude-sonnet-5+opus-review"
  },
- "43e36cebe168": {
-  "src": "不要自己加濃或加稀，比例請依瓶身標示。千倍稀釋（1cc 原液兌 1000ml 純水）是手動噴壺的比例，PA 壺倍率不同，不要直接照別人的比例調，不確定先加 LINE 問小編。",
-  "en": "No. Don't make it stronger or weaker on your own — follow the ratio on the bottle. The 1:1000 ratio (1cc of concentrate to 1000ml of purified water) is for a manual pump sprayer. PA foam lances use a different ratio, so don't copy someone else's mix. WhatsApp us first if you're not sure.",
-  "model": "claude-sonnet-5+opus-review"
- },
  "43f6f9719c68": {
   "src": "滿 <x0/>",
   "en": "Free shipping in Taiwan over <x0/>",
@@ -2667,11 +2662,6 @@
  "4931e339b599": {
   "src": "八、條款修訂",
   "en": "8. Amendments to These Terms",
-  "model": "claude-sonnet-5+opus-review"
- },
- "4963e5421458": {
-  "src": "準備一個乾淨的手動噴壺（建議 1 公升化工級 PE 噴壺）。將 <g0>1ml 原液</g0>（建議用 5ml 滴管精準量取）加入 <g1>1000ml 純水</g1>（不建議自來水）。蓋上噴壺輕搖均勻即可，不需要劇烈搖晃。1ml 兌 1000ml 是手動噴壺的比例；PA 壺倍率不同，請依瓶身標示，不確定先加 LINE 問小編。",
-  "en": "Get a clean manual pump sprayer (a 1-liter chemical-grade PE sprayer works well). Add <g0>1ml of concentrate</g0> (use a 5ml dropper for accuracy) to <g1>1000ml of purified water</g1> (tap water isn't recommended). Cap it and shake gently to mix — no need to shake hard. 1ml to 1000ml is the ratio for a manual pump sprayer; PA foam lances use a different ratio, so follow the bottle label, and WhatsApp us first if you're not sure.",
   "model": "claude-sonnet-5+opus-review"
  },
  "49705a7cc97a": {
@@ -5640,6 +5630,12 @@
   "en": "Car glass and mirrors; home windows, bathroom mirrors, glass doors, glass display cases, glass tabletops",
   "model": "claude-sonnet-5+opus-review"
  },
+ "99547ebc2717": {
+  "src": "不用。1:1000 是日常基準，想要效果更明顯，可以依需求提高濃度，濃度越高效果越好。另一個關鍵是前處理：脫脂、清潔做得越乾淨，效果越好；玻璃本身如果有重油膜，要先清潔乾淨再上。少數車友反映「用了沒感覺」，多半是稀釋過度（2000–3000 倍）。",
+  "en": "No. 1:1000 is the everyday baseline. If you want a stronger effect, you can raise the concentration — the higher it is, the stronger the effect. The other key factor is prep: the cleaner the degreasing and surface prep, the better the result. If the glass itself has a heavy oil film, clean it off first before applying. A few customers who said they \"didn't feel a difference\" had usually over-diluted it (2000–3000x).",
+  "model": "manual",
+  "manual": true
+ },
  "995701789f8c": {
   "src": "適用範圍以規格表列出的材質為準。陽極處理鋁件、鍍鉻件這類活躍金屬，以及車漆鍍膜層、改色膜，目前沒有相容性資料，請勿直接施工。",
   "en": "Only use on the materials listed in the spec table. We don't have compatibility data yet for reactive metals like anodized aluminum or chrome-plated parts, or for paint coatings and color-change wraps, so don't apply it to those directly.",
@@ -5794,6 +5790,12 @@
   "src": "請依瓶身標示；或加 LINE 告知你用泡沫機還是手動噴壺，小編再提供對應比例",
   "en": "Follow the label, or message us on WhatsApp and tell us whether you're using a foam cannon or a hand sprayer, and we'll give you the right ratio.",
   "model": "claude-sonnet-5+opus-review"
+ },
+ "9e9950e67271": {
+  "src": "準備一個乾淨的手動噴壺（建議 1 公升化工級 PE 噴壺）。將 <g0>1ml 原液</g0>（建議用 5ml 滴管精準量取）加入 <g1>1000ml 水</g1>；馬上要用的話，一般自來水就可以。蓋上噴壺輕搖均勻即可，不需要劇烈搖晃。稀釋後的工作液建議當天用完，不要預先調好放著。1ml 兌 1000ml 是手動噴壺的比例；PA 壺倍率不同，請依瓶身標示，不確定先加 LINE 問小編。",
+  "en": "Get a clean manual pump sprayer (a 1-liter chemical-grade PE sprayer works well). Add <g0>1ml of concentrate</g0> (use a 5ml dropper for accuracy) to <g1>1000ml of water</g1> — if you're using it right away, regular tap water is fine. Cap it and shake gently to mix, no need to shake hard. Use the diluted mix the same day; don't premix it and let it sit. 1ml to 1000ml is the ratio for a manual pump sprayer; PA foam lances use a different ratio, so follow the bottle label, and WhatsApp us first if you're not sure.",
+  "model": "manual",
+  "manual": true
  },
  "9ebf37ebdf7f": {
   "src": "重切階段用三號 80 番搭重切羊毛盤，處理橘皮、深刮痕與需要拉皮的漆面。",
@@ -6584,11 +6586,6 @@
  "b25313f659da": {
   "src": "可以，但需要多次處理。嚴重的石灰水垢建議稍加施力並靜置 2–3 分鐘讓藥劑充分反應，如單次無法完全去除，可重複 2–3 次。",
   "en": "Yes, but it takes more than one application. For heavy limescale, apply a bit more pressure and let it sit for 2-3 minutes so it has time to react. If one application doesn't fully remove it, repeat 2-3 times.",
-  "model": "claude-sonnet-5+opus-review"
- },
- "b26d512e3d63": {
-  "src": "誤區一：濃度越高效果越好？",
-  "en": "Mistake #1: Is more concentrated better?",
   "model": "claude-sonnet-5+opus-review"
  },
  "b2771d810ebf": {
@@ -7868,6 +7865,12 @@
   "src": "多久需要做一次鐵粉處理？",
   "en": "How often should you do an iron removal treatment?",
   "model": "claude-sonnet-5+opus-review"
+ },
+ "d6a6ea6a73e6": {
+  "src": "誤區一：只能照 1:1000 嗎？",
+  "en": "Mistake #1: Does it have to be exactly 1:1000?",
+  "model": "manual",
+  "manual": true
  },
  "d6abee682ebf": {
   "src": "每完成一小塊立即擦除殘留並檢查效果，未去除可重複 1-2 次，嚴禁單次過長、過度研磨。",
