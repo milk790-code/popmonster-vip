@@ -123,7 +123,7 @@ a:hover{color:var(--gold-lt)}
 .cookie-bar{position:fixed;bottom:0;left:0;right:0;z-index:999;background:var(--bg-card);border-top:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:13px;color:var(--txt-m);transform:translateY(100%);transition:transform .4s}
 .cookie-bar.show{transform:translateY(0)}
 .cookie-bar a{color:var(--gold)}
-.cookie-bar button{min-height:36px;padding:8px 20px;font-size:13px;border-radius:var(--r);border:none;cursor:pointer;font-weight:600}
+.cookie-bar button{min-height:44px;padding:8px 20px;font-size:13px;border-radius:var(--r);border:none;cursor:pointer;font-weight:600}
 .cookie-accept{background:var(--gold);color:#0a0a0a}
 .cookie-decline{background:transparent;color:var(--txt-m);border:1px solid var(--border)}
 
@@ -432,3 +432,7 @@ a:hover{color:var(--gold-lt)}
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   .fade-up{opacity:1;transform:none}
 }
+
+/* 2026-09-25 r2：手機點擊區至少 44px（頁尾連結、隱私權／服務條款） */
+.footer-legal a{display:inline-flex;align-items:center;min-height:44px}
+@media(max-width:768px){.footer-links{gap:0;align-items:center}.footer-links a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px}}

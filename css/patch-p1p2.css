@@ -136,7 +136,7 @@
   font-family:"Songti TC",STSong,"Noto Serif TC",serif;font-size:15px;color:var(--gold-lt);
   margin-top:6px;font-variant-numeric:tabular-nums;
 }
-.related-body-new .rpx .cur{font-size:11px;letter-spacing:.06em;margin-right:2px;opacity:.8;}
+.related-body-new .rpx .cur{font-size:12px;letter-spacing:.06em;margin-right:2px;opacity:.8;}
 .related-body-new .rpx.tbd{font-size:13px;color:var(--txt-m);}
 
 /* ── 商品頁的延伸閱讀（連回教學文；原本 32 頁只有 1 頁有） ── */
