@@ -83,5 +83,6 @@ jobs:
           if ! gh pr view i18n-auto --json state -q .state 2>/dev/null | grep -q OPEN; then
             gh pr create --base main --head i18n-auto \
               --title "多語版同步（英文／簡中）" \
-              --body "main 上的中文頁有改，這張 PR 是自動產生的英文版（/en/）與簡中版（/zh-hans/）。看過預覽沒問題就合併。"
+              --body "main 上的中文頁有改，這張 PR 是自動產生的英文版（/en/）與簡中版（/zh-hans/）。看過預覽沒問題就合併。" \
+            || echo "::warning::已推到 i18n-auto 分支，但 Actions 還不能開 PR：到 Settings → Actions → General 勾「Allow GitHub Actions to create and approve pull requests」，或手動從 i18n-auto 開 PR"
           fi
