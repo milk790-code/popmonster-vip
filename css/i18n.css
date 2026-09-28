@@ -1,0 +1,49 @@
+/* 語言切換（build.py 放進每一頁；/en/、/zh-hans/ 共用這一支） */
+.lang-switch{position:relative;font-size:13px;line-height:1;z-index:60}
+.lang-switch>summary{list-style:none;display:flex;align-items:center;gap:6px;min-height:var(--tap,44px);padding:0 10px;
+  color:var(--txt-m,#a89e8e);cursor:pointer;border-radius:999px;-webkit-tap-highlight-color:transparent;user-select:none}
+.lang-switch>summary::-webkit-details-marker{display:none}
+.lang-switch>summary:hover,.lang-switch[open]>summary{color:var(--gold,#c8a96b)}
+.lang-switch>summary:focus-visible{outline:2px solid var(--gold,#c8a96b);outline-offset:2px}
+.lang-switch>summary span{letter-spacing:.04em;font-weight:600}
+.lang-menu{position:absolute;right:0;top:calc(100% + 4px);min-width:164px;padding:6px;background:#141414;
+  border:1px solid var(--border-s,rgba(200,169,107,.4));border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.55)}
+.lang-menu a{display:flex;align-items:baseline;justify-content:space-between;gap:12px;min-height:40px;padding:10px 12px;
+  color:var(--txt,#e8e2d6);border-radius:6px;text-decoration:none;font-weight:600}
+.lang-menu a small{color:var(--txt-m,#a89e8e);font-weight:400;font-size:12px}
+.lang-menu a:hover{background:#1c1c1c;color:var(--gold-lt,#d8c08a)}
+.lang-menu a[aria-current]{color:var(--gold,#c8a96b)}
+.lang-menu a[aria-current]::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;align-self:center;margin-right:-4px}
+
+/* 有導覽列的頁：放在選單鈕左邊，桌機跟在連結後面 */
+.nav-inner>.nav-links{margin-left:auto}
+.nav-inner>.lang-switch{margin-left:14px}
+/* 手機：導覽列只放得下 Logo、購物車、選單鈕，語言改放 ☰ 選單最下面 */
+@media(max-width:768px){.nav-inner>.lang-switch{display:none}}
+.lang-row{display:flex;gap:8px;margin-top:4px;padding-top:16px;border-top:1px solid var(--border,rgba(200,169,107,.15))}
+.mobile-menu .lang-row a[data-lang]{flex:1;display:flex;align-items:center;justify-content:center;min-height:44px;padding:0 6px;
+  border:1px solid var(--border,rgba(200,169,107,.15));border-radius:8px;font-size:14px;color:var(--txt-m,#a89e8e);text-decoration:none}
+.mobile-menu .lang-row a[data-lang][aria-current]{border-color:var(--gold,#c8a96b);color:var(--gold,#c8a96b);font-weight:600}
+@media(min-width:769px){.lang-row{display:none}}
+/* 首頁在 920px 以下就改用 ☰ 選單 */
+@media(max-width:920px){.home-page .nav-inner>.lang-switch{display:none}}
+@media(min-width:769px) and (max-width:920px){.home-page .lang-row{display:flex}}
+
+/* 沒有標準導覽列的頁（品牌館、系統館）：固定在右下角，選單往上開，不蓋各頁自己的 LINE 鈕 */
+.lang-float{position:fixed;bottom:14px;right:14px;z-index:1000}
+.lang-float .lang-menu{top:auto;bottom:calc(100% + 6px)}
+.lang-float>summary{background:rgba(10,10,10,.78);border:1px solid var(--border,rgba(200,169,107,.15));
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);min-height:38px}
+
+/* 瀏覽器語言跟頁面不同時，導覽列下方一條提示（不自動跳轉；放上面才不會擋到底部的加入購物車） */
+.lang-hint{position:fixed;left:12px;right:12px;top:72px;z-index:90;max-width:460px;margin:0 auto;display:flex;
+  align-items:center;gap:10px;padding:10px 10px 10px 14px;background:#141414;color:var(--txt,#e8e2d6);font-size:14px;
+  border:1px solid var(--border-s,rgba(200,169,107,.4));border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.lang-hint p{margin:0;flex:1;line-height:1.4}
+.lang-hint a{flex:none;padding:9px 14px;border-radius:8px;background:var(--gold,#c8a96b);color:#0a0a0a;font-weight:700;text-decoration:none}
+.lang-hint button{flex:none;width:36px;height:36px;border:0;background:none;color:var(--txt-m,#a89e8e);font-size:20px;cursor:pointer;border-radius:8px}
+.lang-hint button:hover{color:var(--txt,#e8e2d6)}
+@media print{.lang-switch,.lang-hint{display:none}}
+
+/* 英文字比中文長：導覽列的字不換行 */
+html[lang="en"] .nav-links a{white-space:nowrap}

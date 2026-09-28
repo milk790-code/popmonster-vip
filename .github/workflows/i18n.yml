@@ -1,0 +1,87 @@
+# 多語版同步：繁中原頁（根目錄）改了 → 自動翻英文、轉簡中 → 開一張 PR 等你按合併。
+# 需要：repo secret ANTHROPIC_API_KEY；Settings → Actions → General →
+#       「Allow GitHub Actions to create and approve pull requests」打勾。
+# 沒有金鑰時照樣產生簡中版，英文缺的句子先留中文。
+name: i18n sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.html'
+      - 'guide/**'
+      - 'js/**'
+      - 'products_catalog.js'
+      - 'sitemap.xml'
+      - 'i18n/**'
+      - 'scripts/i18n/**'
+  pull_request:
+    paths:
+      - '*.html'
+      - 'guide/**'
+      - 'js/**'
+      - 'i18n/**'
+      - 'scripts/i18n/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: i18n-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install opencc-python-reimplemented pytest
+      - name: 多語版測試
+        run: python -m pytest -q tests/test_i18n.py
+      - name: 產出是不是最新
+        run: python scripts/i18n/build.py --check || echo "::warning::英文／簡中版還沒跟上這次的中文修改；合併到 main 後會自動開 PR 補上"
+
+  sync:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      HAS_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install anthropic opencc-python-reimplemented pytest
+      - name: 列出要翻的句子
+        run: python scripts/i18n/extract.py
+      - name: 用 Claude 翻譯缺的英文
+        if: env.HAS_KEY == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/i18n/translate.py || echo "::warning::有些句子沒翻成功，先留中文，下次推送會再補"
+      - name: 產生英文與簡中頁
+        run: python scripts/i18n/build.py
+      - name: 多語版測試
+        run: python -m pytest -q tests/test_i18n.py
+      - name: 開 PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then echo "沒有變動"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C i18n-auto
+          git add -A
+          git commit -m "多語版同步：英文翻譯與簡中轉換（自動）"
+          git push -f origin i18n-auto
+          if ! gh pr view i18n-auto --json state -q .state 2>/dev/null | grep -q OPEN; then
+            gh pr create --base main --head i18n-auto \
+              --title "多語版同步（英文／簡中）" \
+              --body "main 上的中文頁有改，這張 PR 是自動產生的英文版（/en/）與簡中版（/zh-hans/）。看過預覽沒問題就合併。"
+          fi

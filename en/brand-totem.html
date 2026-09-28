@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brand totem: 'The Way of Car Care' ink poster | POP MONSTER</title>
+<meta name="description" content="POP MONSTER brand totem — a 9:16 ink poster on rice paper. Vertical calligraphy 'The Way of Car Care' with the vermilion POP MONSTER seal. Pick the right job first, then pick the right product; safety first, check the result on the spot.">
+<link rel="canonical" href="https://popmonster.vip/en/brand-totem.html">
+<!--i18n:alt-->
+<link rel="alternate" hreflang="zh-Hant-TW" href="https://popmonster.vip/brand-totem.html">
+<link rel="alternate" hreflang="zh-Hans" href="https://popmonster.vip/zh-hans/brand-totem.html">
+<link rel="alternate" hreflang="en" href="https://popmonster.vip/en/brand-totem.html">
+<link rel="alternate" hreflang="x-default" href="https://popmonster.vip/brand-totem.html">
+<link rel="stylesheet" href="/css/i18n.css">
+<script src="/js/i18n.js" defer></script>
+<!--/i18n:alt-->
+<meta property="og:site_name" content="POP MONSTER">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Brand totem: 'The Way of Car Care' ink poster | POP MONSTER">
+<meta property="og:description" content="Vertical calligraphy 'The Way of Car Care' with the vermilion POP MONSTER seal — pick the right job first, then pick the right product.">
+<meta property="og:url" content="https://popmonster.vip/en/brand-totem.html">
+<meta property="og:image" content="https://popmonster.vip/assets/brand-totem/og-brand-1200x630.png">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="../css/canwu-brand.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: var(--font-serif);
+    color: var(--text);
+    background-color: var(--bg);
+    background-image: var(--paper-fibre);
+    background-blend-mode: screen;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ---- 頁首導覽（墨地髮絲線）---- */
+  .site-head {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    background-color: var(--bg);
+    border-bottom: var(--rule-hair) solid var(--line);
+    padding: var(--space-2) clamp(16px, 4vw, 40px);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+  }
+  .site-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: var(--tracking-wide);
+    color: var(--text-strong);
+    white-space: nowrap;
+  }
+  .site-logo .logo-seal {
+    width: 26px;
+    height: 26px;
+    flex: none;
+    background: var(--seal);
+    color: var(--paper-light);
+    border-radius: var(--radius-seal);
+    box-shadow: var(--shadow-inset-seal);
+    font-family: var(--font-brush);
+    font-size: 12px;
+    line-height: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    padding: 2px;
+  }
+  .site-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    margin-left: auto;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: var(--tracking-wide);
+  }
+  .site-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-2);
+    color: var(--text-muted);
+    border-bottom: var(--rule-med) solid transparent;
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .site-nav a:hover, .site-nav a:focus-visible { color: var(--text-strong); }
+  .site-nav a[aria-current="page"] {
+    color: var(--text-strong);
+    border-bottom-color: var(--accent);
+  }
+  .nav-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 var(--space-5);
+    background: var(--accent);
+    color: var(--accent-text) !important;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: var(--tracking-wide);
+    box-shadow: var(--shadow-inset-seal);
+    transition: background var(--dur-fast) var(--ease-soft);
+  }
+  .nav-cta:hover, .nav-cta:focus-visible { background: var(--accent-active); }
+
+  /* ---- 墨底畫布 ---- */
+  .canvas {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(16px, 3vh, 28px);
+    padding: clamp(14px, 3.5vw, 40px);
+  }
+
+  /* ---- 海報 · 9:16 宣紙（等比縮放，正本 1080×1920）---- */
+  .poster {
+    position: relative;
+    width: min(100%, calc(92vh * 9 / 16), calc(92svh * 9 / 16));
+    aspect-ratio: 9 / 16;
+    max-height: 92vh;
+    max-height: 92svh;
+    flex: none;
+    overflow: hidden;
+    container-type: inline-size;
+    background-color: var(--paper-raw);
+    background-image: var(--paper-fibre), var(--paper-texture);
+    background-blend-mode: multiply, multiply;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.45);
+    color: var(--ink-thick);
+  }
+
+  /* 髮絲內框（正本 inset 54/1080）*/
+  .poster-frame {
+    position: absolute;
+    inset: 5cqw;
+    border: 1px solid var(--wash-12);
+    pointer-events: none;
+  }
+
+  /* 巨大幽靈字 — 圖騰背後的一口氣（正本 1180px／右 -90 底 -180）*/
+  .poster-ghost {
+    position: absolute;
+    right: -8.33%;
+    bottom: -9.4%;
+    font-family: var(--font-brush);
+    font-size: 109cqw;
+    line-height: 1;
+    color: rgba(27, 23, 18, 0.035);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* 頂部 tracked label（正本 top 120／22px／字距 0.46em）*/
+  .poster-label {
+    position: absolute;
+    top: 6.25%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 2.04cqw;
+    font-weight: 600;
+    letter-spacing: 0.46em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    padding-left: 0.46em;
+    animation-delay: 120ms;
+  }
+
+  /* 中央直排書法圖騰（正本 top 250 / bottom 560 / 248px；
+     正本預留給掃描書法圖，改用真字後微調帶高與字級以免壓到對聯）*/
+  .poster-totem {
+    position: absolute;
+    top: 10%;
+    left: 0;
+    right: 0;
+    bottom: 31%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .poster-totem h1 {
+    writing-mode: vertical-rl;
+    white-space: nowrap;
+    font-family: var(--font-brush);
+    font-weight: 400;
+    font-size: 18.5cqw;
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+    color: var(--ink-burnt);
+    animation-delay: 320ms;
+  }
+
+  /* 對聯（正本 bottom 360／40px／字距 0.28em／間 44）*/
+  .poster-couplet {
+    position: absolute;
+    bottom: 18.75%;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 4.07cqw;
+    animation-delay: 640ms;
+  }
+  .poster-couplet span {
+    writing-mode: vertical-rl;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 3.7cqw;
+    letter-spacing: 0.28em;
+    line-height: 1;
+  }
+  .poster-couplet .line-heavy { color: var(--ink-heavy); }
+  .poster-couplet .line-light { color: var(--ink-light); }
+
+  /* 泡怪鈐印（正本 bottom 168／116×116／字 42）*/
+  .poster-seal-row {
+    position: absolute;
+    bottom: 8.75%;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+  }
+  .poster-seal {
+    width: 10.74cqw;
+    height: 10.74cqw;
+    background: var(--seal);
+    color: var(--paper-light);
+    font-family: var(--font-brush);
+    font-size: 3.89cqw;
+    line-height: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    padding: 1.2cqw;
+    border-radius: var(--radius-seal);
+    box-shadow: var(--shadow-inset-seal);
+    animation-delay: 1000ms;
+  }
+
+  /* 底部小字（正本 bottom 110／26px／字距 0.2em）*/
+  .poster-footing {
+    position: absolute;
+    bottom: 5.7%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-serif);
+    font-size: 2.4cqw;
+    letter-spacing: 0.2em;
+    color: var(--ink-mid);
+    animation-delay: 1180ms;
+  }
+
+  /* ---- 海報下方小導覽（畫布外）---- */
+  .poster-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-5);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: var(--tracking-wide);
+  }
+  .poster-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    color: var(--text-muted);
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .poster-nav a:hover, .poster-nav a:focus-visible { color: var(--text-strong); }
+  .poster-nav .sep {
+    width: 3px;
+    height: 3px;
+    border-radius: var(--radius-full);
+    background: var(--line-strong);
+  }
+  .poster-nav .is-line { color: var(--accent); }
+  .poster-nav .is-line:hover, .poster-nav .is-line:focus-visible { color: var(--accent-active); }
+
+  /* ---- 頁尾（精簡）---- */
+  .site-foot {
+    border-top: var(--rule-hair) solid var(--line);
+    padding: var(--space-5) clamp(16px, 4vw, 40px) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    text-align: center;
+  }
+  .foot-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: var(--tracking-wide);
+  }
+  .foot-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-2);
+    color: var(--text-muted);
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+  .foot-links a:hover, .foot-links a:focus-visible { color: var(--text-strong); }
+  .foot-copy {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: var(--tracking-wide);
+    color: var(--text-faint);
+  }
+
+  @media (max-width: 480px) {
+    .site-nav { font-size: 12px; gap: 0 var(--space-2); }
+    .nav-cta { padding: 0 var(--space-4); }
+  }
+</style>
+</head>
+<body data-ground="ink">
+<!--i18n:switch--><details class="lang-switch lang-float" data-i18n-skip><summary aria-label="Change language"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M12 3c2.6 2.8 3.9 5.8 3.9 9s-1.3 6.2-3.9 9c-2.6-2.8-3.9-5.8-3.9-9S9.4 5.8 12 3z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>EN</span></summary><div class="lang-menu"><a href="/brand-totem.html" hreflang="zh-Hant-TW" lang="zh-Hant-TW" data-lang="zh-Hant">繁中<small>繁體中文</small></a><a href="/zh-hans/brand-totem.html" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh-Hans">简中<small>简体中文</small></a><a href="/en/brand-totem.html" hreflang="en" lang="en" data-lang="en" aria-current="true">EN<small>English</small></a></div></details><!--/i18n:switch-->
+
+<header class="site-head">
+  <a class="site-logo" href="index.html" aria-label="Back to the POP MONSTER homepage">
+    <span class="logo-seal" aria-hidden="true"><span>P</span><span>M</span></span> POP MONSTER</a>
+  <nav class="site-nav" aria-label="Brand sub-navigation">
+    <a href="brand.html">Brand Philosophy</a>
+    <a href="brand-deck.html">Brand Scroll</a>
+    <a href="brand-totem.html" aria-current="page">Brand Emblem</a>
+    <a class="nav-cta" href="https://wa.me/886970527037" target="_blank" rel="noopener">Product advice on WhatsApp</a>
+  </nav>
+</header>
+
+<main class="canvas">
+
+  <!-- 海報 · 9:16 宣紙 -->
+  <section class="poster" aria-label="POP MONSTER brand totem poster: vertical calligraphy 'The Way of Car Care' with the vermilion POP MONSTER seal">
+
+    <div class="poster-frame" aria-hidden="true"></div>
+
+    <!-- 巨大幽靈字 — 圖騰背後的一口氣 -->
+    <div class="poster-ghost" aria-hidden="true">POP</div>
+
+    <!-- 頂部 label -->
+    <div class="poster-label reveal">POP MONSTER</div>
+
+    <!-- 圖騰 -->
+    <div class="poster-totem">
+      <h1 class="reveal">The Way of Car Care</h1>
+    </div>
+
+    <!-- 對聯 -->
+    <div class="poster-couplet reveal">
+      <span class="line-heavy">Pick the right job first</span>
+      <span class="line-light">Then pick the right product</span>
+    </div>
+
+    <!-- 泡怪鈐印 -->
+    <div class="poster-seal-row">
+      <div class="poster-seal reveal-seal" role="img" aria-label="Vermilion seal stamp: POP MONSTER"><span aria-hidden="true">POP</span><span aria-hidden="true">MONSTER</span></div>
+    </div>
+
+    <!-- 底部小字 -->
+    <div class="poster-footing reveal">Safety first · check the result on the spot</div>
+
+  </section>
+
+  <!-- 海報下方小導覽 -->
+  <nav class="poster-nav" aria-label="Brand pages navigation">
+    <a href="brand.html">Back to The Way of the Brand</a>
+    <span class="sep" aria-hidden="true"></span>
+    <a href="brand-deck.html">See the Brand Scroll</a>
+    <span class="sep" aria-hidden="true"></span>
+    <a class="is-line" href="https://wa.me/886970527037" target="_blank" rel="noopener">WhatsApp us</a>
+  </nav>
+
+</main>
+
+<footer class="site-foot">
+  <div class="foot-links">
+    <a href="index.html">Home</a>
+    <a href="about.html">Brand Story</a>
+    <a href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">LINE @150tiznd</a>
+    <a href="https://wa.me/886970527037" target="_blank" rel="noopener">WhatsApp order</a>
+  </div>
+  <div class="foot-copy">© 2026 POP MONSTER. All rights reserved.</div>
+</footer>
+
+</body>
+</html>
