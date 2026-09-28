@@ -9579,8 +9579,9 @@
  },
  "ff08dd8d9f71": {
   "src": "LINE 官方帳號營業時間內 4 小時回覆，非營業時間 24 小時內回覆。目前因外貿業務繁忙，回覆稍長，但絕不漏訊。",
-  "en": "We reply within 4 hours during business hours on the LINE official account, and within 24 hours outside business hours. We're busy with overseas orders right now, so replies may take a little longer, but we never miss a message.",
-  "model": "claude-sonnet-5+opus-review"
+  "en": "We reply on WhatsApp and the LINE official account within 4 hours during business hours, and within 24 hours outside business hours. We're busy with overseas orders right now, so replies may take a little longer, but we never miss a message.",
+  "model": "manual",
+  "manual": true
  },
  "ff3576177e7a": {
   "src": "同一內容切成各平台版本",

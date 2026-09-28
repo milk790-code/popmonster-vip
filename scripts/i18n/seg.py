@@ -41,7 +41,8 @@ JSONLD_SKIP_KEYS = {'@context', '@type', '@id', 'url', 'item', 'sku', 'gtin', 'g
                     'telephone', 'email', 'inLanguage', 'datePublished', 'dateModified',
                     'priceValidUntil', 'contentUrl', 'thumbnailUrl', 'target', 'urlTemplate'}
 
-ATTR_RE = re.compile(r'''([^\s"'>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?''')
+# 沒加引號的值照瀏覽器的讀法：讀到空白或 '>' 為止（'=' 也算值的一部分，例：src=a.png?v=2）
+ATTR_RE = re.compile(r'''([^\s"'>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>][^\s>]*)))?''')
 TOKEN_RE = re.compile(r'<(/?)([gx])(\d+)(/?)>')
 
 

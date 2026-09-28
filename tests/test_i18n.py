@@ -102,6 +102,27 @@ def test_hans_not_converted_twice():
         assert build.DONE_A not in html and build.DONE_B not in html, p
 
 
+def test_unquoted_attr_value_with_equals_sign():
+    """沒引號的值裡有 '='（網址參數）要整段讀到，換路徑後不能被引號切斷"""
+    assert seg.parse_attrs('<img src=a.png?v=2 alt=x>')['src'][0] == 'a.png?v=2'
+    src = '<p><img src=img/a.png?v=2 alt=圖片>看</p>'
+    _, segs = seg.html_segments(src, 't')
+    out, _ = seg.render(src, segs, lambda t, k: t.replace('圖片', 'A photo').replace('看', 'Look'))
+    assert '<img src=img/a.png?v=2 alt="A photo">' in out
+
+
+def test_line_button_next_to_whatsapp_copy_is_rerouted():
+    """按鈕只寫「Chat online／立即前往」、旁邊那句寫 WhatsApp：連結改 WhatsApp（online 裡的 line 不算 LINE）"""
+    linker = build.Linker('en', set(PAGES))
+    for label in ('Go now', 'Chat online', '立即前往'):
+        html = ('<html><body><div><p>WhatsApp us</p><a href="https://line.me/R/ti/p/@150tiznd">%s</a></div>'
+                '</body></html>' % label)
+        out = build.localize_page(html, 'index.html', 'en', linker)
+        assert 'wa.me/886970527037' in out and 'line.me' not in out, label
+    html = '<html><body><div><p>WhatsApp us</p><a href="https://line.me/R/ti/p/@150tiznd">Add us on LINE</a></div></body></html>'
+    assert 'line.me' in build.localize_page(html, 'index.html', 'en', linker)
+
+
 def test_translation_memory_placeholders_valid():
     tm = json.load(open(os.path.join(config.I18N_DIR, 'en.json'), encoding='utf-8')) \
         if os.path.exists(os.path.join(config.I18N_DIR, 'en.json')) else {}
@@ -229,7 +250,8 @@ def test_hans_pages_fully_converted():
         text = re.sub(r'<details class="lang-switch[\s\S]*?</details>|<!--i18n:menu-->[\s\S]*?<!--/i18n:menu-->',
                       ' ', read(p))  # 語言名稱各用自己的寫法
         text = re.sub(r'<script[\s\S]*?</script>|<style[\s\S]*?</style>|<[^>]+>', ' ', text)
-        again = build.to_hans(text)
+        # 已經換好的詞（核心、堆叠、账号…）也要躲過再轉一次，不然 OpenCC 又會換掉
+        again = build.to_hans_keep(text, [(b, b) for a, b in build.load_hans_keep()])
         if again == text:
             continue
         # 再轉一次只准動到「本來就是簡體、OpenCC 卻當繁體再轉」的字（怎么→怎幺、显著→显着）
@@ -280,3 +302,32 @@ def test_about_contact_cards_have_no_shopee():
         grid = re.search(r'<div class="ct-grid">([\s\S]*?)</section>', html).group(1)
         assert grid.count('class="ct-card"') == 4
         assert 'Shopee' not in grid and '虾皮' not in grid and '1,657' not in grid
+
+
+HANS_WRONG = ['内核', '堆栈', '创建', '屏蔽', '激活', '拷贝', '接口位置', '个人数据保护法', '高端订阅', '高端教学',
+              '帐号', '结帐', '转帐', '对帐', '帐本', '吋', '撢']
+
+
+def test_hans_wording_opencc_gets_wrong():
+    """OpenCC tw2sp 的台灣→大陸詞彙會換錯（核心→内核、堆疊→堆栈…），keep 表要把它們留住"""
+    for p in generated('zh-Hans'):
+        text = re.sub(r'<script[\s\S]*?</script>|<style[\s\S]*?</style>|<!--[\s\S]*?-->|<[^>]+>', ' ', read(p))
+        bad = [w for w in HANS_WRONG if w in text]
+        assert not bad, (p, bad)
+    for f in config.JS_FILES + config.JS_HANS_ONLY:
+        src = read('zh-hans/' + f)
+        lits = [src[a:b] for a, b, q in seg.js_literals(src)]
+        bad = [w for w in HANS_WRONG for t in lits if w in t]
+        assert not bad, (f, sorted(set(bad)))
+
+
+def test_hans_order_page_is_whatsapp_only():
+    """簡中下單頁（海外）：meta 與沒跑 JS 前的畫面都不能叫人用 LINE 下單；接線台連到 WhatsApp 版"""
+    html = read('zh-hans/order.html')
+    head = html[:html.find('</head>')]
+    assert 'LINE' not in re.sub(r'<script[\s\S]*?</script>', '', head)
+    body = re.sub(r'<script[\s\S]*?</script>|<!--[\s\S]*?-->', '', html[html.find('<body'):])
+    assert 'LINE' not in re.sub(r'<[^>]+>', ' ', body)
+    assert 'line.me' not in body
+    for p in generated('zh-Hans'):
+        assert not re.search(r'href="(?:\.\./)*go(?:\.html)?"', read(p)), p

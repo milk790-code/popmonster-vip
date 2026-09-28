@@ -9,7 +9,7 @@ window.PM_CONFIG = {
   shipLabel: '宅配到府',
   shipFee: 120,                 // ★ 宅配运费（请确认金额）
   freeShipAt: 2000,             // 满额免运门槛
-  payment: '银行转帐（LINE 对帐后出货）'
+  payment: '银行转账（LINE 对账后出货）'
 };
 
 window.PM_PRICES = {

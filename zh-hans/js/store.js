@@ -196,7 +196,7 @@
         '<div class="pm-note">每款能不能寄到你的国家、运费多少，会先在 WhatsApp 确认，再请你付款。</div>';
     }
     var h = '<div class="pm-row"><span>商品小计</span><b>' + (sub ? nt(sub) : (un ? '待报价' : nt(0))) + (un && sub ? '＋待报价' : '') + '</b></div>';
-    h += '<div class="pm-row"><span>运费（' + esc(CFG.shipLabel || '宅配到府') + '）</span><b>' + (fee === 0 && sub >= (CFG.freeShipAt || 2000) ? '免运' : (un && !sub ? '结帐时计算' : nt(fee))) + '</b></div>';
+    h += '<div class="pm-row"><span>运费（' + esc(CFG.shipLabel || '宅配到府') + '）</span><b>' + (fee === 0 && sub >= (CFG.freeShipAt || 2000) ? '免运' : (un && !sub ? '结账时计算' : nt(fee))) + '</b></div>';
     h += '<div class="pm-row total"><span>合计</span><b>' + (un ? (sub ? nt(sub + fee) + '＋' : '') + '待报价' : nt(sub + fee)) + '</b></div>';
     if (un) h += '<div class="pm-note">部分商品价格待补，送出订单后由小编通过 LINE <span class="nw">回复总金额。</span></div>';
     return h;
@@ -226,7 +226,7 @@
       itemsEl.innerHTML = es.map(itemRow).join('') + extrasHtml();
       var sub = pricedSubtotal(), fee = shipFee(sub);
       footEl.innerHTML = totalsHtml(sub, fee) +
-        '<a class="btn btn-gold" href="' + (INTL ? ORDER_URL : (CFG.base || '') + 'cart.html') + '">前往结帐 →</a>' +
+        '<a class="btn btn-gold" href="' + (INTL ? ORDER_URL : (CFG.base || '') + 'cart.html') + '">前往结账 →</a>' +
         '<button class="btn btn-outline" data-pm-continue style="width:100%">继续选购</button>';
       $('[data-pm-continue]', footEl).addEventListener('click', closeDrawer);
     }
@@ -276,7 +276,7 @@
     L.push('电话：' + form.phone);
     L.push('宅配地址：' + form.addr);
     if (form.note) L.push('备注：' + form.note);
-    L.push('付款方式：' + (CFG.payment || '银行转帐（LINE 对帐后出货）'));
+    L.push('付款方式：' + (CFG.payment || '银行转账（LINE 对账后出货）'));
     L.push('────────────');
     L.push('请小编确认库存与金额，谢谢 🙏');
     return L.join('\n');
@@ -315,7 +315,7 @@
       '<div class="pm-field"><label>联系电话 <span class="req">＊</span></label><input type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="0912 345 678"></div>' +
       '<div class="pm-field"><label>宅配地址 <span class="req">＊</span></label><input type="text" name="addr" autocomplete="street-address" placeholder="县市＋区＋路街巷弄号楼"></div>' +
       '<div class="pm-field"><label>订单备注</label><textarea name="note" placeholder="指定到货时段、发票需求等（选填）"></textarea></div>' +
-      '<div class="pm-info-strip"><span class="ic">ℹ</span><span>付款方式：<b style="color:var(--txt)">' + esc(CFG.payment || '银行转帐') + '</b>。按下方按钮会打开 LINE 并自动带入订单内容，<b style="color:var(--txt)">按下发送</b>即完成下单，小编将回复转帐信息与总金额。</span></div>' +
+      '<div class="pm-info-strip"><span class="ic">ℹ</span><span>付款方式：<b style="color:var(--txt)">' + esc(CFG.payment || '银行转账') + '</b>。按下方按钮会打开 LINE 并自动带入订单内容，<b style="color:var(--txt)">按下发送</b>即完成下单，小编将回复转账信息与总金额。</span></div>' +
       '<button class="btn btn-line pm-submit" data-pm-send>● 通过 LINE 送出订单</button>' +
       '<div class="pm-err-msg" data-pm-err></div>' +
       '</div></div></div>' +
@@ -363,16 +363,16 @@
     done.innerHTML =
       '<div style="font-size:40px;color:var(--gold)">✓</div>' +
       '<div class="oid">' + oid + '</div><h2>订单已产生</h2>' +
-      '<p>LINE 应已自动打开并带入订单内容——<b style="color:var(--txt)">请在 LINE 按下「发送」</b>才算完成下单。若没有打开，请拷贝下方订单文本，贴到我们的 LINE 官方帐号。</p>' +
+      '<p>LINE 应已自动打开并带入订单内容——<b style="color:var(--txt)">请在 LINE 按下「发送」</b>才算完成下单。若没有打开，请复制下方订单文本，贴到我们的 LINE 官方账号。</p>' +
       '<a class="btn btn-line" href="' + url + '" target="_blank" rel="noopener">● 再次打开 LINE</a>' +
-      '<button class="btn btn-outline" data-pm-copy>拷贝订单文本</button>' +
+      '<button class="btn btn-outline" data-pm-copy>复制订单文本</button>' +
       '<textarea class="pm-order-txt" readonly>' + esc(text) + '</textarea>' +
       '<a class="btn btn-outline" href="index.html">回首页继续逛</a>';
     done.classList.add('on');
     $('[data-pm-copy]', done).addEventListener('click', function () {
       var ta = $('.pm-order-txt', done); ta.select();
       try { navigator.clipboard.writeText(text); } catch (e) { document.execCommand('copy'); }
-      toast('<span class="ck">✓</span> 已拷贝订单文本');
+      toast('<span class="ck">✓</span> 已复制订单文本');
     });
     removeOrdered(ordered);
     window.open(url, '_blank', 'noopener');

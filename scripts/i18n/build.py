@@ -406,7 +406,7 @@ def localize_page(html, p, lang, linker):
             if 'shopee.tw' in href and 'ct-card' in seg.classes(n):   # 關於頁聯絡卡：蝦皮那張拿掉
                 drop(n)
                 continue
-            if LINE_CHAT in href and not re.search(r'LINE|WhatsApp', txt, re.I) and \
+            if LINE_CHAT in href and not re.search(r'(?<![A-Za-z])(?:LINE|Line)(?![A-Za-z])|WhatsApp', txt) and \
                     'WhatsApp' in text_of(n.parent):
                 txt = 'WhatsApp'   # 按鈕只寫「立即前往」，旁邊那句說的是 WhatsApp
             if ('shopee.tw' in href or LINE_CHAT in href) and 'WhatsApp' in txt:
@@ -465,6 +465,25 @@ def load_hans_phrases():
     return [(re.compile(a), b) for a, b in json.load(open(fp, encoding='utf-8'))['rules']]
 
 
+def load_hans_keep():
+    """OpenCC tw2sp 會換錯的詞（核心→内核、堆疊→堆栈…）：[(繁體, 要的簡體)]，長的先換"""
+    fp = os.path.join(config.I18N_DIR, 'zh-hans.phrases.json')
+    if not os.path.exists(fp):
+        return []
+    keep = json.load(open(fp, encoding='utf-8')).get('keep', [])
+    return sorted(((a, b) for a, b in keep), key=lambda x: -len(x[0]))
+
+
+def to_hans_keep(s, keep):
+    """繁轉簡，但 keep 裡的詞先換成私用字元躲過 OpenCC，轉完再換成指定的簡體"""
+    for i, (a, b) in enumerate(keep):
+        s = s.replace(a, chr(0xE100 + i))
+    s = to_hans(s)
+    for i, (a, b) in enumerate(keep):
+        s = s.replace(chr(0xE100 + i), b)
+    return s
+
+
 def en_lookup(tm, missing_log, where):
     def look(text, kind):
         e = tm.get(seg.key_of(text))
@@ -475,12 +494,12 @@ def en_lookup(tm, missing_log, where):
     return look
 
 
-def hans_lookup(over, phrases):
+def hans_lookup(over, phrases, keep=()):
     def look(text, kind):
         k = seg.key_of(text)
         if k in over:
             return over[k]
-        t = to_hans(text)
+        t = to_hans_keep(text, keep)
         for rx, rep in phrases:
             t = rx.sub(rep, t)
         return t
@@ -501,6 +520,7 @@ def build(strict=False, check=False):
     tm = load_tm('en')
     over = load_hans_overrides()
     phrases = load_hans_phrases()
+    keep = load_hans_keep()
     pages = config.pages()
     changed, missing = [], []
 
@@ -523,7 +543,7 @@ def build(strict=False, check=False):
             if lang == 'en':
                 out, _ = seg.render(src, segs, en_lookup(tm, missing, p), strict=False)
             else:
-                out, _ = seg.render(src, segs, hans_lookup(over, phrases), strict=False, wrap=mark_done)
+                out, _ = seg.render(src, segs, hans_lookup(over, phrases, keep), strict=False, wrap=mark_done)
                 out = hans_rest(out)
             out = localize_page(out, p, lang, linker)
             if lang == 'zh-Hans' and p == config.ORDER_PAGE:
@@ -535,7 +555,7 @@ def build(strict=False, check=False):
             if lang == 'en':
                 out, _ = seg.render(src, segs, en_lookup(tm, missing, f), strict=False)
             else:
-                out, _ = seg.render(src, segs, hans_lookup(over, phrases), strict=False, wrap=mark_done)
+                out, _ = seg.render(src, segs, hans_lookup(over, phrases, keep), strict=False, wrap=mark_done)
                 out = hans_rest(out)
             out = js_asset_paths(out)
             if f == 'js/products.js':
