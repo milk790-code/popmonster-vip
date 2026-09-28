@@ -1,4 +1,5 @@
 """多語版（/en/、/zh-hans/）的基本保證：切句不漏字、佔位符對得上、互相指得到、連結不斷。"""
+import difflib
 import json
 import os
 import re
@@ -67,6 +68,38 @@ def test_js_html_attrs_are_translated():
     out, missing = seg.render(src, segs, lambda t, k: {'關閉': 'Close'}.get(t, t))
     assert not missing
     assert out == "var a = '<button class=\"x\" aria-label=\"Close\">✕</button>';"
+
+
+def test_unquoted_attr_gets_quotes():
+    """原本沒加引號的屬性值，換成有空白的譯文時要補引號，不然瀏覽器只讀到第一個字"""
+    src = '<p><img alt=圖片 src=a.png>看這裡</p>'
+    _, segs = seg.html_segments(src, 't')
+
+    def look(t, k):
+        return t.replace('圖片', 'A photo').replace('看這裡', 'Look here')
+    out, missing = seg.render(src, segs, look)
+    assert not missing
+    assert '<img alt="A photo" src=a.png>Look here' in out
+    js = "var a = '<img alt=圖片 src=a.png>';"
+    out, _ = seg.render(js, seg.js_segments(js), look)
+    assert out == "var a = '<img alt=\"A photo\" src=a.png>';"
+
+
+def test_js_button_value_is_translated():
+    """JS 字串裡 <input type=button value=…> 跟頁面上的一樣要翻（共用同一套判斷）"""
+    src = "var a = '<input type=\"submit\" value=\"送出\"><input type=\"text\" value=\"王小明\">';"
+    segs = seg.js_segments(src)
+    assert [s.text for s in segs if s.kind == 'jsattr'] == ['送出']
+    out, _ = seg.render(src, segs, lambda t, k: {'送出': 'Send'}.get(t, t))
+    assert 'value="Send"' in out and 'value="王小明"' in out
+
+
+def test_hans_not_converted_twice():
+    """簡中譯文已是簡體，整頁繁轉簡時不能再轉一次（么→幺、显著→显着）"""
+    for p in generated('zh-Hans') + ['zh-hans/' + f for f in config.JS_FILES + config.JS_HANS_ONLY]:
+        html = read(p)
+        assert '幺' not in html and '显着' not in html, p
+        assert build.DONE_A not in html and build.DONE_B not in html, p
 
 
 def test_translation_memory_placeholders_valid():
@@ -186,6 +219,9 @@ def test_en_js_has_no_chinese_strings():
         assert not left, (f, left[:5])
 
 
+SIMPLIFIED_OK = {'么', '著'}
+
+
 def test_hans_pages_fully_converted():
     if build._CC is None:
         pytest.skip('OpenCC not installed')
@@ -193,7 +229,13 @@ def test_hans_pages_fully_converted():
         text = re.sub(r'<details class="lang-switch[\s\S]*?</details>|<!--i18n:menu-->[\s\S]*?<!--/i18n:menu-->',
                       ' ', read(p))  # 語言名稱各用自己的寫法
         text = re.sub(r'<script[\s\S]*?</script>|<style[\s\S]*?</style>|<[^>]+>', ' ', text)
-        assert build.to_hans(text) == text, p
+        again = build.to_hans(text)
+        if again == text:
+            continue
+        # 再轉一次只准動到「本來就是簡體、OpenCC 卻當繁體再轉」的字（怎么→怎幺、显著→显着）
+        sm = difflib.SequenceMatcher(None, text, again, autojunk=False)
+        moved = {text[a:b] for op, a, b, c, d in sm.get_opcodes() if op != 'equal'}
+        assert moved <= SIMPLIFIED_OK, (p, moved - SIMPLIFIED_OK)
 
 
 def test_intl_config_in_localized_products_js():
@@ -217,3 +259,24 @@ def test_sitemap_lists_all_languages():
         assert 'https://popmonster.vip/%s/' % GEN[lang] in xml
     assert 'xmlns:xhtml=' in xml
     assert xml.count('hreflang="x-default"') >= len(PAGES)
+
+
+def test_whatsapp_links_do_not_show_line_account():
+    """海外版改成 WhatsApp 的連結，裡面不能還寫 LINE 帳號；寫 WhatsApp 的按鈕不能連到 LINE"""
+    for lang in GEN:
+        for p in generated(lang):
+            html = read(p)
+            for m in re.finditer(r'<a\b[^>]*href="([^"]*)"[^>]*>([\s\S]*?)</a>', html):
+                href, txt = m.group(1), re.sub(r'<[^>]+>', '', m.group(2))
+                if 'wa.me' in href:
+                    assert not re.search(r'LINE|150tiznd', txt), (p, txt.strip()[:80])
+                if 'line.me' in href:
+                    assert 'WhatsApp' not in txt, (p, txt.strip()[:80])
+
+
+def test_about_contact_cards_have_no_shopee():
+    for lang in GEN:
+        html = read(GEN[lang] + '/about.html')
+        grid = re.search(r'<div class="ct-grid">([\s\S]*?)</section>', html).group(1)
+        assert grid.count('class="ct-card"') == 4
+        assert 'Shopee' not in grid and '虾皮' not in grid and '1,657' not in grid

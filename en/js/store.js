@@ -62,7 +62,8 @@
   /* 規格名稱照逗號切段、每段不拆開（「1入 體驗裝（不划算），20倍稀釋最高可稀釋65倍」不會剩一個「倍」掉到下一行） */
   function specHtml(s) {
     var parts = String(s).split(/\s*,\s*/).filter(Boolean);
-    return parts.map(function (t, i) { return '<span class="c">' + esc(t) + (i < parts.length - 1 ? (EN ? ', ' : '，') : '') + '</span>'; }).join('');
+    // 英文逗號後的空白放在 span 外面：span 是 inline-block，裡面的尾端空白會被吃掉
+    return parts.map(function (t, i) { var more = i < parts.length - 1; return '<span class="c">' + esc(t) + (more ? (EN ? ',' : '，') : '') + '</span>' + (more && EN ? ' ' : ''); }).join('');
   }
   /* only＝這裡的購物車沒有別的商品：下單頁那幾件就是全部，按鈕改成主要按鈕「到下單頁送出」 */
   function extrasHtml(only) {

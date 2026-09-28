@@ -333,6 +333,16 @@ def _walk_blocks(n, src, segs, where):
     _process_run(run, src, segs, where)
 
 
+def attr_translatable(tag, attrs, name):
+    """這個標籤的這個屬性要不要翻（頁面 HTML 與 JS 字串裡的標籤共用同一套判斷）"""
+    if tag == 'meta' and name == 'content':
+        k = (attrs.get('name') or attrs.get('property') or ('',))[0].lower()
+        return k in META_CONTENT_KEYS
+    if tag == 'input' and name == 'value':
+        return attrs.get('type', ('',))[0].lower() in ('button', 'submit', 'reset')
+    return name in TRANSLATABLE_ATTRS
+
+
 def _attr_segs(root, src, segs, where):
     def skipped(n):
         p = n
@@ -348,13 +358,7 @@ def _attr_segs(root, src, segs, where):
         for name, (val, vs, ve, q) in n.attrs.items():
             if vs is None or not has_cjk(val):
                 continue
-            ok = name in TRANSLATABLE_ATTRS
-            if n.tag == 'meta' and name == 'content':
-                k = (n.attrs.get('name') or n.attrs.get('property') or ('',))[0].lower()
-                ok = k in META_CONTENT_KEYS
-            if n.tag == 'input' and name == 'value':
-                ok = (n.attrs.get('type', ('',))[0].lower() in ('button', 'submit', 'reset'))
-            if ok:
+            if attr_translatable(n.tag, n.attrs, name):
                 segs.append(Seg('attr', n.start + vs, n.start + ve, htmllib.unescape(val),
                                 quote=q, where=where + ' @' + name))
 
@@ -595,23 +599,29 @@ def js_segments(src, a=0, b=None, where=''):
 
 def _tag_attr_texts(tag):
     """一個開始標籤裡要翻的屬性 → [(屬性名, 值)]（值已解 HTML 實體）"""
-    out = []
-    for name, (val, vs, ve, q) in parse_attrs(tag).items():
-        if name in TRANSLATABLE_ATTRS and vs is not None and has_cjk(val):
+    out, attrs = [], parse_attrs(tag)
+    for name, (val, vs, ve, q) in attrs.items():
+        if vs is not None and has_cjk(val) and attr_translatable(_tag_name(tag), attrs, name):
             out.append((name, htmllib.unescape(val)))
     return out
 
 
+def _tag_name(tag):
+    m = re.match(r'<([^\s/>]+)', tag)
+    return m.group(1).lower() if m else ''
+
+
 def _tr_tag_attrs(tag, table):
-    """把開始標籤裡的屬性值照 table（原文 → 譯文）換掉，其他字元不動"""
+    """把開始標籤裡的屬性值照 table（原文 → (譯文, wrap)）換掉，其他字元不動"""
     if not table:
         return tag
-    edits = []
-    for name, (val, vs, ve, q) in parse_attrs(tag).items():
-        if name in TRANSLATABLE_ATTRS and vs is not None:
-            tr = table.get(htmllib.unescape(val))
-            if tr is not None:
-                edits.append((vs, ve, esc_attr(tr, q or '"')))
+    edits, attrs = [], parse_attrs(tag)
+    for name, (val, vs, ve, q) in attrs.items():
+        if vs is not None and attr_translatable(_tag_name(tag), attrs, name):
+            hit = table.get(htmllib.unescape(val))
+            if hit is not None:
+                tr, wrap = hit
+                edits.append((vs, ve, wrap(attr_value(tr, q))))
     return apply_edits(tag, edits)
 
 
@@ -665,6 +675,13 @@ def esc_attr(s, q):
     return s.replace('"', '&quot;')
 
 
+def attr_value(tr, q):
+    """換掉屬性值（只換值、不含外面的引號）。原本沒加引號的值，譯文多半有空白，要補上引號。"""
+    if not q:
+        return '"' + esc_attr(tr, '"') + '"'
+    return esc_attr(tr, q)
+
+
 def _fill(tr, tokens_fn, text_fn):
     out, pos = [], 0
     for m in TOKEN_RE.finditer(tr):
@@ -688,9 +705,12 @@ def apply_edits(src, edits):
     return ''.join(out)
 
 
-def render(src, segs, lookup, strict=True, jsonld_fix=None):
-    """lookup(text, kind) → 譯文或 None。strict 時缺譯文就丟 MissingTranslation。"""
+def render(src, segs, lookup, strict=True, jsonld_fix=None, wrap=None):
+    """lookup(text, kind) → 譯文或 None。strict 時缺譯文就丟 MissingTranslation。
+    wrap：把每段譯文包起來（簡中用來標記「已經轉好」的字，整頁繁轉簡時跳過，免得轉兩次）。
+    只包譯文本身，原頁搬過來的標籤與內容不包。"""
     missing = []
+    wrap = wrap or (lambda x: x)
 
     def get(seg):
         tr = lookup(seg.text, seg.kind)
@@ -704,14 +724,14 @@ def render(src, segs, lookup, strict=True, jsonld_fix=None):
         if s.kind == 'attr':
             tr = get(s)
             if tr is not None:
-                attr_edits.append((s.start, s.end, esc_attr(tr, s.quote or '"')))
+                attr_edits.append((s.start, s.end, wrap(attr_value(tr, s.quote))))
 
-    js_attr = {}   # (字串起, 訖) → {屬性原文: 譯文}
+    js_attr = {}   # (字串起, 訖) → {屬性原文: (譯文, wrap)}
     for s in segs:
         if s.kind == 'jsattr':
             tr = get(s)
             if tr is not None and tr != s.text:
-                js_attr.setdefault((s.start, s.end), {})[s.text] = tr
+                js_attr.setdefault((s.start, s.end), {})[s.text] = (tr, wrap)
 
     def span(a, b):
         inner = [e for e in attr_edits if a <= e[0] and e[1] <= b]
@@ -731,7 +751,7 @@ def render(src, segs, lookup, strict=True, jsonld_fix=None):
                 if k[0] == 'x':
                     return span(t[0], t[1])
                 return span(t[0], t[1]) if not m.group(1) else src[t[2]:t[3]]
-            edits.append((s.start, s.end, _fill(tr, tok, esc_text)))
+            edits.append((s.start, s.end, _fill(tr, tok, lambda x: wrap(esc_text(x)) if x else x)))
             covered.append((s.start, s.end))
         elif s.kind == 'js':
             tr = get(s)
@@ -745,12 +765,12 @@ def render(src, segs, lookup, strict=True, jsonld_fix=None):
                 if k[0] == 'x':
                     return _tr_tag_attrs(t[0], table)
                 return _tr_tag_attrs(t[0], table) if not m.group(1) else t[1]
-            val = _fill(tr, jtok, lambda x: x)
             # 翻譯庫存的是去掉頭尾空白的句子；原字串頭尾的空白是拿來接數字的，要補回去
-            if s.text[:1].isspace() and not val[:1].isspace():
-                val = ' ' + val
-            if s.text[-1:].isspace() and not val[-1:].isspace():
-                val = val + ' '
+            if s.text[:1].isspace() and not tr[:1].isspace():
+                tr = ' ' + tr
+            if s.text[-1:].isspace() and not tr[-1:].isspace():
+                tr = tr + ' '
+            val = _fill(tr, jtok, lambda x: wrap(x) if x else x)
             lead, tail = s.extra or ('', '')
             edits.append((s.start, s.end, js_escape(lead + val + tail, s.quote)))
     for e in attr_edits:
@@ -767,7 +787,7 @@ def render(src, segs, lookup, strict=True, jsonld_fix=None):
         for s in ss:
             tr = get(s)
             if tr is not None:
-                table[s.text] = tr
+                table[s.text] = wrap(tr)
 
         def sub(o, k=None):
             if isinstance(o, dict):

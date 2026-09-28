@@ -1286,8 +1286,9 @@
  },
  "20e3ed0b4a34": {
   "src": "五大管道任選 — 推薦優先使用 <g0>LINE 諮詢</g0>，回覆最快。",
-  "en": "Five ways to reach us. For the fastest reply, <g0>WhatsApp us</g0> first.",
-  "model": "claude-sonnet-5+opus-review"
+  "en": "Four ways to reach us. For the fastest reply, <g0>WhatsApp us</g0> first.",
+  "model": "manual",
+  "manual": true
  },
  "20f77228a415": {
   "src": "濃縮",
@@ -4140,8 +4141,9 @@
  },
  "7045d09c5394": {
   "src": "最後更新日期：2026 年 5 月 1 日",
-  "en": "Last updated: May 1, 2026",
-  "model": "claude-sonnet-5+opus-review"
+  "en": "Last updated: September 29, 2026",
+  "model": "manual",
+  "manual": true
  },
  "705f692d3e54": {
   "src": "自己逛 CreatorKit",
@@ -5586,7 +5588,7 @@
  },
  "966cda6a93c2": {
   "src": "蝦皮賣場下單後依平台時程出貨。特殊大宗或缺貨情況主動透過 LINE 通知。",
-  "en": "In Taiwan, Shopee orders ship on the platform's own timeline. For overseas orders, we first confirm on WhatsApp whether each item can ship to your country and what shipping costs, then you pay. For bulk orders or stock shortages, we'll message you on WhatsApp.",
+  "en": "In Taiwan, Shopee orders ship on the platform's own timeline. For overseas orders, we first confirm on WhatsApp whether each item can ship to your country and what shipping costs, then you pay. For special bulk orders or stock shortages, we'll message you on WhatsApp.",
   "model": "manual",
   "manual": true
  },
@@ -7813,8 +7815,9 @@
  },
  "d4223c183bee": {
   "src": "LINE · 推薦",
-  "en": "LINE · Recommended",
-  "model": "claude-sonnet-5+opus-review"
+  "en": "LINE",
+  "model": "manual",
+  "manual": true
  },
  "d45428390e61": {
   "src": "<x0/> 免運費",
@@ -8230,8 +8233,9 @@
  },
  "df5a6243cea4": {
   "src": "最快速回覆，諮詢首選",
-  "en": "Fastest replies, the top choice for questions",
-  "model": "claude-sonnet-5+opus-review"
+  "en": "For customers in Taiwan",
+  "model": "manual",
+  "manual": true
  },
  "df9750fce105": {
   "src": "約 9 分鐘",
@@ -9459,8 +9463,9 @@
  },
  "fd0c31326909": {
   "src": "最後更新日期：2026 年 7 月 29 日",
-  "en": "Last updated: July 29, 2026",
-  "model": "claude-sonnet-5+opus-review"
+  "en": "Last updated: September 29, 2026",
+  "model": "manual",
+  "manual": true
  },
  "fd18f8a69642": {
   "src": "一定要用拾號收尾嗎？",

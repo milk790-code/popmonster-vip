@@ -62,7 +62,8 @@
   /* 规格名称照逗号切段、每段不拆开（「1入 体验装（不划算），20倍稀释最高可稀释65倍」不会剩一个「倍」掉到下一行） */
   function specHtml(s) {
     var parts = String(s).split(/\s*,\s*/).filter(Boolean);
-    return parts.map(function (t, i) { return '<span class="c">' + esc(t) + (i < parts.length - 1 ? (EN ? ', ' : '，') : '') + '</span>'; }).join('');
+    // 英文逗号后的空白放在 span 外面：span 是 inline-block，里面的尾端空白会被吃掉
+    return parts.map(function (t, i) { var more = i < parts.length - 1; return '<span class="c">' + esc(t) + (more ? (EN ? ',' : '，') : '') + '</span>' + (more && EN ? ' ' : ''); }).join('');
   }
   /* only＝这里的购物车没有别的商品：下单页那几件就是全部，按钮改成主要按钮「到下单页送出」 */
   function extrasHtml(only) {
