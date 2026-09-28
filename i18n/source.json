@@ -1765,8 +1765,8 @@
    ]
   },
   {
-   "key": "bfc6e9436726",
-   "text": "泡泡怪獸 POP MONSTER 汽車美容選品",
+   "key": "ede6c223d5fd",
+   "text": "泡泡怪獸 POP MONSTER 商標",
    "kind": "attr",
    "pages": [
     "index.html"
@@ -6803,78 +6803,6 @@
    "kind": "attr",
    "pages": [
     "free-guide.html"
-   ]
-  },
-  {
-   "key": "eef59b050637",
-   "text": "訂單確認 · POP MONSTER",
-   "kind": "html",
-   "pages": [
-    "thanks.html"
-   ]
-  },
-  {
-   "key": "652c20685b2c",
-   "text": "訂單送出成功",
-   "kind": "html",
-   "pages": [
-    "thanks.html"
-   ]
-  },
-  {
-   "key": "bca58fd97a3f",
-   "text": "感謝你選擇 Pop Monster！<x0/>付款完成後 24–48 小時出貨。",
-   "kind": "html",
-   "pages": [
-    "thanks.html"
-   ]
-  },
-  {
-   "key": "31ca9239067e",
-   "text": "綠界付款確認 Email 已寄出（請查收垃圾信）",
-   "kind": "html",
-   "pages": [
-    "thanks.html"
-   ]
-  },
-  {
-   "key": "b49c32cd51a5",
-   "text": "我們收到付款後會安排出貨，並透過 LINE 通知你",
-   "kind": "html",
-   "pages": [
-    "thanks.html"
-   ]
-  },
-  {
-   "key": "3e0077c75c56",
-   "text": "收到商品後，歡迎回到 LINE 跟小怪說效果如何 🐾",
-   "kind": "html",
-   "pages": [
-    "thanks.html"
-   ]
-  },
-  {
-   "key": "f219f1dd6b60",
-   "text": "回到 LINE · 查詢訂單",
-   "kind": "html",
-   "pages": [
-    "thanks.html"
-   ]
-  },
-  {
-   "key": "335da5de1995",
-   "text": "繼續逛逛",
-   "kind": "html",
-   "pages": [
-    "thanks.html"
-   ]
-  },
-  {
-   "key": "b00a8e91a21f",
-   "text": "如有問題請透過 LINE 聯絡，或 Email：service@popmonster.vip",
-   "kind": "html",
-   "pages": [
-    "thanks.html"
    ]
   },
   {

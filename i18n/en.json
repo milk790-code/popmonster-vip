@@ -8865,6 +8865,12 @@
   "en": "All-Purpose Cleaner",
   "model": "claude-sonnet-5+opus-review"
  },
+ "ede6c223d5fd": {
+  "src": "泡泡怪獸 POP MONSTER 商標",
+  "en": "POP MONSTER logo",
+  "model": "manual",
+  "manual": true
+ },
  "ee3a7f6108bd": {
   "src": "米速三號 80 番",
   "en": "MISO No.3 Heavy Cut (80 grit)",
