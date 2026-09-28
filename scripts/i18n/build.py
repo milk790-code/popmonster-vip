@@ -307,13 +307,26 @@ def localize_page(html, p, lang, linker):
     def text_of(n):
         return re.sub(r'<[^>]+>', '', html[n.stag_end:n.etag_start]).strip()
 
-    def in_class(n, cls):
+    def ancestor(n, cls):
         x = n.parent
         while x is not None and x.tag != '#root':
             if cls in seg.classes(x):
-                return True
+                return x
             x = x.parent
-        return False
+        return None
+
+    def in_class(n, cls):
+        return ancestor(n, cls) is not None
+
+    def drop(x):
+        # 整個元素拿掉；它那一行只剩空白的話，連行首縮排和換行一起拿掉
+        a, b = x.start, x.end
+        ls = html.rfind('\n', 0, a) + 1
+        if not html[ls:a].strip() and html[b:b + 1] == '\n':
+            a, b = ls, b + 1
+        edits[:] = [e for e in edits if not (a <= e[0] and e[1] <= b)]
+        edits.append((a, b, ''))
+        dropped.append((a, b))
 
     dropped = []
     for n in seg.walk(root):
@@ -349,8 +362,10 @@ def localize_page(html, p, lang, linker):
             href = a['href'][0]
             txt = text_of(n)
             if 'shopee.tw' in href and any(in_class(n, c) for c in ('footer-links', 'nav-links', 'mobile-menu')):
-                edits.append((n.start, n.end, ''))
-                dropped.append((n.start, n.end))
+                drop(n)
+                continue
+            if 'shopee.tw' in href and in_class(n, 'c-row'):   # 品牌簡報聯絡頁：蝦皮那一列整列拿掉
+                drop(ancestor(n, 'c-row'))
                 continue
             if ('shopee.tw' in href or LINE_CHAT in href) and 'WhatsApp' in txt:
                 attr_edit(n, 'href', WHATSAPP)

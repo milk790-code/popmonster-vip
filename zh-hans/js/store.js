@@ -13,6 +13,7 @@
   /* 海外模式（/en/、/zh-hans/ 的 products.js 会设 intl:true）：不走 LINE 宅配结帐，改到下单页用 WhatsApp；
      运费依国家另报，不显示台湾满额免运 */
   var INTL = !!CFG.intl;
+  var EN = /^en\b/i.test(document.documentElement.getAttribute('lang') || '');
   var ORDER_URL = CFG.orderUrl || ((CFG.base || '') + 'order.html');
   var LS_CART = 'pm_cart_v1';
   var LS_ORDERS = 'pm_orders_v1';
@@ -44,7 +45,9 @@
   /* 下单页另选的规格（cart.v，key 像 'a001|0'；规格名称在 cart.vn，下单页存的）：
      这支没有规格价格表，只列名称、规格、件数，请客人回下单页确认、送出。旧数据没有 vn 就写「规格在下单页」 */
   function extras() {
-    var v = cart.v, vn = cart.vn && typeof cart.vn === 'object' ? cart.vn : {}, rows = {}, order = [];
+    /* 英文页读 vne（下单页存的英文规格名）；旧数据没有 vne 就不秀中文规格名，改写「规格在下单页」 */
+    var names = EN ? cart.vne : cart.vn;
+    var v = cart.v, vn = names && typeof names === 'object' ? names : {}, rows = {}, order = [];
     if (!v || typeof v !== 'object') return [];
     Object.keys(v).forEach(function (k) {
       var q = parseInt(v[k], 10) || 0, S = String(k).split('|')[0].toUpperCase();
@@ -59,7 +62,7 @@
   /* 规格名称照逗号切段、每段不拆开（「1入 体验装（不划算），20倍稀释最高可稀释65倍」不会剩一个「倍」掉到下一行） */
   function specHtml(s) {
     var parts = String(s).split(/\s*,\s*/).filter(Boolean);
-    return parts.map(function (t, i) { return '<span class="c">' + esc(t) + (i < parts.length - 1 ? '，' : '') + '</span>'; }).join('');
+    return parts.map(function (t, i) { return '<span class="c">' + esc(t) + (i < parts.length - 1 ? (EN ? ', ' : '，') : '') + '</span>'; }).join('');
   }
   /* only＝这里的购物车没有别的商品：下单页那几件就是全部，按钮改成主要按钮「到下单页送出」 */
   function extrasHtml(only) {

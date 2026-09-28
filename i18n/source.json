@@ -16575,6 +16575,14 @@
    ]
   },
   {
+   "key": "ddc05404b0d6",
+   "text": "關閉",
+   "kind": "attr",
+   "pages": [
+    "js/store.js"
+   ]
+  },
+  {
    "key": "47be4e2c5dab",
    "text": "<g0>價格由 LINE 報價</g0>",
    "kind": "js",
@@ -16591,9 +16599,25 @@
    ]
   },
   {
+   "key": "acd5b6e90643",
+   "text": "減少",
+   "kind": "attr",
+   "pages": [
+    "js/store.js"
+   ]
+  },
+  {
    "key": "80f643ef26e1",
    "text": "<x0/><g1>＋</g1>",
    "kind": "js",
+   "pages": [
+    "js/store.js"
+   ]
+  },
+  {
+   "key": "605806b6fcd5",
+   "text": "增加",
+   "kind": "attr",
    "pages": [
     "js/store.js"
    ]
@@ -16943,6 +16967,14 @@
    ]
   },
   {
+   "key": "eddc7bb2f69e",
+   "text": "王小明",
+   "kind": "attr",
+   "pages": [
+    "js/store.js"
+   ]
+  },
+  {
    "key": "2d83f7c76114",
    "text": "<g0><g1>聯絡電話 <g2>＊</g2></g1><x3/></g0>",
    "kind": "js",
@@ -16959,9 +16991,25 @@
    ]
   },
   {
+   "key": "239e83ca9eef",
+   "text": "縣市＋區＋路街巷弄號樓",
+   "kind": "attr",
+   "pages": [
+    "js/store.js"
+   ]
+  },
+  {
    "key": "f0a977791c56",
    "text": "<g0><g1>訂單備註</g1><g2></g2></g0>",
    "kind": "js",
+   "pages": [
+    "js/store.js"
+   ]
+  },
+  {
+   "key": "f1447d1af96f",
+   "text": "指定到貨時段、發票需求等（選填）",
+   "kind": "attr",
    "pages": [
     "js/store.js"
    ]

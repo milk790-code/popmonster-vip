@@ -8,6 +8,7 @@
   attr   alt／title／aria-label／placeholder／meta 描述這類屬性值
   jsonld JSON-LD 裡的字串值（網址、SKU、價格這些不翻）
   js     JS 字串常值（內嵌 <script> 與 js/*.js）
+  jsattr JS 字串裡 HTML 標籤的 alt／aria-label／placeholder 這類屬性值（跟著所屬的 js 句一起換）
 """
 import hashlib
 import html as htmllib
@@ -586,7 +587,32 @@ def js_segments(src, a=0, b=None, where=''):
         lead, core, tail = split_code_edges(val)
         text, tokens = _frag_tokens(core)
         segs.append(Seg('js', s, e, text, tokens, quote=q, where=where, extra=(lead, tail)))
+        for t in tokens.values():
+            for name, v in _tag_attr_texts(t[0]):
+                segs.append(Seg('jsattr', s, e, v, quote=q, where=where))
     return segs
+
+
+def _tag_attr_texts(tag):
+    """一個開始標籤裡要翻的屬性 → [(屬性名, 值)]（值已解 HTML 實體）"""
+    out = []
+    for name, (val, vs, ve, q) in parse_attrs(tag).items():
+        if name in TRANSLATABLE_ATTRS and vs is not None and has_cjk(val):
+            out.append((name, htmllib.unescape(val)))
+    return out
+
+
+def _tr_tag_attrs(tag, table):
+    """把開始標籤裡的屬性值照 table（原文 → 譯文）換掉，其他字元不動"""
+    if not table:
+        return tag
+    edits = []
+    for name, (val, vs, ve, q) in parse_attrs(tag).items():
+        if name in TRANSLATABLE_ATTRS and vs is not None:
+            tr = table.get(htmllib.unescape(val))
+            if tr is not None:
+                edits.append((vs, ve, esc_attr(tr, q or '"')))
+    return apply_edits(tag, edits)
 
 
 def split_code_edges(val):
@@ -680,6 +706,13 @@ def render(src, segs, lookup, strict=True, jsonld_fix=None):
             if tr is not None:
                 attr_edits.append((s.start, s.end, esc_attr(tr, s.quote or '"')))
 
+    js_attr = {}   # (字串起, 訖) → {屬性原文: 譯文}
+    for s in segs:
+        if s.kind == 'jsattr':
+            tr = get(s)
+            if tr is not None and tr != s.text:
+                js_attr.setdefault((s.start, s.end), {})[s.text] = tr
+
     def span(a, b):
         inner = [e for e in attr_edits if a <= e[0] and e[1] <= b]
         return apply_edits(src[a:b], [(x - a, y - a, r) for x, y, r in inner])
@@ -704,14 +737,14 @@ def render(src, segs, lookup, strict=True, jsonld_fix=None):
             tr = get(s)
             if tr is None:
                 continue
-            toks = s.tokens
+            toks, table = s.tokens, js_attr.get((s.start, s.end))
 
-            def jtok(m, toks=toks):
+            def jtok(m, toks=toks, table=table):
                 k = m.group(2) + m.group(3)
                 t = toks[k]
                 if k[0] == 'x':
-                    return t[0]
-                return t[0] if not m.group(1) else t[1]
+                    return _tr_tag_attrs(t[0], table)
+                return _tr_tag_attrs(t[0], table) if not m.group(1) else t[1]
             val = _fill(tr, jtok, lambda x: x)
             # 翻譯庫存的是去掉頭尾空白的句子；原字串頭尾的空白是拿來接數字的，要補回去
             if s.text[:1].isspace() and not val[:1].isspace():

@@ -1394,6 +1394,12 @@
   "en": "Daily glass cleaning spray. Neutral formula, no dilution needed. Spray it on, wipe, and it dries fast. Works on car windows and mirrors, and on windows and mirrors at home too.",
   "model": "claude-sonnet-5+opus-review"
  },
+ "239e83ca9eef": {
+  "src": "縣市＋區＋路街巷弄號樓",
+  "en": "Street address, city, postal code",
+  "model": "manual",
+  "manual": true
+ },
  "23c0efd4fc3d": {
   "src": "LINE 選品諮詢",
   "en": "Product advice on WhatsApp",
@@ -2791,8 +2797,9 @@
  },
  "4c9ed6b571f1": {
   "src": "依蝦皮平台規範執行。因產品瑕疵問題請保留照片證明，主動聯繫 LINE 客服協助。",
-  "en": "Returns follow Shopee's platform policy. For product defects, keep photos as proof and message us on WhatsApp for help.",
-  "model": "claude-sonnet-5+opus-review"
+  "en": "Shopee orders in Taiwan follow Shopee's platform return policy. For overseas orders or product defects, keep photos as proof and message us on WhatsApp for help.",
+  "model": "manual",
+  "manual": true
  },
  "4cbea807c408": {
   "src": "鍍膜、拋光前的脫脂噴霧，先把漆面殘留的蠟和油脂處理掉再進下一步。500ml。",
@@ -3503,6 +3510,12 @@
   "src": "上劑潤盤：取適量米速伍號點在專用羊毛盤上，第一次使用先讓盤體微含藥劑潤盤。",
   "en": "Prime the pad: Apply a suitable amount of MISO No.5 onto the dedicated wool pad. The first time you use it, let the pad soak up a little product to prime it.",
   "model": "claude-sonnet-5+opus-review"
+ },
+ "605806b6fcd5": {
+  "src": "增加",
+  "en": "Increase",
+  "model": "manual",
+  "manual": true
  },
  "6072f9a228a5": {
   "src": "重切削首選 · 合成羊毛不噴毛",
@@ -5542,8 +5555,9 @@
  },
  "956a16b032f9": {
   "src": "本網站頁面不直接要求您填寫姓名、電子郵件或信用卡資訊；若您主動透過 LINE 或 WhatsApp 諮詢，該平台與本品牌會依回覆需求處理您主動提供的內容。實際購買行為發生於蝦皮平台，另受蝦皮購物隱私政策規範。",
-  "en": "This website does not directly ask you to fill in your name, email, or credit card information. If you voluntarily contact us via LINE or WhatsApp, that platform and our brand will process the content you provide as needed to respond. Actual purchases take place on Shopee and are separately governed by Shopee's own privacy policy.",
-  "model": "claude-sonnet-5+opus-review"
+  "en": "This website does not directly ask you to fill in your name, email, or credit card information. If you voluntarily contact us via LINE or WhatsApp, that platform and our brand will process the content you provide as needed to respond. Purchases in Taiwan take place on Shopee and are separately governed by Shopee's own privacy policy; overseas orders are arranged with us directly on WhatsApp.",
+  "model": "manual",
+  "manual": true
  },
  "95854d136b8e": {
   "src": "雨刷精｜泡泡怪獸 POP MONSTER",
@@ -5572,8 +5586,9 @@
  },
  "966cda6a93c2": {
   "src": "蝦皮賣場下單後依平台時程出貨。特殊大宗或缺貨情況主動透過 LINE 通知。",
-  "en": "Orders placed through Shopee ship on the platform's own timeline. For special bulk orders or stock shortages, we'll message you on WhatsApp.",
-  "model": "claude-sonnet-5+opus-review"
+  "en": "In Taiwan, Shopee orders ship on the platform's own timeline. For overseas orders, we first confirm on WhatsApp whether each item can ship to your country and what shipping costs, then you pay. For bulk orders or stock shortages, we'll message you on WhatsApp.",
+  "model": "manual",
+  "manual": true
  },
  "97296579c69b": {
   "src": "Sub-brand III · 預洗系列",
@@ -5913,8 +5928,9 @@
  },
  "a24608f7ba01": {
   "src": "本網站產品資訊力求準確，但實際規格、價格、庫存以蝦皮賣場即時顯示為準。本品牌保留修改產品資訊之權利，恕不另行通知。",
-  "en": "We do our best to keep product information accurate, but actual specifications, prices, and stock levels shown on our Shopee store take precedence. We reserve the right to change product information without prior notice.",
-  "model": "claude-sonnet-5+opus-review"
+  "en": "We do our best to keep product information accurate, but the actual specifications, prices, and stock shown on our Shopee store (Taiwan) or confirmed with you on WhatsApp (overseas orders) take precedence. We reserve the right to change product information without prior notice.",
+  "model": "manual",
+  "manual": true
  },
  "a24dfb25933b": {
   "src": "安全第一 · 效果當下驗證",
@@ -6375,6 +6391,12 @@
   "src": "<x0/><g1>商品小計</g1><x2/>",
   "en": "<x0/><g1>Subtotal</g1><x2/>",
   "model": "claude-sonnet-5+opus-review"
+ },
+ "acd5b6e90643": {
+  "src": "減少",
+  "en": "Decrease",
+  "model": "manual",
+  "manual": true
  },
  "acf5507baf01": {
   "src": "要多久清洗一次？",
@@ -8175,6 +8197,12 @@
   "en": "Use <g0>Prep Degreaser Spray</g0> to strip off any wax or oil left from before, bringing the paint back to bare condition so the coating bonds properly. Follow the bottle for dwell time and wiping method — message us on WhatsApp first if you're not sure.",
   "model": "claude-sonnet-5+opus-review"
  },
+ "ddc05404b0d6": {
+  "src": "關閉",
+  "en": "Close",
+  "model": "manual",
+  "manual": true
+ },
  "dddaca2296af": {
   "src": "高濃縮泡沫洗車液，一瓶稀釋後約 50 公升使用液。給覺得一般洗車精泡沫掛不住的人。",
   "en": "A high-concentrate foam car wash. One bottle makes about 50 liters of working solution once diluted. For anyone who finds regular car wash soap foam won't cling.",
@@ -8865,6 +8893,12 @@
   "en": "All-Purpose Cleaner",
   "model": "claude-sonnet-5+opus-review"
  },
+ "eddc7bb2f69e": {
+  "src": "王小明",
+  "en": "Full name",
+  "model": "manual",
+  "manual": true
+ },
  "ede6c223d5fd": {
   "src": "泡泡怪獸 POP MONSTER 商標",
   "en": "POP MONSTER logo",
@@ -9004,6 +9038,12 @@
   "src": "不知道選哪個？先看你要處理什麼",
   "en": "Not sure which one? Start with what you're dealing with",
   "model": "claude-sonnet-5+opus-review"
+ },
+ "f1447d1af96f": {
+  "src": "指定到貨時段、發票需求等（選填）",
+  "en": "Preferred delivery time, invoice details, etc. (optional)",
+  "model": "manual",
+  "manual": true
  },
  "f17d1864baab": {
   "src": "盤款與機型（RO／DA）請在下單後於 LINE 告知，由小編確認品項與金額再出貨。",

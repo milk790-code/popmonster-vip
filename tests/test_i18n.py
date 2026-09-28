@@ -59,6 +59,16 @@ def test_js_identity_render(f):
     assert out == src
 
 
+def test_js_html_attrs_are_translated():
+    """JS 字串裡 HTML 標籤的 aria-label／placeholder 要跟著翻，其他字元不動"""
+    src = "var a = '<button class=\"x\" aria-label=\"關閉\">✕</button>';"
+    segs = seg.js_segments(src)
+    assert sorted(s.kind for s in segs) == ['js', 'jsattr']
+    out, missing = seg.render(src, segs, lambda t, k: {'關閉': 'Close'}.get(t, t))
+    assert not missing
+    assert out == "var a = '<button class=\"x\" aria-label=\"Close\">✕</button>';"
+
+
 def test_translation_memory_placeholders_valid():
     tm = json.load(open(os.path.join(config.I18N_DIR, 'en.json'), encoding='utf-8')) \
         if os.path.exists(os.path.join(config.I18N_DIR, 'en.json')) else {}
@@ -153,6 +163,27 @@ def test_no_shopee_in_international_nav():
             nav = re.search(r'<div class="nav-links">[\s\S]*?</div>', html)
             if nav:
                 assert 'shopee.tw' not in nav.group(0), p
+
+
+def test_no_shopee_links_on_international_pages():
+    """海外版一律 WhatsApp：頁面上不能有可點的蝦皮連結（JSON-LD 的 sameAs 是品牌身分，不算）"""
+    for lang in GEN:
+        for p in generated(lang):
+            html = re.sub(r'<script type="application/ld\+json">[\s\S]*?</script>', '', read(p))
+            assert not re.search(r'href="[^"]*shopee', html), p
+
+
+def test_hans_shopee_sentences_not_mangled():
+    """簡中「前往蝦皮賣場 → WhatsApp 下單」的替換不能留下蝦皮網址（例：請WhatsApp 下单（shopee.tw/…））"""
+    for p in generated('zh-Hans'):
+        assert not re.search(r'WhatsApp ?下单（shopee', read(p)), p
+
+
+def test_en_js_has_no_chinese_strings():
+    for f in config.JS_FILES:
+        src = read('en/' + f)
+        left = [src[a:b] for a, b, q in seg.js_literals(src) if seg.has_cjk(src[a:b])]
+        assert not left, (f, left[:5])
 
 
 def test_hans_pages_fully_converted():

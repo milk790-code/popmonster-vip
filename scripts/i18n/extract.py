@@ -22,7 +22,8 @@ def collect():
         if k in seen:
             seen[k]['pages'].append(where)
             return
-        seen[k] = {'key': k, 'text': seg.norm(s.text), 'kind': s.kind, 'pages': [where]}
+        seen[k] = {'key': k, 'text': seg.norm(s.text), 'kind': 'attr' if s.kind == 'jsattr' else s.kind,
+                   'pages': [where]}
         out.append(seen[k])
 
     for p in config.pages():

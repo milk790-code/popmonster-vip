@@ -13,6 +13,7 @@
   /* 海外模式（/en/、/zh-hans/ 的 products.js 會設 intl:true）：不走 LINE 宅配結帳，改到下單頁用 WhatsApp；
      運費依國家另報，不顯示台灣滿額免運 */
   var INTL = !!CFG.intl;
+  var EN = /^en\b/i.test(document.documentElement.getAttribute('lang') || '');
   var ORDER_URL = CFG.orderUrl || ((CFG.base || '') + 'order.html');
   var LS_CART = 'pm_cart_v1';
   var LS_ORDERS = 'pm_orders_v1';
@@ -44,7 +45,9 @@
   /* 下單頁另選的規格（cart.v，key 像 'a001|0'；規格名稱在 cart.vn，下單頁存的）：
      這支沒有規格價格表，只列名稱、規格、件數，請客人回下單頁確認、送出。舊資料沒有 vn 就寫「規格在下單頁」 */
   function extras() {
-    var v = cart.v, vn = cart.vn && typeof cart.vn === 'object' ? cart.vn : {}, rows = {}, order = [];
+    /* 英文頁讀 vne（下單頁存的英文規格名）；舊資料沒有 vne 就不秀中文規格名，改寫「規格在下單頁」 */
+    var names = EN ? cart.vne : cart.vn;
+    var v = cart.v, vn = names && typeof names === 'object' ? names : {}, rows = {}, order = [];
     if (!v || typeof v !== 'object') return [];
     Object.keys(v).forEach(function (k) {
       var q = parseInt(v[k], 10) || 0, S = String(k).split('|')[0].toUpperCase();
@@ -59,7 +62,7 @@
   /* 規格名稱照逗號切段、每段不拆開（「1入 體驗裝（不划算），20倍稀釋最高可稀釋65倍」不會剩一個「倍」掉到下一行） */
   function specHtml(s) {
     var parts = String(s).split(/\s*,\s*/).filter(Boolean);
-    return parts.map(function (t, i) { return '<span class="c">' + esc(t) + (i < parts.length - 1 ? '，' : '') + '</span>'; }).join('');
+    return parts.map(function (t, i) { return '<span class="c">' + esc(t) + (i < parts.length - 1 ? (EN ? ', ' : '，') : '') + '</span>'; }).join('');
   }
   /* only＝這裡的購物車沒有別的商品：下單頁那幾件就是全部，按鈕改成主要按鈕「到下單頁送出」 */
   function extrasHtml(only) {
@@ -157,7 +160,7 @@
       d.className = 'pm-drawer';
       d.setAttribute('aria-label', 'Cart');
       d.innerHTML =
-        '<div class="pm-dw-head"><h3>Cart<span class="ct" data-pm-count></span></h3><button class="pm-dw-close" aria-label="關閉">✕</button></div>' +
+        '<div class="pm-dw-head"><h3>Cart<span class="ct" data-pm-count></span></h3><button class="pm-dw-close" aria-label="Close">✕</button></div>' +
         '<div class="pm-ship-bar" data-pm-shipbar><div class="t" data-pm-shiptxt></div><div class="pm-ship-track"><div class="pm-ship-fill" data-pm-shipfill></div></div></div>' +
         '<div class="pm-dw-items" data-pm-items></div>' +
         '<div class="pm-dw-foot" data-pm-foot></div>';
@@ -180,7 +183,7 @@
       '<div class="pm-item-info"><div class="pm-item-sku">' + e.sku + ' · ' + esc(e.p.cat) + '</div>' +
       '<div class="pm-item-name">' + esc(e.p.name) + '</div>' + priceHtml + '</div>' +
       '<div class="pm-item-right"><div class="pm-qty">' +
-      '<button data-pm-dec aria-label="減少">−</button><span>' + e.qty + '</span><button data-pm-inc aria-label="增加">+</button>' +
+      '<button data-pm-dec aria-label="Decrease">−</button><span>' + e.qty + '</span><button data-pm-inc aria-label="Increase">+</button>' +
       '</div><button class="pm-item-rm" data-pm-rm>Remove</button></div></div>';
   }
 
@@ -307,10 +310,10 @@
       es.map(itemRow).join('') + '</div>' +
       '<div style="padding:0 20px 20px">' + totalsHtml(sub, fee) + extrasHtml() + '</div></div>' +
       '<div class="pm-panel"><div class="pm-panel-h">Recipient info</div><div class="pm-panel-b" style="padding-bottom:24px">' +
-      '<div class="pm-field"><label>Recipient name <span class="req">*</span></label><input type="text" name="name" autocomplete="name" placeholder="王小明"></div>' +
+      '<div class="pm-field"><label>Recipient name <span class="req">*</span></label><input type="text" name="name" autocomplete="name" placeholder="Full name"></div>' +
       '<div class="pm-field"><label>Phone number <span class="req">*</span></label><input type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="0912 345 678"></div>' +
-      '<div class="pm-field"><label>Shipping address <span class="req">*</span></label><input type="text" name="addr" autocomplete="street-address" placeholder="縣市＋區＋路街巷弄號樓"></div>' +
-      '<div class="pm-field"><label>Order notes</label><textarea name="note" placeholder="指定到貨時段、發票需求等（選填）"></textarea></div>' +
+      '<div class="pm-field"><label>Shipping address <span class="req">*</span></label><input type="text" name="addr" autocomplete="street-address" placeholder="Street address, city, postal code"></div>' +
+      '<div class="pm-field"><label>Order notes</label><textarea name="note" placeholder="Preferred delivery time, invoice details, etc. (optional)"></textarea></div>' +
       '<div class="pm-info-strip"><span class="ic">ℹ</span><span>Payment method:<b style="color:var(--txt)">' + esc(CFG.payment || 'Bank transfer') + '</b>. Tapping the button below opens WhatsApp with your order details filled in. <b style="color:var(--txt)">Tap Send</b> to complete your order. We\'ll confirm the total and shipping to your country on WhatsApp and send payment details before you pay.</span></div>' +
       '<button class="btn btn-line pm-submit" data-pm-send>● Send your order on WhatsApp</button>' +
       '<div class="pm-err-msg" data-pm-err></div>' +

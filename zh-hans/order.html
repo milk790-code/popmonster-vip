@@ -177,7 +177,7 @@
   // ── 购物车：跟全站 js/store.js 共用 localStorage 的 pm_cart_v1 ──
   // store.js 的格式是 {items:{A001:2}}：一个 SKU 一个价（js/products.js 的 PM_PRICES），没有规格。下单页有规格，所以这样对应：
   //   跟官网售价同价的那个规格 ⇄ items['A001']（首页、商品页的购物车看得到也改得到）
-  //   其他规格               ⇄ 同一笔数据多一栏 v:{'a001|0':1}，规格名称另存 vn:{'a001|0':'30ml入门体验款'}
+  //   其他规格               ⇄ 同一笔数据多一栏 v:{'a001|0':1}，规格名称另存 vn:{'a001|0':'30ml入门体验款'}、英文 vne:{'a001|0':'30ml starter'}
   //                              （store.js 不改 v／vn、存盘原样留着；抽屉与结帐页用 vn 写出是哪个规格）
   //   对不到规格的官网品项     ⇄ 下单页内部 key 'a006|site'，照官网名称和售价显示（售价跟规格表不同、或规格表没有这款）
   // 旧版下单页的 pm_cart_v2：第一次打开就并进来（数量相加），旧数据改名 pm_cart_v2_merged 留底。
@@ -214,9 +214,9 @@
     });
     c.items=items;
     if(Object.keys(v).length){
-      c.v=v;c.vn={};
-      Object.keys(v).forEach(function(k){var a=k.split('|'),p=prod(a[0]),x=p&&p.variants[+a[1]];if(x)c.vn[k]=x.spec;}); // 一律存中文规格名：抽屉、结帐页是中文页
-    }else{delete c.v;delete c.vn;}
+      c.v=v;c.vn={};c.vne={};
+      Object.keys(v).forEach(function(k){var a=k.split('|'),p=prod(a[0]),x=p&&p.variants[+a[1]];if(x){c.vn[k]=x.spec;c.vne[k]=specEn(x.spec);}}); // vn 中文规格名给中文页抽屉；vne 英文给 /en/ 抽屉
+    }else{delete c.v;delete c.vn;delete c.vne;}
     c.updated=Date.now();
     try{
       localStorage.setItem(LS_CART,JSON.stringify(c));
