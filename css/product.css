@@ -1,0 +1,121 @@
+/* ============================================================
+   POP MONSTER 商品頁共用樣式 · css/product.css（2026-09-25）
+   取代 32 頁各自的 inline <style>。
+   原則：第一屏看得到「這是什麼、給誰、怎麼買」；黑底金字、細線分隔；
+   不用光暈、漸層線、英文小標、字距拉開的標籤。
+   ============================================================ */
+:root{
+  --serif-p:"Songti TC",STSong,"Noto Serif TC",ui-serif,serif;
+  --tcserif-p:"Songti TC",STSong,"Noto Serif TC",serif;
+  --txt-dim:#8f877a;            /* 原 #5a5347 在黑底只有 2.6:1 */
+  --txt-note:#a89e8e;
+}
+
+/* 行動版選單 */
+.mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:#0a0a0a;border-bottom:1px solid var(--border);padding:20px;z-index:99;flex-direction:column;gap:16px;}
+.mobile-menu.show{display:flex;}
+.mobile-menu a{color:#e8e2d6;font-size:16px;display:block;padding:8px 0;}
+
+/* 品牌標語列：商品頁縮成一行細字，不搶第一屏 */
+.brand-tagline{padding:7px 16px;gap:10px;font-size:12px;letter-spacing:.3em;background:none;border-top:0;}
+.brand-tagline em{font-size:13px;letter-spacing:.3em;font-weight:700;}
+
+/* ── 第一屏 ── */
+.pd-hero{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;
+  max-width:1100px;margin:0 auto;padding:32px 24px 40px;align-items:start;
+}
+.pd-img-wrap{position:relative;background:none;border:0;padding:0;}
+.pd-img-wrap img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:2px;}
+.pd-info-wrap{display:flex;flex-direction:column;}
+
+.pd-breadcrumb{
+  display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:14px;
+  font-size:13px;line-height:1.5;color:var(--txt-m);
+}
+.pd-breadcrumb a{color:var(--txt-m);text-decoration:none;}
+.pd-breadcrumb a:hover{color:var(--gold-lt);}
+.pd-breadcrumb .sep{color:var(--txt-m);}
+.pd-breadcrumb .sku{font-variant-numeric:tabular-nums;}
+
+.pd-h1{
+  font-family:var(--serif-p);font-weight:900;
+  font-size:clamp(28px,3.6vw,44px);line-height:1.25;letter-spacing:0;
+  color:var(--txt);margin:0 0 12px;
+}
+.pd-what{font-size:16px;line-height:1.75;color:var(--txt);margin:0 0 6px;max-width:34em;}
+
+.pd-price{margin:18px 0 4px;}
+.pd-price-block{margin:18px 0 4px;}
+.pd-price-block table{font-size:14px;}
+
+.pd-cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 10px;}
+.pd-cta-row .btn{min-height:52px;font-size:15px;padding:14px 26px;}
+.pd-how{font-size:14px;line-height:1.75;color:var(--txt-note);margin:0;max-width:34em;}
+.pd-how b{color:var(--txt);font-weight:600;}
+.pd-how [data-pm-price-note]:not(:empty)::before{content:"・";}
+
+/* LINE 按鈕：黑底綠字，避免白字壓在 LINE 綠上看不清 */
+.btn-line-ghost{background:transparent;color:#06c755;border:2px solid #06c755;}
+.btn-line-ghost:hover{background:rgba(6,199,85,.08);color:#2bd66e;}
+
+/* 行動版底部固定列 */
+.sticky-cta{display:none;position:fixed;bottom:0;left:0;right:0;z-index:98;background:rgba(10,10,10,.96);border-top:1px solid var(--border);padding:10px 16px;gap:10px;}
+.sticky-cta .btn{flex:1;text-align:center;font-size:15px;padding:12px 14px;min-height:48px;}
+@media(max-width:920px){.sticky-cta{display:flex;}}
+
+/* ── 下方各段 ── */
+.pd-sec{max-width:1100px;margin:0 auto;padding:40px 24px;}
+.pd-sec+.pd-sec{border-top:1px solid var(--border);}
+.pd-sec-h{
+  font-family:var(--serif-p);font-weight:700;font-size:22px;line-height:1.4;
+  color:var(--txt);margin:0 0 20px;
+}
+.pd-block h3{
+  font-family:var(--serif-p);font-weight:700;font-size:18px;line-height:1.5;
+  color:var(--gold-lt);margin:0 0 14px;padding-bottom:9px;border-bottom:1px solid var(--border);
+}
+.pd-warn h3{color:var(--txt);}
+
+/* 同類商品 */
+.related-grid-new{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.related-card-new{display:flex;flex-direction:column;text-decoration:none;border:1px solid var(--border);border-radius:2px;transition:border-color .2s;}
+.related-card-new:hover{border-color:var(--border-s);}
+.related-img-new{aspect-ratio:1/1;overflow:hidden;border-bottom:1px solid var(--border);}
+.related-img-new img{width:100%;height:100%;object-fit:cover;display:block;}
+.related-body-new{padding:14px 16px 16px;}
+.related-body-new .rsku{font-size:12px;line-height:1.5;color:var(--txt-m);margin-bottom:4px;}
+.related-body-new .rnm{font-family:var(--serif-p);font-weight:700;font-size:16px;line-height:1.4;color:var(--txt);}
+@media(max-width:768px){.related-grid-new{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}.related-card-new:nth-child(3){display:none;}}
+
+/* 頁尾前的購買提醒 */
+.pd-end{max-width:1100px;margin:0 auto;padding:48px 24px 56px;border-top:1px solid var(--border);}
+.pd-end h2{font-family:var(--serif-p);font-weight:700;font-size:clamp(22px,2.6vw,28px);line-height:1.4;color:var(--txt);margin:0 0 8px;}
+.pd-end p{font-size:15px;line-height:1.75;color:var(--txt-m);margin:0 0 22px;max-width:36em;}
+.pd-end-btns{display:flex;gap:12px;flex-wrap:wrap;}
+.pd-end-btns .btn{min-height:52px;font-size:15px;}
+
+/* ── 行動版：圖縮小，讓名稱、用途、價格、購買方式都擠進第一屏 ── */
+@media(max-width:768px){
+  .pd-hero{grid-template-columns:minmax(0,1fr);gap:14px;padding:16px 16px 28px;}
+  .pd-img-wrap{width:min(54vw,220px);margin:0 auto;}
+  .pd-img-wrap:has(.ink-ph){width:min(40vw,150px);}
+  .pd-breadcrumb{margin-bottom:8px;}
+  .pd-h1{font-size:28px;margin-bottom:8px;}
+  .pd-what{font-size:15px;}
+  .pd-price{margin-top:12px;}
+  .pd-sec{padding:32px 16px;}
+  .pd-end{padding:36px 16px 44px;}
+}
+@media(max-width:480px){
+  .pd-cta-row{flex-direction:column;gap:10px;}
+  .pd-cta-row .btn{width:100%;}
+  .pd-cta-row>.btn-outline,.pd-cta-row>.btn-line-ghost{display:none;} /* 手機底部已有固定 LINE 鈕 */
+}
+
+/* 實拍畫面（取自 FB 施工影片） */
+.pd-real-fig{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:32px;align-items:end;margin:0;}
+.pd-real-fig img{width:100%;height:auto;display:block;border-radius:2px;}
+.pd-real-fig figcaption p{font-size:15px;line-height:1.75;color:var(--txt-m);margin:0;max-width:26em;}
+@media(max-width:768px){.pd-real-fig{grid-template-columns:minmax(0,1fr);gap:14px;}.pd-real-fig figcaption{order:-1;}}
+.pd-img-note{font-size:13px;line-height:1.6;color:var(--txt-m);margin:8px 0 0;text-align:center;}

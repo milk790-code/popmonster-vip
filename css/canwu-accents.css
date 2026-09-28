@@ -13,7 +13,7 @@
     radial-gradient(ellipse at 50% 30%, rgba(255,255,255,.5) 0%, transparent 60%),
     linear-gradient(160deg,#f6f1e5 0%,#f4efe3 55%,#ece4d4 100%);
   border:1px solid rgba(27,23,18,.14);
-  box-shadow:inset 0 0 60px rgba(202,191,164,.35);
+  padding:12px;
   overflow:hidden;
 }
 .ink-ph::after{ /* 紙紋 */
@@ -121,13 +121,11 @@
   font-size:clamp(64px,9vw,104px);
   line-height:1;letter-spacing:.12em;
   color:#fbf7ee;
-  text-shadow:0 0 26px rgba(244,239,227,.14);
 }
 .ink-band-body{flex:1;min-width:0}
 .ink-band-label{
-  font-family:'Montserrat',sans-serif;
-  font-size:11px;letter-spacing:.35em;text-transform:uppercase;
-  color:#8a8170;margin:0 0 14px;
+  font-size:13px;letter-spacing:.2em;
+  color:#a39a88;margin:0 0 12px;
 }
 .ink-band-title{
   font-family:'Songti TC',STSong,'Noto Serif TC',serif;

@@ -23,7 +23,7 @@
   grid-template-rows:0fr;
   max-height:none;
   overflow:hidden;
-  transition:grid-template-rows .35s ease, padding .35s;
+  transition:grid-template-rows .35s ease;
   padding:0 18px;
 }
 .faq-a > *{overflow:hidden;min-height:0}
@@ -96,7 +96,7 @@
 @media(min-width:921px){.mobile-menu{display:none !important;}}
 
 /* 缺失變數補定義(guide/商品頁使用) */
-:root{--border-w:rgba(200,169,107,.22);--txt-dim:#5a5347;}
+:root{--border-w:rgba(200,169,107,.22);--txt-dim:#8f877a;}
 
 /* ── 商品頁常見問題 ──────────────────────────────────────────────
    main.css 早就有一套可運作的 max-height 手風琴，但商品頁的 inline <style>
@@ -105,11 +105,11 @@
    同時把問題列改成 <button> 讓鍵盤可操作。 */
 .faq-list{display:flex;flex-direction:column;gap:10px;max-width:820px;}
 .faq-list .faq-item{border:1px solid var(--border);border-radius:var(--r);background:var(--bg-card);overflow:hidden;margin-bottom:0;}
-.faq-list .faq-a{
-  display:block;max-height:0;overflow:hidden;padding:0 18px;
-  transition:max-height .4s cubic-bezier(.2,.7,.3,1),padding .4s cubic-bezier(.2,.7,.3,1);
-}
-.faq-list .faq-item.open .faq-a{max-height:60rem;padding:14px 18px;}
+/* 2026-09-25：改成 grid-template-rows 0fr→1fr（答案段落本身 min-height:0），不再動 max-height／padding */
+.faq-list .faq-a{display:grid;grid-template-rows:0fr;max-height:none;overflow:hidden;padding:0 18px;transition:grid-template-rows .35s cubic-bezier(.2,.7,.3,1);}
+.faq-list .faq-a>*{overflow:hidden;min-height:0;}
+.faq-list .faq-item.open .faq-a{grid-template-rows:1fr;max-height:none;padding:0 18px;}
+.faq-list .faq-item.open .faq-a>p{padding:14px 0;}
 .faq-list .faq-a p{margin:0;color:var(--txt-m);font-size:15px;line-height:1.85;}
 .faq-list .faq-q{
   all:unset;box-sizing:border-box;display:flex;align-items:center;gap:14px;width:100%;
@@ -175,7 +175,7 @@
 }
 .pd-steps li::before{
   content:counter(s,decimal-leading-zero);position:absolute;left:0;top:1px;
-  font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:.12em;color:var(--gold-dk);
+  font-family:inherit;font-size:13px;letter-spacing:.04em;color:var(--gold);
 }
 .pd-notes{margin:0;padding-left:0;list-style:none;}
 .pd-notes li{position:relative;padding:0 0 12px 20px;font-size:14.5px;line-height:1.8;color:var(--txt-m);}
