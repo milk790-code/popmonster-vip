@@ -345,6 +345,12 @@
   "en": "<g0>A035</g0> Cerium-Free Glass Oil-Film Remover",
   "model": "claude-sonnet-5+opus-review"
  },
+ "095575fd6e8b": {
+  "src": "1cc原液兌1000ml水（馬上用的話一般自來水就可以），用手動噴壺先稀釋再施工。正常洗車後保持車身濕潤，均勻噴灑後用洗車手套帶過表面，沖淨後直接收水即完成。",
+  "en": "Mix 1cc of concentrate with 1000ml of water (tap water is fine if you're using it right away) in a manual sprayer before applying. After a normal wash, while the car is still wet, spray it on evenly, go over the surface with a wash mitt, then rinse it off — done.",
+  "model": "manual",
+  "manual": true
+ },
  "098ff310f627": {
   "src": "<x0/><g1>移除</g1><x2/><x3/>",
   "en": "<x0/><g1>Remove</g1><x2/><x3/>",
@@ -1277,11 +1283,6 @@
  "20bb03b2f529": {
   "src": "用乾淨的洗車手套輕柔擦拭。",
   "en": "Wipe gently with a clean wash mitt.",
-  "model": "claude-sonnet-5+opus-review"
- },
- "20d5a48692ce": {
-  "src": "1cc原液兌1000ml純水，用手動噴壺先稀釋再施工。正常洗車後保持車身濕潤，均勻噴灑後用洗車手套帶過表面，沖淨後直接收水即完成。",
-  "en": "Mix 1cc of concentrate with 1000ml of purified water, and dilute it in a manual sprayer before applying. After a normal wash, keep the car wet, spray it on evenly, go over the surface with a wash mitt, rinse it off, then dry it — done.",
   "model": "claude-sonnet-5+opus-review"
  },
  "20e3ed0b4a34": {
@@ -2315,11 +2316,6 @@
  "3e8ed9946d30": {
   "src": "慕斯泡沫護皮革 · 弱酸性深層護理",
   "en": "Foam mousse for leather · mildly acidic, deep care",
-  "model": "claude-sonnet-5+opus-review"
- },
- "3e913a92810b": {
-  "src": "<g0>1ml = 1L</g0>：千倍稀釋是手動噴壺的比例，1 毫升原液兌 1000 毫升純水。PA 壺的倍率不同，請依瓶身標示，或加 LINE 告知你用哪一種噴壺，小編再提供對應比例。",
-  "en": "<g0>1ml = 1L</g0>: the 1:1000 ratio is for a manual pump sprayer — 1ml of concentrate to 1000ml of purified water. PA foam lances use a different ratio, so follow the bottle label, or tell us on WhatsApp which sprayer you're using and we'll give you the right ratio.",
   "model": "claude-sonnet-5+opus-review"
  },
  "3eafe82e594a": {
@@ -7741,6 +7737,12 @@
   "en": "No. That's the whole point of a touchless pre-wash — spray it on, let it sit and loosen the dirt on its own, then rinse it off with a pressure washer. No contact scrubbing needed at all, which avoids the fine scratches scrubbing causes in the first place.",
   "model": "claude-sonnet-5+opus-review"
  },
+ "d26dde15a257": {
+  "src": "狀況好直接做<g0>天使塗層</g0>（手動噴壺千倍稀釋，1cc 原液兌 1000ml 水，馬上用一般自來水就可以；PA 壺倍率不同，依瓶身標示）；有太陽紋先拋光再上維護劑；有深刮痕走完整三件組拋光。",
+  "en": "If the paint is in good shape, go straight to <g0>Angel Coating Guard</g0> (1:1000 dilution in a hand pump sprayer — 1cc concentrate to 1000ml water, tap water is fine if using it right away; a PA foam lance uses a different ratio, check the bottle). If there are swirl marks, polish first, then apply the maintenance product. For deep scratches, run the full 3-piece compound set.",
+  "model": "manual",
+  "manual": true
+ },
  "d2d3220575a3": {
   "src": "視行駛環境與洗車頻率，一般 1–2 個月補做一次效果維持最好。如撥水角度明顯下降（水珠不再快速滾落），就是需要補做的信號。",
   "en": "It depends on your driving conditions and how often you wash the car, but reapplying every 1–2 months generally keeps it working best. If the beading angle drops noticeably and water stops rolling off quickly, that's the sign it's time to reapply.",
@@ -9220,6 +9222,12 @@
   "en": "The first step of washing a car is pre-wash, not foam | The complete 8-step process",
   "model": "claude-sonnet-5+opus-review"
  },
+ "f76419613a9b": {
+  "src": "<g0>1ml = 1L</g0>：千倍稀釋是手動噴壺的比例，1 毫升原液兌 1000 毫升水（馬上用的話一般自來水就可以）。PA 壺的倍率不同，請依瓶身標示，或加 LINE 告知你用哪一種噴壺，小編再提供對應比例。",
+  "en": "<g0>1ml = 1L</g0>: the 1:1000 ratio is for a manual pump sprayer — 1ml of concentrate to 1000ml of water (tap water is fine if you're using it right away). PA foam lances use a different ratio, so follow the bottle label, or tell us on WhatsApp which sprayer you're using and we'll give you the right ratio.",
+  "model": "manual",
+  "manual": true
+ },
  "f786a1aa3f5a": {
   "src": "多久護理一次最佳？",
   "en": "How often should I condition it?",
@@ -9488,11 +9496,6 @@
  "fddf3eb46392": {
   "src": "DA / GA / RO 的差別",
   "en": "The difference between DA / GA / RO",
-  "model": "claude-sonnet-5+opus-review"
- },
- "fdecd5ccb0ce": {
-  "src": "狀況好直接做<g0>天使塗層</g0>（手動噴壺千倍稀釋，1cc 原液兌 1000ml 純水；PA 壺倍率不同，依瓶身標示）；有太陽紋先拋光再上維護劑；有深刮痕走完整三件組拋光。",
-  "en": "If the paint is in good shape, go straight to <g0>Angel Coating Guard</g0> (1:1000 dilution in a hand pump sprayer — 1cc concentrate to 1000ml pure water; a PA foam lance uses a different ratio, check the bottle). If there are swirl marks, polish first, then apply the maintenance product. For deep scratches, run the full 3-piece compound set.",
   "model": "claude-sonnet-5+opus-review"
  },
  "fdf1f080a3b7": {
