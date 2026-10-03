@@ -36,7 +36,8 @@ JS_HANS_ONLY = ['products_catalog.js']
 REDIRECT_LINKS = {
     'en': {'cart.html': 'order.html?lang=en', 'order.html': 'order.html?lang=en',
            'go.html': 'go-en', 'go': 'go-en'},
-    'zh-Hans': {'cart.html': 'zh-hans/order.html', 'order.html': 'zh-hans/order.html'},
+    'zh-Hans': {'cart.html': 'zh-hans/order.html', 'order.html': 'zh-hans/order.html',
+                'go.html': 'go-en', 'go': 'go-en'},   # 繁中接線台只有 LINE；海外一律 WhatsApp
 }
 
 WHATSAPP = 'https://wa.me/886970527037'

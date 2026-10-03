@@ -10,11 +10,11 @@
 <link rel="stylesheet" href="/css/i18n.css">
 <script src="/js/i18n.js" defer></script>
 <!--/i18n:alt-->
-<meta name="description" content="泡泡怪兽官网直接下单:选品选规格,LINE/WhatsApp 快速下单或在线付款。POP MONSTER official order page — car care products shipped from Taiwan.">
+<meta name="description" content="泡泡怪兽官网直接下单：选品选规格，用 WhatsApp 下单，从台湾出货。POP MONSTER official order page — car care products shipped from Taiwan.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="泡泡怪兽 POP MONSTER">
 <meta property="og:title" content="千倍浓缩天使涂层｜泡泡怪兽官网下单">
-<meta property="og:description" content="32 款职人汽美用品,选规格直接下单。付款后 3 个工作天内出货,LINE 一对一服务。">
+<meta property="og:description" content="32 款职人汽美用品，选规格直接下单。每款能不能寄到你的国家、运费多少，先在 WhatsApp 确认再付款。">
 <meta property="og:url" content="https://popmonster.vip/zh-hans/order.html">
 <meta property="og:image" content="https://popmonster.vip/img/og/og-home-1200x630.jpg">
 <meta property="og:image:width" content="1200">
@@ -93,7 +93,7 @@
 </style></head><body>
 <section class="wrap">
   <h1 id="t_title">官网下单</h1>
-  <p class="sub" id="t_sub">选品 → 选规格 → 加入清单 → LINE 快速下单或在线付款<br>下单即成为泡泡会员,消费累积自动升级</p>
+  <p class="sub" id="t_sub">选品 → 选规格 → 加入清单 → WhatsApp 下单<br>从台湾出货；每款能不能寄到你的国家、运费多少，我们先在 WhatsApp 回复</p>
   <div class="langbar"><button id="lzh">中文</button><button id="len">EN</button></div>
   <div class="cats" id="cats"></div>
   <div id="list"></div>
@@ -101,18 +101,18 @@
 
 <div class="bar"><div class="in">
   <div><span id="t_picked">已选</span> <b id="cnt">0</b> <span id="t_pcs">件</span> <span class="total" id="total"></span></div>
-  <button class="btn btn-line" id="btnGo">💬 LINE 一键下单</button>
+  <button class="btn btn-line" id="btnGo">💬 WhatsApp 下单</button>
   <button class="btn btn-pay" id="btnPay" disabled>💳 在线付款(即将开通)</button>
   <div class="ship" id="ship"></div>
 </div></div>
 
 <dialog id="dlg">
   <h2 style="color:var(--gold);margin:0 0 8px;font-size:1.17em" id="t_dlgTitle">下单 · 两步完成</h2>
-  <p class="note" id="t_dlgNote">① 按「拷贝订单」 ② 开 LINE 后直接粘贴送出,小编立刻帮你结帐出货。</p>
+  <p class="note" id="t_dlgNote">① 按「打开 WhatsApp」，订单内容已经带好 ② 送出后，我们回复总金额和运费。</p>
   <textarea id="orderText" readonly></textarea>
   <div style="display:flex;gap:10px;margin-top:12px">
-    <button class="btn btn-pay" id="copyBtn" style="flex:1">📋 拷贝订单</button>
-    <a class="btn btn-line" style="flex:1" id="chatBtn" href="https://line.me/R/ti/p/@150tiznd" target="_blank" rel="noopener">打开 LINE</a>
+    <button class="btn btn-pay" id="copyBtn" style="flex:1">📋 复制订单</button>
+    <a class="btn btn-line" style="flex:1" id="chatBtn" href="https://wa.me/886970527037" target="_blank" rel="noopener">打开 WhatsApp</a>
   </div>
   <p class="note" style="text-align:center;margin-bottom:0"><a href="javascript:void(0)" onclick="dlg.close()" style="color:var(--mut)" id="t_close">关闭</a></p>
 </dialog>
@@ -128,12 +128,12 @@
     FX:{USD:32, MYR:7} // 参考汇率(TWD→外币除数);仅显示参考,实际以 TWD 收款
   };
   var I18N={
-    zh:{title:'官网下单',sub:'选品 → 选规格 → 加入清单 → LINE 快速下单或在线付款<br>下单即成为泡泡会员,消费累积自动升级',
-        all:'全部',picked:'已选',pcs:'件',go:'💬 LINE 一键下单',pay:'💳 在线付款(即将开通)',payOn:'💳 在线付款',
-        dlgTitle:'LINE 下单 · 两步完成',dlgNote:'① 按「拷贝订单」 ② 开 LINE 后直接粘贴送出,小编立刻帮你结帐出货。',
-        copy:'📋 拷贝订单',copied:'✅ 已拷贝,去 LINE 粘贴',chat:'打开 LINE',close:'关闭',
-        orderHead:'🛒 泡泡怪兽 官网订单',orderTail:['收件人:','电话:','地址:','付款方式:(转帐/货到付款)'],
-        payFail:'付款页连接失败,请改用 LINE 下单或稍后再试',
+    zh:{title:'官网下单',sub:'选品 → 选规格 → 加入清单 → WhatsApp 下单<br>从台湾出货；每款能不能寄到你的国家、运费多少，我们先在 WhatsApp 回复',
+        all:'全部',picked:'已选',pcs:'件',go:'💬 WhatsApp 下单',pay:'💳 在线付款(即将开通)',payOn:'💳 在线付款',
+        dlgTitle:'WhatsApp 下单 · 两步完成',dlgNote:'① 按「打开 WhatsApp」，订单内容已经带好 ② 送出后，我们回复总金额和运费。',
+        copy:'📋 复制订单',copied:'✅ 已复制',chat:'打开 WhatsApp',close:'关闭',
+        orderHead:'🛒 泡泡怪兽 官网订单',orderTail:['收件人:','电话:','地址:','付款方式:(转账/货到付款)'],
+        payFail:'付款页连接失败，请改用 WhatsApp 下单',
         siteSpec:'商品页款式',quote:'待报价',quoteLine:'(请报价)'},
     en:{title:'Order Online',sub:'Pick products & size → add to list → order via WhatsApp or pay online<br>Every order earns POP membership rewards. Ships from Taiwan; we confirm on WhatsApp whether each item can ship to your country.',
         all:'All',picked:'Items',pcs:'',go:'💬 Order via WhatsApp',pay:'💳 Online payment (coming soon)',payOn:'💳 Pay online',
@@ -146,7 +146,7 @@
     zhi:{title:'官网下单',sub:'选品 → 选规格 → 加入清单 → WhatsApp 下单<br>从台湾出货；每款能不能寄到你的国家、运费多少，我们先在 WhatsApp 回复',
         all:'全部',picked:'已选',pcs:'件',go:'💬 WhatsApp 下单',pay:'💳 在线付款(即将开通)',payOn:'💳 在线付款',
         dlgTitle:'WhatsApp 下单 · 两步完成',dlgNote:'① 按「打开 WhatsApp」，订单内容已经带好 ② 送出后，我们回复总金额和运费。',
-        copy:'📋 拷贝订单',copied:'✅ 已拷贝',chat:'打开 WhatsApp',close:'关闭',
+        copy:'📋 复制订单',copied:'✅ 已复制',chat:'打开 WhatsApp',close:'关闭',
         orderHead:'🛒 泡泡怪兽 官网订单（海外）',orderTail:['收件人:','WhatsApp／电话:','国家与地址:','付款方式:(PayPal／信用卡，运费另外报价)'],
         payFail:'付款页连接失败,请改用 WhatsApp 下单',
         siteSpec:'商品页款式',quote:'待报价',quoteLine:'(请报价)',
@@ -177,7 +177,7 @@
   // ── 购物车：跟全站 js/store.js 共用 localStorage 的 pm_cart_v1 ──
   // store.js 的格式是 {items:{A001:2}}：一个 SKU 一个价（js/products.js 的 PM_PRICES），没有规格。下单页有规格，所以这样对应：
   //   跟官网售价同价的那个规格 ⇄ items['A001']（首页、商品页的购物车看得到也改得到）
-  //   其他规格               ⇄ 同一笔数据多一栏 v:{'a001|0':1}，规格名称另存 vn:{'a001|0':'30ml入门体验款'}
+  //   其他规格               ⇄ 同一笔数据多一栏 v:{'a001|0':1}，规格名称另存 vn:{'a001|0':'30ml入门体验款'}、英文 vne:{'a001|0':'30ml starter'}
   //                              （store.js 不改 v／vn、存盘原样留着；抽屉与结帐页用 vn 写出是哪个规格）
   //   对不到规格的官网品项     ⇄ 下单页内部 key 'a006|site'，照官网名称和售价显示（售价跟规格表不同、或规格表没有这款）
   // 旧版下单页的 pm_cart_v2：第一次打开就并进来（数量相加），旧数据改名 pm_cart_v2_merged 留底。
@@ -214,9 +214,9 @@
     });
     c.items=items;
     if(Object.keys(v).length){
-      c.v=v;c.vn={};
-      Object.keys(v).forEach(function(k){var a=k.split('|'),p=prod(a[0]),x=p&&p.variants[+a[1]];if(x)c.vn[k]=x.spec;}); // 一律存中文规格名：抽屉、结帐页是中文页
-    }else{delete c.v;delete c.vn;}
+      c.v=v;c.vn={};c.vne={};
+      Object.keys(v).forEach(function(k){var a=k.split('|'),p=prod(a[0]),x=p&&p.variants[+a[1]];if(x){c.vn[k]=x.spec;c.vne[k]=specEn(x.spec);}}); // vn 中文规格名给中文页抽屉；vne 英文给 /en/ 抽屉
+    }else{delete c.v;delete c.vn;delete c.vne;}
     c.updated=Date.now();
     try{
       localStorage.setItem(LS_CART,JSON.stringify(c));

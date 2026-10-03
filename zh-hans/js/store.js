@@ -13,6 +13,7 @@
   /* 海外模式（/en/、/zh-hans/ 的 products.js 会设 intl:true）：不走 LINE 宅配结帐，改到下单页用 WhatsApp；
      运费依国家另报，不显示台湾满额免运 */
   var INTL = !!CFG.intl;
+  var EN = /^en\b/i.test(document.documentElement.getAttribute('lang') || '');
   var ORDER_URL = CFG.orderUrl || ((CFG.base || '') + 'order.html');
   var LS_CART = 'pm_cart_v1';
   var LS_ORDERS = 'pm_orders_v1';
@@ -44,7 +45,9 @@
   /* 下单页另选的规格（cart.v，key 像 'a001|0'；规格名称在 cart.vn，下单页存的）：
      这支没有规格价格表，只列名称、规格、件数，请客人回下单页确认、送出。旧数据没有 vn 就写「规格在下单页」 */
   function extras() {
-    var v = cart.v, vn = cart.vn && typeof cart.vn === 'object' ? cart.vn : {}, rows = {}, order = [];
+    /* 英文页读 vne（下单页存的英文规格名）；旧数据没有 vne 就不秀中文规格名，改写「规格在下单页」 */
+    var names = EN ? cart.vne : cart.vn;
+    var v = cart.v, vn = names && typeof names === 'object' ? names : {}, rows = {}, order = [];
     if (!v || typeof v !== 'object') return [];
     Object.keys(v).forEach(function (k) {
       var q = parseInt(v[k], 10) || 0, S = String(k).split('|')[0].toUpperCase();
@@ -59,7 +62,8 @@
   /* 规格名称照逗号切段、每段不拆开（「1入 体验装（不划算），20倍稀释最高可稀释65倍」不会剩一个「倍」掉到下一行） */
   function specHtml(s) {
     var parts = String(s).split(/\s*,\s*/).filter(Boolean);
-    return parts.map(function (t, i) { return '<span class="c">' + esc(t) + (i < parts.length - 1 ? '，' : '') + '</span>'; }).join('');
+    // 英文逗号后的空白放在 span 外面：span 是 inline-block，里面的尾端空白会被吃掉
+    return parts.map(function (t, i) { var more = i < parts.length - 1; return '<span class="c">' + esc(t) + (more ? (EN ? ',' : '，') : '') + '</span>' + (more && EN ? ' ' : ''); }).join('');
   }
   /* only＝这里的购物车没有别的商品：下单页那几件就是全部，按钮改成主要按钮「到下单页送出」 */
   function extrasHtml(only) {
@@ -192,7 +196,7 @@
         '<div class="pm-note">每款能不能寄到你的国家、运费多少，会先在 WhatsApp 确认，再请你付款。</div>';
     }
     var h = '<div class="pm-row"><span>商品小计</span><b>' + (sub ? nt(sub) : (un ? '待报价' : nt(0))) + (un && sub ? '＋待报价' : '') + '</b></div>';
-    h += '<div class="pm-row"><span>运费（' + esc(CFG.shipLabel || '宅配到府') + '）</span><b>' + (fee === 0 && sub >= (CFG.freeShipAt || 2000) ? '免运' : (un && !sub ? '结帐时计算' : nt(fee))) + '</b></div>';
+    h += '<div class="pm-row"><span>运费（' + esc(CFG.shipLabel || '宅配到府') + '）</span><b>' + (fee === 0 && sub >= (CFG.freeShipAt || 2000) ? '免运' : (un && !sub ? '结账时计算' : nt(fee))) + '</b></div>';
     h += '<div class="pm-row total"><span>合计</span><b>' + (un ? (sub ? nt(sub + fee) + '＋' : '') + '待报价' : nt(sub + fee)) + '</b></div>';
     if (un) h += '<div class="pm-note">部分商品价格待补，送出订单后由小编通过 LINE <span class="nw">回复总金额。</span></div>';
     return h;
@@ -222,7 +226,7 @@
       itemsEl.innerHTML = es.map(itemRow).join('') + extrasHtml();
       var sub = pricedSubtotal(), fee = shipFee(sub);
       footEl.innerHTML = totalsHtml(sub, fee) +
-        '<a class="btn btn-gold" href="' + (INTL ? ORDER_URL : (CFG.base || '') + 'cart.html') + '">前往结帐 →</a>' +
+        '<a class="btn btn-gold" href="' + (INTL ? ORDER_URL : (CFG.base || '') + 'cart.html') + '">前往结账 →</a>' +
         '<button class="btn btn-outline" data-pm-continue style="width:100%">继续选购</button>';
       $('[data-pm-continue]', footEl).addEventListener('click', closeDrawer);
     }
@@ -272,7 +276,7 @@
     L.push('电话：' + form.phone);
     L.push('宅配地址：' + form.addr);
     if (form.note) L.push('备注：' + form.note);
-    L.push('付款方式：' + (CFG.payment || '银行转帐（LINE 对帐后出货）'));
+    L.push('付款方式：' + (CFG.payment || '银行转账（LINE 对账后出货）'));
     L.push('────────────');
     L.push('请小编确认库存与金额，谢谢 🙏');
     return L.join('\n');
@@ -311,7 +315,7 @@
       '<div class="pm-field"><label>联系电话 <span class="req">＊</span></label><input type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="0912 345 678"></div>' +
       '<div class="pm-field"><label>宅配地址 <span class="req">＊</span></label><input type="text" name="addr" autocomplete="street-address" placeholder="县市＋区＋路街巷弄号楼"></div>' +
       '<div class="pm-field"><label>订单备注</label><textarea name="note" placeholder="指定到货时段、发票需求等（选填）"></textarea></div>' +
-      '<div class="pm-info-strip"><span class="ic">ℹ</span><span>付款方式：<b style="color:var(--txt)">' + esc(CFG.payment || '银行转帐') + '</b>。按下方按钮会打开 LINE 并自动带入订单内容，<b style="color:var(--txt)">按下发送</b>即完成下单，小编将回复转帐信息与总金额。</span></div>' +
+      '<div class="pm-info-strip"><span class="ic">ℹ</span><span>付款方式：<b style="color:var(--txt)">' + esc(CFG.payment || '银行转账') + '</b>。按下方按钮会打开 LINE 并自动带入订单内容，<b style="color:var(--txt)">按下发送</b>即完成下单，小编将回复转账信息与总金额。</span></div>' +
       '<button class="btn btn-line pm-submit" data-pm-send>● 通过 LINE 送出订单</button>' +
       '<div class="pm-err-msg" data-pm-err></div>' +
       '</div></div></div>' +
@@ -359,16 +363,16 @@
     done.innerHTML =
       '<div style="font-size:40px;color:var(--gold)">✓</div>' +
       '<div class="oid">' + oid + '</div><h2>订单已产生</h2>' +
-      '<p>LINE 应已自动打开并带入订单内容——<b style="color:var(--txt)">请在 LINE 按下「发送」</b>才算完成下单。若没有打开，请拷贝下方订单文本，贴到我们的 LINE 官方帐号。</p>' +
+      '<p>LINE 应已自动打开并带入订单内容——<b style="color:var(--txt)">请在 LINE 按下「发送」</b>才算完成下单。若没有打开，请复制下方订单文本，贴到我们的 LINE 官方账号。</p>' +
       '<a class="btn btn-line" href="' + url + '" target="_blank" rel="noopener">● 再次打开 LINE</a>' +
-      '<button class="btn btn-outline" data-pm-copy>拷贝订单文本</button>' +
+      '<button class="btn btn-outline" data-pm-copy>复制订单文本</button>' +
       '<textarea class="pm-order-txt" readonly>' + esc(text) + '</textarea>' +
       '<a class="btn btn-outline" href="index.html">回首页继续逛</a>';
     done.classList.add('on');
     $('[data-pm-copy]', done).addEventListener('click', function () {
       var ta = $('.pm-order-txt', done); ta.select();
       try { navigator.clipboard.writeText(text); } catch (e) { document.execCommand('copy'); }
-      toast('<span class="ck">✓</span> 已拷贝订单文本');
+      toast('<span class="ck">✓</span> 已复制订单文本');
     });
     removeOrdered(ordered);
     window.open(url, '_blank', 'noopener');

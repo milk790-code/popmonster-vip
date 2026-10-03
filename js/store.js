@@ -13,6 +13,7 @@
   /* 海外模式（/en/、/zh-hans/ 的 products.js 會設 intl:true）：不走 LINE 宅配結帳，改到下單頁用 WhatsApp；
      運費依國家另報，不顯示台灣滿額免運 */
   var INTL = !!CFG.intl;
+  var EN = /^en\b/i.test(document.documentElement.getAttribute('lang') || '');
   var ORDER_URL = CFG.orderUrl || ((CFG.base || '') + 'order.html');
   var LS_CART = 'pm_cart_v1';
   var LS_ORDERS = 'pm_orders_v1';
@@ -44,7 +45,9 @@
   /* 下單頁另選的規格（cart.v，key 像 'a001|0'；規格名稱在 cart.vn，下單頁存的）：
      這支沒有規格價格表，只列名稱、規格、件數，請客人回下單頁確認、送出。舊資料沒有 vn 就寫「規格在下單頁」 */
   function extras() {
-    var v = cart.v, vn = cart.vn && typeof cart.vn === 'object' ? cart.vn : {}, rows = {}, order = [];
+    /* 英文頁讀 vne（下單頁存的英文規格名）；舊資料沒有 vne 就不秀中文規格名，改寫「規格在下單頁」 */
+    var names = EN ? cart.vne : cart.vn;
+    var v = cart.v, vn = names && typeof names === 'object' ? names : {}, rows = {}, order = [];
     if (!v || typeof v !== 'object') return [];
     Object.keys(v).forEach(function (k) {
       var q = parseInt(v[k], 10) || 0, S = String(k).split('|')[0].toUpperCase();
@@ -59,7 +62,8 @@
   /* 規格名稱照逗號切段、每段不拆開（「1入 體驗裝（不划算），20倍稀釋最高可稀釋65倍」不會剩一個「倍」掉到下一行） */
   function specHtml(s) {
     var parts = String(s).split(/\s*,\s*/).filter(Boolean);
-    return parts.map(function (t, i) { return '<span class="c">' + esc(t) + (i < parts.length - 1 ? '，' : '') + '</span>'; }).join('');
+    // 英文逗號後的空白放在 span 外面：span 是 inline-block，裡面的尾端空白會被吃掉
+    return parts.map(function (t, i) { var more = i < parts.length - 1; return '<span class="c">' + esc(t) + (more ? (EN ? ',' : '，') : '') + '</span>' + (more && EN ? ' ' : ''); }).join('');
   }
   /* only＝這裡的購物車沒有別的商品：下單頁那幾件就是全部，按鈕改成主要按鈕「到下單頁送出」 */
   function extrasHtml(only) {

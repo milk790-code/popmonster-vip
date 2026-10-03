@@ -38,6 +38,25 @@ def to_hans(s):
     return _CC.convert(s)
 
 
+# 簡中：譯文（查表、OpenCC、覆寫都已是簡體）先用這兩個私用字元包起來，
+# 整頁繁轉簡時跳過，不然已經是簡體的字會再被轉一次（么→幺、显著→显着）
+DONE_A, DONE_B = '\ue000', '\ue001'
+_DONE_RE = re.compile(DONE_A + '(.*?)' + DONE_B, re.S)
+
+
+def mark_done(s):
+    return DONE_A + s + DONE_B
+
+
+def hans_rest(s):
+    """把沒標記的部分（原頁搬來的標籤、id、註解、裝飾字）轉簡體，標記過的原樣保留"""
+    parts = _DONE_RE.split(s)
+    out = ''.join(x if i % 2 else to_hans(x) for i, x in enumerate(parts))
+    if DONE_A in out or DONE_B in out:
+        raise SystemExit('簡中標記沒配對，檢查 seg.render 的 wrap')
+    return out
+
+
 def read(p):
     with open(os.path.join(ROOT, p), encoding='utf-8') as f:
         return f.read()
@@ -291,6 +310,14 @@ def set_in_language(body, code):
 
 WHATSAPP = config.WHATSAPP
 LINE_CHAT = 'line.me/R/ti/p/@150tiznd'
+# 改成 WhatsApp 的連結裡，卡片角落還寫著 LINE 帳號的字一起換掉
+WA_TEXT = [
+    (re.compile(r'(?:打开|开启|打開|開啟) ?LINE ?@150tiznd'), '打开 WhatsApp'),
+    (re.compile(r'Open LINE ?@150tiznd', re.I), 'Open WhatsApp'),
+    (re.compile(r'LINE (?:Official Account|OA)'), 'WhatsApp'),
+    (re.compile(r'LINE ?官方(?:帐号|账号|帳號)'), 'WhatsApp'),
+    (re.compile(r'@150tiznd'), '+886-970-527-037'),
+]
 
 
 def localize_page(html, p, lang, linker):
@@ -302,18 +329,40 @@ def localize_page(html, p, lang, linker):
         val, vs, ve, q = n.attrs[name]
         if vs is None or newval == val:
             return
-        edits.append((n.start + vs, n.start + ve, seg.esc_attr(newval, q or '"') if q else newval))
+        edits.append((n.start + vs, n.start + ve, seg.attr_value(newval, q)))
 
     def text_of(n):
         return re.sub(r'<[^>]+>', '', html[n.stag_end:n.etag_start]).strip()
 
-    def in_class(n, cls):
+    def ancestor(n, cls):
         x = n.parent
         while x is not None and x.tag != '#root':
             if cls in seg.classes(x):
-                return True
+                return x
             x = x.parent
-        return False
+        return None
+
+    def in_class(n, cls):
+        return ancestor(n, cls) is not None
+
+    def wa_text(n):
+        for t in seg.walk(n):
+            if isinstance(t, seg.Text):
+                old = new = html[t.start:t.end]
+                for rx, to in WA_TEXT:
+                    new = rx.sub(to, new)
+                if new != old:
+                    edits.append((t.start, t.end, new))
+
+    def drop(x):
+        # 整個元素拿掉；它那一行只剩空白的話，連行首縮排和換行一起拿掉
+        a, b = x.start, x.end
+        ls = html.rfind('\n', 0, a) + 1
+        if not html[ls:a].strip() and html[b:b + 1] == '\n':
+            a, b = ls, b + 1
+        edits[:] = [e for e in edits if not (a <= e[0] and e[1] <= b)]
+        edits.append((a, b, ''))
+        dropped.append((a, b))
 
     dropped = []
     for n in seg.walk(root):
@@ -349,13 +398,22 @@ def localize_page(html, p, lang, linker):
             href = a['href'][0]
             txt = text_of(n)
             if 'shopee.tw' in href and any(in_class(n, c) for c in ('footer-links', 'nav-links', 'mobile-menu')):
-                edits.append((n.start, n.end, ''))
-                dropped.append((n.start, n.end))
+                drop(n)
                 continue
+            if 'shopee.tw' in href and in_class(n, 'c-row'):   # 品牌簡報聯絡頁：蝦皮那一列整列拿掉
+                drop(ancestor(n, 'c-row'))
+                continue
+            if 'shopee.tw' in href and 'ct-card' in seg.classes(n):   # 關於頁聯絡卡：蝦皮那張拿掉
+                drop(n)
+                continue
+            if LINE_CHAT in href and not re.search(r'(?<![A-Za-z])(?:LINE|Line)(?![A-Za-z])|WhatsApp', txt) and \
+                    'WhatsApp' in text_of(n.parent):
+                txt = 'WhatsApp'   # 按鈕只寫「立即前往」，旁邊那句說的是 WhatsApp
             if ('shopee.tw' in href or LINE_CHAT in href) and 'WhatsApp' in txt:
                 attr_edit(n, 'href', WHATSAPP)
                 if 'rel' in a:
                     attr_edit(n, 'rel', 'noopener')
+                wa_text(n)
                 continue
         for name in ('href', 'src', 'action', 'poster', 'data-src', 'data-href'):
             if name in a and a[name][1] is not None:
@@ -407,6 +465,25 @@ def load_hans_phrases():
     return [(re.compile(a), b) for a, b in json.load(open(fp, encoding='utf-8'))['rules']]
 
 
+def load_hans_keep():
+    """OpenCC tw2sp 會換錯的詞（核心→内核、堆疊→堆栈…）：[(繁體, 要的簡體)]，長的先換"""
+    fp = os.path.join(config.I18N_DIR, 'zh-hans.phrases.json')
+    if not os.path.exists(fp):
+        return []
+    keep = json.load(open(fp, encoding='utf-8')).get('keep', [])
+    return sorted(((a, b) for a, b in keep), key=lambda x: -len(x[0]))
+
+
+def to_hans_keep(s, keep):
+    """繁轉簡，但 keep 裡的詞先換成私用字元躲過 OpenCC，轉完再換成指定的簡體"""
+    for i, (a, b) in enumerate(keep):
+        s = s.replace(a, chr(0xE100 + i))
+    s = to_hans(s)
+    for i, (a, b) in enumerate(keep):
+        s = s.replace(chr(0xE100 + i), b)
+    return s
+
+
 def en_lookup(tm, missing_log, where):
     def look(text, kind):
         e = tm.get(seg.key_of(text))
@@ -417,12 +494,12 @@ def en_lookup(tm, missing_log, where):
     return look
 
 
-def hans_lookup(over, phrases):
+def hans_lookup(over, phrases, keep=()):
     def look(text, kind):
         k = seg.key_of(text)
         if k in over:
             return over[k]
-        t = to_hans(text)
+        t = to_hans_keep(text, keep)
         for rx, rep in phrases:
             t = rx.sub(rep, t)
         return t
@@ -443,6 +520,7 @@ def build(strict=False, check=False):
     tm = load_tm('en')
     over = load_hans_overrides()
     phrases = load_hans_phrases()
+    keep = load_hans_keep()
     pages = config.pages()
     changed, missing = [], []
 
@@ -465,8 +543,8 @@ def build(strict=False, check=False):
             if lang == 'en':
                 out, _ = seg.render(src, segs, en_lookup(tm, missing, p), strict=False)
             else:
-                out, _ = seg.render(src, segs, hans_lookup(over, phrases), strict=False)
-                out = to_hans(out)
+                out, _ = seg.render(src, segs, hans_lookup(over, phrases, keep), strict=False, wrap=mark_done)
+                out = hans_rest(out)
             out = localize_page(out, p, lang, linker)
             if lang == 'zh-Hans' and p == config.ORDER_PAGE:
                 out = out.replace('<html lang="zh-Hans"', '<html lang="zh-Hans" data-intl="1"', 1)
@@ -477,8 +555,8 @@ def build(strict=False, check=False):
             if lang == 'en':
                 out, _ = seg.render(src, segs, en_lookup(tm, missing, f), strict=False)
             else:
-                out, _ = seg.render(src, segs, hans_lookup(over, phrases), strict=False)
-                out = to_hans(out)
+                out, _ = seg.render(src, segs, hans_lookup(over, phrases, keep), strict=False, wrap=mark_done)
+                out = hans_rest(out)
             out = js_asset_paths(out)
             if f == 'js/products.js':
                 out += intl_config(lang)
